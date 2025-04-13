@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+- phpMyAdmin XML Dump
+- version 5.1.3
+- https://www.phpmyadmin.net
+-
+- Host: localhost:3306
+- Erstellungszeit: 09. Dez 2022 um 07:49
+- Server-Version: 10.3.36-MariaDB
+- PHP-Version: 7.4.32
+-->
+
+<pma_xml_export version="1.0" xmlns:pma="https://www.phpmyadmin.net/some_doc_url/">
+    <!--
+    - Structure schemas
+    -->
+    <pma:structure_schemas>
+        <pma:database name="jessejay" collation="latin1_swedish_ci" charset="latin1">
+            <pma:table name="evenTable">
+                CREATE TABLE `evenTable` (
+                  `eventID` int(11) NOT NULL AUTO_INCREMENT,
+                  `date` date NOT NULL DEFAULT '0000-00-00',
+                  `event` tinytext NOT NULL,
+                  `eventURL` tinytext NOT NULL,
+                  `lineup` mediumtext NOT NULL,
+                  PRIMARY KEY (`eventID`)
+                ) ENGINE=MyISAM AUTO_INCREMENT=1044 DEFAULT CHARSET=latin1;
+            </pma:table>
+        </pma:database>
+    </pma:structure_schemas>
+
+    <!--
+    - Datenbank: 'jessejay'
+    -->
+    <database name="jessejay">
+        <!-- Tabelle evenTable -->
+        <table name="evenTable">
+            <column name="eventID">17</column>
+            <column name="date">2003-02-28</column>
+            <column name="event">greenspace and smoked night</column>
+            <column name="eventURL"></column>
+            <column name="lineup"></column>
+        </table>
+        <table name="evenTable">
+            <column name="eventID">18</column>
+            <column name="date">0000-00-00</column>
+            <column name="event">me myself and i</column>
+            <column name="eventURL"></column>
+            <column name="lineup"></column>
+        </table>
+        <table name="evenTable">
+            <column name="eventID">27</column>
+            <column name="date">2003-05-16</column>
+            <column name="event">Local Underground on Air!</column>
+            <column name="eventURL">www.localunderground.ch</column>
+            <column name="lineup">Jesse Jay, Tino Boss, Frisk, Manic</column>
+        </table>
+        <table name="evenTable">
+            <column name="eventID">346</column>
+            <column name="date">2006-08-08</column>
+            <column name="event">Tuesdaylounge @ Club Aaah!</column>
+            <column name="eventURL">www.aaah.ch</column>
+            <column name="lineup"></column>
+        </table>
+        <table name="evenTable">
+            <column name="eventID">347</column>
+            <column name="date">2006-08-13</column>
+            <column name="event">Cheap and Chic @ Club Aaah!</column>
+            <column name="eventURL">www.aaah.ch</column>
+            <column name="lineup"></column>
+        </table>
+        <table name="evenTable">
+            <column name="eventID">348</column>
+            <column name="date">2006-08-20</column>
+            <column name="event">Cheap and Chic @ Club Aaah!</column>
+            <column name="eventURL">www.aaah.ch</column>
+            <column name="lineup"></column>
+        </table>
+        <table name="evenTable">
+            <column name="eventID">349</column>
+            <column name="date">2006-08-22</column>
+            <column name="event">Tuesdaylounge @ Club Aaah!</column>
+            <column name="eventURL">www.aaah.ch</column>
+            <column name="lineup"></column>
+        </table>
+        <table name="evenTable">
+            <column name="eventID">350</column>
+            <column name="date">2006-07-08</column>
+            <column name="event">Labyrinth&lt;br&gt;with Mental X, Martin, Jesse Jay&lt;br&gt;my playtime: round n round all night long!</column>
+            <column name="eventURL">www.laby.ch/event_detail.html?event_ID=1036</column>
+            <column name="lineup"></column>
+        </table>
+        <table name="evenTable">
+            <column name="eventID">351</column>
+            <column name="date">2006-07-23</column>
+            <column name="event">After Eight @ Labyrinth&lt;br&gt;with Steven S. and me</column>
+            <column name="eventURL">www.laby.ch/event_detail.html?event_ID=1050</column>
+            <column name="lineup"></column>
+        </table>
+        <table name="evenTable">
+            <column name="eventID">352</column>
+            <column name="date">2006-08-11</column>
+            <column name="event">Laby Loft: Gay Party&lt;br&gt;with Thomi B. and me</column>
+            <column name="eventURL">www.laby.ch/event_detail.html?event_ID=1046</column>
+            <column name="lineup"></column>
+        </table>
+        <table name="evenTable">
+            <column name="eventID">353</column>
+            <column name="date">2006-08-12</column>
+            <column name="event">STREETPARADE! Labyrinth am Hirschenplatz</column>
+            <column name="eventURL">www.laby.ch</column>
+            <column name="lineup"></column>
+        </table>
+        <table name="evenTable">
+            <column name="eventID">354</column>
+            <column name="date">2006-05-14</column>
+            <column name="event">Cheap and Chic @ Club Aaah!</column>
+            <column name="eventURL">www.aaah.ch</column>
+            <column name="lineup"></column>
+        </table>
+        <table name="evenTable">
+            <column name="eventID">355</column>
+            <column name="date">2006-07-12</column>
+            <column name="event">Treffpunkt by Norman!&lt;br&gt;my playtime: 22:30-04:00</column>
+            <column name="eventURL">www.aaah.ch</column>
+            <column name="lineup"></column>
+        </table>
+        <table name="evenTable">
+            <column name="eventID">356</column>
+            <column name="date">2006-08-16</column>
+            <column name="event">Treffpunkt by Norman</column>
+            <column name="eventURL">www.aaah.ch</column>
+            <column name="lineup"></column>
+        </table>
+        <table name="evenTable">
+            <column name="eventID">357</column>
+            <column name="date">2006-06-18</column>
+            <column name="event">After Eight @ Labyrinth&lt;br&gt;with Cherie and me...!!</column>
+            <column name="eventURL">www.laby.ch/event_detail.html?event_ID=1028</column>
+            <column name="lineup"></column>
+        </table>
+        <table name="evenTable">
+            <column name="eventID">359</column>
+            <column name="date">2006-07-21</column>
+            <column name="event">Laby Loft: Deko Party&lt;br&gt;with Thomi B. and me</column>
+            <column name="eventURL">www.laby.ch/event_detail.html?event_ID=1039</column>
+            <column name="lineup"></column>
+        </table>
+        <table name="evenTable">
+            <column name="eventID">360</column>
+            <column name="date">2006-06-24</column>
+            <column name="event">Dreamdance Bar&lt;br&gt;with Lèon and me</column>
+            <column name="eventURL">www.dreamdancebar.ch</column>
+            <column name="lineup"></column>
+        </table>
+        <table name="evenTable">
+            <column name="eventID">361</column>
+            <column name="date">2006-06-21</column>
+            <column name="event">Treffpunkt by Norman</column>
+            <column name="eventURL">www.g-colors.ch/aaah/eventdetail.html?event_id=760</column>
+            <column name="lineup"></column>
+        </table>
+        <table name="evenTable">
+            <column name="eventID">362</column>
+            <column name="date">2006-07-22</column>
+            <column name="event">Sternennacht Krebs @ Klub Ex (selve-areal thun)&lt;br&gt;with D.J.N.D. and Jesse Jay</column>
+            <column name="eventURL">www.klub-ex.ch</column>
+            <column name="lineup"></column>
+        </table>
+        <table name="evenTable">
+            <column name="eventID">363</column>
+            <column name="date">2006-07-02</column>
+            <column name="event">Attic&lt;br&gt;with 5th Element, Jesse Jay, Roby Icks, and Chris the Rebell</column>
+            <column name="eventURL">www.attic-club.ch</column>
+            <column name="lineup"></column>
+        </table>
+        <table name="evenTable">
+            <column name="eventID">364</column>
+            <column name="date">2006-07-01</column>
+            <column name="event">Shake with Mental X @ Radio Virus</column>
+            <column name="eventURL">www.virus.ch/sendungen/shake/(offset)/3</column>
+            <column name="lineup"></column>
+        </table>
+        <table name="evenTable">
+            <column name="eventID">365</column>
+            <column name="date">2006-07-02</column>
+            <column name="event">Bananabar</column>
+            <column name="eventURL">www.bananabar.ch</column>
+            <column name="lineup"></column>
+        </table>
+        <table name="evenTable">
+            <column name="eventID">367</column>
+            <column name="date">2006-08-05</column>
+            <column name="event">Attic -Afterhour&lt;br&gt;with 5th Element, Sonic, Jesse Jay</column>
+            <column name="eventURL">www.attic-club.ch</column>
+            <column name="lineup"></column>
+        </table>
+        <table name="evenTable">
+            <column name="eventID">368</column>
+            <column name="date">2005-08-05</column>
+            <column name="event">ElectroKeller  (SG)&lt;br&gt;with D.J.N.D. and Jesse Jay</column>
+            <column name="eventURL">www.technobar25.ch</column>
+            <column name="lineup"></column>
+        </table>
+        <table name="evenTable">
+            <column name="eventID">528</column>
+            <column name="date">2007-09-09</column>
+            <column name="event">X-Treme @ Club Aaah!&lt;br&gt;Cheap and Chic</column>
+            <column name="eventURL">www.aaah.ch</column>
+            <column name="lineup"></column>
+        </table>
+    </database>
+</pma_xml_export>
