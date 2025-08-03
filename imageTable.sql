@@ -33,7 +33,7 @@ CREATE TABLE `imageTable` (
   `imgName` tinytext NOT NULL,
   `imgWidth` smallint(6) NOT NULL DEFAULT 0,
   `imgHeight` smallint(6) NOT NULL DEFAULT 0
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Daten für Tabelle `imageTable`

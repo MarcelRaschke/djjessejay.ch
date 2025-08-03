@@ -33,7 +33,7 @@ CREATE TABLE `soundTable` (
   `style` tinytext NOT NULL,
   `urlAbspielen` tinytext NOT NULL,
   `urlDownload` tinytext NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Daten für Tabelle `soundTable`

@@ -32,7 +32,7 @@ CREATE TABLE `links` (
   `links` mediumtext NOT NULL,
   `url` tinytext NOT NULL,
   `info` mediumtext NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Daten für Tabelle `links`
@@ -44,9 +44,9 @@ INSERT INTO `links` (`index`, `links`, `url`, `info`) VALUES
 (4, 'Labyrinth', 'www.laby.ch', 'Der Nr.1 Gayclub in Zürich (R.I.P.)'),
 (29, 'Soundcloud', 'soundcloud.com/jessejay', 'mein soundcloud profil'),
 (9, 'Putzfrauenagentur', 'www.putzfrauenagentur.ch', 'raumpflege ist vertrauenssache'),
-(30, 'DJ Jesse Jay', 'www.facebook.com/pages/DJ-Jesse-Jay/99520703334', ' \"gefällt mir\"'),
+(30, 'DJ Jesse Jay', 'www.facebook.com/pages/DJ-Jesse-Jay/99520703334', ' "gefällt mir"'),
 (25, 'Mental X - Shake on Radio Virus', 'www.mentalx.virus.ch', 'wöchentliche Informations - Inspirations-  Motivationsquelle'),
-(26, 'Facebook', 'www.facebook.com/DjJesseJay', '\"Freunde\"');
+(26, 'Facebook', 'www.facebook.com/DjJesseJay', '"Freunde"');
 
 --
 -- Indizes der exportierten Tabellen

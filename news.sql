@@ -30,16 +30,16 @@ SET time_zone = "+00:00";
 CREATE TABLE `news` (
   `news` mediumtext NOT NULL,
   `news1` mediumtext NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Daten für Tabelle `news`
 --
 
 INSERT INTO `news` (`news`, `news1`) VALUES
-('Do.03.04.14 <font color=\"#0000ff\"><a href=\"http://www.123galaxy.ch\">Galaxy Space Night</a></font><br>6h live mixes,brand new stuff, me and many more on Radio <font color=\"#0000ff\"><a href=\"http://www.lora.ch/sendungen/alle-sendungen/67?list=Galaxy+Space+Night\">LoRa</a></font>!', 'Sendung verpasst? Hör<font color=\"#0000ff\"><a href=\"https://soundcloud.com/jessejay/000015-gsn\"> hier </a></font>die aktuellste Sendung, zum Archiv und Webradio gehts <font color=\"#0000ff\"><a href=\"http://www.lora.ch/sendungen/alle-sendungen/67?list=Galaxy+Space+Night\">da lang</a></font>...'),
-('Do.16.10.14 <font color=\"#0000ff\"><a href=\"http://www.123galaxy.ch\">Galaxy Space Night</a></font><br>6h live mixes,brand new stuff, me and many more on Radio <font color=\"#0000ff\"><a href=\"http://www.lora.ch/sendungen/alle-sendungen/67?list=Galaxy+Space+Night\">LoRa</a></font>!', 'Sendung verpasst? Hör<font color=\"#0000ff\"><a href=\"https://soundcloud.com/jessejay/000015-gsn\"> hier </a></font>die aktuellste Sendung, zum Archiv und Webradio gehts <font color=\"#0000ff\"><a href=\"https://soundcloud.com/jessejay/galaxy-space-night-oktober-1\">da lang</a></font>...'),
-('Do.16.10.14 <font color=\"#0000ff\"><a href=\"http://www.123galaxy.ch\">Galaxy Space Night</a></font><br>6h live mixes,brand new stuff, me and many more on Radio <font color=\"#0000ff\"><a href=\"http://www.lora.ch/sendungen/alle-sendungen/67?list=Galaxy+Space+Night\">LoRa</a></font>!', 'Sendung verpasst? Hör<font color=\"#0000ff\"><a href=\"https://soundcloud.com/jessejay/000015-gsn\"> hier </a></font>die aktuellste Sendung, zum Archiv und Webradio gehts <font color=\"#0000ff\"><a href=\"http://www.lora.ch/sendungen/alle-sendungen/67?list=Galaxy+Space+Night\">da lang</a></font>...');
+('Do.03.04.14 <font color="#0000ff"><a href="http://www.123galaxy.ch">Galaxy Space Night</a></font><br>6h live mixes,brand new stuff, me and many more on Radio <font color="#0000ff"><a href="http://www.lora.ch/sendungen/alle-sendungen/67?list=Galaxy+Space+Night">LoRa</a></font>!', 'Sendung verpasst? Hör<font color="#0000ff"><a href="https://soundcloud.com/jessejay/000015-gsn"> hier </a></font>die aktuellste Sendung, zum Archiv und Webradio gehts <font color="#0000ff"><a href="http://www.lora.ch/sendungen/alle-sendungen/67?list=Galaxy+Space+Night">da lang</a></font>...'),
+('Do.16.10.14 <font color="#0000ff"><a href="http://www.123galaxy.ch">Galaxy Space Night</a></font><br>6h live mixes,brand new stuff, me and many more on Radio <font color="#0000ff"><a href="http://www.lora.ch/sendungen/alle-sendungen/67?list=Galaxy+Space+Night">LoRa</a></font>!', 'Sendung verpasst? Hör<font color="#0000ff"><a href="https://soundcloud.com/jessejay/000015-gsn"> hier </a></font>die aktuellste Sendung, zum Archiv und Webradio gehts <font color="#0000ff"><a href="https://soundcloud.com/jessejay/galaxy-space-night-oktober-1">da lang</a></font>...'),
+('Do.16.10.14 <font color="#0000ff"><a href="http://www.123galaxy.ch">Galaxy Space Night</a></font><br>6h live mixes,brand new stuff, me and many more on Radio <font color="#0000ff"><a href="http://www.lora.ch/sendungen/alle-sendungen/67?list=Galaxy+Space+Night">LoRa</a></font>!', 'Sendung verpasst? Hör<font color="#0000ff"><a href="https://soundcloud.com/jessejay/000015-gsn"> hier </a></font>die aktuellste Sendung, zum Archiv und Webradio gehts <font color="#0000ff"><a href="http://www.lora.ch/sendungen/alle-sendungen/67?list=Galaxy+Space+Night">da lang</a></font>...');
 
 --
 -- Indizes der exportierten Tabellen
