@@ -32,7 +32,7 @@ CREATE TABLE `links` (
   `links` mediumtext NOT NULL,
   `url` tinytext NOT NULL,
   `info` mediumtext NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Daten für Tabelle `links`

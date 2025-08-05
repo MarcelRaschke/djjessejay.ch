@@ -29,17 +29,19 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `news` (
   `news` mediumtext NOT NULL,
-  `news1` mediumtext NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `news1` mediumtext NOT NULL,
+  FULLTEXT KEY `news_fulltext` (`news`),
+  FULLTEXT KEY `news1_fulltext` (`news1`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Daten für Tabelle `news`
 --
 
 INSERT INTO `news` (`news`, `news1`) VALUES
-('Do.03.04.14 <font color="#0000ff"><a href="http://www.123galaxy.ch">Galaxy Space Night</a></font><br>6h live mixes,brand new stuff, me and many more on Radio <font color="#0000ff"><a href="http://www.lora.ch/sendungen/alle-sendungen/67?list=Galaxy+Space+Night">LoRa</a></font>!', 'Sendung verpasst? Hör<font color="#0000ff"><a href="https://soundcloud.com/jessejay/000015-gsn"> hier </a></font>die aktuellste Sendung, zum Archiv und Webradio gehts <font color="#0000ff"><a href="http://www.lora.ch/sendungen/alle-sendungen/67?list=Galaxy+Space+Night">da lang</a></font>...'),
-('Do.16.10.14 <font color="#0000ff"><a href="http://www.123galaxy.ch">Galaxy Space Night</a></font><br>6h live mixes,brand new stuff, me and many more on Radio <font color="#0000ff"><a href="http://www.lora.ch/sendungen/alle-sendungen/67?list=Galaxy+Space+Night">LoRa</a></font>!', 'Sendung verpasst? Hör<font color="#0000ff"><a href="https://soundcloud.com/jessejay/000015-gsn"> hier </a></font>die aktuellste Sendung, zum Archiv und Webradio gehts <font color="#0000ff"><a href="https://soundcloud.com/jessejay/galaxy-space-night-oktober-1">da lang</a></font>...'),
-('Do.16.10.14 <font color="#0000ff"><a href="http://www.123galaxy.ch">Galaxy Space Night</a></font><br>6h live mixes,brand new stuff, me and many more on Radio <font color="#0000ff"><a href="http://www.lora.ch/sendungen/alle-sendungen/67?list=Galaxy+Space+Night">LoRa</a></font>!', 'Sendung verpasst? Hör<font color="#0000ff"><a href="https://soundcloud.com/jessejay/000015-gsn"> hier </a></font>die aktuellste Sendung, zum Archiv und Webradio gehts <font color="#0000ff"><a href="http://www.lora.ch/sendungen/alle-sendungen/67?list=Galaxy+Space+Night">da lang</a></font>...');
+('Do.03.04.14 <a href="http://www.123galaxy.ch" target="_blank" rel="noopener">Galaxy Space Night</a><br>6h live mixes,brand new stuff, me and many more on Radio <a href="http://www.lora.ch/sendungen/alle-sendungen/67?list=Galaxy+Space+Night" target="_blank" rel="noopener">LoRa</a>!', 'Sendung verpasst? Hör <a href="https://soundcloud.com/jessejay/000015-gsn" target="_blank" rel="noopener">hier</a> die aktuellste Sendung, zum Archiv und Webradio gehts <a href="http://www.lora.ch/sendungen/alle-sendungen/67?list=Galaxy+Space+Night" target="_blank" rel="noopener">da lang</a>...'),
+('Do.16.10.14 <a href="http://www.123galaxy.ch" target="_blank" rel="noopener">Galaxy Space Night</a><br>6h live mixes,brand new stuff, me and many more on Radio <a href="http://www.lora.ch/sendungen/alle-sendungen/67?list=Galaxy+Space+Night" target="_blank" rel="noopener">LoRa</a>!', 'Sendung verpasst? Hör <a href="https://soundcloud.com/jessejay/000015-gsn" target="_blank" rel="noopener">hier</a> die aktuellste Sendung, zum Archiv und Webradio gehts <a href="https://soundcloud.com/jessejay/galaxy-space-night-oktober-1" target="_blank" rel="noopener">da lang</a>...'),
+('Do.16.10.14 <a href="http://www.123galaxy.ch" target="_blank" rel="noopener">Galaxy Space Night</a><br>6h live mixes,brand new stuff, me and many more on Radio <a href="http://www.lora.ch/sendungen/alle-sendungen/67?list=Galaxy+Space+Night" target="_blank" rel="noopener">LoRa</a>!', 'Sendung verpasst? Hör <a href="https://soundcloud.com/jessejay/000015-gsn" target="_blank" rel="noopener">hier</a> die aktuellste Sendung, zum Archiv und Webradio gehts <a href="http://www.lora.ch/sendungen/alle-sendungen/67?list=Galaxy+Space+Night" target="_blank" rel="noopener">da lang</a>...');
 
 --
 -- Indizes der exportierten Tabellen
@@ -47,10 +49,8 @@ INSERT INTO `news` (`news`, `news1`) VALUES
 
 --
 -- Indizes für die Tabelle `news`
+-- (FULLTEXT indexes are now defined in the CREATE TABLE statement)
 --
-ALTER TABLE `news` ADD FULLTEXT KEY `news` (`news`);
-ALTER TABLE `news` ADD FULLTEXT KEY `news_2` (`news`);
-ALTER TABLE `news` ADD FULLTEXT KEY `news_3` (`news`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
