@@ -34,7 +34,7 @@ CREATE TABLE `guestbook` (
   `email` text DEFAULT NULL,
   `www` text DEFAULT NULL,
   `comments` text DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Daten für Tabelle `guestbook`
