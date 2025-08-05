@@ -8,7 +8,7 @@
 <meta charset="utf-8">
 <meta favico="
 Ր
-<title> DJ Jesse Jay :: since over 25 years the progressive music attack * </title>
+<title> DJ Jesse Jay :: Since 1997 the progressive music attack * </title>
 <meta name="description" content="Alles über den Zürcher DJ JesseJay, seine Laufbahn und seine
 Spieldaten">
 <meta name="keywords" content="DJ, Jesse Jay, JesseJay, Michael, Fellner, Michael Fellner, Techno,
@@ -31,7 +31,7 @@ src="https://m30norg.files.wordpress.com/2022/12/dfkt-e280a2-diamonds-animation_
 Jay</figcaption></figure>
 <!-- /wp:image -->
 <!-- wp:paragraph -->
-<p>::DJ Jesse Jay:: since over 25 years the progressive music attack:: ::Alles über den Zürcher DJ
+<p>::DJ Jesse Jay:: Since 1997 the progressive music attack:: ::Alles über den Zürcher DJ
 JesseJay, seine Laufbahn und seine Spieldaten::</p>
 <!-- /wp:paragraph -->
 <!-- wp:paragraph {"textColor": "black"} -->
