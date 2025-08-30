@@ -67,4 +67,15 @@ CREATE TABLE `evenTable` (
 
 LOCK TABLES `evenTable` WRITE;
 /*!40000 ALTER TABLE `evenTable` DISABLE KEYS */;
-INSERT INTO `evenTable` VALUES (362,'2006-07-22','Sternennacht Krebs @ Klub Ex (selve-areal thun)<br>with D.J.N.D. and Jesse Jay','www.klub-ex.ch',''),(367,'2006-08-05','Attic -Afterhour<br>with 5th Element, Sonic, Jesse Jay','www.attic-club.ch',''),(368,'2005-08-05','ElectroKeller  (SG)<br>with D.J.N.D. and Jesse Jay','www.technobar25.ch',''),(365,'2006-07-02','Bananabar','www.bananabar.ch',''),(364,'2006-07-01','Shake with Mental X @ Radio Virus','www.virus.ch/sendungen/shake/(offset)/3',''),(363,'2006-07-02','Attic<br>with 5th Element, Jesse Jay, Roby Icks, and Chris the Rebell','www.attic-club.ch',''),(361,'2006-06-21','Treffpunkt by Norman','www.g-colors.ch/aaah/eventdetail.html?event_id=760',''),(17,'2003-02-28','greenspace and smoked night','',''),(18,'0000-00-00','me myself and i','',''),(360,
+INSERT INTO `evenTable` VALUES (362,'2006-07-22','Sternennacht Krebs @ Klub Ex (selve-areal thun)<br>with D.J.N.D. and Jesse Jay','www.klub-ex.ch',''),(367,'2006-08-05','Attic -Afterhour<br>with 5th Element, Sonic, Jesse Jay','www.attic-club.ch',''),(368,'2005-08-05','ElectroKeller  (SG)<br>with D.J.N.D. and Jesse Jay','www.technobar25.ch',''),(365,'2006-07-02','Bananabar','www.bananabar.ch',''),(364,'2006-07-01','Shake with Mental X @ Radio Virus','www.virus.ch/sendungen/shake/(offset)/3',''),(363,'2006-07-02','Attic<br>with 5th Element, Jesse Jay, Roby Icks, and Chris the Rebell','www.attic-club.ch',''),(361,'2006-06-21','Treffpunkt by Norman','www.g-colors.ch/aaah/eventdetail.html?event_id=760',''),(17,'2003-02-28','greenspace and smoked night','',''),(18,'0000-00-00','me myself and i','','');
+/*!40000 ALTER TABLE `evenTable` ENABLE KEYS */;
+UNLOCK TABLES;
+
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
