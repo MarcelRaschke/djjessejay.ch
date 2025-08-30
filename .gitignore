@@ -1,0 +1,26 @@
+# DJ Jesse Jay Website - Gitignore
+
+# Archive and extracted files
+mixed_content_archive.bak
+jesse_jay_website_content.html
+additional_database_content.sql
+
+# Temporary files
+*.tmp
+*.temp
+temp_*
+
+# Node modules (if added later)
+node_modules/
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+dist/
+build/
