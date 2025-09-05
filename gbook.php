@@ -2,12 +2,11 @@
 // DJ Jesse Jay Guestbook
 session_start();
 
-// Database configuration (placeholder - update with actual credentials)
-$host = 'localhost';
-$dbname = 'jessejay';
-$username = 'username';
-$password = 'password';
-
+// Database configuration (use environment variables for credentials)
+$host = getenv('DB_HOST') ?: 'localhost';
+$dbname = getenv('DB_NAME') ?: 'jessejay';
+$username = getenv('DB_USER') ?: 'username';
+$password = getenv('DB_PASS') ?: 'password';
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
