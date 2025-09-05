@@ -3,11 +3,14 @@
 document.addEventListener('DOMContentLoaded', function() {
     var contactForm = document.getElementById('contact-form');
     if (contactForm) {
+        var nameInput = contactForm.querySelector('[name="name"]');
+        var emailInput = contactForm.querySelector('[name="email"]');
+        var messageInput = contactForm.querySelector('[name="message"]');
         contactForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            var name = contactForm.querySelector('[name="name"]').value.trim();
-            var email = contactForm.querySelector('[name="email"]').value.trim();
-            var message = contactForm.querySelector('[name="message"]').value.trim();
+            var name = nameInput.value.trim();
+            var email = emailInput.value.trim();
+            var message = messageInput.value.trim();
             if (!name || !email || !message) {
                 alert('Please fill in all fields.');
                 return;
