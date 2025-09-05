@@ -37,8 +37,8 @@ if ($_POST && isset($_POST['name'], $_POST['email'], $_POST['message'])) {
     // If no errors and database is available, save entry
     if (empty($errors) && !isset($db_error)) {
         try {
-            $stmt = $pdo->prepare("INSERT INTO guestbook (name, email, message, created_at) VALUES (?, ?, ?, NOW())");
-            $stmt->execute([$name, $email, $message]);
+            $stmt = $pdo->prepare("INSERT INTO guestbook (name, email, message, created_at) VALUES (?, ?, ?, ?)");
+            $stmt->execute([$name, $email, $message, date('Y-m-d H:i:s')]);
             $success_message = "Vielen Dank für Ihren Eintrag!";
             
             // Clear form data
