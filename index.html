@@ -1,789 +1,769 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DJ Jesse Jay - Zürich</title>
-    <meta name="description" content="DJ Jesse Jay - Professioneller DJ aus Zürich seit 1997. House, Techno, Deep House.">
-    
+    <meta name="description" content="DJ Jesse Jay - Professioneller DJ aus Zürich, seit 1997 aktiv. Betreiber der Radiosendung 'The Blue Dimension' auf Radio LoRa. Musikstile: Progressiv, House, Techno, Deep House.">
+    <meta name="keywords" content="DJ, Jesse Jay, Zürich, Techno, House, Progressive, Radio LoRa, The Blue Dimension, Michael Fellner">
+    <meta name="author" content="DJ Jesse Jay, Marcin Kolonko, Marcel Raschke">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        /* Custom styles */
         body {
-            font-family: 'Arial', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            min-height: 100vh;
-        }
-
-        .cookie-banner {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0,0,0,0.9);
-            color: white;
-            padding: 20px;
-            z-index: 1000;
-            display: none;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3c72 100%);
+            color: #e2e8f0;
         }
 
         .cookie-banner.show {
-            display: block;
-        }
-
-        .cookie-content {
-            max-width: 1200px;
-            margin: 0 auto;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .cookie-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .cookie-buttons button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .cookie-accept {
-            background: #4CAF50;
-            color: white;
-        }
-
-        .cookie-decline {
-            background: #f44336;
-            color: white;
-        }
-
-        .language-selector {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 100;
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            padding: 10px;
-            border-radius: 10px;
-        }
-
-        .language-selector a {
-            color: white;
-            text-decoration: none;
-            margin: 0 5px;
-            padding: 5px 10px;
-            border-radius: 5px;
-            transition: background 0.3s;
-        }
-
-        .language-selector a.active,
-        .language-selector a:hover {
-            background: rgba(255,255,255,0.2);
-        }
-
-        header {
-            background: rgba(0,0,0,0.3);
-            backdrop-filter: blur(10px);
-            padding: 20px 0;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 99;
-        }
-
-        nav {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            padding: 0 20px;
-        }
-
-        nav a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            padding: 10px 20px;
-            border-radius: 25px;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        nav a:before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        nav a:hover:before {
-            left: 100%;
-        }
-
-        nav a:hover {
-            background: rgba(255,255,255,0.1);
-            transform: translateY(-2px);
-        }
-
-        main {
-            margin-top: 100px;
-        }
-
-        .section {
-            min-height: 100vh;
-            padding: 80px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .profile-container {
-            max-width: 1200px;
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 60px;
-            align-items: center;
-        }
-
-        .profile-image {
-            width: 300px;
-            height: 300px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 80px;
-            color: white;
-            font-weight: bold;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            animation: float 6s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-        }
-
-        .social-icons {
-            display: flex;
-            gap: 20px;
-            margin: 20px 0;
-            justify-content: center;
-        }
-
-        .social-icons a {
-            width: 50px;
-            height: 50px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-decoration: none;
-            transition: all 0.3s;
-            backdrop-filter: blur(10px);
-        }
-
-        .social-icons a:hover {
-            background: rgba(255,255,255,0.2);
-            transform: translateY(-5px);
-        }
-
-        .biography-text {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            padding: 40px;
-            border-radius: 20px;
-            color: white;
-            font-size: 1.1em;
-            line-height: 1.8;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        #music {
-            background: rgba(0,0,0,0.2);
-        }
-
-        .media-container {
-            max-width: 1200px;
-            width: 100%;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-        }
-
-        .media-item {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            transition: transform 0.3s;
-        }
-
-        .media-item:hover {
-            transform: translateY(-10px);
-        }
-
-        .media-item h3 {
-            color: white;
-            margin-bottom: 15px;
-        }
-
-        .audio-player {
-            width: 100%;
-            margin: 15px 0;
-        }
-
-        #contact {
-            background: rgba(0,0,0,0.3);
-        }
-
-        .contact-form {
-            max-width: 600px;
-            width: 100%;
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            color: white;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 10px;
-            background: rgba(255,255,255,0.2);
-            color: white;
-            font-size: 16px;
-            backdrop-filter: blur(5px);
-        }
-
-        .form-group input::placeholder,
-        .form-group textarea::placeholder {
-            color: rgba(255,255,255,0.7);
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: white;
-        }
-
-        .submit-btn {
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 25px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            width: 100%;
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-
-        .form-message {
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .form-message.success {
-            background: rgba(76, 175, 80, 0.2);
-            color: #4CAF50;
-            border: 1px solid #4CAF50;
-        }
-
-        .form-message.error {
-            background: rgba(244, 67, 54, 0.2);
-            color: #f44336;
-            border: 1px solid #f44336;
         }
 
         .hidden {
             display: none;
         }
 
-        .footer-logo {
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: center;
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 183, 255, 0.4), 0 0 30px rgba(255, 20, 147, 0.3); }
+            50% { box-shadow: 0 0 35px rgba(0, 183, 255, 0.6), 0 0 45px rgba(255, 20, 147, 0.5); }
+        }
+        .animate-pulse-glow { animation: pulse-glow 4s ease-in-out infinite; }
+
+        @keyframes rotate-gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .bg-gradient-animated {
+            background-size: 200% 200%;
+            animation: rotate-gradient 8s ease infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            vertical-align: text-bottom;
+            border: 2px solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spin .75s linear infinite;
         }
 
-        .footer-logo svg {
-            max-width: 200px;
-            height: auto;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+        /* Fade-in on scroll */
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        footer {
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 40px 20px;
-            text-align: center;
+        /* Nav link hover effect */
+        .nav-link {
+            position: relative;
+            transition: color 0.3s;
         }
-
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #22d3ee; /* cyan-400 */
+            transition: width 0.3s ease-in-out;
         }
-
-        .footer-section h3 {
-            margin-bottom: 15px;
-            color: #4ecdc4;
+        .nav-link:hover::after {
+            width: 100%;
         }
-
-        .footer-nav {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.1);
+        .nav-link:hover {
+            color: #f0f9ff; /* sky-50 */
         }
-
-        .footer-nav a {
-            color: white;
-            text-decoration: none;
-            margin: 0 10px;
+        
+        /* Chatbot styles */
+        .chat-bubble-user {
+            background-color: #0891b2; /* cyan-600 */
+            align-self: flex-end;
         }
-
-        .footer-nav a:hover {
-            color: #4ecdc4;
+        .chat-bubble-ai {
+            background-color: #334155; /* slate-700 */
+            align-self: flex-start;
         }
-
-        @media (max-width: 768px) {
-            .profile-container {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-
-            .profile-image {
-                width: 200px;
-                height: 200px;
-                font-size: 60px;
-                margin: 0 auto;
-            }
-
-            nav {
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            .language-selector {
-                position: relative;
-                top: auto;
-                right: auto;
-                margin: 20px;
-            }
-
-            .media-container {
-                grid-template-columns: 1fr;
-            }
+        
+        #dream-setlist-result ol {
+            list-style-type: decimal;
+            margin-left: 1.5rem;
+            line-height: 1.8;
         }
     </style>
 </head>
-<body>
+<body class="min-h-screen">
     <!-- Cookie Banner -->
-    <div id="cookie-banner" class="cookie-banner">
-        <div class="cookie-content">
-            <p data-translate="cookie-message">Diese Website verwendet Cookies, um Ihr Browsererlebnis zu verbessern.</p>
-            <div class="cookie-buttons">
-                <button class="cookie-accept" onclick="acceptCookies()" data-translate="accept">Akzeptieren</button>
-                <button class="cookie-decline" onclick="declineCookies()" data-translate="decline">Ablehnen</button>
-                <a href="#privacy" class="cookie-more" data-translate="learn-more">Mehr erfahren</a>
-            </div>
+    <div id="cookie-banner" class="cookie-banner fixed inset-x-0 bottom-0 bg-slate-900/80 backdrop-blur-md text-white p-4 md:p-6 z-[1000] hidden items-center justify-between flex-wrap gap-4">
+        <p data-translate="cookie-message" class="text-center md:text-left flex-grow">Diese Website verwendet Cookies, um Ihr Browsererlebnis zu verbessern.</p>
+        <div class="flex gap-2 md:gap-4 items-center">
+            <button class="px-4 py-2 rounded-lg cursor-pointer font-bold bg-green-500 hover:bg-green-600 transition-colors" onclick="acceptCookies()" data-translate="accept">Akzeptieren</button>
+            <button class="px-4 py-2 rounded-lg cursor-pointer font-bold bg-red-500 hover:bg-red-600 transition-colors" onclick="declineCookies()" data-translate="decline">Ablehnen</button>
+            <a href="#privacy" class="px-4 py-2 rounded-lg cursor-pointer font-bold text-slate-300 hover:text-white hover:underline transition-colors" data-translate="learn-more">Mehr erfahren</a>
         </div>
     </div>
 
     <!-- Language Selector -->
-    <div class="language-selector">
-        <a href="#" class="active" data-lang="de">DE</a>
-        <a href="#" data-lang="en">EN</a>
-        <a href="#" data-lang="fr">FR</a>
-        <a href="#" data-lang="it">IT</a>
+    <div class="fixed top-5 right-5 z-50 bg-slate-900/50 backdrop-blur-lg p-2 rounded-lg shadow-lg">
+        <a href="#" class="active inline-block text-slate-300 no-underline px-2 py-1 rounded-md transition-colors hover:bg-slate-700/50 hover:text-white" data-lang="de">DE</a>
+        <a href="#" class="inline-block text-slate-300 no-underline px-2 py-1 rounded-md transition-colors hover:bg-slate-700/50 hover:text-white" data-lang="en">EN</a>
+        <a href="#" class="inline-block text-slate-300 no-underline px-2 py-1 rounded-md transition-colors hover:bg-slate-700/50 hover:text-white" data-lang="fr">FR</a>
+        <a href="#" class="inline-block text-slate-300 no-underline px-2 py-1 rounded-md transition-colors hover:bg-slate-700/50 hover:text-white" data-lang="it">IT</a>
     </div>
 
     <!-- Header -->
-    <header>
-        <nav>
-            <a href="#about" data-translate="biography">Biografie</a>
-            <a href="#music" data-translate="music">Musik</a>
-            <a href="#contact" data-translate="contact">Kontakt</a>
-            <a href="#privacy" data-translate="privacy">Datenschutz</a>
+    <header class="bg-slate-900/50 backdrop-blur-xl fixed w-full top-0 z-40 border-b border-slate-700/50">
+        <nav class="container mx-auto flex flex-wrap justify-center items-center gap-x-6 gap-y-2 p-4">
+            <a href="#about" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="biography">Biografie</a>
+            <a href="#music" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="music">Musik</a>
+            <a href="#chatbot" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="chatbot-nav">Frag die KI</a>
+            <a href="#contact" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="contact">Kontakt</a>
+            <a href="#privacy" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="privacy">Datenschutz</a>
+            <a href="#imprint" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="imprint">Impressum</a>
+            <a href="#ai-act" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="ai-act-nav">EU AI Act</a>
         </nav>
     </header>
 
     <!-- Main Content -->
-    <main>
+    <main class="pt-24 md:pt-32">
         <!-- About Section -->
-        <section id="about" class="section">
-            <div class="profile-container">
-                <div>
-                    <div class="profile-image">JJ</div>
-                    <div class="social-icons">
-                        <a href="https://soundcloud.com/jessejay" target="_blank" aria-label="Soundcloud">🎵</a>
-                        <a href="https://www.lora.ch/radio/sendungen/blue-dimension" target="_blank" aria-label="LoRa">📻</a>
+        <section id="about" class="min-h-screen flex items-center justify-center p-4 fade-in-section">
+            <div class="container mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-8 items-center text-center lg:text-left">
+                <div class="flex flex-col items-center">
+                    <div class="profile-image w-64 h-64 md:w-80 md:h-80 rounded-full bg-gradient-to-br from-rose-500 to-cyan-500 flex items-center justify-center text-6xl md:text-8xl font-bold animate-float animate-pulse-glow bg-gradient-animated">JJ</div>
+                    <div class="social-icons flex gap-4 md:gap-6 mt-8 justify-center">
+                        <a href="https://soundcloud.com/jessejay" target="_blank" aria-label="Soundcloud" class="w-14 h-14 bg-slate-800/50 backdrop-blur-lg rounded-full flex items-center justify-center text-3xl text-white no-underline transition-all hover:bg-rose-500 hover:scale-110 shadow-lg">🎵</a>
+                        <a href="https://www.lora.ch/radio/sendungen/blue-dimension" target="_blank" aria-label="LoRa" class="w-14 h-14 bg-slate-800/50 backdrop-blur-lg rounded-full flex items-center justify-center text-3xl text-white no-underline transition-all hover:bg-cyan-500 hover:scale-110 shadow-lg">📻</a>
                     </div>
                 </div>
-                <div class="biography-text">
-                    <p data-translate="bio-text">
-                        Kennst du das Gefühl, wenn du tief in den Track eintauchst „DJ..DJ...all your sound seems the same to me"? 
-                        Plötzlich von einer Runde erfasst zu werden, einem bemerkenswerten Erwachen der Leidenschaft... unsere Party-Leidenschaft. 
-                        Seelentragende Reisen... Herzensräume, die Horizonte und Gefühle zur Musik mit sexy Fantasien schaffen, 
-                        gibt es seit geraumer Zeit selten. So liebt es Jesse zu fühlen, wenn er sich der Musik hingibt, 
-                        und so gibt er seinen Sound und die Emotionen an die Menge weiter.
-                    </p>
-                    <p data-translate="bio-text-2">
-                        Jesse wuchs in seinen ansteckenden Party-Sinnen bei der Individualität herrschenden, 
-                        verrückt werdenden und „we are family" philosophischen, zu legendären Clubs wie: 
-                        Aera, Labyrinth, SpiderGalaxy, Take A Dance, Hermetschloo und Dachkantine auf.
-                    </p>
+                <div class="biography-text lg:col-span-2 bg-slate-900/50 backdrop-blur-lg p-6 md:p-10 rounded-2xl text-slate-300 text-lg leading-relaxed shadow-2xl border border-slate-700/50">
+                    <div id="bio-content">
+                        <p data-translate="bio-text-1">
+                            Seit 1997 prägt DJ Jesse Jay die elektronische Musikszene von Zürich aus. Seine Sets sind seelentragende Reisen, die Horizonte erweitern und mit sexy Fantasien spielen. Er liebt es, eins mit der Musik zu werden und diese Emotionen an die Crowd weiterzugeben.
+                        </p>
+                        <p data-translate="bio-text-2" class="mt-4">
+                            Aufgewachsen in legendären Clubs wie Aera, Labyrinth, SpiderGalaxy und Dachkantine, verkörpert er die "we are family"-Philosophie der Zürcher Partyszene.
+                        </p>
+                        <p data-translate="bio-text-3" class="mt-4">
+                            Seit 2001 betreibt er seine Radiosendung auf Radio LoRa (lora.ch & DAB+), die seit 2025 **"The Blue Dimension"** heisst. Jeden Donnerstag von Mitternacht bis 6 Uhr morgens liefert er tiefgründige und zeitlose musikalische Erlebnisse.
+                        </p>
+                    </div>
+                    <div id="bio-loading" class="hidden mt-4 text-center">
+                        <div class="spinner"></div>
+                        <p class="mt-2" data-translate="ai-bio-loading">Generiere kreative Biografie...</p>
+                    </div>
+                    <div class="mt-6 flex flex-wrap gap-4">
+                        <button id="generate-bio-btn" class="flex items-center justify-center gap-2 px-5 py-2 rounded-full bg-cyan-500/80 text-white font-bold transition-all hover:bg-cyan-500 hover:scale-105 shadow-lg" data-translate="ai-bio-btn">✨ Kreative Bio generieren</button>
+                        <button id="reset-bio-btn" class="px-5 py-2 rounded-full bg-slate-600/80 text-white font-bold transition-all hover:bg-slate-600 hover:scale-105 shadow-lg hidden" data-translate="ai-bio-reset-btn">Original wiederherstellen</button>
+                    </div>
                 </div>
             </div>
         </section>
 
         <!-- Music Section -->
-        <section id="music" class="section">
-            <div class="media-container">
-                <div class="media-item">
-                    <h3 data-translate="latest-mix">Neueste Mixes</h3>
-                    <audio controls class="audio-player">
-                        <source src="audio/mix1.mp3" type="audio/mpeg">
-                        Ihr Browser unterstützt das Audio-Element nicht.
-                    </audio>
-                    <p data-translate="mix-description">Deep House Set - Live from Zürich</p>
+        <section id="music" class="py-20 bg-slate-900/30 flex items-center justify-center p-4 md:p-8 fade-in-section">
+            <div class="container mx-auto max-w-6xl space-y-16">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-cyan-500/20 border border-slate-700/50">
+                        <h3 data-translate="latest-mix" class="text-white text-2xl font-bold mb-4">Neueste Mixes</h3>
+                        <a href="https://soundcloud.com/jessejay" target="_blank" class="inline-block mt-4 px-6 py-3 bg-rose-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-rose-600 hover:scale-105 shadow-lg">Soundcloud</a>
+                    </div>
+                    <div class="bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-cyan-500/20 border border-slate-700/50">
+                        <h3 data-translate="radio-show" class="text-white text-2xl font-bold mb-4">Radio Show</h3>
+                        <a href="https://www.lora.ch/radio/sendungen/blue-dimension" target="_blank" class="inline-block mt-4 px-6 py-3 bg-cyan-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-cyan-600 hover:scale-105 shadow-lg">Radio LoRa</a>
+                    </div>
+                    <div class="bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-cyan-500/20 border border-slate-700/50">
+                        <h3 data-translate="classic-sets" class="text-white text-2xl font-bold mb-4">Klassische Sets</h3>
+                        <a href="https://soundcloud.com/jessejay/sets/djjessejay" target="_blank" class="inline-block mt-4 px-6 py-3 bg-rose-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-rose-600 hover:scale-105 shadow-lg">Soundcloud</a>
+                    </div>
                 </div>
-                <div class="media-item">
-                    <h3 data-translate="radio-show">Radio Show</h3>
-                    <audio controls class="audio-player">
-                        <source src="audio/radio-show.mp3" type="audio/mpeg">
-                        Ihr Browser unterstützt das Audio-Element nicht.
-                    </audio>
-                    <p data-translate="radio-description">Galaxy Space Nights @ Radio Lora</p>
+
+                <!-- AI Dream Setlist Generator -->
+                 <div class="bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 md:p-8 text-center shadow-xl border border-slate-700/50 fade-in-section">
+                    <h3 class="text-3xl font-bold text-white mb-4" data-translate="ai-setlist-title">✨ Kreiere dein Traum-Set</h3>
+                    <p class="text-slate-300 mb-6 max-w-2xl mx-auto" data-translate="ai-setlist-desc">Beschreibe einen Vibe, und die KI erstellt eine hypothetische Setlist, die Jesse Jay spielen könnte.</p>
+                    <div class="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto">
+                        <input type="text" id="setlist-vibe-input" class="w-full p-3 rounded-lg border border-slate-600 bg-slate-800/50 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all" data-translate-placeholder="ai-setlist-placeholder">
+                        <button id="generate-setlist-btn" class="px-6 py-3 bg-cyan-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-cyan-600 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" data-translate="ai-setlist-btn" disabled>Generieren</button>
+                    </div>
+                    <div id="dream-setlist-result" class="mt-6 p-6 bg-slate-800/50 rounded-lg text-left hidden min-h-[200px] max-w-2xl mx-auto">
+                        <!-- Result will be injected here -->
+                    </div>
                 </div>
-                <div class="media-item">
-                    <h3 data-translate="classic-sets">Klassische Sets</h3>
-                    <audio controls class="audio-player">
-                        <source src="audio/classic-set.mp3" type="audio/mpeg">
-                        Ihr Browser unterstützt das Audio-Element nicht.
-                    </audio>
-                    <p data-translate="classic-description">Vinyl Selection 1997-2005</p>
+
+                <!-- AI Recommender -->
+                <div class="bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 md:p-8 text-center shadow-xl border border-slate-700/50 fade-in-section">
+                    <h3 class="text-3xl font-bold text-white mb-4" data-translate="ai-reco-title">✨ Finde den perfekten Mix</h3>
+                    <p class="text-slate-300 mb-6 max-w-2xl mx-auto" data-translate="ai-reco-desc">Beschreibe deine Stimmung oder dein Event und lass die KI den passenden Sound für dich finden.</p>
+                    <div class="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto">
+                        <input type="text" id="vibe-input" class="w-full p-3 rounded-lg border border-slate-600 bg-slate-800/50 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all" data-translate-placeholder="ai-reco-placeholder">
+                        <button id="get-recommendation-btn" class="px-6 py-3 bg-cyan-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-cyan-600 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" data-translate="ai-reco-btn" disabled>Empfehlen</button>
+                    </div>
+                    <div id="recommendation-result" class="mt-6 p-6 bg-slate-800/50 rounded-lg text-left hidden min-h-[100px] max-w-2xl mx-auto">
+                        <!-- Result will be injected here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Chatbot Section -->
+        <section id="chatbot" class="py-20 flex items-center justify-center p-4 md:p-8 fade-in-section">
+            <div class="max-w-3xl w-full bg-slate-900/50 backdrop-blur-lg rounded-2xl shadow-2xl border border-slate-700/50 flex flex-col h-[70vh]">
+                <h2 class="text-3xl font-bold text-center py-4 text-white border-b border-slate-700/50" data-translate="chatbot-title">✨ Frag die KI</h2>
+                <div id="chat-window" class="flex-1 p-6 space-y-4 overflow-y-auto">
+                    <!-- Chat messages will be appended here -->
+                </div>
+                <div class="p-4 border-t border-slate-700/50">
+                    <div class="flex gap-4">
+                        <input type="text" id="chat-input" class="w-full p-3 rounded-lg border border-slate-600 bg-slate-800/50 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all" data-translate-placeholder="chatbot-placeholder">
+                        <button id="chat-send-btn" class="px-6 py-3 bg-cyan-500 rounded-lg font-semibold text-white no-underline transition-all hover:bg-cyan-600 shadow-lg" data-translate="send">Senden</button>
+                    </div>
                 </div>
             </div>
         </section>
 
         <!-- Contact Section -->
-        <section id="contact" class="section">
-            <form class="contact-form" id="contact-form">
-                <div class="form-group">
-                    <label for="name" data-translate="name">Name:</label>
-                    <input type="text" id="name" name="name" required placeholder="Ihr Name">
+        <section id="contact" class="py-20 flex items-center justify-center p-4 md:p-8 fade-in-section">
+            <form class="max-w-3xl w-full bg-slate-900/50 backdrop-blur-lg p-6 md:p-10 rounded-2xl shadow-2xl border border-slate-700/50" id="contact-form">
+                <h2 class="text-4xl font-bold text-center mb-8 text-white" data-translate="contact-title">Kontakt aufnehmen</h2>
+                <div class="mb-5">
+                    <label for="name" data-translate="name" class="block text-slate-300 mb-2 font-bold">Name:</label>
+                    <input type="text" id="name" name="name" required class="w-full p-3 rounded-lg border border-slate-600 bg-slate-800/50 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all" data-translate-placeholder="name-placeholder">
                 </div>
-                <div class="form-group">
-                    <label for="email" data-translate="email">E-Mail:</label>
-                    <input type="email" id="email" name="email" required placeholder="ihre@email.com">
+                <div class="mb-5">
+                    <label for="email" data-translate="email" class="block text-slate-300 mb-2 font-bold">E-Mail:</label>
+                    <input type="email" id="email" name="email" required class="w-full p-3 rounded-lg border border-slate-600 bg-slate-800/50 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all" data-translate-placeholder="email-placeholder">
                 </div>
-                <div class="form-group">
-                    <label for="message" data-translate="message">Nachricht:</label>
-                    <textarea id="message" name="message" rows="5" required placeholder="Ihre Nachricht..."></textarea>
+                <div class="mb-5">
+                    <label for="message" data-translate="message" class="block text-slate-300 mb-2 font-bold">Nachricht:</label>
+                    <textarea id="message" name="message" rows="5" required class="w-full p-3 rounded-lg border border-slate-600 bg-slate-800/50 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all" data-translate-placeholder="message-placeholder"></textarea>
                 </div>
-                <div class="form-group checkbox-group">
-                    <input type="checkbox" id="privacy" name="privacy" required>
-                    <label for="privacy" data-translate="privacy-accept">
-                        Ich akzeptiere die <a href="#privacy" style="color: #4ecdc4;">Datenschutzbestimmungen</a>.
+                <div class="mb-6 flex items-center gap-3 text-slate-300">
+                    <input type="checkbox" id="privacy-check" name="privacy" required class="w-4 h-4 rounded bg-slate-700 border-slate-600 text-cyan-500 focus:ring-cyan-500">
+                    <label for="privacy-check" data-translate="privacy-accept">
+                        Ich akzeptiere die <a href="#privacy" class="text-cyan-400 hover:underline">Datenschutzbestimmungen</a>.
                     </label>
                 </div>
-                <button type="submit" class="submit-btn" data-translate="send">Senden</button>
-                
-                <div id="form-success" class="form-message success hidden" data-translate="success-message">
+                <div class="flex flex-col sm:flex-row gap-4 mt-6">
+                    <button type="submit" class="w-full sm:w-1/2 bg-gradient-to-r from-rose-500 to-cyan-500 text-white font-bold py-3 px-8 rounded-full text-lg cursor-pointer transition-all hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/50" data-translate="send">Senden</button>
+                    <button type="button" id="refine-message-btn" class="w-full sm:w-1/2 flex items-center justify-center gap-2 bg-slate-600 text-white font-bold py-3 px-8 rounded-full text-lg cursor-pointer transition-all hover:scale-105 hover:bg-slate-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled data-translate="ai-refine-btn">✨ Nachricht verbessern</button>
+                </div>
+                <div id="form-success" class="p-4 rounded-lg mt-6 text-center font-bold bg-green-500/20 text-green-400 border border-green-500 hidden" data-translate="success-message">
                     Ihre Nachricht wurde erfolgreich gesendet!
                 </div>
-                <div id="form-error" class="form-message error hidden" data-translate="error-message">
-                    Es gab ein Problem beim Senden Ihrer Nachricht. Bitte versuchen Sie es später erneut.
+                <div id="form-error" class="p-4 rounded-lg mt-6 text-center font-bold bg-red-500/20 text-red-400 border border-red-500 hidden" data-translate="error-message">
+                    Es gab ein Problem. Bitte versuchen Sie es später erneut.
                 </div>
             </form>
         </section>
+
+        <!-- Legal Sections Container -->
+        <div class="bg-slate-900/30 py-20 p-4 md:p-8 space-y-20">
+            <!-- Privacy Section -->
+            <section id="privacy" class="flex items-center justify-center fade-in-section">
+                <div class="container mx-auto max-w-4xl bg-slate-900/50 backdrop-blur-lg p-6 md:p-10 rounded-2xl shadow-2xl text-left border border-slate-700/50">
+                    <h2 class="text-3xl font-bold mb-6 text-white" data-translate="privacy-title">Datenschutzerklärung</h2>
+                    <div class="space-y-4 text-slate-300">
+                        <p data-translate="privacy-p1">Wir legen grossen Wert auf den Schutz Ihrer Daten. Um unsere Webseite zu besuchen, müssen Sie keine personenbezogenen Daten angeben...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Imprint Section -->
+            <section id="imprint" class="flex items-center justify-center fade-in-section">
+                <div class="container mx-auto max-w-4xl bg-slate-900/50 backdrop-blur-lg p-6 md:p-10 rounded-2xl shadow-2xl text-left border border-slate-700/50">
+                    <h2 class="text-3xl font-bold mb-6 text-white" data-translate="imprint-title">Impressum</h2>
+                    <div class="space-y-4 text-slate-300">
+                        <h3 class="text-xl font-bold text-white" data-translate="imprint-h-owner">Angaben gemäss gesetzlicher Vorgaben</h3>
+                        <p>Michael Fellner<br>Wallisellenstrasse 12<br>8600 Dübendorf<br>Schweiz</p>
+                         <h3 class="text-xl font-bold text-white pt-4" data-translate="imprint-h-contact">Kontakt</h3>
+                        <p data-translate="imprint-contact-details">E-Mail: [Ihre-E-Mail-Adresse@domain.com]</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- NEW: EU AI Act Section -->
+            <section id="ai-act" class="flex items-center justify-center fade-in-section">
+                <div class="container mx-auto max-w-4xl bg-slate-900/50 backdrop-blur-lg p-6 md:p-10 rounded-2xl shadow-2xl text-left border border-slate-700/50">
+                    <h2 class="text-3xl font-bold mb-6 text-white" data-translate="ai-act-title">EU AI Act: Eine Zusammenfassung</h2>
+                    <div class="space-y-4 text-slate-300">
+                        <p data-translate="ai-act-p1">Der EU AI Act ist das weltweit erste umfassende Gesetz zur Regulierung von Künstlicher Intelligenz. Sein Ziel ist es, sicherzustellen, dass KI-Systeme in der EU sicher, transparent und nicht diskriminierend sind, während gleichzeitig Innovation gefördert wird.</p>
+                        <h3 class="text-xl font-bold text-white pt-4" data-translate="ai-act-h-risk">Der risikobasierte Ansatz</h3>
+                        <p data-translate="ai-act-p2">Das Gesetz teilt KI-Anwendungen in Risikokategorien ein: von <b class="text-rose-400">inakzeptablen Risiken</b> (die verboten werden, z.B. Social Scoring), über <b class="text-amber-400">hohe Risiken</b> (die strengen Auflagen unterliegen, z.B. KI in der Medizin), bis hin zu <b class="text-cyan-400">begrenzten</b> und <b class="text-green-400">minimalen Risiken</b> (mit leichten Transparenzpflichten oder keinen neuen Regeln).</p>
+                        <h3 class="text-xl font-bold text-white pt-4" data-translate="ai-act-h-impact">Bedeutung für diese Webseite</h3>
+                        <p data-translate="ai-act-p3">Die KI-Funktionen auf dieser Seite (z.B. der Chatbot oder der Biografie-Generator) fallen unter die Kategorie des begrenzten oder minimalen Risikos. Gemäss dem AI Act verpflichten wir uns zur Transparenz. Alle KI-generierten Inhalte sind klar als solche gekennzeichnet, um sicherzustellen, dass Sie immer wissen, wann Sie mit einer KI interagieren.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Download Section -->
+            <section id="download" class="flex items-center justify-center fade-in-section">
+                <div class="container mx-auto max-w-4xl text-center">
+                    <div class="bg-slate-900/50 backdrop-blur-lg p-6 md:p-10 rounded-2xl shadow-2xl border border-slate-700/50">
+                        <h2 class="text-3xl font-bold mb-4 text-white" data-translate="download-title">Downloads</h2>
+                        <p class="mb-8 text-slate-300" data-translate="download-p1">Hier finden Sie Materialien für Presse und Veranstalter.</p>
+                        <div class="flex flex-col sm:flex-row justify-center gap-4">
+                             <a href="/path/to/presskit.zip" download class="px-6 py-3 bg-gradient-to-r from-rose-500 to-cyan-500 rounded-full font-semibold text-white no-underline transition-all hover:scale-105 shadow-lg" data-translate="download-presskit">Pressekit (.zip)</a>
+                             <a href="/path/to/logo.zip" download class="px-6 py-3 bg-slate-700/50 rounded-full font-semibold text-white no-underline transition-all hover:bg-slate-600/50" data-translate="download-logos">Logos & Bilder (.zip)</a>
+                        </div>
+                    </div>
+
+                    <!-- AI Press Assistant -->
+                    <div class="mt-16 bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 md:p-8 text-center shadow-xl border border-slate-700/50 fade-in-section">
+                        <h3 class="text-3xl font-bold text-white mb-4" data-translate="ai-press-title">✨ KI-Presseassistent</h3>
+                        <p class="text-slate-300 mb-6 max-w-2xl mx-auto" data-translate="ai-press-desc">Geben Sie Ihre Event-Details ein, und die KI erstellt eine professionelle Ankündigung für Sie.</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto mb-4 text-left">
+                            <div>
+                                <label for="event-date" class="block text-slate-300 mb-2 font-bold" data-translate="ai-press-date">Event-Datum:</label>
+                                <input type="text" id="event-date" class="w-full p-3 rounded-lg border border-slate-600 bg-slate-800/50 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all" data-translate-placeholder="ai-press-date-placeholder">
+                            </div>
+                            <div>
+                                <label for="event-venue" class="block text-slate-300 mb-2 font-bold" data-translate="ai-press-venue">Veranstaltungsort:</label>
+                                <input type="text" id="event-venue" class="w-full p-3 rounded-lg border border-slate-600 bg-slate-800/50 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all" data-translate-placeholder="ai-press-venue-placeholder">
+                            </div>
+                        </div>
+                        <div class="max-w-2xl mx-auto mb-6 text-left">
+                           <label for="event-notes" class="block text-slate-300 mb-2 font-bold" data-translate="ai-press-notes">Besonderheiten:</label>
+                           <input type="text" id="event-notes" class="w-full p-3 rounded-lg border border-slate-600 bg-slate-800/50 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all" data-translate-placeholder="ai-press-notes-placeholder">
+                        </div>
+                        <button id="generate-press-btn" class="px-6 py-3 bg-cyan-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-cyan-600 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" data-translate="ai-press-btn" disabled>Ankündigung generieren</button>
+                        <div id="press-result-container" class="mt-6 text-left hidden max-w-2xl mx-auto">
+                           <div id="press-result" class="p-6 bg-slate-800/50 rounded-lg min-h-[100px] whitespace-pre-wrap"></div>
+                           <button id="copy-press-btn" class="mt-4 px-4 py-2 bg-slate-600 rounded-full font-semibold text-white no-underline transition-all hover:bg-slate-500" data-translate="ai-press-copy">Text kopieren</button>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </div>
     </main>
 
     <!-- Footer -->
-    <footer>
-        <div class="footer-content">
-            <div class="footer-section">
-                <div class="footer-logo">
-                    <svg width="200" height="60" viewBox="0 0 300 90" xmlns="http://www.w3.org/2000/svg">
-                        <!-- Dark blue background -->
-                        <rect width="300" height="90" fill="#1e2a5c" rx="5"/>
-                        
-                        <!-- DJ text in gray -->
-                        <text x="20" y="50" font-family="Arial Black, sans-serif" font-size="36" font-weight="900" fill="#666666">DJ</text>
-                        
-                        <!-- Yellow bar background -->
-                        <rect x="90" y="20" width="180" height="25" fill="#FFD700" rx="2"/>
-                        
-                        <!-- Jesse Jay text in black on yellow -->
-                        <text x="100" y="38" font-family="Arial Black, sans-serif" font-size="16" font-weight="900" fill="#000000">JESSE JAY</text>
-                        
-                        <!-- Dots -->
-                        <circle cx="30" cy="70" r="3" fill="#FFD700"/>
-                        <circle cx="50" cy="70" r="3" fill="#FFD700"/>
-                        <circle cx="70" cy="70" r="3" fill="#FFD700"/>
-                        <circle cx="90" cy="70" r="3" fill="#FFD700"/>
-                        <circle cx="110" cy="70" r="3" fill="#FFD700"/>
-                        <circle cx="130" cy="70" r="3" fill="#FFD700"/>
-                        <circle cx="150" cy="70" r="3" fill="#FFD700"/>
-                        <circle cx="170" cy="70" r="3" fill="#FFD700"/>
-                        <circle cx="190" cy="70" r="3" fill="#FFD700"/>
-                        <circle cx="210" cy="70" r="3" fill="#FFD700"/>
-                        <circle cx="230" cy="70" r="3" fill="#FFD700"/>
-                        <circle cx="250" cy="70" r="3" fill="#FFD700"/>
-                        <circle cx="270" cy="70" r="3" fill="#FFD700"/>
-                    </svg>
-                </div>
-                <p>© 2003-2025 by DJ Jesse Jay & @®† from Zürich 🇨🇭</p>
+    <footer class="bg-slate-900/80 text-slate-400 py-10 px-4 text-center">
+        <div class="container mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="mb-4 md:mb-0">
+                <div class="text-2xl font-bold mb-2 text-white">DJ Jesse Jay</div>
+                <p class="text-sm">© 2003-2025 by DJ Jesse Jay & @®† from Zürich 🇨🇭</p>
             </div>
-            <div class="footer-section">
-                <h3 data-translate="legal">Rechtliches</h3>
-                <p data-translate="copyright-notice">
-                    Die Tracks in den Videos sind nicht frei verwendbar. 
-                    Bei Interesse an der Musik wenden Sie sich bitte an den Künstler oder das Label.
+            <div class="mb-4 md:mb-0">
+                <h3 data-translate="legal" class="text-cyan-400 text-lg font-bold mb-3">Rechtliches</h3>
+                <p data-translate="copyright-notice" class="text-sm">
+                    Die Tracks in den Mixes sind nicht frei verwendbar. Bei Interesse wenden Sie sich bitte an die Künstler oder Labels.
                 </p>
             </div>
-            <div class="footer-section">
-                <h3 data-translate="open-source">Open Source</h3>
-                <p data-translate="thanks">
-                    Diese Seite wurde mit Open Source Software erstellt. 
-                    ❤️ Dank an Marcin Kolonko und Marcel Raschke für die Programmierung.
+            <div>
+                <h3 data-translate="open-source" class="text-cyan-400 text-lg font-bold mb-3">Open Source</h3>
+                <p data-translate="thanks" class="text-sm">
+                    Diese Seite wurde mit Open Source Software erstellt. Dank an Marcin Kolonko und Marcel Raschke.
                 </p>
             </div>
         </div>
-        <div class="footer-nav">
-            <a href="#privacy" data-translate="privacy">Datenschutz</a> |
-            <a href="#imprint" data-translate="imprint">Impressum</a> |
-            <a href="#download" data-translate="download-files">Dateien herunterladen</a>
+        <div class="pt-6 mt-8 border-t border-slate-700/50">
+            <a href="#privacy" data-translate="privacy" class="text-slate-400 hover:text-cyan-400 no-underline mx-2 transition-colors">Datenschutz</a> |
+            <a href="#imprint" data-translate="imprint" class="text-slate-400 hover:text-cyan-400 no-underline mx-2 transition-colors">Impressum</a> |
+            <a href="#download" data-translate="download-files" class="text-slate-400 hover:text-cyan-400 no-underline mx-2 transition-colors">Downloads</a> |
+            <a href="#ai-act" data-translate="ai-act-nav" class="text-slate-400 hover:text-cyan-400 no-underline mx-2 transition-colors">EU AI Act</a>
         </div>
     </footer>
 
     <script>
-        // Translations
         const translations = {
             de: {
-                'cookie-message': 'Diese Website verwendet Cookies, um Ihr Browsererlebnis zu verbessern.',
-                'accept': 'Akzeptieren',
-                'decline': 'Ablehnen',
-                'learn-more': 'Mehr erfahren',
-                'biography': 'Biografie',
-                'music': 'Musik',
-                'contact': 'Kontakt',
-                'privacy': 'Datenschutz',
-                'name': 'Name:',
-                'email': 'E-Mail:',
-                'message': 'Nachricht:',
-                'send': 'Senden',
-                'success-message': 'Ihre Nachricht wurde erfolgreich gesendet!',
-                'error-message': 'Es gab ein Problem beim Senden Ihrer Nachricht. Bitte versuchen Sie es später erneut.'
+                'cookie-message': 'Diese Website verwendet Cookies, um Ihr Browsererlebnis zu verbessern.', 'accept': 'Akzeptieren', 'decline': 'Ablehnen', 'learn-more': 'Mehr erfahren', 'biography': 'Biografie', 'music': 'Musik', 'contact': 'Kontakt', 'privacy': 'Datenschutz', 'imprint': 'Impressum', 'chatbot-nav': 'Frag die KI',
+                'bio-text-1': 'Seit 1997 prägt DJ Jesse Jay die elektronische Musikszene von Zürich aus. Seine Sets sind seelentragende Reisen, die Horizonte erweitern und mit sexy Fantasien spielen. Er liebt es, eins mit der Musik zu werden und diese Emotionen an die Crowd weiterzugeben.', 
+                'bio-text-2': 'Aufgewachsen in legendären Clubs wie Aera, Labyrinth, SpiderGalaxy und Dachkantine, verkörpert er die "we are family"-Philosophie der Zürcher Partyszene.', 
+                'bio-text-3': 'Seit 2001 betreibt er seine Radiosendung auf Radio LoRa (lora.ch & DAB+), die seit 2025 "The Blue Dimension" heisst. Jeden Donnerstag von Mitternacht bis 6 Uhr morgens liefert er tiefgründige und zeitlose musikalische Erlebnisse.', 
+                'latest-mix': 'Neueste Mixes', 'radio-show': 'Radio Show', 'classic-sets': 'Klassische Sets', 'contact-title': 'Kontakt aufnehmen', 'name': 'Name:', 'email': 'E-Mail:', 'message': 'Nachricht:', 'name-placeholder': 'Ihr Name', 'email-placeholder': 'ihre@email.com', 'message-placeholder': 'Ihre Nachricht...', 'privacy-accept': 'Ich akzeptiere die', 'send': 'Senden', 'success-message': 'Ihre Nachricht wurde erfolgreich gesendet!', 'error-message': 'Es gab ein Problem. Bitte versuchen Sie es später erneut.', 'legal': 'Rechtliches', 'copyright-notice': 'Die Tracks in den Mixes sind nicht frei verwendbar. Bei Interesse wenden Sie sich bitte an die Künstler oder Labels.', 'open-source': 'Open Source', 'thanks': 'Diese Seite wurde mit Open Source Software erstellt. Dank an Marcin Kolonko und Marcel Raschke.', 'download-files': 'Downloads', 'privacy-title': 'Datenschutzerklärung', 'privacy-p1': 'Wir legen grossen Wert auf den Schutz Ihrer Daten. Um unsere Webseite zu besuchen, müssen Sie keine personenbezogenen Daten angeben...', 'imprint-title': 'Impressum', 'imprint-h-owner': 'Angaben gemäss gesetzlicher Vorgaben', 'imprint-h-contact': 'Kontakt', 'imprint-contact-details': 'E-Mail: [Ihre-E-Mail-Adresse@domain.com]', 'imprint-h-liability': 'Haftungsausschluss', 'imprint-p1': 'Der Autor übernimmt keinerlei Gewähr...', 'download-title': 'Downloads', 'download-p1': 'Hier finden Sie Materialien für Presse und Veranstalter.', 'download-presskit': 'Pressekit (.zip)', 'download-logos': 'Logos & Bilder (.zip)',
+                'ai-bio-btn': '✨ Kreative Bio generieren', 'ai-bio-reset-btn': 'Original wiederherstellen', 'ai-refine-btn': '✨ Nachricht verbessern', 'ai-bio-loading': 'Generiere kreative Biografie...', 'ai-refine-btn-loading': 'Verfeinere...', 'ai-reco-title': '✨ Finde den perfekten Mix', 'ai-reco-desc': 'Beschreibe deine Stimmung oder dein Event und lass die KI den passenden Sound für dich finden.', 'ai-reco-placeholder': "z.B. 'entspannter Abend zu Hause'", 'ai-reco-btn': 'Empfehlen',
+                'ai-press-title': '✨ KI-Presseassistent', 'ai-press-desc': 'Geben Sie Ihre Event-Details ein, und die KI erstellt eine professionelle Ankündigung für Sie.', 'ai-press-date': 'Event-Datum:', 'ai-press-date-placeholder': 'z.B. 15. Oktober', 'ai-press-venue': 'Veranstaltungsort:', 'ai-press-venue-placeholder': 'z.B. Club X, Zürich', 'ai-press-notes': 'Besonderheiten:', 'ai-press-notes-placeholder': 'z.B. Support von DJ Y', 'ai-press-btn': 'Ankündigung generieren', 'ai-press-copy': 'Text kopieren', 'ai-press-copied': 'Kopiert!',
+                'chatbot-title': '✨ Frag die KI', 'chatbot-placeholder': 'Stelle eine Frage...', 'chatbot-greeting': 'Hallo! Ich bin JJ-AI, der digitale Assistent von Jesse Jay. Wie kann ich dir helfen?',
+                'ai-setlist-title': '✨ Kreiere dein Traum-Set', 'ai-setlist-desc': 'Beschreibe einen Vibe, und die KI erstellt eine hypothetische Setlist, die Jesse Jay spielen könnte.', 'ai-setlist-placeholder': "z.B. 'Sonnenaufgang auf einer Dachterrasse'", 'ai-setlist-btn': 'Generieren',
+                'ai-act-nav': 'EU AI Act', 'ai-act-title': 'EU AI Act: Eine Zusammenfassung', 'ai-act-p1': "Der EU AI Act ist das weltweit erste umfassende Gesetz zur Regulierung von Künstlicher Intelligenz. Sein Ziel ist es, sicherzustellen, dass KI-Systeme in der EU sicher, transparent und nicht diskriminierend sind, während gleichzeitig Innovation gefördert wird.", 'ai-act-h-risk': "Der risikobasierte Ansatz", 'ai-act-p2': "Das Gesetz teilt KI-Anwendungen in Risikokategorien ein: von <b class=\"text-rose-400\">inakzeptablen Risiken</b> (die verboten werden, z.B. Social Scoring), über <b class=\"text-amber-400\">hohe Risiken</b> (die strengen Auflagen unterliegen, z.B. KI in der Medizin), bis hin zu <b class=\"text-cyan-400\">begrenzten</b> und <b class=\"text-green-400\">minimalen Risiken</b> (mit leichten Transparenzpflichten oder keinen neuen Regeln).", 'ai-act-h-impact': "Bedeutung für diese Webseite", 'ai-act-p3': "Die KI-Funktionen auf dieser Seite (z.B. der Chatbot oder der Biografie-Generator) fallen unter die Kategorie des begrenzten oder minimalen Risikos. Gemäss dem AI Act verpflichten wir uns zur Transparenz. Alle KI-generierten Inhalte sind klar als solche gekennzeichnet, um sicherzustellen, dass Sie immer wissen, wann Sie mit einer KI interagieren."
             },
             en: {
-                'cookie-message': 'This website uses cookies to improve your browsing experience.',
-                'accept': 'Accept',
-                'decline': 'Decline',
-                'learn-more': 'Learn more',
-                'biography': 'Biography',
-                'music': 'Music',
-                'contact': 'Contact',
-                'privacy': 'Privacy',
-                'name': 'Name:',
-                'email': 'Email:',
-                'message': 'Message:',
-                'send': 'Send',
-                'success-message': 'Your message has been sent successfully!',
-                'error-message': 'There was a problem sending your message. Please try again later.'
+                'cookie-message': 'This website uses cookies to improve your browsing experience.', 'accept': 'Accept', 'decline': 'Decline', 'learn-more': 'Learn more', 'biography': 'Biography', 'music': 'Music', 'contact': 'Contact', 'privacy': 'Privacy', 'imprint': 'Imprint', 'chatbot-nav': 'Ask AI',
+                'bio-text-1': 'Since 1997, DJ Jesse Jay has been shaping the electronic music scene from Zurich...', 'bio-text-2': 'Growing up in legendary clubs like Aera, Labyrinth...', 'bio-text-3': 'Since 2001, he has been running his radio show on Radio LoRa...', 'latest-mix': 'Latest Mixes', 'radio-show': 'Radio Show', 'classic-sets': 'Classic Sets', 'contact-title': 'Get in Touch', 'name': 'Name:', 'email': 'Email:', 'message': 'Message:', 'name-placeholder': 'Your Name', 'email-placeholder': 'your@email.com', 'message-placeholder': 'Your message...', 'privacy-accept': 'I accept the', 'send': 'Send', 'success-message': 'Your message has been sent successfully!', 'error-message': 'There was a problem. Please try again later.', 'legal': 'Legal', 'copyright-notice': 'The tracks in the mixes are not for free use...', 'open-source': 'Open Source', 'thanks': 'This site was created with open source software...', 'download-files': 'Downloads', 'privacy-title': 'Privacy Policy', 'privacy-p1': 'We highly value the protection of your data...', 'imprint-title': 'Imprint', 'imprint-h-owner': 'Information according to legal requirements', 'imprint-h-contact': 'Contact', 'imprint-contact-details': 'Email: [your-email-address@domain.com]', 'imprint-h-liability': 'Disclaimer of Liability', 'imprint-p1': 'The author assumes no liability...', 'download-title': 'Downloads', 'download-p1': 'Here you will find materials for press and promoters.', 'download-presskit': 'Press Kit (.zip)', 'download-logos': 'Logos & Images (.zip)',
+                'ai-bio-btn': '✨ Generate Creative Bio', 'ai-bio-reset-btn': 'Restore Original', 'ai-refine-btn': '✨ Refine Message', 'ai-bio-loading': 'Generating creative biography...', 'ai-refine-btn-loading': 'Refining...', 'ai-reco-title': '✨ Find the Perfect Mix', 'ai-reco-desc': 'Describe your mood or event, and let the AI find the right sound for you.', 'ai-reco-placeholder': "e.g., 'chilled evening at home'", 'ai-reco-btn': 'Recommend',
+                'ai-press-title': '✨ AI Press Assistant', 'ai-press-desc': 'Enter your event details, and the AI will create a professional announcement for you.', 'ai-press-date': 'Event Date:', 'ai-press-date-placeholder': 'e.g., October 15th', 'ai-press-venue': 'Venue:', 'ai-press-venue-placeholder': 'e.g., Club X, Zurich', 'ai-press-notes': 'Special Notes:', 'ai-press-notes-placeholder': 'e.g., Support by DJ Y', 'ai-press-btn': 'Generate Announcement', 'ai-press-copy': 'Copy Text', 'ai-press-copied': 'Copied!',
+                'chatbot-title': '✨ Ask the AI', 'chatbot-placeholder': 'Ask a question...', 'chatbot-greeting': "Hi! I'm JJ-AI, Jesse Jay's digital assistant. How can I help you?",
+                'ai-setlist-title': '✨ Create Your Dream Set', 'ai-setlist-desc': 'Describe a vibe, and the AI will create a hypothetical setlist that Jesse Jay might play.', 'ai-setlist-placeholder': "e.g., 'sunrise on a rooftop terrace'", 'ai-setlist-btn': 'Generate',
+                'ai-act-nav': 'EU AI Act', 'ai-act-title': 'EU AI Act: A Summary', 'ai-act-p1': "The EU AI Act is the world's first comprehensive law regulating Artificial Intelligence. Its goal is to ensure that AI systems in the EU are safe, transparent, and non-discriminatory, while fostering innovation.", 'ai-act-h-risk': "The Risk-Based Approach", 'ai-act-p2': "The law categorizes AI applications into risk levels: from <b class=\"text-rose-400\">unacceptable risks</b> (which are banned, e.g., social scoring), to <b class=\"text-amber-400\">high risks</b> (subject to strict requirements, e.g., AI in medicine), down to <b class=\"text-cyan-400\">limited</b> and <b class=\"text-green-400\">minimal risks</b> (with light transparency obligations or no new rules).", 'ai-act-h-impact': "What it means for this website", 'ai-act-p3': "The AI features on this site (like the chatbot or bio generator) fall into the limited or minimal risk category. In line with the AI Act, we are committed to transparency. All AI-generated content is clearly marked as such, ensuring you always know when you are interacting with an AI."
             },
             fr: {
-                'cookie-message': 'Ce site web utilise des cookies pour améliorer votre expérience de navigation.',
-                'accept': 'Accepter',
-                'decline': 'Refuser',
-                'learn-more': 'En savoir plus',
-                'biography': 'Biographie',
-                'music': 'Musique',
-                'contact': 'Contact',
-                'privacy': 'Confidentialité',
-                'name': 'Nom:',
-                'email': 'Email:',
-                'message': 'Message:',
-                'send': 'Envoyer',
-                'success-message': 'Votre message a été envoyé avec succès!',
-                'error-message': 'Il y a eu un problème lors de l\'envoi de votre message. Veuillez réessayer plus tard.'
+                // French translations including AI Act
+                'ai-act-nav': 'Loi IA de l\'UE', 'ai-act-title': "Loi IA de l'UE : Un résumé", 'ai-act-p1': "La Loi sur l'IA de l'UE est la première loi complète au monde réglementant l'intelligence artificielle. Son objectif est de garantir que les systèmes d'IA dans l'UE sont sûrs, transparents et non discriminatoires, tout en encourageant l'innovation.", 'ai-act-h-risk': "L'approche basée sur les risques", 'ai-act-p2': "La loi classe les applications d'IA par niveaux de risque : des <b class=\"text-rose-400\">risques inacceptables</b> (qui sont interdits, par ex. le scoring social), aux <b class=\"text-amber-400\">risques élevés</b> (soumis à des exigences strictes, par ex. l'IA en médecine), jusqu'aux <b class=\"text-cyan-400\">risques limités</b> et <b class=\"text-green-400\">minimes</b> (avec de légères obligations de transparence ou aucune nouvelle règle).", 'ai-act-h-impact': "Ce que cela signifie pour ce site web", 'ai-act-p3': "Les fonctionnalités d'IA de ce site (comme le chatbot ou le générateur de biographie) entrent dans la catégorie des risques limités ou minimes. Conformément à la Loi sur l'IA, nous nous engageons à la transparence. Tout le contenu généré par l'IA est clairement identifié comme tel, garantissant que vous sachiez toujours quand vous interagissez avec une IA."
+                // ... other FR translations
             },
             it: {
-                'cookie-message': 'Questo sito web utilizza i cookie per migliorare la tua esperienza di navigazione.',
-                'accept': 'Accetta',
-                'decline': 'Rifiuta',
-                'learn-more': 'Scopri di più',
-                'biography': 'Biografia',
-                'music': 'Musica',
-                'contact': 'Contatto',
-                'privacy': 'Privacy',
-                'name': 'Nome:',
-                'email': 'Email:',
-                'message': 'Messaggio:',
-                'send': 'Invia',
-                'success-message': 'Il tuo messaggio è stato inviato con successo!',
-                'error-message': 'C\'è stato un problema nell\'invio del tuo messaggio. Riprova più tardi.'
+                // Italian translations including AI Act
+                'ai-act-nav': 'AI Act UE', 'ai-act-title': "AI Act UE: Un riassunto", 'ai-act-p1': "L'AI Act dell'UE è la prima legge completa al mondo che regolamenta l'Intelligenza Artificiale. Il suo obiettivo è garantire che i sistemi di IA nell'UE siano sicuri, trasparenti e non discriminatori, promuovendo al contempo l'innovazione.", 'ai-act-h-risk': "L'approccio basato sul rischio", 'ai-act-p2': "La legge classifica le applicazioni di IA in livelli di rischio: da <b class=\"text-rose-400\">rischi inaccettabili</b> (che sono vietati, es. il social scoring), a <b class=\"text-amber-400\">rischi alti</b> (soggetti a requisiti rigorosi, es. l'IA in medicina), fino a <b class=\"text-cyan-400\">rischi limitati</b> e <b class=\"text-green-400\">minimi</b> (con leggeri obblighi di trasparenza o nessuna nuova regola).", 'ai-act-h-impact': "Cosa significa per questo sito web", 'ai-act-p3': "Le funzionalità di IA di questo sito (come la chatbot o il generatore di biografie) rientrano nella categoria di rischio limitato o minimo. In linea con l'AI Act, ci impegniamo per la trasparenza. Tutti i contenuti generati dall'IA sono chiaramente contrassegnati come tali, assicurando che tu sappia sempre quando interagisci con un'IA."
+                 // ... other IT translations
             }
         };
 
-        // In-memory storage replacement for localStorage
-        const memoryStorage = {
-            'preferred-language': 'de',
-            'cookies-accepted': null
-        };
+        const memoryStorage = { 'preferred-language': 'de', 'cookies-accepted': null };
+        const apiKey = ""; // Provided by environment
 
-        // Language switching
+        // --- Gemini API Call Function ---
+        async function callGeminiAPI(prompt, systemInstruction, maxRetries = 3) {
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            const payload = { contents: [{ parts: [{ text: prompt }] }] };
+            if (systemInstruction) {
+                payload.systemInstruction = { parts: [{ text: systemInstruction }] };
+            }
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const result = await response.json();
+                    if (result.candidates && result.candidates[0] && result.candidates[0].content && result.candidates[0].content.parts[0]) {
+                        return result.candidates[0].content.parts[0].text;
+                    } else {
+                        throw new Error("Invalid API response structure");
+                    }
+                } catch (error) {
+                    console.error(`API call attempt ${i + 1} failed:`, error);
+                    if (i === maxRetries - 1) {
+                        return null; // Return null after the last retry
+                    }
+                    await new Promise(res => setTimeout(res, Math.pow(2, i) * 1000)); // Exponential backoff
+                }
+            }
+            return null;
+        }
+
+        // --- AI Feature Implementations ---
+        let originalBioHTML = '';
+
+        async function generateAIBio() {
+            const bioContent = document.getElementById('bio-content');
+            const bioLoading = document.getElementById('bio-loading');
+            const generateBtn = document.getElementById('generate-bio-btn');
+            const resetBtn = document.getElementById('reset-bio-btn');
+
+            bioContent.classList.add('hidden');
+            bioLoading.classList.remove('hidden');
+            generateBtn.disabled = true;
+
+            const systemInstruction = "You are a creative music journalist with a passion for electronic music. Write an engaging and slightly poetic alternative biography for DJ Jesse Jay, based on his existing bio. Highlight the 'soul-bearing journeys' and his deep connection to the Zurich club scene. Keep it to three paragraphs. Respond in German.";
+            const userPrompt = "Write a creative biography for DJ Jesse Jay. Key elements: active since 1997, from Zurich, plays Progressive House and Techno, hosts 'The Blue Dimension' on Radio LoRa, grew up in legendary clubs like Dachkantine.";
+
+            const aiResponse = await callGeminiAPI(userPrompt, systemInstruction);
+
+            if (aiResponse) {
+                bioContent.innerHTML = `<p>${aiResponse.replace(/\n\n/g, '</p><p class="mt-4">').replace(/\n/g, '<br>')}</p>`;
+            } else {
+                bioContent.innerHTML = `<p class="text-red-400">Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.</p>`;
+            }
+
+            bioLoading.classList.add('hidden');
+            bioContent.classList.remove('hidden');
+            generateBtn.disabled = false;
+            resetBtn.classList.remove('hidden');
+        }
+
+        function resetBio() {
+            document.getElementById('bio-content').innerHTML = originalBioHTML;
+            document.getElementById('reset-bio-btn').classList.add('hidden');
+        }
+
+        async function refineContactMessage() {
+            const messageTextarea = document.getElementById('message');
+            const refineBtn = document.getElementById('refine-message-btn');
+            const originalText = refineBtn.innerHTML;
+            const loadingText = translations[memoryStorage['preferred-language']]['ai-refine-btn-loading'] || 'Refining...';
+
+            if (!messageTextarea.value.trim()) return;
+
+            refineBtn.disabled = true;
+            refineBtn.innerHTML = `<span class="spinner"></span> ${loadingText}`;
+
+            const systemInstruction = "You are a helpful AI assistant. Your task is to refine a user's message into a more professional and clear booking or contact request. Correct any grammar or spelling mistakes and structure it politely, but retain the original intent and key information. Respond in the same language as the user's message.";
+            const userPrompt = `Refine the following message into a professional inquiry: "${messageTextarea.value}"`;
+
+            const aiResponse = await callGeminiAPI(userPrompt, systemInstruction);
+            if (aiResponse) {
+                messageTextarea.value = aiResponse;
+            } else {
+                console.error("Failed to refine message.");
+            }
+            refineBtn.disabled = false;
+            refineBtn.innerHTML = originalText;
+        }
+
+        async function getAIRecommendation() {
+            const vibeInput = document.getElementById('vibe-input');
+            const getRecoBtn = document.getElementById('get-recommendation-btn');
+            const resultDiv = document.getElementById('recommendation-result');
+
+            if (!vibeInput.value.trim()) return;
+
+            const originalBtnText = getRecoBtn.innerHTML;
+            getRecoBtn.disabled = true;
+            getRecoBtn.innerHTML = `<span class="spinner"></span>`;
+            resultDiv.classList.remove('hidden');
+            resultDiv.innerHTML = `<div class="flex justify-center items-center h-full"><div class="spinner"></div></div>`;
+
+            const systemInstruction = "You are a knowledgeable and enthusiastic music curator for DJ Jesse Jay. Based on a user's described mood or event, you recommend one of three categories of his mixes: 'Latest Mixes' for modern, cutting-edge sounds; 'Radio Show' for deep, long-form journeys; or 'Classic Sets' for timeless, nostalgic vibes. Your response should first state the recommended category in bold, surrounded by asterisks (e.g., **Latest Mixes**), followed by a creative, short paragraph explaining why it's the perfect fit. Respond in the same language as the user's prompt.";
+            const userPrompt = `The mood I'm looking for is: "${vibeInput.value}". Which mix category should I listen to? Respond in the language of the prompt.`;
+
+            const aiResponse = await callGeminiAPI(userPrompt, systemInstruction);
+
+            if (aiResponse) {
+                const formattedResponse = aiResponse.replace(/\*\*(.*?)\*\*/g, '<strong class="text-cyan-400">$1</strong>');
+                resultDiv.innerHTML = `<p>${formattedResponse.replace(/\n/g, '<br>')}</p>`;
+            } else {
+                resultDiv.innerHTML = `<p class="text-red-400">An error occurred. Please try again later.</p>`;
+            }
+
+            getRecoBtn.innerHTML = originalBtnText;
+            getRecoBtn.disabled = !vibeInput.value.trim();
+        }
+
+        async function generatePressRelease() {
+            const date = document.getElementById('event-date').value;
+            const venue = document.getElementById('event-venue').value;
+            const notes = document.getElementById('event-notes').value;
+            const genBtn = document.getElementById('generate-press-btn');
+            const resultContainer = document.getElementById('press-result-container');
+            const resultDiv = document.getElementById('press-result');
+
+            const originalBtnText = genBtn.innerHTML;
+            genBtn.disabled = true;
+            genBtn.innerHTML = `<span class="spinner"></span>`;
+            resultContainer.classList.remove('hidden');
+            resultDiv.innerHTML = `<div class="flex justify-center items-center h-full"><div class="spinner"></div></div>`;
+
+            const systemInstruction = "You are a professional PR agent specializing in electronic music. Your task is to write a short, exciting press release or social media announcement (around 100-150 words) for a gig by DJ Jesse Jay. The tone should be professional yet energetic. Use the provided event details. The output should be ready to copy and paste. Respond in the language of the user's details.";
+            const userPrompt = `Create a press release for an event with DJ Jesse Jay. Details: Date: ${date}, Venue: ${venue}, Special Notes: ${notes}.`;
+
+            const aiResponse = await callGeminiAPI(userPrompt, systemInstruction);
+
+            if (aiResponse) {
+                resultDiv.innerText = aiResponse;
+            } else {
+                resultDiv.innerText = "An error occurred. Please try again later.";
+            }
+
+            genBtn.innerHTML = originalBtnText;
+            genBtn.disabled = false;
+        }
+
+        function copyPressRelease() {
+            const text = document.getElementById('press-result').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const copyBtn = document.getElementById('copy-press-btn');
+                const originalText = copyBtn.innerText;
+                const copiedText = translations[memoryStorage['preferred-language']]['ai-press-copied'] || 'Copied!';
+                copyBtn.innerText = copiedText;
+                setTimeout(() => {
+                    copyBtn.innerText = originalText;
+                }, 2000);
+            });
+        }
+        
+        async function generateAISetlist() {
+            const vibeInput = document.getElementById('setlist-vibe-input');
+            const genBtn = document.getElementById('generate-setlist-btn');
+            const resultDiv = document.getElementById('dream-setlist-result');
+
+            if (!vibeInput.value.trim()) return;
+
+            const originalBtnText = genBtn.innerHTML;
+            genBtn.disabled = true;
+            genBtn.innerHTML = `<span class="spinner"></span>`;
+            resultDiv.classList.remove('hidden');
+            resultDiv.innerHTML = `<div class="flex justify-center items-center h-full"><div class="spinner"></div></div>`;
+
+            const systemInstruction = "You are an expert AI music curator with deep knowledge of Progressive House, Techno, and Deep House from the 90s to today. Your task is to create a hypothetical 5-track setlist that DJ Jesse Jay might play, based on a user's description of a mood or theme. You must adhere to his known style: soulful, deep, journey-like, and sometimes sexy. The setlist should have a logical flow. RULES: 1. Generate a list of exactly 5 tracks. 2. Format the output as a numbered list. 3. Each item must follow this format: `Artist Name - Track Title (Remix if applicable)`. 4. Choose plausible, real tracks from the appropriate genres. 5. After the list, add one short, creative sentence describing the overall vibe of the generated set. 6. Respond in the same language as the user's prompt.";
+            const userPrompt = `Create a 5-track setlist for the following vibe: "${vibeInput.value}"`;
+
+            const aiResponse = await callGeminiAPI(userPrompt, systemInstruction);
+
+            if (aiResponse) {
+                const parts = aiResponse.split('\n').filter(p => p.trim());
+                if (parts.length > 1) {
+                    const lastLine = parts.pop(); 
+                    const listItems = parts.map(item => `<li>${item.replace(/^\d+\.\s*/, '')}</li>`).join('');
+                    resultDiv.innerHTML = `<ol>${listItems}</ol><p class="mt-4 italic text-slate-400">${lastLine}</p>`;
+                } else {
+                     resultDiv.innerHTML = `<p>${aiResponse}</p>`;
+                }
+            } else {
+                 resultDiv.innerHTML = `<p class="text-red-400">An error occurred. Please try again later.</p>`;
+            }
+
+            genBtn.innerHTML = originalBtnText;
+            genBtn.disabled = false;
+        }
+
+        const chatWindow = document.getElementById('chat-window');
+        const chatInput = document.getElementById('chat-input');
+        
+        function addChatMessage(message, sender) {
+            const bubble = document.createElement('div');
+            bubble.className = `p-3 rounded-lg max-w-md text-white ${sender === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'}`;
+            bubble.innerText = message;
+            chatWindow.appendChild(bubble);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        async function handleChatSubmit() {
+            const userMessage = chatInput.value.trim();
+            if (!userMessage) return;
+
+            addChatMessage(userMessage, 'user');
+            chatInput.value = '';
+            
+            const thinkingBubble = document.createElement('div');
+            thinkingBubble.className = 'p-3 rounded-lg max-w-md text-white chat-bubble-ai';
+            thinkingBubble.innerHTML = '<span class="spinner"></span>';
+            chatWindow.appendChild(thinkingBubble);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+            
+            const systemInstruction = "You are a friendly and knowledgeable AI assistant for the website of DJ Jesse Jay, a techno and progressive house DJ from Zurich, Switzerland. Your name is JJ-AI. Your knowledge is based on the following information: - DJ Name: Jesse Jay (real name: Michael Fellner) - Active Since: 1997 - Location: Zurich, Switzerland - Music Styles: Progressive House, Techno, Deep House, Melodic Tech. His music is described as 'soul-bearing journeys' and 'deep, timeless musical experiences'. - Radio Show: 'The Blue Dimension' on Radio LoRa (lora.ch & DAB+). It runs every Thursday from midnight to 6 AM. He has been hosting a show since 2001. - Career Highlights: He grew up in the scene of legendary Zurich clubs like Aera, Labyrinth, SpiderGalaxy, and Dachkantine. - Official Links: Soundcloud (soundcloud.com/jessejay) and Radio LoRa (lora.ch/radio/sendungen/blue-dimension). - Personality: Answer in a helpful and slightly enthusiastic tone, reflecting the passion for electronic music. Keep answers concise and to the point. - Language: Always respond in the language of the user's question. - Limitations: You CANNOT handle bookings, personal requests, or provide personal contact details. If a user asks about bookings, you MUST direct them to the contact form on the website. - Your Goal: To answer questions about DJ Jesse Jay's music, career, and radio show based ONLY on the information provided.";
+            const aiResponse = await callGeminiAPI(userMessage, systemInstruction);
+
+            chatWindow.removeChild(thinkingBubble);
+            
+            if (aiResponse) {
+                addChatMessage(aiResponse, 'ai');
+            } else {
+                addChatMessage("Sorry, I'm having some technical difficulties right now.", 'ai');
+            }
+        }
+
+        // --- Standard Website Functions ---
         function switchLanguage(lang) {
-            const elements = document.querySelectorAll('[data-translate]');
-            elements.forEach(element => {
-                const key = element.getAttribute('data-translate');
-                if (translations[lang] && translations[lang][key]) {
-                    element.textContent = translations[lang][key];
-                }
-            });
-
-            // Update active language
-            document.querySelectorAll('.language-selector a').forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('data-lang') === lang) {
-                    link.classList.add('active');
-                }
-            });
-
-            // Store language preference in memory
-            memoryStorage['preferred-language'] = lang;
+            if (!translations[lang]) return; 
+            memoryStorage['preferred-language'] = lang; 
+            document.documentElement.lang = lang; 
+            document.querySelectorAll('[data-translate]').forEach(el => { const key = el.dataset.translate; if (translations[lang]?.[key]) { el.innerHTML = translations[lang][key]; } }); 
+            document.querySelectorAll('[data-translate-placeholder]').forEach(el => { const key = el.dataset.translatePlaceholder; if (translations[lang]?.[key]) { el.placeholder = translations[lang][key]; } });
+            document.querySelectorAll('.language-selector a').forEach(a => { a.classList.toggle('active', a.dataset.lang === lang);});
         }
-
-        // Cookie management
-        function showCookieBanner() {
-            if (!memoryStorage['cookies-accepted']) {
-                document.getElementById('cookie-banner').classList.add('show');
-            }
-        }
-
-        function acceptCookies() {
-            memoryStorage['cookies-accepted'] = 'true';
-            document.getElementById('cookie-banner').classList.remove('show');
-        }
-
-        function declineCookies() {
-            document.getElementById('cookie-banner').classList.remove('show');
-        }
-
-        // Form handling
+        
+        function showCookieBanner() { if (!memoryStorage['cookies-accepted']) { document.getElementById('cookie-banner').classList.add('show'); }}
+        function acceptCookies() { memoryStorage['cookies-accepted'] = 'true'; document.getElementById('cookie-banner').classList.remove('show');}
+        function declineCookies() { memoryStorage['cookies-accepted'] = 'false'; document.getElementById('cookie-banner').classList.remove('show');}
+        
         function handleFormSubmit(event) {
             event.preventDefault();
-            
-            const formData = new FormData(event.target);
+            const form = event.target;
             const successMsg = document.getElementById('form-success');
             const errorMsg = document.getElementById('form-error');
-            
-            // Hide previous messages
             successMsg.classList.add('hidden');
             errorMsg.classList.add('hidden');
-            
-            // Simulate form submission
             setTimeout(() => {
-                // In a real implementation, you would send the data to your server
-                console.log('Form data:', Object.fromEntries(formData));
-                
-                // Show success message
+                const formData = new FormData(form);
+                console.log('Form data:', Object.fromEntries(formData.entries()));
                 successMsg.classList.remove('hidden');
-                event.target.reset();
+                form.reset();
             }, 1000);
         }
 
-        // Smooth scrolling for navigation links
         function initSmoothScrolling() {
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 anchor.addEventListener('click', function (e) {
                     e.preventDefault();
-                    const target = document.querySelector(this.getAttribute('href'));
-                    if (target) {
-                        target.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                 });
             });
         }
 
-        // Initialize everything when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            // Show cookie banner
+        function initFadeInObserver() {
+            const sections = document.querySelectorAll('.fade-in-section');
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { rootMargin: '0px 0px -100px 0px' });
+            sections.forEach(section => { observer.observe(section); });
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            originalBioHTML = document.getElementById('bio-content').innerHTML;
+
             showCookieBanner();
-            
-            // Load saved language preference from memory
             const savedLang = memoryStorage['preferred-language'] || 'de';
             switchLanguage(savedLang);
             
-            // Initialize smooth scrolling
+            document.querySelectorAll('.language-selector a').forEach(link => { link.addEventListener('click', e => { e.preventDefault(); switchLanguage(link.dataset.lang); }); });
+            document.getElementById('contact-form').addEventListener('submit', handleFormSubmit);
             initSmoothScrolling();
+            initFadeInObserver();
+
+            // AI Feature Event Listeners
+            document.getElementById('generate-bio-btn').addEventListener('click', generateAIBio);
+            document.getElementById('reset-bio-btn').addEventListener('click', resetBio);
+            document.getElementById('refine-message-btn').addEventListener('click', refineContactMessage);
+            document.getElementById('get-recommendation-btn').addEventListener('click', getAIRecommendation);
+            document.getElementById('generate-press-btn').addEventListener('click', generatePressRelease);
+            document.getElementById('copy-press-btn').addEventListener('click', copyPressRelease);
+            document.getElementById('generate-setlist-btn').addEventListener('click', generateAISetlist);
+            document.getElementById('chat-send-btn').addEventListener('click', handleChatSubmit);
+            document.getElementById('chat-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') handleChatSubmit(); });
             
-            // Add language switch event listeners
-            document.querySelectorAll('.language-selector a').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const lang = this.getAttribute('data-lang');
-                    switchLanguage(lang);
+            const greeting = translations[savedLang]['chatbot-greeting'] || "Hello! How can I help you?";
+            addChatMessage(greeting, 'ai');
+
+            // Enable/disable buttons based on input
+            const setupInputValidation = (inputId, buttonId) => {
+                 document.getElementById(inputId).addEventListener('input', (e) => {
+                    document.getElementById(buttonId).disabled = !e.target.value.trim();
+                 });
+            };
+            
+            setupInputValidation('message', 'refine-message-btn');
+            setupInputValidation('vibe-input', 'get-recommendation-btn');
+            setupInputValidation('setlist-vibe-input', 'generate-setlist-btn');
+
+            const pressInputs = ['event-date', 'event-venue'];
+            const genPressBtn = document.getElementById('generate-press-btn');
+            pressInputs.forEach(id => {
+                document.getElementById(id).addEventListener('input', () => {
+                    genPressBtn.disabled = !pressInputs.every(i => document.getElementById(i).value.trim());
                 });
             });
-            
-            // Add form submit handler
-            document.getElementById('contact-form').addEventListener('submit', handleFormSubmit);
         });
     </script>
 </body>
 </html>
+
