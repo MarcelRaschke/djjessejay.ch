@@ -1,104 +1,332 @@
-
 /* DJ Jesse Jay Website Styles
  * Since 1997 the progressive music attack from Zürich
  */
 
-/* Reset and base styles */
-* { 
-    margin: 0; 
-    padding: 0; 
+/* ─── Reset & Base ──────────────────────────────────────────── */
+*, *::before, *::after {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-body, html {
-    width: 100%; 
-    height: 100%;
-    font-family: Arial, sans-serif;
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 1rem;
     line-height: 1.6;
-    color: #333;
+    color: #e2e8f0;
+    background: linear-gradient(135deg, #0f172a 0%, #1e3c72 100%);
+    min-height: 100vh;
 }
 
-/* Typography */
+/* ─── Typography ────────────────────────────────────────────── */
 h1 {
-    font-size: 2.5em;
-    color: #2c3e50;
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    color: #ffffff;
     text-align: center;
-    margin: 20px 0;
+    margin: 1rem 0;
+    font-weight: 700;
 }
 
 h2 {
-    font-size: 2em;
-    color: #34495e;
-    margin: 15px 0;
+    font-size: clamp(1.4rem, 4vw, 2rem);
+    color: #00b7ff;
+    margin: 1rem 0 0.75rem;
+}
+
+h3 {
+    font-size: clamp(1.1rem, 3vw, 1.4rem);
+    color: #e2e8f0;
+    margin: 0.75rem 0;
 }
 
 p {
-    margin: 10px 0;
+    margin: 0.6rem 0;
     line-height: 1.8;
 }
 
-/* Layout */
+/* ─── Layout ────────────────────────────────────────────────── */
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 1.5rem;
 }
 
-/* Media elements */
-.video-container {
-    position: relative;
-    width: fit-content;
-    height: fit-content;
-    margin: 20px 0;
+section {
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
-iframe {
-    border: none;
-    border-radius: 8px;
+/* ─── Links ─────────────────────────────────────────────────── */
+a {
+    color: #00b7ff;
+    text-decoration: none;
+    transition: color 0.2s ease, outline-color 0.2s ease;
 }
 
-/* Images */
+a:hover {
+    color: #ff1493;
+    text-decoration: underline;
+}
+
+a:focus-visible {
+    outline: 2px solid #00b7ff;
+    outline-offset: 3px;
+    border-radius: 2px;
+}
+
+/* ─── Images ────────────────────────────────────────────────── */
 img {
     max-width: 100%;
     height: auto;
-    border-radius: 4px;
+    border-radius: 8px;
+    display: block;
 }
 
 figure {
-    margin: 20px 0;
+    margin: 1.25rem 0;
     text-align: center;
 }
 
 figcaption {
     font-style: italic;
-    color: #666;
-    margin-top: 10px;
+    color: #94a3b8;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
 }
 
-/* Links */
-a {
-    color: #3498db;
-    text-decoration: none;
-    transition: color 0.3s ease;
+/* ─── Media / iframes ───────────────────────────────────────── */
+.video-container {
+    position: relative;
+    width: 100%;
+    margin: 1.25rem 0;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-a:hover {
-    color: #2980b9;
-    text-decoration: underline;
+iframe {
+    border: none;
+    border-radius: 8px;
+    max-width: 100%;
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    height: auto;
+    display: block;
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
+/* ─── Forms ─────────────────────────────────────────────────── */
+input,
+textarea,
+select {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    background-color: #1e293b;
+    color: #e2e8f0;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.2s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: 2px solid #00b7ff;
+    outline-offset: 2px;
+    border-color: #00b7ff;
+}
+
+button,
+input[type="submit"] {
+    cursor: pointer;
+    padding: 0.65rem 1.5rem;
+    background-color: #00b7ff;
+    color: #0f172a;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+button:hover,
+input[type="submit"]:hover {
+    background-color: #ff1493;
+    color: #ffffff;
+}
+
+button:focus-visible,
+input[type="submit"]:focus-visible {
+    outline: 2px solid #00b7ff;
+    outline-offset: 2px;
+}
+
+button:active,
+input[type="submit"]:active {
+    transform: scale(0.98);
+}
+
+.form-group {
+    margin-bottom: 1rem;
+    width: 100%;
+    max-width: 600px;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 0.95rem;
+    color: #94a3b8;
+}
+
+.error {
+    color: #ff3333;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: none;
+}
+
+/* ─── Header / Nav ──────────────────────────────────────────── */
+header {
+    background-color: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(8px);
+    padding: 1rem 1.5rem;
+    text-align: center;
+    border-bottom: 2px solid #1e3c72;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1.5rem;
+    margin-top: 0.75rem;
+}
+
+nav a {
+    font-weight: 500;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+}
+
+/* ─── Footer ────────────────────────────────────────────────── */
+footer {
+    background-color: rgba(15, 23, 42, 0.95);
+    color: #94a3b8;
+    text-align: center;
+    padding: 1.5rem 1rem;
+    border-top: 2px solid #1e3c72;
+    font-size: 0.875rem;
+    line-height: 1.7;
+}
+
+footer a {
+    color: #64748b;
+}
+
+footer a:hover {
+    color: #00b7ff;
+}
+
+/* ─── Cookie Banner ─────────────────────────────────────────── */
+.cookie-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(15, 23, 42, 0.97);
+    border-top: 1px solid #334155;
+    padding: 1rem 1.5rem;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    z-index: 999;
+    font-size: 0.9rem;
+}
+
+.cookie-banner.show {
+    display: flex;
+}
+
+.cookie-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* ─── Responsive: Tablet (601px – 1024px) ───────────────────── */
+@media (min-width: 601px) and (max-width: 1024px) {
     .container {
-        padding: 10px;
+        padding: 1.25rem;
     }
-    
-    h1 {
-        font-size: 2em;
+
+    section {
+        padding: 1.5rem 1.25rem;
     }
-    
+
+    nav ul {
+        gap: 0.5rem 2rem;
+    }
+
+    .form-group {
+        max-width: 100%;
+    }
+}
+
+/* ─── Responsive: Mobile (≤600px) ──────────────────────────── */
+@media (max-width: 600px) {
+    body {
+        font-size: 0.95rem;
+        padding-bottom: 2rem;
+    }
+
+    .container {
+        padding: 0.75rem;
+    }
+
+    section {
+        padding: 1rem 0.75rem;
+    }
+
+    nav ul {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-group {
+        max-width: 100%;
+    }
+
     iframe {
-        width: 100% !important;
-        height: auto;
+        border-radius: 4px;
+    }
+
+    header {
+        padding: 0.75rem 1rem;
+    }
+}
+
+/* ─── Reduced Motion ────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    html {
+        scroll-behavior: auto;
     }
 }

@@ -32,3 +32,12 @@ Thumbs.db
 # Archive/backup content
 *wayback*
 *archive.org*
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+
+# Environment variables
+.env
+backend/.env
