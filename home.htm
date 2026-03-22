@@ -1,78 +1,490 @@
+<!DOCTYPE html>
+<html lang="de-CH">
 
-<!DOCTYPE HTML>
-<html>
 <head>
-<meta charset="utf-8">
-<meta name="icon" content="favicon.ico">
-<title> DJ Jesse Jay :: Since 1997 the progressive music attack </title>
-<meta name="description" content="Alles über den Zürcher DJ JesseJay, seine Laufbahn und seine
-Spieldaten">
-<meta name="keywords" content="DJ, Jesse Jay, JesseJay, Michael, Fellner, Michael Fellner, Techno,
-House, Progressive, Prog-House, Progressive-House, Tech-House, progressive, sexy Musik">
-<meta name="generator" content="WordPress">
-<style>
-* { margin:0; padding:0; }
-body,html {width:100%; height:100%;}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DJ Jesse Jay</title>
+  
+  <link rel="icon" type="image/png" href="favicon.png">
+  
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "description": "Jesse Jay - Progressive Music Attack from Zürich",
+      "headline": "DJ Jesse Jay - Progressive Music Attack from Zürich",
+      "name": "DJ Jesse Jay",
+      "url": "https://www.djjessejay.ch/"
+    }
+  </script>
+  <style>
+    /* 1. CSS Variablen */
+    :root {
+      --text-color: #ffff00;
+      --dark-bg: #000000;
+      --overlay-color: rgba(0, 0, 0, 0.85); /* Dunkler, halbtransparenter Hintergrund für Lesbarkeit */
+    }
+
+    /* 2. Allgemeine Styles & Smooth Scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      /* Main Background Image: DJ im Studio */
+      background-image: url('9a1d9f20-826a-40cc-9163-04c396bd50a5-1_all_3678.jpg');
+      background-size: cover;
+      background-position: center center;
+      background-attachment: fixed; /* Erzeugt den coolen Parallax-Effekt */
+      background-color: #000033; /* Fallback-Farbe */
+      color: var(--text-color);
+      padding-bottom: 150px; 
+      line-height: 1.6;
+    }
+
+    /* 3. Header & Navigation (Sticky) */
+    header {
+      /* Header Background: Stylisiertes DJ-Gesicht mit Wave */
+      background-image: linear-gradient(to right, rgba(0, 0, 0, 0.9), rgba(0, 0, 50, 0.7)), url('9a1d9f20-826a-40cc-9163-04c396bd50a5-1_all_3779.gif');
+      background-size: cover;
+      background-position: center;
+      padding: 15px 20px;
+      text-align: center;
+      position: sticky; 
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+      border-bottom: 2px solid var(--text-color);
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px; 
+      margin-bottom: 10px;
+    }
+
+    .header-logo {
+      height: 50px; 
+      width: auto;
+      border-radius: 4px; 
+    }
+
+    .lang-switcher {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 0.9em;
+    }
+
+    .lang-switcher a {
+      cursor: pointer;
+      margin: 0 5px;
+      text-decoration: none;
+      font-weight: bold;
+      color: var(--text-color);
+      text-shadow: 1px 1px 2px #000; 
+    }
+
+    .lang-switcher a:hover {
+      text-decoration: underline;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2.2em;
+      text-shadow: 2px 2px 5px #000;
+    }
+
+    h1 a {
+      color: var(--text-color);
+      text-decoration: none;
+    }
+
+    nav ul {
+      padding: 0;
+      margin: 0;
+      list-style: none;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap; 
+    }
+
+    nav a {
+      color: var(--text-color);
+      text-decoration: none;
+      font-weight: bold;
+      transition: opacity 0.3s ease;
+      text-shadow: 1px 1px 3px #000;
+    }
+
+    nav a:hover {
+      opacity: 0.8;
+      text-decoration: underline;
+    }
+
+    /* 4. Hauptbereich & Einblend-Animationen */
+    main {
+      max-width: 800px;
+      margin: 40px auto;
+    }
+
+    section {
+      background-color: var(--overlay-color); 
+      padding: 40px 30px; 
+      margin-bottom: 40px;
+      border: 1px solid var(--text-color);
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.7);
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+      backdrop-filter: blur(5px); 
+    }
+
+    section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Individuelle Sektions-Hintergründe */
+    #music {
+      background-image: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9)), url('9a1d9f20-826a-40cc-9163-04c396bd50a5-1_all_172.bmp');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+
+    #contact {
+      background-image: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.9)), url('9a1d9f20-826a-40cc-9163-04c396bd50a5-1_all_3561.gif');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+
+    h2 {
+      border-bottom: 2px solid var(--text-color);
+      padding-bottom: 5px;
+      margin-bottom: 20px;
+      text-shadow: 1px 1px 3px #000;
+    }
+
+    h3 {
+      margin-top: 30px;
+      margin-bottom: 10px;
+      color: var(--text-color);
+    }
+
+    /* 5. iFrames & Media */
+    .iframe-container {
+      margin: 20px auto;
+      text-align: center;
+    }
+
+    .iframe-container iframe {
+      width: 100%;
+      max-width: 640px;
+      border: 1px solid var(--text-color);
+      border-radius: 8px; 
+    }
+    
+    .media-buttons {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-top: 25px;
+    }
+
+    .download-btn {
+      background-color: transparent;
+      color: var(--text-color);
+      border: 2px solid var(--text-color);
+      padding: 10px 20px;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 4px;
+      transition: background-color 0.3s, color 0.3s;
+      display: inline-block;
+    }
+
+    .download-btn:hover {
+      background-color: var(--text-color);
+      color: var(--dark-bg);
+      text-decoration: none;
+    }
+
+    /* 6. Formular Styles */
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    textarea {
+      width: 100%;
+      max-width: 400px;
+      padding: 10px;
+      border: 1px solid var(--text-color);
+      background-color: rgba(0,0,0,0.6);
+      color: var(--text-color);
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-family: inherit;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    button[type="submit"] {
+      background-color: var(--text-color);
+      color: var(--dark-bg);
+      border: none;
+      padding: 10px 20px;
+      font-size: 1.1em;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background-color 0.3s ease, transform 0.1s ease;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #fff;
+    }
+
+    button[type="submit"]:active {
+      transform: scale(0.98);
+    }
+
+    /* 7. Footer & Socials */
+    footer {
+      background-color: rgba(0, 0, 0, 0.95);
+      color: var(--text-color);
+      text-align: center;
+      padding: 15px 10px;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      font-size: 0.85em;
+      box-sizing: border-box;
+      z-index: 900;
+      border-top: 1px solid var(--text-color);
+    }
+
+    .social-links {
+      margin-bottom: 10px;
+      font-size: 1.2em;
+    }
+
+    .social-links a {
+      margin: 0 10px;
+    }
+
+    footer p {
+      margin: 5px 0;
+    }
+
+    /* 8. Back to Top Button */
+    #backToTop {
+      position: fixed;
+      bottom: 160px; 
+      right: 20px;
+      background-color: var(--dark-bg);
+      color: var(--text-color);
+      border: 2px solid var(--text-color);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 1.2em;
+      cursor: pointer;
+      display: none; 
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    #backToTop:hover {
+      background-color: var(--text-color);
+      color: var(--dark-bg);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      body { padding-bottom: 0; }
+      
+      .lang-switcher {
+        position: static;
+        margin-bottom: 10px;
+        display: block;
+      }
+
+      .header-brand {
+        flex-direction: column; 
+        gap: 5px;
+      }
+
+      h1 { font-size: 1.8em; }
+      header { position: static; } 
+      
+      input[type="text"], input[type="email"], textarea { max-width: 100%; }
+
+      footer {
+        position: static; 
+        padding: 20px 10px;
+      }
+
+      #backToTop {
+        bottom: 20px;
+      }
+    }
+  </style>
 </head>
+
 <body>
-<h1>DJ Jesse Jay aus Zürich</h1>
-<!-- wp:image {"id":368,"sizeSlug":"large"} -->
-<figure class="wp-block-image size-large"><img
-src="https://m30norg.files.wordpress.com/2022/12/dfkt-e280a2-diamonds-animation_original.gif?w=
-640" alt="" class="wp-image-368"/><figcaption class="wp-element-caption">Mixed by DJ Jesse
-Jay</figcaption></figure>
-<!-- /wp:image -->
-<!-- wp:paragraph -->
-<p>::DJ Jesse Jay:: Since 1997 the progressive music attack:: ::Alles über den Zürcher DJ
-JesseJay, seine Laufbahn und seine Spieldaten::</p>
-<!-- /wp:paragraph -->
-<!-- wp:paragraph {"textColor": "black"} -->
-<p class="has-black-color has-text-color">DJ, Jesse Jay, JesseJay, Michael, Fellner, Michael Fellner,
-Techno, House, Progressive, Prog-House, Progressive-House, Tech-House, progressive, sexy Musik</p>
-<!-- /wp:paragraph -->
-<div style="position:relative;width:fit-content;height:fit-content;">
-            <a style="position:absolute;top:20px;right:1rem;opacity:0.8;" href="https://clipchamp.com/watch/MFMRnrkLQAH?utm_source=embed&utm_medium=embed&utm_campaign=watch">
-                <img style="height:22px;" src="https://clipchamp.com/e.svg" alt="Made by DJ Jesse Jay from Zürich" />
-            </a>
-            <iframe allow="autoplay;" allowfullscreen style="border:none" src="https://clipchamp.com/watch/MFMRnrkLQAH/embed" width="640" height="360"></iframe>
-</div>
+  <header id="top">
+    <div class="lang-switcher">
+      <a onclick="setLang('en')">EN</a> | 
+      <a onclick="setLang('de')">DE</a> | 
+      <a onclick="setLang('fr')">FR</a> | 
+      <a onclick="setLang('it')">IT</a>
+    </div>
+    
+    <div class="header-brand">
+      <a href="https://www.djjessejay.ch">
+        <img src="favicon.png" alt="DJ Jesse Jay Logo" class="header-logo">
+      </a>
+      <h1><a href="https://www.djjessejay.ch">DJ Jesse Jay</a></h1>
+    </div>
 
-<!-- Additional video embeds -->
-<div style="position:relative;width:fit-content;height:fit-content;margin-top:20px;">
-    <iframe allow="autoplay;" allowfullscreen style="border:none" src="https://clipchamp.com/watch/qg4hxk2TlJ5/embed" width="640" height="360"></iframe>
-</div>
+    <nav>
+      <ul>
+        <li><a href="#about" data-i18n="nav_about">Über</a></li>
+        <li><a href="#music" data-i18n="nav_music">Musik</a></li>
+        <li><a href="#media" data-i18n="nav_media">Presse</a></li>
+        <li><a href="#contact" data-i18n="nav_contact">Kontakt</a></li>
+        <li><a href="#legal" data-i18n="nav_legal">Datenschutz & AI</a></li>
+      </ul>
+    </nav>
+  </header>
 
-<div style="position:relative;width:fit-content;height:fit-content;margin-top:20px;">
-    <iframe allow="autoplay;" allowfullscreen style="border:none" src="https://clipchamp.com/watch/XgHiFyQZOlW/embed" width="640" height="360"></iframe>
-</div>
+  <main>
+    <section id="about">
+      <h2 data-i18n="about_title">Über DJ Jesse Jay</h2>
+      <p data-i18n="about_text">Kennst du das Gefühl, wenn du dich tief in einem Track verlierst und denkst: „DJ..DJ...dein ganzer Sound kommt mir gleich vor“? Plötzlich in einen Strudel mitgerissen zu werden, ein bemerkenswertes Erwachen der Leidenschaft, ...unsere Party-Leidenschaft, seelengetragene Reisen…, Herzensräume, die Horizonte und Gefühle zur Musik erschaffen/sexy! Fantasien entstehen, wie schon lange nicht mehr. Genau so liebt es Jesse sich zu fühlen, wenn er sich der Musik hingibt, und so gibt er seinen Sound und die Emotionen an die Menge weiter, die er mit seiner radikalen Sensibilität umarmt. Jesse wuchs in seinen ansteckenden Party-Sinnen in den individualitätsdominierenden, verrückten und „wir sind eine Familie“-philosophischen, legendären Clubs wie Aera, Labyrinth, SpiderGalaxy, Take A Dance, Hermetschloo und Dachkantine. Bei Radio Lora spielt er seit 2001 alle zwei Wochen bei den Galaxy Space Nights 6 Stunden lang, tief-zärtliche Urlaube für den Geist mit seiner zeitlosen, überraschenden Auswahl an Perlen-Tracks, herzlichen und gleichzeitig porno-Geschichten, nahtlos verwoben mit seinen unverwechselbaren DJ-Fähigkeiten. Seit 1997 misst er dem Spielen zu Beginn, als Main Act oder als Outro die gleiche Bedeutung bei. Ein treuer Vinyl-Liebhaber, der gleichermaßen mit dem CDJ begeistert. Kennst du auch das Gefühl eines bedingungslosen, leidenschaftlichen Musik-Trips?</p>
+    </section>
 
-<div style="position:relative;width:fit-content;height:fit-content;margin-top:20px;">
-    <iframe allow="autoplay;" allowfullscreen style="border:none" src="https://clipchamp.com/watch/HGL9cnZU2h3/embed" width="640" height="360"></iframe>
-</div>
+    <section id="music">
+      <h2 data-i18n="music_title">Musik</h2>
+      <p data-i18n="music_mixed">Gemixt von DJ JesseJay</p>
+      
+      <div class="iframe-container">
+        <iframe title="Clipchamp Video" loading="lazy" src="https://clipchamp.com/watch/rLiA04F0ofQ/embed" width="640" height="360" allow="autoplay; fullscreen"></iframe>
+      </div>
+      
+      <div class="iframe-container">
+        <iframe title="Soundcloud Playlist" loading="lazy" height="450" scrolling="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/1494828904&amp;color=%230e0c69&amp;auto_play=true&amp;hide_related=false&amp;show_comments=false&amp;show_user=true&amp;show_reposts=false&amp;show_teaser=true"></iframe>
+      </div>
+      
+      <div class="iframe-container">
+        <iframe title="Radio Lora Blue Dimension" loading="lazy" src="https://www.lora.ch/radio/sendungen/blue-dimension" height="450"></iframe>
+      </div>
+    </section>
 
-<div style="position:relative;width:fit-content;height:fit-content;margin-top:20px;">
-    <iframe allow="autoplay;" allowfullscreen style="border:none" src="https://clipchamp.com/watch/OldfPFJ9cwa/embed" width="640" height="360"></iframe>
-</div>
+    <section id="media">
+      <h2 data-i18n="media_title">Media & Presse-Mappe</h2>
+      <p data-i18n="media_text">Hier finden Journalisten, Veranstalter und Promoter alle wichtigen Unterlagen (Pressefotos, Logos, Biografie und Tech-Rider) als Download für die Berichterstattung oder Event-Planung.</p>
+      <div class="media-buttons">
+        <a href="jessejay-presskit.zip" class="download-btn" data-i18n="media_btn_presskit" download>Presse-Mappe (ZIP)</a>
+        <a href="jessejay-logos.zip" class="download-btn" data-i18n="media_btn_logos" download>Logos (ZIP)</a>
+        <a href="jessejay-techrider.pdf" class="download-btn" data-i18n="media_btn_rider" target="_blank">Tech-Rider (PDF)</a>
+      </div>
+    </section>
 
-<div style="position:relative;width:fit-content;height:fit-content;margin-top:20px;">
-    <iframe allow="autoplay;" allowfullscreen style="border:none" src="https://clipchamp.com/watch/v6LAPXVcJlw/embed" width="640" height="360"></iframe>
-</div>
+    <section id="contact">
+      <h2 data-i18n="contact_title">Kontakt</h2>
+      <form action="mailto:Jesse.michael.fellner@gmail.com" method="post" enctype="text/plain">
+        <div class="form-group">
+          <label for="name" data-i18n="form_name">Name:</label>
+          <input type="text" id="name" name="Name" required>
+        </div>
+        <div class="form-group">
+          <label for="email" data-i18n="form_email">E-Mail:</label>
+          <input type="email" id="email" name="Email" required>
+        </div>
+        <div class="form-group">
+          <label for="message" data-i18n="form_message">Nachricht:</label>
+          <textarea id="message" name="Nachricht" required></textarea>
+        </div>
+        <button type="submit" data-i18n="form_submit">Senden</button>
+      </form>
+    </section>
 
-<div style="position:relative;width:fit-content;height:fit-content;margin-top:20px;">
-    <iframe allow="autoplay;" allowfullscreen style="border:none" src="https://clipchamp.com/watch/rLiA04F0ofQ/embed" width="640" height="360"></iframe>
-</div>
+    <section id="legal">
+      <h2 data-i18n="legal_title">Datenschutz & EU AI Act</h2>
+      
+      <h3 data-i18n="legal_privacy_title">Datenschutzerklärung</h3>
+      <p data-i18n="legal_privacy_text">Wenn Sie das Kontaktformular nutzen, wird Ihre Standard-E-Mail-Anwendung geöffnet und die Daten werden direkt per E-Mail gesendet. Wir speichern keine Ihrer Eingaben auf einem Webserver. Eingebettete Inhalte von Drittanbietern (z.B. SoundCloud, Clipchamp, Radio Lora) können Ihre IP-Adresse erfassen und Cookies setzen. Hierfür gelten die Datenschutzbestimmungen der jeweiligen Drittanbieter.</p>
+      
+      <h3 data-i18n="legal_ai_title">Transparenzhinweis (EU AI Act)</h3>
+      <p data-i18n="legal_ai_text">Der Künstler nutzt zur Erstellung und Bearbeitung von Inhalten auf dieser Website (darunter Code, Bilder, Texte, Audio und Video) verschiedene Technologien der Künstlichen Intelligenz. Zu den verwendeten Systemen gehören unter anderem Gemini, ChatGPT, Mistral, Claude, Perplexity und Huggingface. Dies dient der kreativen Unterstützung, Weiterentwicklung und Optimierung des Contents.</p>
+    </section>
 
-<!-- wp:paragraph -->
-<p>https://soundcloud.com/jessejay</p>
-<!-- /wp:paragraph -->
-<!-- wp:image {"id":370,"sizeSlug":"large"} -->
-<figure class="wp-block-image size-large"><img
-src="https://m30norg.files.wordpress.com/2022/12/img_2847-animation_original.gif?w=640" alt=""
-class="wp-image-370"/><figcaption class="wp-element-caption">Jesse Jay Laser</figcaption></figure>
-<!-- /wp:image -->
+  </main>
 
-<footer>
-</footer>
-</body>
-</html>
+  <footer>
+    <div class="social-links">
+      <a href="https://soundcloud.com/jessejay" target="_blank" rel="noopener">SoundCloud</a> | 
+      <a href="#" target="_blank" rel="noopener">Instagram</a> | 
+      <a href="#" target="_blank" rel="noopener">Facebook</a>
+    </div>
+    <p>&copy; 2003-2026 DJ Jesse Jay &amp; &#64;(r)&dagger; from Zürich.</p>
+    <p data-i18n="footer_creators">Website Ersteller: Marcin Kolonko und Marcel Raschke</p>
+    <p data-i18n="footer_disclaimer">Die Tracks in den Videos sind nicht frei verwendbar. Alle Hintergründe &amp; Sounds sind lizenziert unter CC by 4.0. Copyright (17 U.S.C.SECTION 108(a)(3)). Apache License Version 2.0.</p>
+  </footer>
+
+  <button id="backToTop" onclick="window.scrollTo(0,0)" title="Nach oben">&#8679;</button>
+
+  <script>
+    // --- 1. Mehrsprachigkeit ---
+    const translations = {
+      en: {
+        nav_about: "About", nav_music: "Music", nav_media: "Press", nav_contact: "Contact", nav_legal: "Privacy & AI",
+        about_title: "About DJ Jesse Jay",
+        about_text: "Do you know the feelings like this one u feel when u drive Deeply in the Track „DJ..DJ...all your sound seems the same to me“? Being suddenly taken into a round, remarkably awakening of passion, ...our party passion, soul carrying voyages… , heart spaces creating horizons and feelings to music/sexy! fantasies arise got, seldom since quite a while. That is how Jesse loves to feel when he is giving himself to the music and this is how he passes on his sound and the emotiones to the crowd, embracing with his radical sensitiveness. Jesse grew up in his contagious party senses at the individuality-reigning, going mad and „we are family“ philosophical, legendary Clubs like Aera, Labyrinth, SpiderGalaxy, Take A Dance, Hermetschloo and Dachkantine. At Radio Lora he plays each two weeks since 2001 at Galaxy Space Nights 6 hours long, deep-tender holidays of the mind with his timeless, surprising choice of pearl-tracks, heartful and at the same time porno stories, seamlessly woben with his distinctive DJ's skills. He gives the same dimension of importance to play at the beginning, as a main act or the outro since 1997. A loyal Vinyl Lover, equally pleasuring with the CDJ. Do you know the feeling of an unconditional, passionate music trip, too?",
+        music_title: "Music", music_mixed: "Mixed by DJ JesseJay",
+        media_title: "Media & Press Kit",
+        media_text: "Journalists, event organizers, and promoters can find all essential materials (press photos, logos, biography, and tech rider) for download here.",
+        media_btn_presskit: "Press Kit (ZIP)",
+        media_btn_logos: "Logo Pack (ZIP)",
+        media_btn_rider: "Tech Rider (PDF)",
+        contact_title: "Contact", form_name: "Name:", form_email: "Email:", form_message: "Message:", form_submit: "Send",
+        legal_title: "Privacy & EU AI Act",
+        legal_privacy_title: "Privacy Policy",
+        legal_privacy_text: "When you use the contact form, your default email application opens and the data is sent directly via email. We do not store any of your inputs on a web server. Embedded content from third parties (e.g. SoundCloud, Clipchamp, Radio Lora) may collect your IP address and set cookies. The privacy policies of the respective third-party providers apply to this.",
+        legal_ai_title: "Transparency Notice (EU AI Act)",
+        legal_ai_text: "The artist uses various Artificial Intelligence technologies to create and edit content on this website (including code, images, text, audio, and video). The systems used include Gemini, ChatGPT, Mistral, Claude, Perplexity, and Huggingface. This serves the creative support, further development, and optimization of the content.",
+        footer_creators: "Website Creators: Marcin Kolonko and Marcel Raschke",
+        footer_disclaimer: "The tracks in the videos are not free to use. All Backgrounds & Sounds licensed CC by 4.0. Copyright (17 U.S.C.SECTION 108(a)(3)). Apache License Version 2.0."
+      },
+      de: {
+        nav_about: "Über", nav_music: "Musik", nav_media: "Presse", nav_contact: "Kontakt", nav_legal: "Datenschutz & AI",
+        about_title: "Über DJ Jesse Jay",
+        about_text: "Kennst du das Gefühl, wenn du dich tief in einem Track verlierst und denkst: „DJ..DJ...dein ganzer Sound kommt mir gleich vor“? Plötzlich in einen Strudel mitgerissen zu werden, ein bemerkenswertes Erwachen der Leidenschaft, ...unsere Party-Leidenschaft, seelengetragene Reisen…, Herzensräume, die Horizonte und Gefühle zur Musik erschaffen/sexy! Fantasien entstehen, wie schon lange nicht mehr. Genau so liebt es Jesse sich zu fühlen, wenn er sich der Musik hingibt, und so gibt er seinen Sound und die Emotionen an die Menge weiter, die er mit seiner radikalen Sensibilität umarmt. Jesse wuchs in seinen ansteckenden Party-Sinnen in den individualitätsdominierenden, verrückten und „wir sind eine Familie“-philosophischen, legendären Clubs wie Aera, Labyrinth, SpiderGalaxy, Take A Dance, Hermetschloo und Dachkantine. Bei Radio Lora spielt er seit 2001 alle zwei Wochen bei den Galaxy Space Nights 6 Stunden lang, tief-zärtliche Urlaube für den Geist mit seiner zeitlosen, überraschenden Auswahl an Perlen-Tracks, herzlichen und gleichzeitig porno-Geschichten, nahtlos verwoben mit seinen unverwechselbaren DJ-Fähigkeiten. Seit 1997 misst er dem Spielen zu Beginn, als Main Act oder als Outro die gleiche Bedeutung bei. Ein treuer Vinyl-Liebhaber, der gleichermaßen mit dem CDJ begeistert. Kennst du auch das Gefühl eines bedingungslosen, leidenschaftlichen Musik-Trips?",
+        music_title: "Musik", music_mixed: "Gemixt von DJ JesseJay",
+        media_title: "Media & Presse-Mappe",
+  

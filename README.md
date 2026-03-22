@@ -1,139 +1,84 @@
-::: {#cookie-banner .cookie-banner}
-::: cookie-content
-Diese Website verwendet Cookies, um Ihr Browsererlebnis zu verbessern.
+# DJ Jesse Jay — djjessejay.ch
 
-::: cookie-buttons
-Akzeptieren
+Official website of **DJ Jesse Jay**, a professional DJ from Zurich, Switzerland, active since 1997. Host of the radio show *Blue Dimension* on [Radio LoRa](https://www.lora.ch/radio/sendungen/blue-dimension).
 
-Ablehnen
+---
 
-[Mehr erfahren](datenschutz.html){#cookie-more .cookie-more}
-:::
-:::
-:::
+## Features
 
-::: language-selector
-[DE](#){.active data-lang="de"} [EN](#){data-lang="en"}
-[FR](#){data-lang="fr"} [IT](#){data-lang="it"}
-:::
+- Multilingual support (DE, EN, FR, IT)
+- Responsive design (mobile, tablet, desktop)
+- Music section with embedded media
+- Contact form with reCAPTCHA and privacy consent
+- Cookie consent banner
+- GDPR-compliant privacy page (`datenschutz.html`) and imprint (`impressum.html`)
+- Open Source — Apache License 2.0
 
-<div>
+---
 
-# [DJ Jesse Jay](https://www.djjessejay.ch)
+## Tech Stack
 
--   [Biografie](#about){.translate key="biography"}
--   [Musik](#music){.translate key="music"}
--   [Kontakt](#contact){.translate key="contact"}
--   [Datenschutz](datenschutz.html){.translate key="privacy"}
+| Layer      | Technology                          |
+|------------|-------------------------------------|
+| Frontend   | HTML5, CSS3 (Tailwind CSS), Vanilla JS |
+| Fonts      | Google Fonts (Inter)                |
+| Hosting    | Static site (no server required)    |
 
-</div>
+---
 
-::: {role="main"}
-::: {#about .section}
-::: profile-container
-![DJ Jesse Jay](img/DJ-Jesse-Jay.jpg){.profile-image}
+## Project Structure
 
-::: social-icons
-[](https://soundcloud.com/jessejay){target="_blank"
-aria-label="Soundcloud"}
-:::
+```
+djjessejay.ch/
+├── img/                  # Images (profile photo, etc.)
+├── index.html            # Main page
+├── jessejay.css          # Custom styles
+├── scripts.js            # JavaScript (cookie banner, language switcher, form)
+├── datenschutz.html      # Privacy policy
+├── impressum.html        # Imprint
+├── robots.txt            # Search engine directives
+├── favicon.ico           # Site icon
+├── LICENSE               # Apache 2.0
+├── CONTRIBUTING.md       # Contribution guidelines
+├── CODE_OF_CONDUCT.md    # Code of conduct
+└── SECURITY.md           # Security policy
+```
 
-[](https://www.lora.ch/radio/sendungen/blue-dimension){target="_blank"
-aria-label="LoRa"}
-:::
+---
 
-## Biografie {#biografie .translate key="biography"}
+## Local Development
 
-::: biography-text
-Do you know the feelings like this one you feel when you drive deeply in
-the track „DJ..DJ\...all your sound seems the same to me\"? Being
-suddenly taken into a round, remarkably awakening of passion, \...our
-party passion. Soul carrying voyages... , heart spaces creating horizons
-and feelings to music with sexy fantasies arise, got seldom since quite
-a while. That is how Jesse loves to feel when he is giving himself to
-the music and this is how he passes on his sound and the emotions to the
-crowd. Embracing with his radical sensitiveness. Jesse grew up in his
-contagious party senses at the individuality-reigning, going mad and „we
-are family\" philosophical, to legendary Clubs like: Aera, Labyrinth,
-SpiderGalaxy, Take A Dance, Hermetschloo and Dachkantine. At Radio Lora
-he plays each two weeks since 2001 at Galaxy Space Nights. A 6 hours
-long, deep-tender holidays of the mind. With his timeless, surprising
-choices of pearl-tracks. Heartful and at the same time est porno
-stories, seamlessly woben with his distinctive DJ\'s skills. He gives
-the same dimension of importance to play like at the beginning, same as
-a main act, or the outro. Continuously grown since 1997. A loyal Vinyl
-Lover, with equally pleasuring with the CDJ & XDJ. Do you know the
-feeling of an unconditional, passionate music trip, too?
-:::
-:::
+No build step required — it's a pure static site.
 
-::: {#music .section}
-## Musik {#musik .translate key="music"}
+**Option A — Python (built-in):**
+```bash
+python -m http.server 8000
+```
+Then open [http://localhost:8000](http://localhost:8000).
 
-Gemischt von DJ Jesse Jay
+**Option B — Node.js (npx):**
+```bash
+npx serve .
+```
 
-::: media-container
-:::
-:::
+---
 
-::: {#contact .section}
-## Kontakt {#kontakt .translate key="contact"}
+## Contact Form
 
-::: form-group
-Name:
-:::
+The contact form uses client-side validation and reCAPTCHA. To enable email sending in production, connect it to a backend endpoint or a service such as [Formspree](https://formspree.io) or [EmailJS](https://www.emailjs.com).
 
-::: form-group
-E-Mail:
-:::
+Replace `YOUR_RECAPTCHA_SITE_KEY` in `index.html` with your actual Google reCAPTCHA v2 site key.
 
-::: form-group
-Nachricht:
-:::
+---
 
-::: {.form-group .checkbox-group}
-Ich akzeptiere die [Datenschutzbestimmungen](datenschutz.html).
-:::
+## Contributing
 
-::: {.g-recaptcha sitekey="YOUR_RECAPTCHA_SITE_KEY"}
-:::
+Pull requests are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting changes.
 
-Senden
+---
 
-::: {#form-success .form-message .hidden}
-Ihre Nachricht wurde erfolgreich gesendet!
-:::
+## License
 
-::: {#form-error .form-message .hidden}
-Es gab ein Problem beim Senden Ihrer Nachricht. Bitte versuchen Sie es
-später erneut.
-:::
-:::
-:::
+[Apache License 2.0](LICENSE) — 2003–2025 DJ Jesse Jay, Zürich 🇨🇭
 
-::: footer-content
-::: footer-section
-© 2003-2025 by DJ Jesse Jay & @®† from Zürich 🇨🇭
-:::
-
-::: footer-section
-The tracks in the videos are not free to use. If you\'d like to use the
-music in these videos, please contact the Artist or Label. All
-Backgrounds & Sounds that we use are licensed CC by 4.0. ALL OTHER
-CONTENT MAY ALSO BE PROTECTED BY COPYRIGHT (17 U.S.C.SECTION 108(a)(3)).
-:::
-
-::: footer-section
-This site is made with Open Source Software. Apache License Version 2.0,
-January 2004
-[https://www.apache.org/licenses/](https://www.apache.org/licenses/){target="_blank"}
-❤️ thanks to Marcin Kolonko and Marcel Raschke for programming this
-site.
-:::
-
-::: footer-nav
-[Datenschutz](datenschutz.html){.translate key="privacy"} \|
-[Impressum](impressum.html){.translate key="imprint"} \| [Dateien
-herunterladen](#){#download-files .translate key="download-files"}
-:::
-:::
+Built with ❤️ by Marcin Kolonko and Marcel Raschke.
