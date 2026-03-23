@@ -12,7 +12,7 @@ RED='\033[0;31m'    BOLD='\033[1m'   RESET='\033[0m'
 GREEN='\033[0;32m'  CYAN='\033[0;36m'
 
 banner() {
-  echo -e "${RED}${BOLD}"
+  echo -e "${GREEN}${BOLD}"
   cat <<'BANNER'
   __
  / _|___  ___   ___(_) ___| |_ _   _
@@ -21,7 +21,7 @@ banner() {
 |_| |___/\___/ \___|_|\___|\__|\__, |
                                 |___/
   "Hello, Friend."
-  fsociety SubAgent Cluster · Claude Opus 4.6 · HexStrike AI
+  fsociety · Zero-Day Legend · Claude Opus 4.6 · HexStrike AI
 BANNER
   echo -e "${RESET}"
 }
@@ -60,7 +60,7 @@ setup_workspace() {
   local ts; ts=$(date +%Y%m%d_%H%M%S)
   WORKSPACE="/root/pentest-reports/${TARGET//\//_}_${ts}"
   mkdir -p "$WORKSPACE"
-  echo "[*] Workspace: $WORKSPACE"
+  echo "[*] fsociety Workspace: $WORKSPACE"
 }
 
 # ── SubAgent: Recon ────────────────────────────────────────────────────────────
@@ -74,7 +74,7 @@ run_recon_agent() {
      Nutze alle verfügbaren Tools parallel. Starte jetzt." \
     > "${WORKSPACE}/recon.log" 2>&1 &
   RECON_PID=$!
-  echo "[*] Recon-Agent PID: $RECON_PID"
+  echo "[*] Elliot PID: $RECON_PID"
 }
 
 # ── SubAgent: Web Pentest ───────────────────────────────────────────────────────
@@ -93,7 +93,7 @@ run_web_agent() {
      Speichere Ergebnisse in ${WORKSPACE}/web.json" \
     > "${WORKSPACE}/web.log" 2>&1 &
   WEB_PID=$!
-  echo "[*] Web-Agent PID: $WEB_PID"
+  echo "[*] Darlene PID: $WEB_PID"
 }
 
 # ── SubAgent: Enum ─────────────────────────────────────────────────────────────
@@ -110,7 +110,7 @@ run_enum_agent() {
       > "${WORKSPACE}/enum.log" 2>&1
   ) &
   ENUM_PID=$!
-  echo "[*] Enum-Agent PID: $ENUM_PID"
+  echo "[*] Darlene (Enum) PID: $ENUM_PID"
 }
 
 # ── SubAgent: Exploit ──────────────────────────────────────────────────────────
@@ -126,7 +126,7 @@ run_exploit_agent() {
       > "${WORKSPACE}/exploit.log" 2>&1
   ) &
   EXPLOIT_PID=$!
-  echo "[*] Exploit-Agent PID: $EXPLOIT_PID"
+  echo "[*] Mr. Robot PID: $EXPLOIT_PID"
 }
 
 # ── SubAgent: Report ───────────────────────────────────────────────────────────
@@ -149,7 +149,7 @@ run_report_agent() {
     echo -e "${GREEN}[+] Report fertig: ${WORKSPACE}/report.md${RESET}"
   ) &
   REPORT_PID=$!
-  echo "[*] Report-Agent PID: $REPORT_PID"
+  echo "[*] Whiterose PID: $REPORT_PID"
 }
 
 # ── Fortschritts-Monitor ───────────────────────────────────────────────────────
@@ -161,7 +161,7 @@ monitor_agents() {
 
   while true; do
     sleep 30
-    echo -n "[$(date +%H:%M:%S)] Aktive Agents: "
+    echo -n "[$(date +%H:%M:%S)] Aktive Operatives: "
     ACTIVE=0
     for pid_var in RECON_PID WEB_PID ENUM_PID EXPLOIT_PID REPORT_PID; do
       pid="${!pid_var:-0}"
