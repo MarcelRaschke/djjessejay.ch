@@ -1,11 +1,11 @@
-# Kali Linux Cloud Image – OpenClaw & Telegram
+# Kali Linux Cloud Image – OpenClaw, Telegram & HexStrike AI
 # docker build -t kali-cloud .
 # docker run -it --rm kali-cloud
 
 FROM kalilinux/kali-rolling:latest
 
 LABEL maintainer="djjessejay.ch"
-LABEL description="Kali Linux Cloud Instanz mit OpenClaw und Telegram"
+LABEL description="Kali Linux Cloud Instanz mit OpenClaw, Telegram und HexStrike AI"
 
 # Nicht-interaktiver Modus
 ENV DEBIAN_FRONTEND=noninteractive
@@ -53,6 +53,22 @@ RUN set -eux; \
 RUN mkdir -p /usr/share/applications && \
     printf '[Desktop Entry]\nVersion=1.0\nName=Telegram Desktop\nExec=/usr/local/bin/telegram-desktop\nIcon=/opt/telegram/Telegram\nTerminal=false\nType=Application\nCategories=Network;InstantMessaging;\n' \
     > /usr/share/applications/telegram-desktop.desktop
+
+# ── HexStrike AI ─────────────────────────────────────────────────────────────
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        python3 python3-pip python3-venv chromium \
+    && rm -rf /var/lib/apt/lists/* \
+    && git clone --depth 1 https://github.com/0x4m4/hexstrike-ai.git /opt/hexstrike-ai \
+    && python3 -m venv /opt/hexstrike-ai/hexstrike-env \
+    && /opt/hexstrike-ai/hexstrike-env/bin/pip install --quiet --upgrade pip \
+    && /opt/hexstrike-ai/hexstrike-env/bin/pip install --quiet -r /opt/hexstrike-ai/requirements.txt
+
+RUN printf '#!/usr/bin/env bash\nsource /opt/hexstrike-ai/hexstrike-env/bin/activate\nexec python3 /opt/hexstrike-ai/hexstrike_mcp.py "$@"\n' \
+    > /usr/local/bin/hexstrike && chmod +x /usr/local/bin/hexstrike
+
+RUN mkdir -p /root/.config/hexstrike && \
+    printf '{\n  "mcpServers": {\n    "hexstrike-ai": {\n      "command": "/opt/hexstrike-ai/hexstrike-env/bin/python3",\n      "args": ["/opt/hexstrike-ai/hexstrike_mcp.py"],\n      "env": { "PYTHONPATH": "/opt/hexstrike-ai" }\n    }\n  }\n}\n' \
+    > /root/.config/hexstrike/mcp.json
 
 # ── SSH ───────────────────────────────────────────────────────────────────────
 RUN mkdir /var/run/sshd && \

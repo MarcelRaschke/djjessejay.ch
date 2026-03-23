@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Kali Linux Cloud Instance Setup
-# Installs: OpenClaw, Telegram
+# Installs: OpenClaw, Telegram, HexStrike AI
 set -euo pipefail
 
 LOGFILE="/var/log/kali-cloud-setup.log"
@@ -100,6 +100,55 @@ install_telegram_cli() {
   }
 }
 
+# ── HexStrike AI ───────────────────────────────────────────────────────────────
+install_hexstrike() {
+  info "Installiere HexStrike AI..."
+
+  # Python 3 + venv
+  apt-get install -y -qq python3 python3-pip python3-venv chromium
+
+  local DEST="/opt/hexstrike-ai"
+
+  if [[ -d "$DEST/.git" ]]; then
+    info "HexStrike AI bereits vorhanden – aktualisiere..."
+    git -C "$DEST" pull --ff-only
+  else
+    git clone --depth 1 https://github.com/0x4m4/hexstrike-ai.git "$DEST"
+  fi
+
+  # Virtuelle Umgebung
+  python3 -m venv "$DEST/hexstrike-env"
+  "$DEST/hexstrike-env/bin/pip" install --quiet --upgrade pip
+  "$DEST/hexstrike-env/bin/pip" install --quiet -r "$DEST/requirements.txt"
+
+  # Wrapper-Skript
+  cat > /usr/local/bin/hexstrike <<'WRAPPER'
+#!/usr/bin/env bash
+source /opt/hexstrike-ai/hexstrike-env/bin/activate
+exec python3 /opt/hexstrike-ai/hexstrike_mcp.py "$@"
+WRAPPER
+  chmod +x /usr/local/bin/hexstrike
+
+  # MCP-Konfiguration
+  mkdir -p /root/.config/hexstrike
+  cat > /root/.config/hexstrike/mcp.json <<'MCP'
+{
+  "mcpServers": {
+    "hexstrike-ai": {
+      "command": "/opt/hexstrike-ai/hexstrike-env/bin/python3",
+      "args": ["/opt/hexstrike-ai/hexstrike_mcp.py"],
+      "env": {
+        "PYTHONPATH": "/opt/hexstrike-ai"
+      }
+    }
+  }
+}
+MCP
+
+  info "HexStrike AI installiert → /usr/local/bin/hexstrike"
+  info "MCP-Konfiguration → /root/.config/hexstrike/mcp.json"
+}
+
 # ── Firewall ────────────────────────────────────────────────────────────────────
 configure_firewall() {
   info "Konfiguriere UFW-Firewall..."
@@ -119,8 +168,9 @@ print_summary() {
   info "═══════════════════════════════════════════"
   info " Kali Linux Cloud Setup abgeschlossen"
   info "═══════════════════════════════════════════"
-  info " OpenClaw:         $(command -v openclaw   2>/dev/null || echo 'nicht im PATH')"
-  info " Telegram Desktop: $(command -v telegram-desktop 2>/dev/null || echo 'nicht im PATH')"
+  info " OpenClaw:         $(command -v openclaw          2>/dev/null || echo 'nicht im PATH')"
+  info " Telegram Desktop: $(command -v telegram-desktop  2>/dev/null || echo 'nicht im PATH')"
+  info " HexStrike AI:     $(command -v hexstrike         2>/dev/null || echo 'nicht im PATH')"
   info " Log:              $LOGFILE"
   info "═══════════════════════════════════════════"
 }
@@ -131,6 +181,7 @@ main() {
   install_openclaw
   install_telegram
   install_telegram_cli
+  install_hexstrike
   configure_firewall
   print_summary
 }

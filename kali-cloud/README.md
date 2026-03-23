@@ -3,6 +3,7 @@
 Automatisiertes Setup einer Kali Linux Cloud-Instanz mit:
 - **OpenClaw** – Open-source Klon des Klassikers Captain Claw
 - **Telegram Desktop** – Messenger-Client
+- **HexStrike AI** – MCP-Server für AI-gestützte Pentesting-Automatisierung (150+ Sicherheitstools)
 
 ## Schnellstart
 
@@ -50,7 +51,33 @@ openclaw
 
 # Telegram Desktop
 telegram-desktop
+
+# HexStrike AI MCP-Server starten
+hexstrike
+
+# HexStrike AI direkt (mit Argumenten)
+hexstrike --port 8888 --debug
 ```
+
+## HexStrike AI – MCP-Konfiguration
+
+Die MCP-Konfiguration liegt unter `/root/.config/hexstrike/mcp.json`.
+Sie kann in Claude Desktop oder anderen MCP-kompatiblen Clients eingebunden werden:
+
+```json
+{
+  "mcpServers": {
+    "hexstrike-ai": {
+      "command": "/opt/hexstrike-ai/hexstrike-env/bin/python3",
+      "args": ["/opt/hexstrike-ai/hexstrike_mcp.py"],
+      "env": { "PYTHONPATH": "/opt/hexstrike-ai" }
+    }
+  }
+}
+```
+
+> **Hinweis:** HexStrike AI ist ausschließlich für **autorisierte Sicherheitstests** bestimmt.
+> Nur auf Systemen verwenden, für die eine ausdrückliche Genehmigung vorliegt.
 
 ## Konfiguration
 
