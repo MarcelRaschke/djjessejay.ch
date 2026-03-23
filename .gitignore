@@ -32,6 +32,12 @@ Thumbs.db
 *.swp
 *.swo
 
+# IDE workspace state (Visual Studio)
+.vs/
+
+# Application logs (nicht in Git)
+hexstrike.log
+
 # Archive/backup content
 *wayback*
 *archive.org*

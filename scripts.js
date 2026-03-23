@@ -42,12 +42,6 @@ function initializeGallery() {
     });
 }
 
-// Utility functions
-function detectFlashPlugin() {
-    // Modern replacement for Flash detection
-    return false; // Flash is no longer supported
-}
-
 // Music player controls
 function playTrack(trackId) {
     const audio = document.getElementById(trackId);
