@@ -1,11 +1,11 @@
-# Skills – Ultimate Hacker Setup
+# fsociety Skills – Mr. Robot Arsenal
 
 Alle verfügbaren Fähigkeiten und Tools im Stack:
-**Claude Opus 4.6 · HexStrike AI · Kali Linux · Claude Code · OpenClaw**
+**Elliot · Mr. Robot · Darlene · Tyrell · Whiterose · HexStrike AI · Kali**
 
 ---
 
-## AI / Automation
+## AI / fsociety Automation
 | Skill | Tool | Befehl |
 |-------|------|--------|
 | KI-gestütztes Pentesting | Claude Code (Opus 4.6) | `claude` |

@@ -8,7 +8,7 @@
 FROM kalilinux/kali-rolling:latest
 
 LABEL maintainer="djjessejay.ch"
-LABEL description="Ultimate Hacker: Kali + HexStrike AI + Claude Code Opus 4.6"
+LABEL description="fsociety: Kali + HexStrike AI + Claude Opus 4.6 – Hello, Friend."
 
 ENV DEBIAN_FRONTEND=noninteractive
 

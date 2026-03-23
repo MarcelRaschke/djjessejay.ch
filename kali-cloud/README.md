@@ -1,6 +1,8 @@
-# Kali Linux Cloud Instanz
+# fsociety – Kali Linux Cloud (Mr. Robot Setup)
 
-Automatisiertes Setup einer Kali Linux Cloud-Instanz mit:
+> „Hello, Friend." – Elliot Alderson
+
+Automatisiertes Setup einer fsociety Kali Linux Cloud-Instanz mit:
 - **OpenClaw** – Open-source Klon des Klassikers Captain Claw
 - **Telegram Desktop** – Messenger-Client
 - **HexStrike AI** – MCP-Server für AI-gestützte Pentesting-Automatisierung (150+ Sicherheitstools)

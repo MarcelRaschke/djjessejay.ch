@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Container-Einstiegspunkt – Ultimate Hacker Setup
+# Container-Einstiegspunkt – fsociety (Mr. Robot Setup)
 set -euo pipefail
 
 # SSH-Dienst starten
@@ -33,7 +33,8 @@ fi
 
 echo ""
 echo -e "\e[1;31m╔══════════════════════════════════════════════════════════════╗\e[0m"
-echo -e "\e[1;31m║  ULTIMATE HACKER – KALI LINUX CLOUD                          ║\e[0m"
+echo -e "\e[1;31m║  fsociety – \"Hello, Friend.\"                                  ║\e[0m"
+echo -e "\e[1;31m║  Mr. Robot SubAgent Cluster – bereit                         ║\e[0m"
 echo -e "\e[1;31m╚══════════════════════════════════════════════════════════════╝\e[0m"
 echo -e " \e[32mClaude Code:\e[0m   $(command -v claude           2>/dev/null || echo 'nicht gefunden')"
 echo -e " \e[32mModell:\e[0m        claude-opus-4-6"
@@ -46,7 +47,8 @@ echo -e " \e[32mTelegram:\e[0m      $(command -v telegram-desktop 2>/dev/null ||
 echo -e " \e[32mSSH:\e[0m           Port 22"
 echo -e " \e[32mDISPLAY:\e[0m       ${DISPLAY:-:1}"
 echo ""
-echo -e "\e[1;33m  Starte mit: claude  (Opus 4.6 + HexStrike AI MCP)\e[0m"
+echo -e "\e[1;33m  claude  →  \"Hello, Friend.\" – Elliot Alderson erwartet dich\e[0m"
+echo -e "\e[1;33m  hack <target> full  →  fsociety – alle Agents parallel\e[0m"
 echo ""
 
 exec "$@"

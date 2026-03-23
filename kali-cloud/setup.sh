@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ╔══════════════════════════════════════════════════════════════════════════════╗
-# ║  ULTIMATE HACKER SETUP – djjessejay.ch                                     ║
-# ║  Stack: Kali Linux · HexStrike AI · Claude Code (Opus 4.6) · OpenClaw     ║
+# ║  fsociety SETUP – djjessejay.ch                                            ║
+# ║  "Hello, Friend." – Mr. Robot · HexStrike AI · Claude Opus 4.6            ║
 # ╚══════════════════════════════════════════════════════════════════════════════╝
 set -euo pipefail
 
@@ -395,7 +395,8 @@ configure_firewall() {
 print_summary() {
   echo ""
   echo -e "\e[1;31m╔══════════════════════════════════════════════════════════════╗\e[0m"
-  echo -e "\e[1;31m║  ULTIMATE HACKER SETUP – BEREIT                              ║\e[0m"
+  echo -e "\e[1;31m║  fsociety – SETUP ABGESCHLOSSEN                              ║\e[0m"
+  echo -e "\e[1;31m║  \"Hello, Friend. We're in.\"                                  ║\e[0m"
   echo -e "\e[1;31m╚══════════════════════════════════════════════════════════════╝\e[0m"
   echo -e " \e[32mClaude Code:\e[0m      $(command -v claude            2>/dev/null || echo 'nicht im PATH')"
   echo -e " \e[32mModell:\e[0m           claude-opus-4-6"
@@ -409,8 +410,8 @@ print_summary() {
   echo -e " \e[32mOpenClaw:\e[0m         $(command -v openclaw          2>/dev/null || echo 'nicht im PATH')"
   echo -e " \e[32mLog:\e[0m              $LOGFILE"
   echo ""
-  echo -e "\e[1;33m  Einzeln:   claude              (Opus 4.6 + HexStrike MCP)\e[0m"
-  echo -e "\e[1;33m  Multi-KI:  hack <target> full  (5 SubAgents parallel)\e[0m"
+  echo -e "\e[1;33m  \"Hello, Friend.\" → claude              (Elliot/Opus 4.6 + HexStrike MCP)\e[0m"
+  echo -e "\e[1;33m  Stage 1:         → hack <target> full  (fsociety – alle Agents parallel)\e[0m"
   echo ""
 }
 

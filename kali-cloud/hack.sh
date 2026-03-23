@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ╔══════════════════════════════════════════════════════════════════════════════╗
-# ║  hack.sh – Ultimate Hacker SubAgent Orchestrator                           ║
-# ║  Startet parallele Claude Opus 4.6 SubAgents für vollautomatisches Pentesting║
+# ║  hack.sh – fsociety SubAgent Orchestrator (Mr. Robot)                      ║
+# ║  "Hello, Friend." – Claude Opus 4.6 · HexStrike AI                        ║
 # ╚══════════════════════════════════════════════════════════════════════════════╝
 set -euo pipefail
 
@@ -14,13 +14,14 @@ GREEN='\033[0;32m'  CYAN='\033[0;36m'
 banner() {
   echo -e "${RED}${BOLD}"
   cat <<'BANNER'
- ██╗  ██╗ █████╗  ██████╗██╗  ██╗    ███████╗██╗  ██╗
- ██║  ██║██╔══██╗██╔════╝██║ ██╔╝    ██╔════╝██║  ██║
- ███████║███████║██║     █████╔╝     ███████╗███████║
- ██╔══██║██╔══██║██║     ██╔═██╗     ╚════██║██╔══██║
- ██║  ██║██║  ██║╚██████╗██║  ██╗    ███████║██║  ██║
- ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝   ╚══════╝╚═╝  ╚═╝
-  SubAgent Orchestrator · Claude Opus 4.6 · HexStrike AI
+  __
+ / _|___  ___   ___(_) ___| |_ _   _
+| |_/ __|/ _ \ / __| |/ _ \ __| | | |
+|  _\__ \ (_) | (__| |  __/ |_| |_| |
+|_| |___/\___/ \___|_|\___|\__|\__, |
+                                |___/
+  "Hello, Friend."
+  fsociety SubAgent Cluster · Claude Opus 4.6 · HexStrike AI
 BANNER
   echo -e "${RESET}"
 }
@@ -64,7 +65,7 @@ setup_workspace() {
 
 # ── SubAgent: Recon ────────────────────────────────────────────────────────────
 run_recon_agent() {
-  echo -e "${GREEN}[+] Starte Recon-Agent (parallel)...${RESET}"
+  echo -e "${GREEN}[ELLIOT] Ich fange an, alles über dich zu wissen...${RESET}"
   claude --model claude-opus-4-6 \
     --system-prompt "$(cat /opt/kali-cloud/agents/recon-agent.md 2>/dev/null || cat ~/kali-cloud/agents/recon-agent.md)" \
     --print \
@@ -78,7 +79,7 @@ run_recon_agent() {
 
 # ── SubAgent: Web Pentest ───────────────────────────────────────────────────────
 run_web_agent() {
-  echo -e "${GREEN}[+] Starte Web-Pentest-Agent (parallel)...${RESET}"
+  echo -e "${GREEN}[DARLENE] Ich breche ein. Kein Passwort hält mich auf.${RESET}"
   claude --model claude-opus-4-6 \
     --system-prompt "Du bist ein Web Application Pentest Spezialist.
      Arsenal: nikto, gobuster, sqlmap, whatweb, wafw00f, wfuzz.
@@ -97,7 +98,7 @@ run_web_agent() {
 
 # ── SubAgent: Enum ─────────────────────────────────────────────────────────────
 run_enum_agent() {
-  echo -e "${GREEN}[+] Starte Enum-Agent (wartet auf Recon)...${RESET}"
+  echo -e "${GREEN}[DARLENE] Enumeriere alle Services. Kein Stein bleibt auf dem anderen.${RESET}"
   # Wartet auf recon.json
   ( while [[ ! -f "${WORKSPACE}/recon.json" ]]; do sleep 5; done
     claude --model claude-opus-4-6 \
@@ -114,7 +115,7 @@ run_enum_agent() {
 
 # ── SubAgent: Exploit ──────────────────────────────────────────────────────────
 run_exploit_agent() {
-  echo -e "${GREEN}[+] Starte Exploit-Agent (wartet auf Enum)...${RESET}"
+  echo -e "${GREEN}[MR. ROBOT] Es ist Zeit. Wir tun, was getan werden muss.${RESET}"
   ( while [[ ! -f "${WORKSPACE}/enum.json" ]]; do sleep 5; done
     claude --model claude-opus-4-6 \
       --system-prompt "$(cat /opt/kali-cloud/agents/exploit-agent.md 2>/dev/null || cat ~/kali-cloud/agents/exploit-agent.md)" \
@@ -130,7 +131,7 @@ run_exploit_agent() {
 
 # ── SubAgent: Report ───────────────────────────────────────────────────────────
 run_report_agent() {
-  echo -e "${GREEN}[+] Starte Report-Agent (wartet auf alle)...${RESET}"
+  echo -e "${GREEN}[WHITEROSE] Zeit ist kostbar. Ich dokumentiere präzise.${RESET}"
   ( # Warte auf alle anderen Agents
     for f in recon.json enum.json; do
       while [[ ! -f "${WORKSPACE}/${f}" ]]; do sleep 10; done
@@ -154,7 +155,7 @@ run_report_agent() {
 # ── Fortschritts-Monitor ───────────────────────────────────────────────────────
 monitor_agents() {
   echo ""
-  echo -e "${CYAN}[*] SubAgent-Cluster läuft. Status-Check alle 30s...${RESET}"
+  echo -e "${CYAN}[fsociety] Cluster aktiv. \"Hello, Friend.\" Status-Check alle 30s...${RESET}"
   echo -e "${CYAN}[*] Logs: ${WORKSPACE}/${RESET}"
   echo ""
 
@@ -174,10 +175,10 @@ monitor_agents() {
   done
 
   echo ""
-  echo -e "${GREEN}${BOLD}[+] Alle SubAgents abgeschlossen!${RESET}"
+  echo -e "${GREEN}${BOLD}[fsociety] Stage complete. Evil Corp hat verloren.${RESET}"
   echo -e "${GREEN}[+] Ergebnisse: ${WORKSPACE}/${RESET}"
   [[ -f "${WORKSPACE}/report.md" ]] && \
-    echo -e "${GREEN}[+] Report: ${WORKSPACE}/report.md${RESET}"
+    echo -e "${GREEN}[WHITEROSE] Report: ${WORKSPACE}/report.md${RESET}"
 }
 
 # ── Hauptprogramm ──────────────────────────────────────────────────────────────
@@ -187,10 +188,10 @@ main() {
   check_deps
   setup_workspace
 
-  echo -e "${BOLD}Ziel:${RESET} $TARGET"
-  echo -e "${BOLD}Modus:${RESET} $MODE"
-  echo -e "${BOLD}Model:${RESET} claude-opus-4-6"
-  echo -e "${BOLD}MCP:${RESET}   hexstrike-ai (Port 13145)"
+  echo -e "${BOLD}Ziel:${RESET}   $TARGET"
+  echo -e "${BOLD}Modus:${RESET}  $MODE"
+  echo -e "${BOLD}Model:${RESET}  claude-opus-4-6 (Elliot)"
+  echo -e "${BOLD}MCP:${RESET}    hexstrike-ai (Port 13145)"
   echo ""
 
   case "$MODE" in
