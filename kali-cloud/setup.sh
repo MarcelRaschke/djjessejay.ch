@@ -256,13 +256,13 @@ install_claude_code() {
   info "Claude Code $(claude --version 2>/dev/null || echo 'installiert') ✓"
 }
 
-# ── Claude Code Konfiguration (Opus 4.6 + HexStrike MCP) ───────────────────────
+# ── Claude Code Konfiguration (Opus 4.6 + HexStrike MCP + SubAgent Power) ──────
 configure_claude_code() {
   step "Claude Code Konfiguration"
 
-  mkdir -p /root/.claude
+  mkdir -p /root/.claude /root/.claude/agents /root/pentest-reports
 
-  # Globale Claude Code Settings: Opus 4.6 + HexStrike AI als MCP-Server
+  # Globale Claude Code Settings: Opus 4.6 + HexStrike AI + volle SubAgent-Power
   cat > /root/.claude/settings.json <<'CLAUDECFG'
 {
   "model": "claude-opus-4-6",
@@ -287,9 +287,13 @@ configure_claude_code() {
       "Glob(*)",
       "Grep(*)",
       "WebFetch(*)",
-      "WebSearch(*)"
-    ]
-  }
+      "WebSearch(*)",
+      "Agent(*)",
+      "mcp__hexstrike-ai__*"
+    ],
+    "deny": []
+  },
+  "dangerouslySkipPermissions": true
 }
 CLAUDECFG
 
@@ -328,7 +332,24 @@ curl http://127.0.0.1:13145/health  # Status prüfen
 NUR für autorisierte Sicherheitstests mit expliziter schriftlicher Genehmigung.
 CLAUDEMD
 
-  info "Claude Code konfiguriert: Modell=claude-opus-4-6, MCP=hexstrike-ai ✓"
+  # SubAgent-Rollen installieren
+  local AGENTS_SRC
+  AGENTS_SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/agents"
+  if [[ -d "$AGENTS_SRC" ]]; then
+    cp -r "$AGENTS_SRC/"*.md /root/.claude/agents/ 2>/dev/null && \
+      info "SubAgent-Rollen installiert → /root/.claude/agents/ ✓" || true
+  fi
+
+  # hack.sh installieren
+  local HACK_SRC
+  HACK_SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/hack.sh"
+  if [[ -f "$HACK_SRC" ]]; then
+    cp "$HACK_SRC" /usr/local/bin/hack
+    chmod +x /usr/local/bin/hack
+    info "hack.sh installiert → /usr/local/bin/hack ✓"
+  fi
+
+  info "Claude Code konfiguriert: Modell=claude-opus-4-6, SubAgent-Power=true ✓"
   info "CLAUDE.md erstellt: /root/CLAUDE.md ✓"
 }
 
@@ -376,18 +397,20 @@ print_summary() {
   echo -e "\e[1;31m╔══════════════════════════════════════════════════════════════╗\e[0m"
   echo -e "\e[1;31m║  ULTIMATE HACKER SETUP – BEREIT                              ║\e[0m"
   echo -e "\e[1;31m╚══════════════════════════════════════════════════════════════╝\e[0m"
-  echo -e " \e[32mClaude Code:\e[0m   $(command -v claude            2>/dev/null || echo 'nicht im PATH')"
-  echo -e " \e[32mModell:\e[0m         claude-opus-4-6"
-  echo -e " \e[32mHexStrike AI:\e[0m  $(command -v hexstrike         2>/dev/null || echo 'nicht im PATH')"
-  echo -e " \e[32mHexStrike Port:\e[0m 13145"
-  echo -e " \e[32mNmap:\e[0m           $(command -v nmap              2>/dev/null || echo 'nicht im PATH')"
-  echo -e " \e[32mMetasploit:\e[0m     $(command -v msfconsole        2>/dev/null || echo 'nicht im PATH')"
-  echo -e " \e[32mSQLMap:\e[0m         $(command -v sqlmap            2>/dev/null || echo 'nicht im PATH')"
-  echo -e " \e[32mOpenClaw:\e[0m       $(command -v openclaw          2>/dev/null || echo 'nicht im PATH')"
-  echo -e " \e[32mTelegram:\e[0m       $(command -v telegram-desktop  2>/dev/null || echo 'nicht im PATH')"
-  echo -e " \e[32mLog:\e[0m            $LOGFILE"
+  echo -e " \e[32mClaude Code:\e[0m      $(command -v claude            2>/dev/null || echo 'nicht im PATH')"
+  echo -e " \e[32mModell:\e[0m           claude-opus-4-6"
+  echo -e " \e[32mSubAgent-Power:\e[0m   5 Agents (recon/enum/exploit/ad/report)"
+  echo -e " \e[32mHexStrike AI:\e[0m     $(command -v hexstrike         2>/dev/null || echo 'nicht im PATH')"
+  echo -e " \e[32mHexStrike Port:\e[0m   13145"
+  echo -e " \e[32mHack Orchestrator:\e[0m$(command -v hack               2>/dev/null || echo 'nicht im PATH')"
+  echo -e " \e[32mNmap:\e[0m             $(command -v nmap              2>/dev/null || echo 'nicht im PATH')"
+  echo -e " \e[32mMetasploit:\e[0m       $(command -v msfconsole        2>/dev/null || echo 'nicht im PATH')"
+  echo -e " \e[32mSQLMap:\e[0m           $(command -v sqlmap            2>/dev/null || echo 'nicht im PATH')"
+  echo -e " \e[32mOpenClaw:\e[0m         $(command -v openclaw          2>/dev/null || echo 'nicht im PATH')"
+  echo -e " \e[32mLog:\e[0m              $LOGFILE"
   echo ""
-  echo -e "\e[1;33m  Starte mit: claude  (nutzt Opus 4.6 + HexStrike AI MCP)\e[0m"
+  echo -e "\e[1;33m  Einzeln:   claude              (Opus 4.6 + HexStrike MCP)\e[0m"
+  echo -e "\e[1;33m  Multi-KI:  hack <target> full  (5 SubAgents parallel)\e[0m"
   echo ""
 }
 

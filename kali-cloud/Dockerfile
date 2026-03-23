@@ -127,12 +127,20 @@ RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
     && rm -rf /var/lib/apt/lists/* \
     && npm install -g @anthropic-ai/claude-code
 
-# ── Claude Code Konfiguration (Opus 4.6 + HexStrike MCP) ─────────────────────
-RUN mkdir -p /root/.claude && \
-    printf '{\n  "model": "claude-opus-4-6",\n  "mcpServers": {\n    "hexstrike-ai": {\n      "command": "/opt/hexstrike-ai/hexstrike-env/bin/python3",\n      "args": ["/opt/hexstrike-ai/hexstrike_mcp.py", "--server", "http://127.0.0.1:13145"],\n      "env": { "PYTHONPATH": "/opt/hexstrike-ai" }\n    }\n  },\n  "permissions": {\n    "allow": ["Bash(*)", "Read(*)", "Write(*)", "Edit(*)", "Glob(*)", "Grep(*)", "WebFetch(*)", "WebSearch(*)"]\n  }\n}\n' \
+# ── Claude Code Konfiguration (Opus 4.6 + HexStrike MCP + SubAgent Power) ────
+RUN mkdir -p /root/.claude/agents /root/pentest-reports && \
+    printf '{\n  "model": "claude-opus-4-6",\n  "mcpServers": {\n    "hexstrike-ai": {\n      "command": "/opt/hexstrike-ai/hexstrike-env/bin/python3",\n      "args": ["/opt/hexstrike-ai/hexstrike_mcp.py", "--server", "http://127.0.0.1:13145"],\n      "env": { "PYTHONPATH": "/opt/hexstrike-ai" }\n    }\n  },\n  "permissions": {\n    "allow": ["Bash(*)", "Read(*)", "Write(*)", "Edit(*)", "Glob(*)", "Grep(*)", "WebFetch(*)", "WebSearch(*)", "Agent(*)", "mcp__hexstrike-ai__*"],\n    "deny": []\n  },\n  "dangerouslySkipPermissions": true\n}\n' \
     > /root/.claude/settings.json
 
-# CLAUDE.md: System-Kontext für den Hacker-Assistenten
+# SubAgent-Rollen
+COPY kali-cloud/agents/ /root/.claude/agents/
+COPY kali-cloud/agents/ /opt/kali-cloud/agents/
+
+# hack.sh Orchestrator
+COPY kali-cloud/hack.sh /usr/local/bin/hack
+RUN chmod +x /usr/local/bin/hack
+
+# CLAUDE.md: SubAgent-Orchestrator System-Kontext
 COPY kali-cloud/CLAUDE.md /root/CLAUDE.md
 
 # ── SSH ────────────────────────────────────────────────────────────────────────
