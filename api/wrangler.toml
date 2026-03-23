@@ -1,0 +1,13 @@
+name       = "djjessejay-proxy"
+main       = "worker.js"
+compatibility_date = "2024-01-01"
+
+# Route: alle Requests auf djjessejay.ch/api/* landen im Worker
+# Voraussetzung: Domain ist in Cloudflare und proxied (orange cloud ✓)
+[[routes]]
+pattern = "djjessejay.ch/api/*"
+zone_name = "djjessejay.ch"
+
+# Secrets werden NICHT hier gesetzt – nur via:
+#   wrangler secret put ANTHROPIC_API_KEY
+# (Key landet verschlüsselt in Cloudflare, nie im Code oder Git)
