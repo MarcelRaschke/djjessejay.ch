@@ -1,0 +1,59 @@
+version: "3.9"
+
+# Kali Linux Cloud Instanz mit OpenClaw & Telegram
+# Verwendung:
+#   docker compose up -d
+#   docker compose exec kali bash
+
+services:
+  kali:
+    image: kalilinux/kali-rolling:latest
+    container_name: kali-cloud
+    hostname: kali-cloud
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    privileged: false
+    # X11-Weiterleitung für GUI-Anwendungen (OpenClaw / Telegram Desktop)
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - PULSE_SERVER=unix:/run/pulse/native
+    volumes:
+      - ./setup.sh:/opt/setup.sh:ro
+      - kali-home:/root
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    ports:
+      - "2222:22"   # SSH-Zugang (optional)
+    networks:
+      - kali-net
+    command: >
+      bash -c "
+        apt-get update -qq &&
+        apt-get install -y -qq openssh-server &&
+        service ssh start &&
+        bash /opt/setup.sh &&
+        tail -f /dev/null
+      "
+
+  # VNC-Server für Remote-Desktop-Zugriff
+  novnc:
+    image: theasp/novnc:latest
+    container_name: kali-novnc
+    restart: unless-stopped
+    environment:
+      - DISPLAY_WIDTH=1920
+      - DISPLAY_HEIGHT=1080
+      - DISPLAY=${DISPLAY:-:0}
+    ports:
+      - "8080:8080"  # noVNC Web-Interface
+    networks:
+      - kali-net
+    depends_on:
+      - kali
+
+volumes:
+  kali-home:
+
+networks:
+  kali-net:
+    driver: bridge
