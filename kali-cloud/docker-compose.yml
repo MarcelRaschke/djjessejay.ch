@@ -1,9 +1,13 @@
 version: "3.9"
 
-# Kali Linux Cloud Instanz mit OpenClaw & Telegram
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  ULTIMATE HACKER – Docker Compose                                           ║
+# ║  Stack: Kali Linux · HexStrike AI · Claude Code (Opus 4.6) · OpenClaw     ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
 # Verwendung:
+#   export ANTHROPIC_API_KEY=sk-ant-...
 #   docker compose up -d
-#   docker compose exec kali bash
+#   docker compose exec kali claude     ← Opus 4.6 + HexStrike AI MCP
 
 services:
   kali:
@@ -14,16 +18,22 @@ services:
     stdin_open: true
     tty: true
     privileged: false
-    # X11-Weiterleitung für GUI-Anwendungen (OpenClaw / Telegram Desktop)
     environment:
       - DISPLAY=${DISPLAY:-:0}
       - PULSE_SERVER=unix:/run/pulse/native
+      # Anthropic API Key – für Claude Code (Opus 4.6)
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      # Claude Code: Modell festlegen
+      - ANTHROPIC_MODEL=claude-opus-4-6
     volumes:
       - ./setup.sh:/opt/setup.sh:ro
       - kali-home:/root
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      # Claude Code Konfig persistent
+      - claude-config:/root/.claude
     ports:
-      - "2222:22"   # SSH-Zugang (optional)
+      - "2222:22"      # SSH
+      - "13145:13145"  # HexStrike AI API
     networks:
       - kali-net
     command: >
@@ -53,6 +63,7 @@ services:
 
 volumes:
   kali-home:
+  claude-config:
 
 networks:
   kali-net:
