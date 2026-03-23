@@ -168,12 +168,19 @@ install_hexstrike() {
   apt-get install -y -qq python3 python3-pip python3-venv chromium
 
   local DEST="/opt/hexstrike-ai"
+  local SRC
+  SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/hexstrike"
 
-  if [[ -d "$DEST/.git" ]]; then
-    info "HexStrike AI bereits vorhanden – aktualisiere..."
-    git -C "$DEST" pull --ff-only
+  if [[ ! -d "$SRC" ]]; then
+    err "HexStrike-Quellverzeichnis nicht gefunden: $SRC"
+    exit 1
+  fi
+
+  if [[ -d "$DEST" ]]; then
+    info "HexStrike AI bereits vorhanden – aktualisiere aus lokalem Verzeichnis..."
+    cp -r "$SRC/"* "$DEST/"
   else
-    git clone --depth 1 https://github.com/0x4m4/hexstrike-ai.git "$DEST"
+    cp -r "$SRC" "$DEST"
   fi
 
   python3 -m venv "$DEST/hexstrike-env"
