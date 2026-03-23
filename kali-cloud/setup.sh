@@ -125,7 +125,7 @@ install_hexstrike() {
   cat > /usr/local/bin/hexstrike <<'WRAPPER'
 #!/usr/bin/env bash
 source /opt/hexstrike-ai/hexstrike-env/bin/activate
-exec python3 /opt/hexstrike-ai/hexstrike_mcp.py "$@"
+exec python3 /opt/hexstrike-ai/hexstrike_mcp.py --server http://127.0.0.1:13145 "$@"
 WRAPPER
   chmod +x /usr/local/bin/hexstrike
 
@@ -137,6 +137,7 @@ WRAPPER
     "hexstrike-ai": {
       "command": "/opt/hexstrike-ai/hexstrike-env/bin/python3",
       "args": ["/opt/hexstrike-ai/hexstrike_mcp.py"],
+      "args": ["/opt/hexstrike-ai/hexstrike_mcp.py", "--server", "http://127.0.0.1:13145"],
       "env": {
         "PYTHONPATH": "/opt/hexstrike-ai"
       }

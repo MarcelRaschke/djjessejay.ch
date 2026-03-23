@@ -63,11 +63,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && /opt/hexstrike-ai/hexstrike-env/bin/pip install --quiet --upgrade pip \
     && /opt/hexstrike-ai/hexstrike-env/bin/pip install --quiet -r /opt/hexstrike-ai/requirements.txt
 
-RUN printf '#!/usr/bin/env bash\nsource /opt/hexstrike-ai/hexstrike-env/bin/activate\nexec python3 /opt/hexstrike-ai/hexstrike_mcp.py "$@"\n' \
+RUN printf '#!/usr/bin/env bash\nsource /opt/hexstrike-ai/hexstrike-env/bin/activate\nexec python3 /opt/hexstrike-ai/hexstrike_mcp.py --server http://127.0.0.1:13145 "$@"\n' \
     > /usr/local/bin/hexstrike && chmod +x /usr/local/bin/hexstrike
 
 RUN mkdir -p /root/.config/hexstrike && \
-    printf '{\n  "mcpServers": {\n    "hexstrike-ai": {\n      "command": "/opt/hexstrike-ai/hexstrike-env/bin/python3",\n      "args": ["/opt/hexstrike-ai/hexstrike_mcp.py"],\n      "env": { "PYTHONPATH": "/opt/hexstrike-ai" }\n    }\n  }\n}\n' \
+    printf '{\n  "mcpServers": {\n    "hexstrike-ai": {\n      "command": "/opt/hexstrike-ai/hexstrike-env/bin/python3",\n      "args": ["/opt/hexstrike-ai/hexstrike_mcp.py", "--server", "http://127.0.0.1:13145"],\n      "env": { "PYTHONPATH": "/opt/hexstrike-ai" }\n    }\n  }\n}\n' \
     > /root/.config/hexstrike/mcp.json
 
 # ── SSH ───────────────────────────────────────────────────────────────────────
