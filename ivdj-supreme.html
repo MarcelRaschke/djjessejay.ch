@@ -608,11 +608,11 @@ class Deck {
         $('loop' + id).addEventListener('click', () => this.toggleLoop());
         $('loopSz' + id).addEventListener('change', e => {
             this.loopBars = parseFloat(e.target.value);
-            if (this.looping && this.source && this.bpm > 0) {
+            if (this.looping && this.bpm > 0 && this.buffer) {
                 // Extend/shrink from the existing loopStart so the in-point never drifts
                 const barLen = (60 / this.bpm) * 4;
                 this.loopEnd = Math.min(this.loopStart + barLen * this.loopBars, this.buffer.duration);
-                this.source.loopEnd = this.loopEnd;
+                if (this.source) this.source.loopEnd = this.loopEnd;
             }
         });
 
@@ -681,6 +681,10 @@ class Deck {
             const newBuffer = await ctx.decodeAudioData(arr);
             // A newer load started while we were awaiting; discard this stale result
             if (token !== this.loadToken) return;
+            // Preserve pending loop from a buffer-less session restore; a track swap on an already-loaded deck should not carry the old loop over
+            const savedLoop = !this.buffer
+                ? { looping: this.looping, loopStart: this.loopStart, loopEnd: this.loopEnd }
+                : null;
             this.stop();
             this.buffer = newBuffer;
             this.trackName = file.name;
@@ -691,6 +695,13 @@ class Deck {
             this.hotCues = this.pendingCues ? [...this.pendingCues] : [null, null, null, null];
             this.pendingCues = null;
             for (let i = 0; i < 4; i++) $('cue' + this.id + i).classList.toggle('set', this.hotCues[i] !== null);
+            // Restore pending loop state from a buffer-less session restore
+            if (savedLoop && savedLoop.looping) {
+                this.looping = true;
+                this.loopStart = savedLoop.loopStart;
+                this.loopEnd = savedLoop.loopEnd;
+                $('loop' + this.id).classList.add('active');
+            }
             $('track' + this.id).textContent = file.name;
             $('bpm' + this.id).textContent = (this.bpm * this.pitch).toFixed(1) + ' BPM';
             $('hint' + this.id).style.display = 'none';
@@ -980,10 +991,14 @@ class Deck {
             this.loopStart = s.loopStart || 0;
             this.loopEnd = s.loopEnd || 0;
             $('loop' + this.id).classList.toggle('active', this.looping);
-            if (this.looping && this.source) {
-                this.source.loop = true;
-                this.source.loopStart = this.loopStart;
-                this.source.loopEnd = this.loopEnd;
+            if (this.source) {
+                if (this.looping) {
+                    this.source.loop = true;
+                    this.source.loopStart = this.loopStart;
+                    this.source.loopEnd = this.loopEnd;
+                } else {
+                    this.source.loop = false;
+                }
             }
         }
     }
