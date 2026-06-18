@@ -600,7 +600,12 @@ class Deck {
         $('loop' + id).addEventListener('click', () => this.toggleLoop());
         $('loopSz' + id).addEventListener('change', e => {
             this.loopBars = parseFloat(e.target.value);
-            if (this.looping) { this.stopLoopRegion(); this.startLoopRegion(); }
+            if (this.looping && this.source && this.bpm > 0) {
+                // Extend/shrink from the existing loopStart so the in-point never drifts
+                const barLen = (60 / this.bpm) * 4;
+                this.loopEnd = Math.min(this.loopStart + barLen * this.loopBars, this.buffer.duration);
+                this.source.loopEnd = this.loopEnd;
+            }
         });
 
         $('fxRev' + id).addEventListener('click', () => this.toggleFX('reverb', 'fxRev'));
@@ -619,6 +624,8 @@ class Deck {
         if (this.nodes || !ctx) return;
         const n = {};
         n.gain = ctx.createGain();
+        // Sync gain to whatever the volume slider already shows (may have been set before audio init)
+        n.gain.gain.value = parseInt($('vol' + this.id).value) / 100;
         n.eqLow = ctx.createBiquadFilter();  n.eqLow.type = 'lowshelf';  n.eqLow.frequency.value = 320;
         n.eqMid = ctx.createBiquadFilter();  n.eqMid.type = 'peaking';   n.eqMid.frequency.value = 1000; n.eqMid.Q.value = 0.9;
         n.eqHigh = ctx.createBiquadFilter(); n.eqHigh.type = 'highshelf'; n.eqHigh.frequency.value = 3200;
@@ -674,7 +681,7 @@ class Deck {
             this.pendingCues = null;
             for (let i = 0; i < 4; i++) $('cue' + this.id + i).classList.toggle('set', this.hotCues[i] !== null);
             $('track' + this.id).textContent = file.name;
-            $('bpm' + this.id).textContent = this.bpm.toFixed(1) + ' BPM';
+            $('bpm' + this.id).textContent = (this.bpm * this.pitch).toFixed(1) + ' BPM';
             $('hint' + this.id).style.display = 'none';
             this.drawWaveform();
             haptic([20, 10, 20]);
@@ -790,7 +797,8 @@ class Deck {
             const beat = 60 / this.bpm;
             // Use deck playback position (not AudioContext clock) for phase so snaps align to audible beats
             const phase = (this.position() % beat);
-            const wait = (beat - phase) * (quantize.strength / 100);
+            // beat/phase are track-seconds; divide by pitch to convert to wall-clock seconds
+            const wait = ((beat - phase) / this.pitch) * (quantize.strength / 100);
             if (this.quantizeTimer !== null) { clearTimeout(this.quantizeTimer); this.quantizeTimer = null; }
             this.quantizeTimer = setTimeout(() => { this.quantizeTimer = null; doStart(); }, wait * 1000);
             const acc = 90 + Math.round((quantize.strength / 100) * 9);
@@ -854,6 +862,7 @@ class Deck {
         $('pitch' + this.id).value = pct;
         if (this.source) this.source.playbackRate.value = this.pitch;
         if (this.bpm) $('bpm' + this.id).textContent = (this.bpm * this.pitch).toFixed(1) + ' BPM';
+        updatePredictor();
     }
 
     cue(i) {
@@ -1017,8 +1026,9 @@ $('quantStr').addEventListener('input', e => {
 let recorder = null, recChunks = [];
 $('recBtn').addEventListener('click', () => {
     ensureAudio();
-    if (recorder && recorder.state === 'recording') {
-        recorder.stop();
+    if (recorder && recorder.state !== 'inactive') {
+        // 'recording' → stop it; any other non-inactive state means onstop hasn't fired yet — stay busy
+        if (recorder.state === 'recording') recorder.stop();
         return;
     }
     recChunks = [];
