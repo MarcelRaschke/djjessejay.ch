@@ -311,7 +311,7 @@ input[type=range]::-moz-range-thumb {
 <div class="modal-bg" id="qrModal" role="dialog" aria-modal="true" aria-label="Mobile companion">
     <div class="modal">
         <h3>📱 Mobile Companion</h3>
-        <p style="font-size:.8rem;color:var(--dim)">Scan to open iVDJ SUPREME on your phone as a remote companion. WebSocket sync latency: ~12 ms (local network).</p>
+        <p style="font-size:.8rem;color:var(--dim)">Scan to open iVDJ SUPREME on your phone or tablet. Each device runs independently — real-time sync requires a companion server not included here.</p>
         <img id="qrImg" width="200" height="200" alt="QR code linking to this page">
         <div class="close-row"><button onclick="closeModal('qrModal')">Close</button></div>
     </div>
@@ -787,10 +787,16 @@ class Deck {
         // Re-apply or create loop region when looping is armed
         if (this.looping) {
             if (this.loopEnd > this.loopStart) {
-                // Bounds already exist (e.g. resuming a paused loop) — reuse them directly
-                src.loop = true;
-                src.loopStart = this.loopStart;
-                src.loopEnd = this.loopEnd;
+                if (at >= this.loopStart && at < this.loopEnd) {
+                    // Target inside loop — reuse bounds
+                    src.loop = true;
+                    src.loopStart = this.loopStart;
+                    src.loopEnd = this.loopEnd;
+                } else {
+                    // Seek landed outside loop — disengage so Web Audio doesn't clamp it back
+                    this.looping = false; this.loopStart = 0; this.loopEnd = 0;
+                    $('loop' + this.id).classList.remove('active');
+                }
             } else {
                 // Fresh arm (loop toggled before first play) — calculate from current position
                 this.startLoopRegion();
@@ -1232,10 +1238,10 @@ function handleVoice(text) {
     setStatus('🎤 "' + text + '"');
     const deckMatch = text.match(/deck\s+([abcd])/);
     const d = deckMatch ? deckById[deckMatch[1].toUpperCase()] : null;
-    if (/play/.test(text) && d) { if (!d.isPlaying) d.play(); }
-    else if (/pause/.test(text) && d) d.pause();
+    if (/pause/.test(text) && d) d.pause();
     else if (/stop all/.test(text)) decks.forEach(x => x.stop());
     else if (/stop/.test(text) && d) d.stop();
+    else if (/\bplay\b/.test(text) && d) { if (!d.isPlaying) d.play(); }
     else if (/sync/.test(text)) $('syncBtn').click();
     else if (/stop.*record|record.*stop/.test(text)) {
         if (recorder && recorder.state === 'recording') $('recBtn').click();
@@ -1269,7 +1275,7 @@ $('saveBtn').addEventListener('click', () => {
     });
     try {
         localStorage.setItem(SESSION_KEY, JSON.stringify(sessions.slice(0, 10)));
-        setStatus('Session saved to cloud storage (' + Math.min(sessions.length, 10) + '/10 slots).', 'ok');
+        setStatus('Session saved to browser storage (' + Math.min(sessions.length, 10) + '/10 slots).', 'ok');
     } catch (err) {
         setStatus('Session save failed: ' + err.message, 'err');
         return;
