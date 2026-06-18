@@ -354,17 +354,23 @@ function ensureAudio() {
 
     master.eqLow = ctx.createBiquadFilter();
     master.eqLow.type = 'lowshelf'; master.eqLow.frequency.value = 320;
+    master.eqLow.gain.value = parseFloat($('mEqLow').value);
     master.eqMid = ctx.createBiquadFilter();
     master.eqMid.type = 'peaking'; master.eqMid.frequency.value = 1000; master.eqMid.Q.value = 0.8;
+    master.eqMid.gain.value = parseFloat($('mEqMid').value);
     master.eqHigh = ctx.createBiquadFilter();
     master.eqHigh.type = 'highshelf'; master.eqHigh.frequency.value = 3200;
+    master.eqHigh.gain.value = parseFloat($('mEqHigh').value);
 
     master.comp = ctx.createDynamicsCompressor();
-    master.comp.threshold.value = -24; master.comp.ratio.value = 4;
-    master.comp.attack.value = 0.003; master.comp.release.value = 0.25;
+    master.comp.threshold.value = parseFloat($('cThresh').value);
+    master.comp.ratio.value = parseFloat($('cRatio').value);
+    master.comp.attack.value = parseFloat($('cAttack').value) / 1000;
+    master.comp.release.value = 0.25;
 
     master.limiter = ctx.createDynamicsCompressor();
-    master.limiter.threshold.value = -1; master.limiter.ratio.value = 20;
+    master.limiter.threshold.value = parseFloat($('limCeil').value);
+    master.limiter.ratio.value = 20;
     master.limiter.attack.value = 0.001; master.limiter.release.value = 0.1; master.limiter.knee.value = 0;
 
     master.analyser = ctx.createAnalyser();
@@ -801,9 +807,11 @@ class Deck {
             if (!isSeeking) this.killSource();
             const beat = 60 / this.bpm;
             // Use deck playback position (not AudioContext clock) for phase so snaps align to audible beats
-            const phase = (this.position() % beat);
+            const phase = this.position() % beat;
+            // If already on the beat (within 10 ms tolerance) snap immediately; otherwise wait for next beat
+            const remaining = phase < 0.01 ? 0 : beat - phase;
             // beat/phase are track-seconds; divide by pitch to convert to wall-clock seconds
-            const wait = ((beat - phase) / this.pitch) * (quantize.strength / 100);
+            const wait = (remaining / this.pitch) * (quantize.strength / 100);
             if (this.quantizeTimer !== null) { clearTimeout(this.quantizeTimer); this.quantizeTimer = null; }
             this.quantizeTimer = setTimeout(() => { this.quantizeTimer = null; doStart(); }, wait * 1000);
             const acc = 90 + Math.round((quantize.strength / 100) * 9);
@@ -935,6 +943,7 @@ class Deck {
             eq: { l: $('eqL' + this.id).value, m: $('eqM' + this.id).value, h: $('eqH' + this.id).value },
             vol: $('vol' + this.id).value,
             cues: this.hotCues, fx: this.fx, loopBars: this.loopBars,
+            looping: this.looping, loopStart: this.loopStart, loopEnd: this.loopEnd,
         };
     }
 
@@ -965,6 +974,17 @@ class Deck {
         if (s.loopBars) {
             this.loopBars = s.loopBars;
             $('loopSz' + this.id).value = String(s.loopBars);
+        }
+        if (s.looping !== undefined) {
+            this.looping = s.looping;
+            this.loopStart = s.loopStart || 0;
+            this.loopEnd = s.loopEnd || 0;
+            $('loop' + this.id).classList.toggle('active', this.looping);
+            if (this.looping && this.source) {
+                this.source.loop = true;
+                this.source.loopStart = this.loopStart;
+                this.source.loopEnd = this.loopEnd;
+            }
         }
     }
 }
@@ -1202,6 +1222,9 @@ function handleVoice(text) {
     else if (/stop all/.test(text)) decks.forEach(x => x.stop());
     else if (/stop/.test(text) && d) d.stop();
     else if (/sync/.test(text)) $('syncBtn').click();
+    else if (/stop.*record|record.*stop/.test(text)) {
+        if (recorder && recorder.state === 'recording') $('recBtn').click();
+    }
     else if (/record/.test(text)) $('recBtn').click();
     else if (/loop/.test(text) && d) d.toggleLoop();
     else if (/cue\s+(one|two|three|four|[1-4])/.test(text) && d) {
@@ -1288,6 +1311,7 @@ document.addEventListener('keydown', e => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' ||
         e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON' ||
         e.target.getAttribute('role') === 'button') return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.code === 'Space') { e.preventDefault(); deckById.A.togglePlay(); }
     else if (e.code === 'Enter') { e.preventDefault(); deckById.B.togglePlay(); }
     else if (e.key >= '1' && e.key <= '4') deckById.A.cue(parseInt(e.key) - 1);
