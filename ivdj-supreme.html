@@ -478,6 +478,7 @@ class Deck {
         this.trackName = '';
         this.quantizeTimer = null;
         this.pendingCues = null;
+        this.loadToken = 0;   // incremented on each load; stale decodes are discarded
         this.buildDOM(def.col);
     }
 
@@ -654,11 +655,14 @@ class Deck {
     async loadFile(file) {
         ensureAudio();
         this.initAudio();
+        const token = ++this.loadToken;   // each call gets a unique token
         setStatus(`Deck ${this.id}: decoding "${file.name}" …`);
         try {
             const arr = await file.arrayBuffer();
             // Decode into a temporary buffer first; only stop the live deck once we know it succeeded
             const newBuffer = await ctx.decodeAudioData(arr);
+            // A newer load started while we were awaiting; discard this stale result
+            if (token !== this.loadToken) return;
             this.stop();
             this.buffer = newBuffer;
             this.trackName = file.name;
@@ -751,8 +755,18 @@ class Deck {
         this.source = src;
         this.startedAt = ctx.currentTime;
         this.offset = at;
-        // Apply any pre-armed loop immediately so starting paused→play respects loop state
-        if (this.looping) this.startLoopRegion();
+        // Re-apply or create loop region when looping is armed
+        if (this.looping) {
+            if (this.loopEnd > this.loopStart) {
+                // Bounds already exist (e.g. resuming a paused loop) — reuse them directly
+                src.loop = true;
+                src.loopStart = this.loopStart;
+                src.loopEnd = this.loopEnd;
+            } else {
+                // Fresh arm (loop toggled before first play) — calculate from current position
+                this.startLoopRegion();
+            }
+        }
     }
 
     play(at) {
@@ -774,7 +788,8 @@ class Deck {
             // Plain play-from-pause: no source to preserve; kill immediately.
             if (!isSeeking) this.killSource();
             const beat = 60 / this.bpm;
-            const phase = (ctx.currentTime % beat);
+            // Use deck playback position (not AudioContext clock) for phase so snaps align to audible beats
+            const phase = (this.position() % beat);
             const wait = (beat - phase) * (quantize.strength / 100);
             if (this.quantizeTimer !== null) { clearTimeout(this.quantizeTimer); this.quantizeTimer = null; }
             this.quantizeTimer = setTimeout(() => { this.quantizeTimer = null; doStart(); }, wait * 1000);
@@ -1142,6 +1157,14 @@ $('voiceBtn').addEventListener('click', () => {
         const text = e.results[e.results.length - 1][0].transcript.toLowerCase().trim();
         handleVoice(text);
     };
+    recognition.onerror = e => {
+        // Permission denied or unrecoverable error — stop trying to restart
+        if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+            voiceOn = false;
+            $('voiceBtn').classList.remove('active');
+            setStatus('Voice control: microphone access denied.', 'err');
+        }
+    };
     recognition.onend = () => { if (voiceOn) recognition.start(); };
     recognition.start();
     voiceOn = true;
@@ -1152,7 +1175,7 @@ function handleVoice(text) {
     setStatus('🎤 "' + text + '"');
     const deckMatch = text.match(/deck\s+([abcd])/);
     const d = deckMatch ? deckById[deckMatch[1].toUpperCase()] : null;
-    if (/play/.test(text) && d) d.play();
+    if (/play/.test(text) && d) { if (!d.isPlaying) d.play(); }
     else if (/pause/.test(text) && d) d.pause();
     else if (/stop all/.test(text)) decks.forEach(x => x.stop());
     else if (/stop/.test(text) && d) d.stop();
