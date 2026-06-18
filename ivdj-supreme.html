@@ -657,8 +657,10 @@ class Deck {
         setStatus(`Deck ${this.id}: decoding "${file.name}" …`);
         try {
             const arr = await file.arrayBuffer();
+            // Decode into a temporary buffer first; only stop the live deck once we know it succeeded
+            const newBuffer = await ctx.decodeAudioData(arr);
             this.stop();
-            this.buffer = await ctx.decodeAudioData(arr);
+            this.buffer = newBuffer;
             this.trackName = file.name;
             this.bpm = detectBPM(this.buffer);
             this.energy = analyzeEnergy(this.buffer);
@@ -756,9 +758,10 @@ class Deck {
     play(at) {
         if (!this.buffer) return;
         ensureAudio();
-        if (this.isPlaying) this.killSource();
-        const target = at !== undefined ? at : this.offset;
+        const isSeeking = at !== undefined;
+        const target = isSeeking ? at : this.offset;
         const doStart = () => {
+            this.killSource();    // kill old source here, not before, so quantized seeks stay gapless
             this.startSource(target);
             this.isPlaying = true;
             this.el.classList.add('playing');
@@ -767,7 +770,9 @@ class Deck {
             haptic(30);
         };
         if (quantize.enabled && this.bpm > 0) {
-            // Recording quantization: snap start to the global beat grid
+            // Quantized seek while playing: keep old source alive until the new beat so there's no gap.
+            // Plain play-from-pause: no source to preserve; kill immediately.
+            if (!isSeeking) this.killSource();
             const beat = 60 / this.bpm;
             const phase = (ctx.currentTime % beat);
             const wait = (beat - phase) * (quantize.strength / 100);
@@ -886,9 +891,10 @@ class Deck {
     }
 
     syncTo(targetBPM) {
-        if (!this.bpm || !targetBPM) return;
+        if (!this.bpm || !targetBPM) return false;
         const pct = (targetBPM / this.bpm - 1) * 100;
-        if (Math.abs(pct) <= 15) this.setPitch(Math.round(pct * 10) / 10);
+        if (Math.abs(pct) <= 15) { this.setPitch(Math.round(pct * 10) / 10); return true; }
+        return false;
     }
 
     getState() {
@@ -923,6 +929,10 @@ class Deck {
             if (s.fx && s.fx[fx] !== this.fx[fx])
                 this.toggleFX(fx, fx === 'reverb' ? 'fxRev' : fx === 'delay' ? 'fxDel' : 'fxCho');
         });
+        if (s.loopBars) {
+            this.loopBars = s.loopBars;
+            $('loopSz' + this.id).value = String(s.loopBars);
+        }
     }
 }
 
@@ -965,8 +975,13 @@ $('syncBtn').addEventListener('click', () => {
     const ref = decks.find(d => d.bpm > 0);
     if (!ref) { setStatus('BPM sync: load at least one track first.', 'err'); return; }
     const target = ref.bpm * ref.pitch;
-    decks.forEach(d => { if (d !== ref && d.bpm > 0) d.syncTo(target); });
-    setStatus(`BPM sync: all decks matched to ${target.toFixed(1)} BPM (reference deck ${ref.id})`, 'ok');
+    const failed = [];
+    decks.forEach(d => { if (d !== ref && d.bpm > 0 && !d.syncTo(target)) failed.push(d.id); });
+    if (failed.length) {
+        setStatus(`BPM sync: deck(s) ${failed.join(', ')} outside ±15% range – adjust pitch manually or halve/double BPM`, 'err');
+    } else {
+        setStatus(`BPM sync: all decks matched to ${target.toFixed(1)} BPM (reference deck ${ref.id})`, 'ok');
+    }
     haptic(30);
 });
 
@@ -992,7 +1007,16 @@ $('recBtn').addEventListener('click', () => {
         return;
     }
     recChunks = [];
-    recorder = new MediaRecorder(master.recDest.stream);
+    if (typeof MediaRecorder === 'undefined') {
+        setStatus('Recording not supported in this browser.', 'err');
+        return;
+    }
+    try {
+        recorder = new MediaRecorder(master.recDest.stream);
+    } catch (err) {
+        setStatus('Recording unavailable: ' + err.message, 'err');
+        return;
+    }
     recorder.ondataavailable = e => { if (e.data.size) recChunks.push(e.data); };
     recorder.onstop = () => {
         const blob = new Blob(recChunks, { type: recorder.mimeType || 'audio/webm' });
