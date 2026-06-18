@@ -608,7 +608,7 @@ class Deck {
         $('loop' + id).addEventListener('click', () => this.toggleLoop());
         $('loopSz' + id).addEventListener('change', e => {
             this.loopBars = parseFloat(e.target.value);
-            if (this.looping && this.bpm > 0 && this.buffer) {
+            if (this.looping && this.bpm > 0 && this.buffer && this.loopEnd > this.loopStart) {
                 // Extend/shrink from the existing loopStart so the in-point never drifts
                 const barLen = (60 / this.bpm) * 4;
                 this.loopEnd = Math.min(this.loopStart + barLen * this.loopBars, this.buffer.duration);
@@ -1325,7 +1325,7 @@ $('qrBtn').addEventListener('click', () => {
 document.addEventListener('keydown', e => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' ||
         e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON' ||
-        e.target.getAttribute('role') === 'button') return;
+        e.target.tagName === 'A' || e.target.getAttribute('role') === 'button') return;
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.code === 'Space') { e.preventDefault(); deckById.A.togglePlay(); }
     else if (e.code === 'Enter') { e.preventDefault(); deckById.B.togglePlay(); }
