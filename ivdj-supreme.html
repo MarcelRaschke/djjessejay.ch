@@ -330,7 +330,15 @@ input[type=range]::-moz-range-thumb {
 const $ = id => document.getElementById(id);
 const statusLine = $('statusLine');
 function setStatus(msg, cls) {
-    statusLine.innerHTML = cls ? `<span class="${cls}">${msg}</span>` : msg;
+    statusLine.textContent = '';
+    if (cls) {
+        const span = document.createElement('span');
+        span.className = cls;
+        span.textContent = msg;
+        statusLine.appendChild(span);
+    } else {
+        statusLine.textContent = msg;
+    }
 }
 
 /* ---------- Audio engine (lazy init: browsers require a gesture) ---------- */
@@ -380,6 +388,7 @@ function ensureAudio() {
     master.splitter.connect(master.anR, 1);
 
     decks.forEach(d => d.initAudio());
+    applyCrossfaders();   // sync gain nodes to current slider positions
     setStatus('Audio engine online. Sample rate: ' + ctx.sampleRate + ' Hz', 'ok');
 }
 
@@ -462,9 +471,13 @@ class Deck {
         this.hotCues = [null, null, null, null];
         this.looping = false;
         this.loopBars = 1;
+        this.loopStart = 0;
+        this.loopEnd = 0;
         this.fx = { reverb: false, delay: false, chorus: false };
         this.energy = null;
         this.trackName = '';
+        this.quantizeTimer = null;
+        this.pendingCues = null;
         this.buildDOM(def.col);
     }
 
@@ -650,8 +663,10 @@ class Deck {
             this.bpm = detectBPM(this.buffer);
             this.energy = analyzeEnergy(this.buffer);
             this.offset = 0;
-            this.hotCues = [null, null, null, null];
-            for (let i = 0; i < 4; i++) $('cue' + this.id + i).classList.remove('set');
+            // Restore cues from a previous session restore if present, else clear them
+            this.hotCues = this.pendingCues ? [...this.pendingCues] : [null, null, null, null];
+            this.pendingCues = null;
+            for (let i = 0; i < 4; i++) $('cue' + this.id + i).classList.toggle('set', this.hotCues[i] !== null);
             $('track' + this.id).textContent = file.name;
             $('bpm' + this.id).textContent = this.bpm.toFixed(1) + ' BPM';
             $('hint' + this.id).style.display = 'none';
@@ -691,7 +706,13 @@ class Deck {
 
     position() {
         if (!this.buffer) return 0;
-        return this.isPlaying ? this.offset + (ctx.currentTime - this.startedAt) * this.pitch : this.offset;
+        if (!this.isPlaying) return this.offset;
+        const raw = this.offset + (ctx.currentTime - this.startedAt) * this.pitch;
+        if (this.looping && this.loopEnd > this.loopStart) {
+            const loopLen = this.loopEnd - this.loopStart;
+            return this.loopStart + ((raw - this.loopStart) % loopLen);
+        }
+        return raw;
     }
 
     drawPlayhead() {
@@ -728,6 +749,8 @@ class Deck {
         this.source = src;
         this.startedAt = ctx.currentTime;
         this.offset = at;
+        // Apply any pre-armed loop immediately so starting paused→play respects loop state
+        if (this.looping) this.startLoopRegion();
     }
 
     play(at) {
@@ -748,7 +771,8 @@ class Deck {
             const beat = 60 / this.bpm;
             const phase = (ctx.currentTime % beat);
             const wait = (beat - phase) * (quantize.strength / 100);
-            setTimeout(doStart, wait * 1000);
+            if (this.quantizeTimer !== null) { clearTimeout(this.quantizeTimer); this.quantizeTimer = null; }
+            this.quantizeTimer = setTimeout(() => { this.quantizeTimer = null; doStart(); }, wait * 1000);
             const acc = 90 + Math.round((quantize.strength / 100) * 9);
             $('quantAcc').textContent = 'ACC ' + acc + '%';
         } else {
@@ -765,6 +789,7 @@ class Deck {
     }
 
     pause() {
+        if (this.quantizeTimer !== null) { clearTimeout(this.quantizeTimer); this.quantizeTimer = null; }
         if (!this.isPlaying) return;
         this.offset = this.position();
         this.killSource();
@@ -777,10 +802,12 @@ class Deck {
     togglePlay() { this.isPlaying ? this.pause() : this.play(); }
 
     stop() {
+        if (this.quantizeTimer !== null) { clearTimeout(this.quantizeTimer); this.quantizeTimer = null; }
         this.killSource();
         this.isPlaying = false;
         this.offset = 0;
         this.looping = false;
+        this.loopStart = 0; this.loopEnd = 0;
         if (this.el) {
             this.el.classList.remove('playing');
             const btn = $('play' + this.id);
@@ -797,15 +824,15 @@ class Deck {
     }
 
     setPitch(pct) {
+        if (this.source) {
+            // Capture position at the OLD pitch BEFORE changing the rate
+            this.offset = this.position();
+            this.startedAt = ctx.currentTime;
+        }
         this.pitch = 1 + pct / 100;
         $('pitchV' + this.id).textContent = (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%';
         $('pitch' + this.id).value = pct;
-        if (this.source) {
-            // re-anchor position so the playhead math stays correct
-            this.offset = this.position();
-            this.startedAt = ctx.currentTime;
-            this.source.playbackRate.value = this.pitch;
-        }
+        if (this.source) this.source.playbackRate.value = this.pitch;
         if (this.bpm) $('bpm' + this.id).textContent = (this.bpm * this.pitch).toFixed(1) + ' BPM';
     }
 
@@ -837,10 +864,11 @@ class Deck {
     startLoopRegion() {
         if (!this.source || !this.bpm) return;
         const barLen = (60 / this.bpm) * 4;
-        const start = this.position();
+        this.loopStart = this.position();
+        this.loopEnd = Math.min(this.loopStart + barLen * this.loopBars, this.buffer.duration);
         this.source.loop = true;
-        this.source.loopStart = start;
-        this.source.loopEnd = Math.min(start + barLen * this.loopBars, this.buffer.duration);
+        this.source.loopStart = this.loopStart;
+        this.source.loopEnd = this.loopEnd;
     }
 
     stopLoopRegion() {
@@ -883,9 +911,13 @@ class Deck {
         });
         $('vol' + this.id).value = s.vol;
         $('vol' + this.id).dispatchEvent(new Event('input'));
-        if (this.buffer && s.cues) {
-            this.hotCues = s.cues;
-            s.cues.forEach((c, i) => $('cue' + this.id + i).classList.toggle('set', c !== null));
+        // Store cues as pending: applied on the next loadFile so they survive buffer-less restores
+        if (s.cues) {
+            this.pendingCues = [...s.cues];
+            if (this.buffer) {
+                this.hotCues = [...s.cues];
+                s.cues.forEach((c, i) => $('cue' + this.id + i).classList.toggle('set', c !== null));
+            }
         }
         ['reverb', 'delay', 'chorus'].forEach(fx => {
             if (s.fx && s.fx[fx] !== this.fx[fx])
@@ -1124,6 +1156,7 @@ $('saveBtn').addEventListener('click', () => {
         master: {
             eqLow: $('mEqLow').value, eqMid: $('mEqMid').value, eqHigh: $('mEqHigh').value,
             vol: $('mVol').value, thresh: $('cThresh').value, ratio: $('cRatio').value,
+            attack: $('cAttack').value, limCeil: $('limCeil').value,
             xfAB: $('xfAB').value, xfCD: $('xfCD').value,
         },
     });
@@ -1153,7 +1186,8 @@ window.restoreSession = function (i) {
     decks.forEach((d, j) => d.loadState(s.decks[j]));
     const m = s.master;
     [['mEqLow', m.eqLow], ['mEqMid', m.eqMid], ['mEqHigh', m.eqHigh], ['mVol', m.vol],
-     ['cThresh', m.thresh], ['cRatio', m.ratio], ['xfAB', m.xfAB], ['xfCD', m.xfCD]]
+     ['cThresh', m.thresh], ['cRatio', m.ratio], ['cAttack', m.attack], ['limCeil', m.limCeil],
+     ['xfAB', m.xfAB], ['xfCD', m.xfCD]]
         .forEach(([id, v]) => { $(id).value = v; $(id).dispatchEvent(new Event('input')); });
     closeModal('sessionModal');
     setStatus('Session restored: ' + s.name + ' (re-load audio files to restore tracks).', 'ok');
@@ -1177,7 +1211,8 @@ $('qrBtn').addEventListener('click', () => {
 
 /* ---------- Keyboard shortcuts ---------- */
 document.addEventListener('keydown', e => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' ||
+        e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON') return;
     if (e.code === 'Space') { e.preventDefault(); deckById.A.togglePlay(); }
     else if (e.code === 'Enter') { e.preventDefault(); deckById.B.togglePlay(); }
     else if (e.key >= '1' && e.key <= '4') deckById.A.cue(parseInt(e.key) - 1);
