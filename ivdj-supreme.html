@@ -350,7 +350,7 @@ function ensureAudio() {
     ctx = new (window.AudioContext || window.webkitAudioContext)();
 
     master.gain = ctx.createGain();
-    master.gain.gain.value = 0.85;
+    master.gain.gain.value = parseInt($('mVol').value) / 100;
 
     master.eqLow = ctx.createBiquadFilter();
     master.eqLow.type = 'lowshelf'; master.eqLow.frequency.value = 320;
@@ -500,6 +500,7 @@ class Deck {
                 <div class="wave-hint" id="hint${this.id}">▼ drop audio / click to load</div>
             </div>
             <div class="transport">
+                <button id="load${this.id}" aria-label="Load track on deck ${this.id}">⏏ LOAD</button>
                 <button class="play-btn" id="play${this.id}" aria-label="Play or pause deck ${this.id}">▶ PLAY</button>
                 <button id="stop${this.id}" aria-label="Stop deck ${this.id}">■ STOP</button>
             </div>
@@ -558,11 +559,11 @@ class Deck {
         const waveWrap = $('wave' + id);
         waveWrap.addEventListener('click', e => {
             if (this.buffer) this.seekFromEvent(e, waveWrap);
-            else this.pickFile();
         });
         waveWrap.addEventListener('keydown', e => {
-            if (e.key === 'Enter' && !this.buffer) this.pickFile();
+            if (e.key === 'Enter') this.pickFile();
         });
+        $('load' + id).addEventListener('click', () => this.pickFile());
         waveWrap.addEventListener('dragover', e => { e.preventDefault(); waveWrap.classList.add('dragover'); });
         waveWrap.addEventListener('dragleave', () => waveWrap.classList.remove('dragover'));
         waveWrap.addEventListener('drop', e => {
@@ -627,8 +628,11 @@ class Deck {
         // Sync gain to whatever the volume slider already shows (may have been set before audio init)
         n.gain.gain.value = parseInt($('vol' + this.id).value) / 100;
         n.eqLow = ctx.createBiquadFilter();  n.eqLow.type = 'lowshelf';  n.eqLow.frequency.value = 320;
+        n.eqLow.gain.value = parseFloat($('eqL' + this.id).value);
         n.eqMid = ctx.createBiquadFilter();  n.eqMid.type = 'peaking';   n.eqMid.frequency.value = 1000; n.eqMid.Q.value = 0.9;
+        n.eqMid.gain.value = parseFloat($('eqM' + this.id).value);
         n.eqHigh = ctx.createBiquadFilter(); n.eqHigh.type = 'highshelf'; n.eqHigh.frequency.value = 3200;
+        n.eqHigh.gain.value = parseFloat($('eqH' + this.id).value);
         n.analyser = ctx.createAnalyser(); n.analyser.fftSize = 256;
 
         // FX sends
@@ -1023,14 +1027,16 @@ $('quantStr').addEventListener('input', e => {
 });
 
 /* ---------- Recording (MediaRecorder on master bus) ---------- */
-let recorder = null, recChunks = [];
+let recorder = null, recChunks = [], recStopping = false;
 $('recBtn').addEventListener('click', () => {
     ensureAudio();
-    if (recorder && recorder.state !== 'inactive') {
-        // 'recording' → stop it; any other non-inactive state means onstop hasn't fired yet — stay busy
-        if (recorder.state === 'recording') recorder.stop();
+    if (recStopping) return;
+    if (recorder && recorder.state === 'recording') {
+        recStopping = true;
+        recorder.stop();
         return;
     }
+    if (recorder && recorder.state !== 'inactive') return;
     recChunks = [];
     if (typeof MediaRecorder === 'undefined') {
         setStatus('Recording not supported in this browser.', 'err');
@@ -1044,6 +1050,7 @@ $('recBtn').addEventListener('click', () => {
     }
     recorder.ondataavailable = e => { if (e.data.size) recChunks.push(e.data); };
     recorder.onstop = () => {
+        recStopping = false;
         const blob = new Blob(recChunks, { type: recorder.mimeType || 'audio/webm' });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
@@ -1217,8 +1224,13 @@ $('saveBtn').addEventListener('click', () => {
             xfAB: $('xfAB').value, xfCD: $('xfCD').value,
         },
     });
-    localStorage.setItem(SESSION_KEY, JSON.stringify(sessions.slice(0, 10)));
-    setStatus('Session saved to cloud storage (' + Math.min(sessions.length, 10) + '/10 slots).', 'ok');
+    try {
+        localStorage.setItem(SESSION_KEY, JSON.stringify(sessions.slice(0, 10)));
+        setStatus('Session saved to cloud storage (' + Math.min(sessions.length, 10) + '/10 slots).', 'ok');
+    } catch (err) {
+        setStatus('Session save failed: ' + err.message, 'err');
+        return;
+    }
     haptic([20, 10, 20]);
 });
 $('loadBtn').addEventListener('click', () => {
