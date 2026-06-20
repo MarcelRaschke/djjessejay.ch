@@ -6,9 +6,9 @@ set -euo pipefail
 service ssh start 2>/dev/null || true
 
 # Virtuellen Framebuffer starten (für GUI-Apps ohne echten Monitor)
+export DISPLAY=:1
 if ! pgrep Xvfb > /dev/null 2>&1; then
   Xvfb :1 -screen 0 1920x1080x24 &
-  export DISPLAY=:1
 fi
 
 # Fenster-Manager starten
@@ -17,16 +17,19 @@ if ! pgrep fluxbox > /dev/null 2>&1; then
 fi
 
 # HexStrike AI Server starten (Port 13145)
+HEXSTRIKE_STATUS="nicht gestartet"
 if ! curl -s http://127.0.0.1:13145/health &>/dev/null; then
   echo "[*] HexStrike AI hochfahren... Evil Corp schläft noch."
   PYTHONPATH=/opt/hexstrike-ai \
     /opt/hexstrike-ai/hexstrike-env/bin/python3 \
     /opt/hexstrike-ai/hexstrike_server.py --port 13145 \
     >> /var/log/hexstrike.log 2>&1 &
-  sleep 3
+  for _ in $(seq 1 15); do
+    sleep 1
+    curl -s http://127.0.0.1:13145/health &>/dev/null && break
+  done
 fi
 
-HEXSTRIKE_STATUS="nicht gestartet"
 if curl -s http://127.0.0.1:13145/health &>/dev/null; then
   HEXSTRIKE_STATUS="läuft auf Port 13145 ✓"
 fi

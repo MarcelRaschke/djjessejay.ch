@@ -171,16 +171,18 @@ install_hexstrike() {
   local SRC
   SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/hexstrike"
 
-  if [[ ! -d "$SRC" ]]; then
-    err "HexStrike-Quellverzeichnis nicht gefunden: $SRC"
-    exit 1
-  fi
-
-  if [[ -d "$DEST" ]]; then
-    info "HexStrike AI bereits vorhanden – aktualisiere aus lokalem Verzeichnis..."
-    cp -r "$SRC/"* "$DEST/"
+  if [[ -d "$SRC" ]]; then
+    if [[ -d "$DEST" ]]; then
+      info "HexStrike AI bereits vorhanden – aktualisiere aus lokalem Verzeichnis..."
+      cp -r "$SRC/"* "$DEST/"
+    else
+      cp -r "$SRC" "$DEST"
+    fi
+  elif [[ -d "$DEST" ]]; then
+    info "HexStrike AI bereits installiert – überspringe Kopieren."
   else
-    cp -r "$SRC" "$DEST"
+    warn "Lokales Verzeichnis nicht gefunden: $SRC – klone von GitHub..."
+    git clone --depth 1 https://github.com/0x4m4/hexstrike-ai.git "$DEST"
   fi
 
   python3 -m venv "$DEST/hexstrike-env"

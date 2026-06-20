@@ -30,11 +30,13 @@ fi
 
 log "Wrangler Version: $(wrangler --version)"
 
+# ---- Wechsle ins Skript-Verzeichnis (wrangler.toml befindet sich hier) ----
+cd "$SCRIPT_DIR"
+
 # ---- API-Key konfigurieren ----
 if [ -z "${ANTHROPIC_API_KEY:-}" ]; then
   warn "ANTHROPIC_API_KEY nicht gesetzt."
   warn "Jetzt als Cloudflare Secret hinterlegen (sicher, wird nicht in Git gespeichert):"
-  cd "$SCRIPT_DIR"
   wrangler secret put ANTHROPIC_API_KEY
 else
   log "ANTHROPIC_API_KEY gefunden – als Cloudflare Secret speichern..."
@@ -43,7 +45,6 @@ fi
 
 # ---- Gateway deployen ----
 log "Deploye Worker nach Cloudflare..."
-cd "$SCRIPT_DIR"
 wrangler deploy
 
 log "Gateway erfolgreich deployed!"

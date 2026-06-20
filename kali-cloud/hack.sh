@@ -100,7 +100,8 @@ run_web_agent() {
 run_enum_agent() {
   echo -e "${GREEN}[DARLENE] Enumeriere alle Services. Kein Stein bleibt auf dem anderen.${RESET}"
   # Wartet auf recon.json
-  ( while [[ ! -f "${WORKSPACE}/recon.json" ]]; do sleep 5; done
+  ( WAIT=0; until [[ -f "${WORKSPACE}/recon.json" ]] || (( WAIT >= 300 )); do sleep 5; (( WAIT += 5 )) || true; done
+    [[ -f "${WORKSPACE}/recon.json" ]] || echo "[!] Timeout: recon.json – starte Enum mit verfügbaren Daten"
     claude --model claude-opus-4-6 \
       --system-prompt "$(cat /opt/kali-cloud/agents/enum-agent.md 2>/dev/null || cat ~/kali-cloud/agents/enum-agent.md)" \
       --print \
@@ -116,7 +117,8 @@ run_enum_agent() {
 # ── SubAgent: Exploit ──────────────────────────────────────────────────────────
 run_exploit_agent() {
   echo -e "${GREEN}[MR. ROBOT] Es ist Zeit. Wir tun, was getan werden muss.${RESET}"
-  ( while [[ ! -f "${WORKSPACE}/enum.json" ]]; do sleep 5; done
+  ( WAIT=0; until [[ -f "${WORKSPACE}/enum.json" ]] || (( WAIT >= 300 )); do sleep 5; (( WAIT += 5 )) || true; done
+    [[ -f "${WORKSPACE}/enum.json" ]] || echo "[!] Timeout: enum.json – starte Exploit mit verfügbaren Daten"
     claude --model claude-opus-4-6 \
       --system-prompt "$(cat /opt/kali-cloud/agents/exploit-agent.md 2>/dev/null || cat ~/kali-cloud/agents/exploit-agent.md)" \
       --print \
@@ -167,7 +169,7 @@ monitor_agents() {
       pid="${!pid_var:-0}"
       if kill -0 "$pid" 2>/dev/null; then
         echo -n "${pid_var%_PID}($pid) "
-        ((ACTIVE++))
+        (( ++ACTIVE ))
       fi
     done
     echo ""
