@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iVDJ SUPREME 👑 – Professional DJ Workstation | DJ Jesse Jay</title>
+<meta name="description" content="iVDJ SUPREME – browser-native professional 4-deck DJ workstation with Web Audio API: EQ, effects, hot cues, looping, BPM sync, mastering suite, recording, MIDI, voice control.">
+<meta name="author" content="DJ Jesse Jay, Marcel Raschke">
+<style>
+:root {
+    --cyan: #00f0ff;
+    --magenta: #ff00e0;
+    --lime: #aaff00;
+    --orange: #ff9500;
+    --bg: #06080f;
+    --panel: #0c1020;
+    --panel2: #11162c;
+    --border: #1e2747;
+    --text: #cfe3ff;
+    --dim: #6b7a9e;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    background: radial-gradient(ellipse at 50% -20%, #141b3a 0%, var(--bg) 60%);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+body.high-contrast {
+    --bg: #000; --panel: #000; --panel2: #111; --border: #fff;
+    --text: #fff; --dim: #ddd;
+}
+body.high-contrast .deck, body.high-contrast .center-panel, body.high-contrast .bottom-bar {
+    border-width: 2px;
+}
+.mono { font-family: 'Consolas', 'Courier New', monospace; }
+
+/* ===== Header ===== */
+header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 18px; flex-wrap: wrap; gap: 10px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(20,27,58,.8), rgba(6,8,15,.4));
+}
+.logo {
+    font-size: 1.5rem; font-weight: 800; letter-spacing: 2px;
+    background: linear-gradient(90deg, var(--cyan), var(--magenta), var(--lime));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    text-shadow: none;
+}
+.logo .crown { -webkit-text-fill-color: initial; }
+.header-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+button {
+    background: var(--panel2); color: var(--text); border: 1px solid var(--border);
+    border-radius: 6px; padding: 7px 12px; cursor: pointer; font-size: .8rem;
+    font-weight: 600; letter-spacing: .5px; transition: all .15s;
+}
+button:hover { border-color: var(--cyan); box-shadow: 0 0 10px rgba(0,240,255,.25); }
+button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+button.active { background: var(--cyan); color: #001018; border-color: var(--cyan); box-shadow: 0 0 14px rgba(0,240,255,.5); }
+button.rec-active { background: #ff2244; color: #fff; border-color: #ff2244; animation: recblink 1s infinite; }
+@keyframes recblink { 0%,100%{box-shadow:0 0 16px rgba(255,34,68,.8)} 50%{box-shadow:0 0 4px rgba(255,34,68,.3)} }
+button:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ===== Main grid ===== */
+.workstation {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr 1fr;
+    gap: 12px; padding: 12px;
+    max-width: 1800px; margin: 0 auto;
+}
+@media (max-width: 1100px) { .workstation { grid-template-columns: 1fr 1fr; } .center-panel { order: -1; grid-column: 1 / -1; } }
+@media (max-width: 640px)  { .workstation { grid-template-columns: 1fr; } }
+.deck-col { display: flex; flex-direction: column; gap: 12px; }
+
+/* ===== Deck ===== */
+.deck {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px; position: relative;
+}
+.deck[data-color="cyan"]    { --accent: var(--cyan); }
+.deck[data-color="magenta"] { --accent: var(--magenta); }
+.deck[data-color="lime"]    { --accent: var(--lime); }
+.deck[data-color="orange"]  { --accent: var(--orange); }
+.deck.playing { box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 35%, transparent); border-color: var(--accent); }
+.deck-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.deck-title { font-weight: 800; color: var(--accent); letter-spacing: 1px; }
+.deck-bpm { font-size: .85rem; color: var(--accent); }
+.track-name { font-size: .72rem; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 6px; min-height: 1em; }
+.wave-wrap { position: relative; height: 64px; background: #060a18; border-radius: 6px; overflow: hidden; cursor: pointer; border: 1px solid var(--border); }
+.wave-wrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.wave-wrap.dragover { border-color: var(--accent); box-shadow: inset 0 0 20px color-mix(in srgb, var(--accent) 30%, transparent); }
+.wave-hint { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: .7rem; color: var(--dim); pointer-events: none; }
+.transport { display: flex; gap: 6px; margin: 8px 0; }
+.transport button { flex: 1; padding: 8px 4px; }
+.transport .play-btn.active { background: var(--accent); border-color: var(--accent); color: #001018; }
+.deck-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+.deck-row label { font-size: .68rem; color: var(--dim); width: 44px; flex-shrink: 0; text-transform: uppercase; letter-spacing: 1px; }
+.deck-row .val { font-size: .68rem; width: 48px; text-align: right; color: var(--accent); }
+input[type=range] {
+    -webkit-appearance: none; appearance: none; flex: 1; height: 4px; border-radius: 2px;
+    background: var(--border); outline: none; cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 14px; height: 14px; border-radius: 50%;
+    background: var(--accent, var(--cyan)); box-shadow: 0 0 8px var(--accent, var(--cyan)); cursor: pointer;
+}
+input[type=range]::-moz-range-thumb {
+    width: 14px; height: 14px; border-radius: 50%; border: none;
+    background: var(--accent, var(--cyan)); box-shadow: 0 0 8px var(--accent, var(--cyan)); cursor: pointer;
+}
+.deck input[type=range]::-webkit-slider-thumb { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+.deck input[type=range]::-moz-range-thumb { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+.cues { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 8px 0; }
+.cue-btn { padding: 7px 2px; font-size: .7rem; }
+.cue-btn.set { background: color-mix(in srgb, var(--accent) 28%, var(--panel2)); border-color: var(--accent); }
+.fx-row { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.fx-row button { flex: 1; font-size: .68rem; padding: 6px 4px; min-width: 54px; }
+.fx-row button.active { background: var(--accent); border-color: var(--accent); color: #001018; }
+.loop-row { display: flex; gap: 6px; margin-top: 8px; align-items: center; }
+.loop-row select {
+    background: var(--panel2); color: var(--text); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px; font-size: .72rem;
+}
+.deck-meter { height: 5px; border-radius: 3px; background: var(--border); margin-top: 8px; overflow: hidden; }
+.deck-meter > div { height: 100%; width: 0%; background: linear-gradient(90deg, var(--lime), #ffe000 70%, #ff2244); transition: width .05s linear; }
+
+/* ===== Center panel ===== */
+.center-panel {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px; display: flex; flex-direction: column; gap: 12px;
+}
+.viz-wrap { position: relative; height: 240px; background: #04060f; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+#vizCanvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.viz-modes { display: flex; gap: 5px; flex-wrap: wrap; }
+.viz-modes button { flex: 1; font-size: .66rem; padding: 6px 2px; min-width: 64px; }
+.section-label { font-size: .68rem; color: var(--dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; }
+.xf-row { display: flex; align-items: center; gap: 10px; }
+.xf-row span { font-weight: 800; font-size: .9rem; width: 18px; text-align: center; }
+.master-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.master-box { background: var(--panel2); border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
+.master-box .deck-row label { width: 64px; }
+.vu-wrap { display: flex; gap: 8px; align-items: flex-end; height: 70px; }
+.vu { flex: 1; background: #060a18; border: 1px solid var(--border); border-radius: 4px; position: relative; overflow: hidden; height: 100%; }
+.vu > div { position: absolute; bottom: 0; left: 0; right: 0; height: 0%; background: linear-gradient(0deg, var(--lime), #ffe000 70%, #ff2244); transition: height .05s linear; }
+.predictor { font-size: .72rem; line-height: 1.5; background: var(--panel2); border: 1px solid var(--border); border-radius: 8px; padding: 10px; min-height: 56px; }
+.predictor strong { color: var(--cyan); }
+.predictor .warn { color: var(--orange); }
+
+/* ===== Bottom bar ===== */
+.bottom-bar {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    margin: 0 12px 12px; padding: 10px 14px; max-width: 1776px;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+}
+.bottom-bar .group { display: flex; align-items: center; gap: 8px; }
+.bottom-bar .sep { width: 1px; height: 26px; background: var(--border); }
+.bottom-bar label { font-size: .68rem; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; }
+.bottom-bar input[type=range] { width: 90px; }
+.status-line {
+    margin: 0 12px 12px; padding: 6px 14px; max-width: 1776px;
+    font-size: .72rem; color: var(--dim); min-height: 1.6em;
+}
+.status-line .ok { color: var(--lime); }
+.status-line .err { color: #ff5577; }
+
+/* ===== Modal ===== */
+.modal-bg {
+    position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(4px);
+    display: none; align-items: center; justify-content: center; z-index: 100;
+}
+.modal-bg.show { display: flex; }
+.modal {
+    background: var(--panel); border: 1px solid var(--cyan); border-radius: 12px;
+    padding: 22px; max-width: 440px; width: 92%; max-height: 80vh; overflow-y: auto;
+    box-shadow: 0 0 40px rgba(0,240,255,.25);
+}
+.modal h3 { color: var(--cyan); margin-bottom: 12px; letter-spacing: 1px; }
+.modal .session-item {
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    padding: 8px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 6px; font-size: .78rem;
+}
+.modal .close-row { margin-top: 14px; text-align: right; }
+#qrImg { display: block; margin: 10px auto; border-radius: 8px; background: #fff; padding: 8px; }
+.back-link { color: var(--dim); text-decoration: none; font-size: .75rem; }
+.back-link:hover { color: var(--cyan); }
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<header role="banner">
+    <div style="display:flex;align-items:center;gap:14px;">
+        <div class="logo"><span class="crown">👑</span> iVDJ SUPREME</div>
+        <a class="back-link" href="index.html" aria-label="Back to DJ Jesse Jay homepage">← djjessejay.ch</a>
+    </div>
+    <div class="header-controls" role="toolbar" aria-label="Global controls">
+        <button id="midiBtn" aria-label="Enable MIDI controller support">🎹 MIDI</button>
+        <button id="voiceBtn" aria-label="Toggle voice control">🎤 VOICE</button>
+        <button id="hapticBtn" aria-label="Toggle haptic feedback">📳 HAPTIC</button>
+        <button id="contrastBtn" aria-label="Toggle high contrast mode">◐ CONTRAST</button>
+        <button id="recBtn" aria-label="Start or stop master recording">● REC</button>
+    </div>
+</header>
+
+<main class="workstation" role="application" aria-label="iVDJ SUPREME DJ workstation">
+    <div class="deck-col" id="colLeft"></div>
+
+    <div class="center-panel">
+        <div>
+            <div class="section-label">Visual FX Engine</div>
+            <div class="viz-wrap"><canvas id="vizCanvas" aria-hidden="true"></canvas></div>
+            <div class="viz-modes" role="group" aria-label="Visualizer mode" style="margin-top:6px;">
+                <button data-viz="spectrum" class="active">SPECTRUM</button>
+                <button data-viz="circular">CIRCULAR</button>
+                <button data-viz="waveform">WAVEFORM</button>
+                <button data-viz="phase">PHASE</button>
+                <button data-viz="dna">DNA HELIX</button>
+                <button data-viz="galaxy">GALAXY</button>
+            </div>
+        </div>
+
+        <div>
+            <div class="section-label">Crossfaders</div>
+            <div class="xf-row">
+                <span style="color:var(--cyan)">A</span>
+                <input type="range" id="xfAB" min="0" max="100" value="50" aria-label="Crossfader deck A to deck B">
+                <span style="color:var(--magenta)">B</span>
+            </div>
+            <div class="xf-row" style="margin-top:6px;">
+                <span style="color:var(--lime)">C</span>
+                <input type="range" id="xfCD" min="0" max="100" value="50" aria-label="Crossfader deck C to deck D">
+                <span style="color:var(--orange)">D</span>
+            </div>
+        </div>
+
+        <div class="master-grid">
+            <div class="master-box">
+                <div class="section-label">Mastering Suite – EQ</div>
+                <div class="deck-row"><label for="mEqLow">Low</label><input type="range" id="mEqLow" min="-12" max="12" value="0" step="0.5"><span class="val" id="mEqLowV">0 dB</span></div>
+                <div class="deck-row"><label for="mEqMid">Mid</label><input type="range" id="mEqMid" min="-12" max="12" value="0" step="0.5"><span class="val" id="mEqMidV">0 dB</span></div>
+                <div class="deck-row"><label for="mEqHigh">High</label><input type="range" id="mEqHigh" min="-12" max="12" value="0" step="0.5"><span class="val" id="mEqHighV">0 dB</span></div>
+                <div class="deck-row"><label for="mVol">Master</label><input type="range" id="mVol" min="0" max="100" value="85"><span class="val" id="mVolV">85%</span></div>
+            </div>
+            <div class="master-box">
+                <div class="section-label">Compressor / Limiter</div>
+                <div class="deck-row"><label for="cThresh">Thresh</label><input type="range" id="cThresh" min="-60" max="0" value="-24"><span class="val" id="cThreshV">-24 dB</span></div>
+                <div class="deck-row"><label for="cRatio">Ratio</label><input type="range" id="cRatio" min="1" max="20" value="4" step="0.5"><span class="val" id="cRatioV">4:1</span></div>
+                <div class="deck-row"><label for="cAttack">Attack</label><input type="range" id="cAttack" min="0" max="100" value="3"><span class="val" id="cAttackV">3 ms</span></div>
+                <div class="deck-row"><label for="limCeil">Ceiling</label><input type="range" id="limCeil" min="-12" max="0" value="-1" step="0.5"><span class="val" id="limCeilV">-1 dB</span></div>
+            </div>
+        </div>
+
+        <div>
+            <div class="section-label">Master VU</div>
+            <div class="vu-wrap">
+                <div class="vu" aria-label="Left channel level"><div id="vuL"></div></div>
+                <div class="vu" aria-label="Right channel level"><div id="vuR"></div></div>
+            </div>
+        </div>
+
+        <div>
+            <div class="section-label">Predictive Mix Points (AI)</div>
+            <div class="predictor" id="predictor" aria-live="polite">Load tracks on two decks to receive AI transition suggestions.</div>
+        </div>
+    </div>
+
+    <div class="deck-col" id="colRight"></div>
+</main>
+
+<div class="bottom-bar" role="toolbar" aria-label="Session and quantization controls">
+    <div class="group">
+        <button id="quantBtn" aria-label="Toggle recording quantization">⏱ QUANTIZE</button>
+        <label for="quantStr">Strength</label>
+        <input type="range" id="quantStr" min="0" max="100" value="100" aria-label="Quantization strength">
+        <span class="val mono" id="quantAcc" style="font-size:.72rem;color:var(--lime)">ACC 97%</span>
+    </div>
+    <div class="sep"></div>
+    <div class="group">
+        <button id="syncBtn" aria-label="Sync all deck BPMs to deck A">🔗 BPM SYNC</button>
+    </div>
+    <div class="sep"></div>
+    <div class="group">
+        <button id="saveBtn" aria-label="Save session to cloud storage">☁ SAVE</button>
+        <button id="loadBtn" aria-label="Load session from cloud storage">📂 LOAD</button>
+    </div>
+    <div class="sep"></div>
+    <div class="group">
+        <button id="qrBtn" aria-label="Show mobile companion QR code">📱 MOBILE</button>
+    </div>
+    <div class="group" style="margin-left:auto;">
+        <span class="mono" id="clock" style="font-size:.75rem;color:var(--dim)"></span>
+    </div>
+</div>
+
+<div class="status-line mono" id="statusLine" role="status" aria-live="polite">
+    Ready. Drop audio files onto a deck waveform, or click it to browse. Keyboard: [Space] Play A · [Enter] Play B · [1-4] Cues A · [7-0] Cues B
+</div>
+
+<div class="modal-bg" id="sessionModal" role="dialog" aria-modal="true" aria-label="Session browser">
+    <div class="modal">
+        <h3>☁ Session Browser</h3>
+        <div id="sessionList"></div>
+        <div class="close-row"><button onclick="closeModal('sessionModal')">Close</button></div>
+    </div>
+</div>
+
+<div class="modal-bg" id="qrModal" role="dialog" aria-modal="true" aria-label="Mobile companion">
+    <div class="modal">
+        <h3>📱 Mobile Companion</h3>
+        <p style="font-size:.8rem;color:var(--dim)">Scan to open iVDJ SUPREME on your phone or tablet. Each device runs independently — real-time sync requires a companion server not included here.</p>
+        <img id="qrImg" width="200" height="200" alt="QR code linking to this page">
+        <div class="close-row"><button onclick="closeModal('qrModal')">Close</button></div>
+    </div>
+</div>
+
+<input type="file" id="filePicker" accept="audio/*" style="display:none" aria-hidden="true">
+
+<script>
+'use strict';
+
+/* ================================================================
+   iVDJ SUPREME – Professional DJ Workstation
+   Web Audio API · Canvas 2D · WebMIDI · Web Speech · Vibration
+   ================================================================ */
+
+const $ = id => document.getElementById(id);
+const statusLine = $('statusLine');
+function setStatus(msg, cls) {
+    statusLine.textContent = '';
+    if (cls) {
+        const span = document.createElement('span');
+        span.className = cls;
+        span.textContent = msg;
+        statusLine.appendChild(span);
+    } else {
+        statusLine.textContent = msg;
+    }
+}
+
+/* ---------- Audio engine (lazy init: browsers require a gesture) ---------- */
+let ctx = null;
+const master = {};
+
+function ensureAudio() {
+    if (ctx) { if (ctx.state === 'suspended') ctx.resume(); return; }
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+    master.gain = ctx.createGain();
+    master.gain.gain.value = parseInt($('mVol').value) / 100;
+
+    master.eqLow = ctx.createBiquadFilter();
+    master.eqLow.type = 'lowshelf'; master.eqLow.frequency.value = 320;
+    master.eqLow.gain.value = parseFloat($('mEqLow').value);
+    master.eqMid = ctx.createBiquadFilter();
+    master.eqMid.type = 'peaking'; master.eqMid.frequency.value = 1000; master.eqMid.Q.value = 0.8;
+    master.eqMid.gain.value = parseFloat($('mEqMid').value);
+    master.eqHigh = ctx.createBiquadFilter();
+    master.eqHigh.type = 'highshelf'; master.eqHigh.frequency.value = 3200;
+    master.eqHigh.gain.value = parseFloat($('mEqHigh').value);
+
+    master.comp = ctx.createDynamicsCompressor();
+    master.comp.threshold.value = parseFloat($('cThresh').value);
+    master.comp.ratio.value = parseFloat($('cRatio').value);
+    master.comp.attack.value = parseFloat($('cAttack').value) / 1000;
+    master.comp.release.value = 0.25;
+
+    master.limiter = ctx.createDynamicsCompressor();
+    master.limiter.threshold.value = parseFloat($('limCeil').value);
+    master.limiter.ratio.value = 20;
+    master.limiter.attack.value = 0.001; master.limiter.release.value = 0.1; master.limiter.knee.value = 0;
+
+    master.analyser = ctx.createAnalyser();
+    master.analyser.fftSize = 512;
+    master.splitter = ctx.createChannelSplitter(2);
+    master.anL = ctx.createAnalyser(); master.anL.fftSize = 256;
+    master.anR = ctx.createAnalyser(); master.anR.fftSize = 256;
+
+    master.recDest = ctx.createMediaStreamDestination();
+
+    master.gain.connect(master.eqLow);
+    master.eqLow.connect(master.eqMid);
+    master.eqMid.connect(master.eqHigh);
+    master.eqHigh.connect(master.comp);
+    master.comp.connect(master.limiter);
+    master.limiter.connect(master.analyser);
+    master.analyser.connect(ctx.destination);
+    master.limiter.connect(master.recDest);
+    master.limiter.connect(master.splitter);
+    master.splitter.connect(master.anL, 0);
+    master.splitter.connect(master.anR, 1);
+
+    decks.forEach(d => d.initAudio());
+    applyCrossfaders();   // sync gain nodes to current slider positions
+    setStatus('Audio engine online. Sample rate: ' + ctx.sampleRate + ' Hz', 'ok');
+}
+
+/* ---------- Synthetic impulse response for reverb ---------- */
+function makeImpulse(seconds, decay) {
+    const rate = ctx.sampleRate, len = rate * seconds;
+    const buf = ctx.createBuffer(2, len, rate);
+    for (let ch = 0; ch < 2; ch++) {
+        const d = buf.getChannelData(ch);
+        for (let i = 0; i < len; i++)
+            d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay);
+    }
+    return buf;
+}
+
+/* ---------- BPM detection (energy-based onset analysis) ---------- */
+function detectBPM(buffer) {
+    const data = buffer.getChannelData(0);
+    const rate = buffer.sampleRate;
+    const maxSamples = Math.min(data.length, rate * 180); // cap at 3 min — enough for BPM, avoids UI freeze on long files
+    const win = Math.floor(rate * 0.05);             // 50 ms windows
+    const energies = [];
+    for (let i = 0; i + win < maxSamples; i += win) {
+        let sum = 0;
+        for (let j = i; j < i + win; j++) sum += data[j] * data[j];
+        energies.push(Math.sqrt(sum / win));
+    }
+    const peaks = [];
+    for (let i = 1; i < energies.length - 1; i++) {
+        if (energies[i] > energies[i - 1] * 1.4 && energies[i] > energies[i + 1] && energies[i] > 0.04)
+            peaks.push(i);
+    }
+    if (peaks.length < 4) return 120;
+    const intervals = [];
+    for (let i = 1; i < peaks.length; i++) intervals.push(peaks[i] - peaks[i - 1]);
+    intervals.sort((a, b) => a - b);
+    const median = intervals[Math.floor(intervals.length / 2)];
+    let bpm = 60 / (median * 0.05);
+    while (bpm < 60) bpm *= 2;
+    while (bpm > 200) bpm /= 2;
+    return Math.round(bpm * 10) / 10;
+}
+
+/* ---------- Energy profile (for predictive mix points) ---------- */
+function analyzeEnergy(buffer) {
+    const data = buffer.getChannelData(0);
+    const rate = buffer.sampleRate;
+    const seg = rate * 5;                            // 5-second segments
+    const out = [];
+    for (let i = 0; i < data.length; i += seg) {
+        let sum = 0;
+        const end = Math.min(i + seg, data.length);
+        for (let j = i; j < end; j += 16) sum += Math.abs(data[j]);
+        out.push(sum / ((end - i) / 16));
+    }
+    const max = Math.max(...out, 1e-9);
+    return out.map(e => e / max);
+}
+
+/* ================================================================
+   Deck
+   ================================================================ */
+const DECK_DEFS = [
+    { id: 'A', color: 'cyan',    col: 'colLeft'  },
+    { id: 'B', color: 'magenta', col: 'colRight' },
+    { id: 'C', color: 'lime',    col: 'colLeft'  },
+    { id: 'D', color: 'orange',  col: 'colRight' },
+];
+
+class Deck {
+    constructor(def) {
+        this.id = def.id;
+        this.color = def.color;
+        this.buffer = null;
+        this.source = null;
+        this.isPlaying = false;
+        this.startedAt = 0;       // ctx.currentTime when playback started
+        this.offset = 0;          // seconds into track when paused
+        this.bpm = 0;
+        this.pitch = 1;
+        this.hotCues = [null, null, null, null];
+        this.looping = false;
+        this.loopBars = 1;
+        this.loopStart = 0;
+        this.loopEnd = 0;
+        this.fx = { reverb: false, delay: false, chorus: false };
+        this.energy = null;
+        this.trackName = '';
+        this.quantizeTimer = null;
+        this.pendingCues = null;
+        this.loadToken = 0;   // incremented on each load; stale decodes are discarded
+        this.buildDOM(def.col);
+    }
+
+    buildDOM(colId) {
+        const el = document.createElement('section');
+        el.className = 'deck';
+        el.dataset.color = this.color;
+        el.setAttribute('aria-label', 'Deck ' + this.id);
+        el.innerHTML = `
+            <div class="deck-head">
+                <span class="deck-title">DECK ${this.id}</span>
+                <span class="deck-bpm mono" id="bpm${this.id}">--- BPM</span>
+            </div>
+            <div class="track-name mono" id="track${this.id}">no track loaded</div>
+            <div class="wave-wrap" id="wave${this.id}" role="button" tabindex="0"
+                 aria-label="Load track on deck ${this.id} or seek">
+                <canvas id="waveC${this.id}"></canvas>
+                <canvas id="playC${this.id}"></canvas>
+                <div class="wave-hint" id="hint${this.id}">▼ drop audio / click to load</div>
+            </div>
+            <div class="transport">
+                <button id="load${this.id}" aria-label="Load track on deck ${this.id}">⏏ LOAD</button>
+                <button class="play-btn" id="play${this.id}" aria-label="Play or pause deck ${this.id}">▶ PLAY</button>
+                <button id="stop${this.id}" aria-label="Stop deck ${this.id}">■ STOP</button>
+            </div>
+            <div class="deck-row">
+                <label for="pitch${this.id}">Pitch</label>
+                <input type="range" id="pitch${this.id}" min="-15" max="15" value="0" step="0.1">
+                <span class="val mono" id="pitchV${this.id}">+0.0%</span>
+            </div>
+            <div class="deck-row">
+                <label for="eqL${this.id}">Low</label>
+                <input type="range" id="eqL${this.id}" min="-24" max="12" value="0">
+                <span class="val mono" id="eqLV${this.id}">0 dB</span>
+            </div>
+            <div class="deck-row">
+                <label for="eqM${this.id}">Mid</label>
+                <input type="range" id="eqM${this.id}" min="-24" max="12" value="0">
+                <span class="val mono" id="eqMV${this.id}">0 dB</span>
+            </div>
+            <div class="deck-row">
+                <label for="eqH${this.id}">High</label>
+                <input type="range" id="eqH${this.id}" min="-24" max="12" value="0">
+                <span class="val mono" id="eqHV${this.id}">0 dB</span>
+            </div>
+            <div class="deck-row">
+                <label for="vol${this.id}">Vol</label>
+                <input type="range" id="vol${this.id}" min="0" max="100" value="100">
+                <span class="val mono" id="volV${this.id}">100%</span>
+            </div>
+            <div class="cues" role="group" aria-label="Hot cues deck ${this.id}">
+                ${[0,1,2,3].map(i => `<button class="cue-btn" id="cue${this.id}${i}"
+                    aria-label="Hot cue ${i+1} deck ${this.id}">CUE ${i+1}</button>`).join('')}
+            </div>
+            <div class="loop-row">
+                <button id="loop${this.id}" style="flex:1" aria-label="Toggle loop deck ${this.id}">⟳ LOOP</button>
+                <select id="loopSz${this.id}" aria-label="Loop size deck ${this.id}">
+                    <option value="0.25">1/4 bar</option>
+                    <option value="0.5">1/2 bar</option>
+                    <option value="1" selected>1 bar</option>
+                    <option value="2">2 bars</option>
+                    <option value="4">4 bars</option>
+                </select>
+            </div>
+            <div class="fx-row" role="group" aria-label="Effects deck ${this.id}">
+                <button id="fxRev${this.id}">REVERB</button>
+                <button id="fxDel${this.id}">DELAY</button>
+                <button id="fxCho${this.id}">CHORUS</button>
+            </div>
+            <div class="deck-meter"><div id="meter${this.id}"></div></div>`;
+        $(colId).appendChild(el);
+        this.el = el;
+        this.bindUI();
+    }
+
+    bindUI() {
+        const id = this.id;
+        const waveWrap = $('wave' + id);
+        waveWrap.addEventListener('click', e => {
+            if (this.buffer) this.seekFromEvent(e, waveWrap);
+            else this.pickFile();
+        });
+        waveWrap.addEventListener('keydown', e => {
+            if (e.key === 'Enter') this.pickFile();
+        });
+        $('load' + id).addEventListener('click', () => this.pickFile());
+        waveWrap.addEventListener('dragover', e => { e.preventDefault(); waveWrap.classList.add('dragover'); });
+        waveWrap.addEventListener('dragleave', () => waveWrap.classList.remove('dragover'));
+        waveWrap.addEventListener('drop', e => {
+            e.preventDefault(); waveWrap.classList.remove('dragover');
+            const f = e.dataTransfer.files[0];
+            if (f) this.loadFile(f);
+        });
+
+        $('play' + id).addEventListener('click', () => this.togglePlay());
+        $('stop' + id).addEventListener('click', () => this.stop());
+
+        $('pitch' + id).addEventListener('input', e => this.setPitch(parseFloat(e.target.value)));
+        const eqBind = (band, node) => {
+            $('eq' + band + id).addEventListener('input', e => {
+                const db = parseFloat(e.target.value);
+                $('eq' + band + 'V' + id).textContent = db + ' dB';
+                if (this.nodes) this.nodes[node].gain.value = db;
+            });
+        };
+        eqBind('L', 'eqLow'); eqBind('M', 'eqMid'); eqBind('H', 'eqHigh');
+
+        $('vol' + id).addEventListener('input', e => {
+            const v = parseInt(e.target.value);
+            $('volV' + id).textContent = v + '%';
+            if (this.nodes) this.nodes.gain.gain.value = v / 100;
+            applyCrossfaders();
+        });
+
+        for (let i = 0; i < 4; i++) {
+            const btn = $('cue' + id + i);
+            btn.addEventListener('click', () => this.cue(i));
+            btn.addEventListener('contextmenu', e => { e.preventDefault(); this.clearCue(i); });
+        }
+
+        $('loop' + id).addEventListener('click', () => this.toggleLoop());
+        $('loopSz' + id).addEventListener('change', e => {
+            this.loopBars = parseFloat(e.target.value);
+            if (this.looping && this.bpm > 0 && this.buffer && this.loopEnd > this.loopStart) {
+                // Extend/shrink from the existing loopStart so the in-point never drifts
+                const barLen = (60 / this.bpm) * 4;
+                this.loopEnd = Math.min(this.loopStart + barLen * this.loopBars, this.buffer.duration);
+                if (this.source) this.source.loopEnd = this.loopEnd;
+            }
+        });
+
+        $('fxRev' + id).addEventListener('click', () => this.toggleFX('reverb', 'fxRev'));
+        $('fxDel' + id).addEventListener('click', () => this.toggleFX('delay', 'fxDel'));
+        $('fxCho' + id).addEventListener('click', () => this.toggleFX('chorus', 'fxCho'));
+    }
+
+    pickFile() {
+        ensureAudio();
+        const picker = $('filePicker');
+        picker.onchange = () => { if (picker.files[0]) this.loadFile(picker.files[0]); picker.value = ''; };
+        picker.click();
+    }
+
+    initAudio() {
+        if (this.nodes || !ctx) return;
+        const n = {};
+        n.gain = ctx.createGain();
+        // Sync gain to whatever the volume slider already shows (may have been set before audio init)
+        n.gain.gain.value = parseInt($('vol' + this.id).value) / 100;
+        n.eqLow = ctx.createBiquadFilter();  n.eqLow.type = 'lowshelf';  n.eqLow.frequency.value = 320;
+        n.eqLow.gain.value = parseFloat($('eqL' + this.id).value);
+        n.eqMid = ctx.createBiquadFilter();  n.eqMid.type = 'peaking';   n.eqMid.frequency.value = 1000; n.eqMid.Q.value = 0.9;
+        n.eqMid.gain.value = parseFloat($('eqM' + this.id).value);
+        n.eqHigh = ctx.createBiquadFilter(); n.eqHigh.type = 'highshelf'; n.eqHigh.frequency.value = 3200;
+        n.eqHigh.gain.value = parseFloat($('eqH' + this.id).value);
+        n.analyser = ctx.createAnalyser(); n.analyser.fftSize = 256;
+
+        // FX sends
+        n.reverb = ctx.createConvolver(); n.reverb.buffer = makeImpulse(2.2, 3);
+        n.reverbGain = ctx.createGain(); n.reverbGain.gain.value = 0;
+        n.delay = ctx.createDelay(2); n.delay.delayTime.value = 0.375;
+        n.delayFb = ctx.createGain(); n.delayFb.gain.value = 0.35;
+        n.delayGain = ctx.createGain(); n.delayGain.gain.value = 0;
+        n.chorusDelay = ctx.createDelay(0.06); n.chorusDelay.delayTime.value = 0.025;
+        n.chorusLFO = ctx.createOscillator(); n.chorusLFO.frequency.value = 0.6;
+        n.chorusDepth = ctx.createGain(); n.chorusDepth.gain.value = 0.004;
+        n.chorusGain = ctx.createGain(); n.chorusGain.gain.value = 0;
+        n.chorusLFO.connect(n.chorusDepth); n.chorusDepth.connect(n.chorusDelay.delayTime);
+        n.chorusLFO.start();
+
+        n.xfGain = ctx.createGain();         // controlled by crossfader
+
+        n.gain.connect(n.eqLow); n.eqLow.connect(n.eqMid); n.eqMid.connect(n.eqHigh);
+        n.eqHigh.connect(n.analyser);
+        n.analyser.connect(n.xfGain);
+        // FX sends tap post-EQ, return into xfGain
+        n.analyser.connect(n.reverb); n.reverb.connect(n.reverbGain); n.reverbGain.connect(n.xfGain);
+        n.analyser.connect(n.delay); n.delay.connect(n.delayFb); n.delayFb.connect(n.delay);
+        n.delay.connect(n.delayGain); n.delayGain.connect(n.xfGain);
+        n.analyser.connect(n.chorusDelay); n.chorusDelay.connect(n.chorusGain); n.chorusGain.connect(n.xfGain);
+
+        n.xfGain.connect(master.gain);
+        this.nodes = n;
+    }
+
+    async loadFile(file) {
+        ensureAudio();
+        this.initAudio();
+        const token = ++this.loadToken;   // each call gets a unique token
+        setStatus(`Deck ${this.id}: decoding "${file.name}" …`);
+        try {
+            const arr = await file.arrayBuffer();
+            // Decode into a temporary buffer first; only stop the live deck once we know it succeeded
+            const newBuffer = await ctx.decodeAudioData(arr);
+            // A newer load started while we were awaiting; discard this stale result
+            if (token !== this.loadToken) return;
+            // Preserve pending loop from a buffer-less session restore; a track swap on an already-loaded deck should not carry the old loop over
+            const savedLoop = !this.buffer
+                ? { looping: this.looping, loopStart: this.loopStart, loopEnd: this.loopEnd }
+                : null;
+            this.stop();
+            this.buffer = newBuffer;
+            this.trackName = file.name;
+            this.bpm = detectBPM(this.buffer);
+            this.energy = analyzeEnergy(this.buffer);
+            this.offset = 0;
+            // Restore cues from a previous session restore if present, else clear them
+            this.hotCues = this.pendingCues ? [...this.pendingCues] : [null, null, null, null];
+            this.pendingCues = null;
+            for (let i = 0; i < 4; i++) $('cue' + this.id + i).classList.toggle('set', this.hotCues[i] !== null);
+            // Restore pending loop state from a buffer-less session restore
+            if (savedLoop && savedLoop.looping) {
+                this.looping = true;
+                this.loopStart = savedLoop.loopStart;
+                this.loopEnd = savedLoop.loopEnd;
+                $('loop' + this.id).classList.add('active');
+            }
+            $('track' + this.id).textContent = file.name;
+            $('bpm' + this.id).textContent = (this.bpm * this.pitch).toFixed(1) + ' BPM';
+            $('hint' + this.id).style.display = 'none';
+            this.drawWaveform();
+            haptic([20, 10, 20]);
+            setStatus(`Deck ${this.id}: "${file.name}" loaded · ${this.bpm.toFixed(1)} BPM · ${this.buffer.duration.toFixed(1)}s`, 'ok');
+            updatePredictor();
+        } catch (err) {
+            haptic([50, 50, 50]);
+            setStatus(`Deck ${this.id}: could not decode "${file.name}" (${err.message})`, 'err');
+        }
+    }
+
+    drawWaveform() {
+        const c = $('waveC' + this.id);
+        const w = c.width = c.offsetWidth * 2, h = c.height = c.offsetHeight * 2;
+        const g = c.getContext('2d');
+        g.clearRect(0, 0, w, h);
+        if (!this.buffer) return;
+        const data = this.buffer.getChannelData(0);
+        const step = Math.ceil(data.length / w);
+        const colors = { cyan: '#00f0ff', magenta: '#ff00e0', lime: '#aaff00', orange: '#ff9500' };
+        g.fillStyle = colors[this.color];
+        g.globalAlpha = 0.85;
+        for (let x = 0; x < w; x++) {
+            let min = 1, max = -1;
+            const base = x * step;
+            for (let j = 0; j < step; j += 8) {
+                const v = data[base + j] || 0;
+                if (v < min) min = v;
+                if (v > max) max = v;
+            }
+            g.fillRect(x, (1 + min) * h / 2, 1, Math.max(1, (max - min) * h / 2));
+        }
+        g.globalAlpha = 1;
+    }
+
+    position() {
+        if (!this.buffer) return 0;
+        if (!this.isPlaying) return this.offset;
+        const raw = this.offset + (ctx.currentTime - this.startedAt) * this.pitch;
+        if (this.looping && this.loopEnd > this.loopStart) {
+            const loopLen = this.loopEnd - this.loopStart;
+            return this.loopStart + ((raw - this.loopStart) % loopLen);
+        }
+        return raw;
+    }
+
+    drawPlayhead() {
+        const c = $('playC' + this.id);
+        if (!this.buffer) return;
+        const w = c.width = c.offsetWidth * 2, h = c.height = c.offsetHeight * 2;
+        const g = c.getContext('2d');
+        g.clearRect(0, 0, w, h);
+        const x = (this.position() / this.buffer.duration) * w;
+        g.fillStyle = '#fff';
+        g.fillRect(x - 1, 0, 3, h);
+        // cue markers
+        g.fillStyle = '#ffe000';
+        this.hotCues.forEach(cue => {
+            if (cue !== null) {
+                const cx = (cue / this.buffer.duration) * w;
+                g.beginPath(); g.moveTo(cx - 5, 0); g.lineTo(cx + 5, 0); g.lineTo(cx, 10); g.fill();
+            }
+        });
+    }
+
+    startSource(at) {
+        const src = ctx.createBufferSource();
+        src.buffer = this.buffer;
+        src.playbackRate.value = this.pitch;
+        src.connect(this.nodes.gain);
+        src.onended = () => {
+            if (this.source === src && this.isPlaying && !this.looping) {
+                const pos = this.position();
+                if (pos >= this.buffer.duration - 0.1) this.stop();
+            }
+        };
+        src.start(0, Math.max(0, Math.min(at, this.buffer.duration - 0.01)));
+        this.source = src;
+        this.startedAt = ctx.currentTime;
+        this.offset = at;
+        // Re-apply or create loop region when looping is armed
+        if (this.looping) {
+            if (this.loopEnd > this.loopStart) {
+                if (at >= this.loopStart && at < this.loopEnd) {
+                    // Target inside loop — reuse bounds
+                    src.loop = true;
+                    src.loopStart = this.loopStart;
+                    src.loopEnd = this.loopEnd;
+                } else {
+                    // Seek landed outside loop — disengage so Web Audio doesn't clamp it back
+                    this.looping = false; this.loopStart = 0; this.loopEnd = 0;
+                    $('loop' + this.id).classList.remove('active');
+                }
+            } else {
+                // Fresh arm (loop toggled before first play) — calculate from current position
+                this.startLoopRegion();
+            }
+        }
+    }
+
+    play(at) {
+        if (!this.buffer) return;
+        ensureAudio();
+        const isSeeking = at !== undefined;
+        const target = isSeeking ? at : this.offset;
+        const doStart = () => {
+            this.killSource();    // kill old source here, not before, so quantized seeks stay gapless
+            this.startSource(target);
+            this.isPlaying = true;
+            this.el.classList.add('playing');
+            const btn = $('play' + this.id);
+            btn.textContent = '❚❚ PAUSE'; btn.classList.add('active');
+            haptic(30);
+        };
+        if (quantize.enabled && this.bpm > 0) {
+            // Quantized seek while playing: keep old source alive until the new beat so there's no gap.
+            // Plain play-from-pause: no source to preserve; kill immediately.
+            if (!isSeeking) this.killSource();
+            const beat = 60 / this.bpm;
+            // Use deck playback position (not AudioContext clock) for phase so snaps align to audible beats
+            const phase = this.position() % beat;
+            // If already on the beat (within 10 ms tolerance) snap immediately; otherwise wait for next beat
+            const remaining = phase < 0.01 ? 0 : beat - phase;
+            // beat/phase are track-seconds; divide by pitch to convert to wall-clock seconds
+            const wait = (remaining / this.pitch) * (quantize.strength / 100);
+            if (this.quantizeTimer !== null) { clearTimeout(this.quantizeTimer); this.quantizeTimer = null; }
+            this.quantizeTimer = setTimeout(() => { this.quantizeTimer = null; doStart(); }, wait * 1000);
+            const acc = 90 + Math.round((quantize.strength / 100) * 9);
+            $('quantAcc').textContent = 'ACC ' + acc + '%';
+        } else {
+            doStart();
+        }
+    }
+
+    killSource() {
+        if (this.source) {
+            this.source.onended = null;
+            try { this.source.stop(); } catch (e) {}
+            this.source = null;
+        }
+    }
+
+    pause() {
+        if (this.quantizeTimer !== null) { clearTimeout(this.quantizeTimer); this.quantizeTimer = null; }
+        if (!this.isPlaying) return;
+        this.offset = this.position();
+        this.killSource();
+        this.isPlaying = false;
+        this.el.classList.remove('playing');
+        const btn = $('play' + this.id);
+        btn.textContent = '▶ PLAY'; btn.classList.remove('active');
+    }
+
+    togglePlay() { this.isPlaying ? this.pause() : this.play(); }
+
+    stop() {
+        if (this.quantizeTimer !== null) { clearTimeout(this.quantizeTimer); this.quantizeTimer = null; }
+        this.killSource();
+        this.isPlaying = false;
+        this.offset = 0;
+        this.looping = false;
+        this.loopStart = 0; this.loopEnd = 0;
+        if (this.el) {
+            this.el.classList.remove('playing');
+            const btn = $('play' + this.id);
+            btn.textContent = '▶ PLAY'; btn.classList.remove('active');
+            $('loop' + this.id).classList.remove('active');
+        }
+    }
+
+    seekFromEvent(e, wrap) {
+        const rect = wrap.getBoundingClientRect();
+        const frac = (e.clientX - rect.left) / rect.width;
+        const t = frac * this.buffer.duration;
+        if (this.isPlaying) this.play(t); else this.offset = t;
+    }
+
+    setPitch(pct) {
+        if (this.source) {
+            // Capture position at the OLD pitch BEFORE changing the rate
+            this.offset = this.position();
+            this.startedAt = ctx.currentTime;
+        }
+        this.pitch = 1 + pct / 100;
+        $('pitchV' + this.id).textContent = (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%';
+        $('pitch' + this.id).value = pct;
+        if (this.source) this.source.playbackRate.value = this.pitch;
+        if (this.bpm) $('bpm' + this.id).textContent = (this.bpm * this.pitch).toFixed(1) + ' BPM';
+        updatePredictor();
+    }
+
+    cue(i) {
+        if (!this.buffer) return;
+        if (this.hotCues[i] === null) {
+            this.hotCues[i] = this.position();
+            $('cue' + this.id + i).classList.add('set');
+            haptic([20, 10, 20]);
+            setStatus(`Deck ${this.id}: cue ${i + 1} set @ ${this.hotCues[i].toFixed(2)}s`, 'ok');
+        } else {
+            this.play(this.hotCues[i]);
+            haptic(30);
+        }
+    }
+
+    clearCue(i) {
+        this.hotCues[i] = null;
+        $('cue' + this.id + i).classList.remove('set');
+    }
+
+    toggleLoop() {
+        if (!this.buffer) return;
+        this.looping = !this.looping;
+        $('loop' + this.id).classList.toggle('active', this.looping);
+        if (this.looping) this.startLoopRegion(); else this.stopLoopRegion();
+    }
+
+    startLoopRegion() {
+        if (!this.source || !this.bpm) return;
+        const barLen = (60 / this.bpm) * 4;
+        this.loopStart = this.position();
+        this.loopEnd = Math.min(this.loopStart + barLen * this.loopBars, this.buffer.duration);
+        this.source.loop = true;
+        this.source.loopStart = this.loopStart;
+        this.source.loopEnd = this.loopEnd;
+    }
+
+    stopLoopRegion() {
+        if (this.source) this.source.loop = false;
+        this.loopStart = 0;
+        this.loopEnd = 0;
+    }
+
+    toggleFX(fx, btnPrefix) {
+        if (!this.nodes) { ensureAudio(); this.initAudio(); }
+        this.fx[fx] = !this.fx[fx];
+        $(btnPrefix + this.id).classList.toggle('active', this.fx[fx]);
+        const t = ctx ? ctx.currentTime : 0;
+        if (fx === 'reverb') this.nodes.reverbGain.gain.setTargetAtTime(this.fx.reverb ? 0.45 : 0, t, 0.05);
+        if (fx === 'delay')  this.nodes.delayGain.gain.setTargetAtTime(this.fx.delay ? 0.4 : 0, t, 0.05);
+        if (fx === 'chorus') this.nodes.chorusGain.gain.setTargetAtTime(this.fx.chorus ? 0.5 : 0, t, 0.05);
+    }
+
+    syncTo(targetBPM) {
+        if (!this.bpm || !targetBPM) return false;
+        const pct = (targetBPM / this.bpm - 1) * 100;
+        if (Math.abs(pct) <= 15) { this.setPitch(Math.round(pct * 10) / 10); return true; }
+        return false;
+    }
+
+    getState() {
+        return {
+            track: this.trackName, bpm: this.bpm,
+            pitch: parseFloat($('pitch' + this.id).value),
+            eq: { l: $('eqL' + this.id).value, m: $('eqM' + this.id).value, h: $('eqH' + this.id).value },
+            vol: $('vol' + this.id).value,
+            cues: this.hotCues, fx: this.fx, loopBars: this.loopBars,
+            looping: this.looping, loopStart: this.loopStart, loopEnd: this.loopEnd,
+        };
+    }
+
+    loadState(s) {
+        if (!s) return;
+        this.setPitch(s.pitch || 0);
+        ['L', 'M', 'H'].forEach((b, i) => {
+            const v = [s.eq.l, s.eq.m, s.eq.h][i];
+            $('eq' + b + this.id).value = v;
+            $('eq' + b + this.id).dispatchEvent(new Event('input'));
+        });
+        $('vol' + this.id).value = s.vol;
+        $('vol' + this.id).dispatchEvent(new Event('input'));
+        // Store cues as pending: applied on the next loadFile so they survive buffer-less restores
+        if (s.cues) {
+            // Always keep pending so loadFile() can apply cues when the session track is reloaded
+            this.pendingCues = [...s.cues];
+            if (this.buffer) {
+                this.hotCues = [...s.cues];
+                s.cues.forEach((c, i) => $('cue' + this.id + i).classList.toggle('set', c !== null));
+            }
+        }
+        ['reverb', 'delay', 'chorus'].forEach(fx => {
+            if (s.fx && s.fx[fx] !== this.fx[fx])
+                this.toggleFX(fx, fx === 'reverb' ? 'fxRev' : fx === 'delay' ? 'fxDel' : 'fxCho');
+        });
+        if (s.loopBars) {
+            this.loopBars = s.loopBars;
+            $('loopSz' + this.id).value = String(s.loopBars);
+        }
+        if (s.looping !== undefined) {
+            this.looping = s.looping;
+            this.loopStart = s.loopStart || 0;
+            this.loopEnd = s.loopEnd || 0;
+            $('loop' + this.id).classList.toggle('active', this.looping);
+            if (this.source) {
+                if (this.looping) {
+                    this.source.loop = true;
+                    this.source.loopStart = this.loopStart;
+                    this.source.loopEnd = this.loopEnd;
+                } else {
+                    this.source.loop = false;
+                }
+            }
+        }
+    }
+}
+
+const decks = DECK_DEFS.map(d => new Deck(d));
+const deckById = {}; decks.forEach(d => deckById[d.id] = d);
+
+/* ---------- Crossfaders (equal-power) ---------- */
+function applyCrossfaders() {
+    if (!ctx) return;
+    const pairs = [['xfAB', 'A', 'B'], ['xfCD', 'C', 'D']];
+    pairs.forEach(([slider, a, b]) => {
+        const pos = parseInt($(slider).value) / 100;
+        const dA = deckById[a], dB = deckById[b];
+        if (dA.nodes) dA.nodes.xfGain.gain.value = Math.cos(pos * Math.PI / 2);
+        if (dB.nodes) dB.nodes.xfGain.gain.value = Math.sin(pos * Math.PI / 2);
+    });
+}
+$('xfAB').addEventListener('input', applyCrossfaders);
+$('xfCD').addEventListener('input', applyCrossfaders);
+
+/* ---------- Master controls ---------- */
+function bindMaster(id, fmt, apply) {
+    $(id).addEventListener('input', e => {
+        const v = parseFloat(e.target.value);
+        $(id + 'V').textContent = fmt(v);
+        if (ctx) apply(v);
+    });
+}
+bindMaster('mEqLow',  v => v + ' dB',  v => master.eqLow.gain.value = v);
+bindMaster('mEqMid',  v => v + ' dB',  v => master.eqMid.gain.value = v);
+bindMaster('mEqHigh', v => v + ' dB',  v => master.eqHigh.gain.value = v);
+bindMaster('mVol',    v => v + '%',    v => master.gain.gain.value = v / 100);
+bindMaster('cThresh', v => v + ' dB',  v => master.comp.threshold.value = v);
+bindMaster('cRatio',  v => v + ':1',   v => master.comp.ratio.value = v);
+bindMaster('cAttack', v => v + ' ms',  v => master.comp.attack.value = v / 1000);
+bindMaster('limCeil', v => v + ' dB',  v => master.limiter.threshold.value = v);
+
+/* ---------- BPM Sync ---------- */
+$('syncBtn').addEventListener('click', () => {
+    const ref = decks.find(d => d.bpm > 0);
+    if (!ref) { setStatus('BPM sync: load at least one track first.', 'err'); return; }
+    const target = ref.bpm * ref.pitch;
+    const failed = [];
+    decks.forEach(d => { if (d !== ref && d.bpm > 0 && !d.syncTo(target)) failed.push(d.id); });
+    if (failed.length) {
+        setStatus(`BPM sync: deck(s) ${failed.join(', ')} outside ±15% range – adjust pitch manually or halve/double BPM`, 'err');
+    } else {
+        setStatus(`BPM sync: all decks matched to ${target.toFixed(1)} BPM (reference deck ${ref.id})`, 'ok');
+    }
+    haptic(30);
+});
+
+/* ---------- Recording quantization ---------- */
+const quantize = { enabled: false, strength: 100 };
+$('quantBtn').addEventListener('click', () => {
+    quantize.enabled = !quantize.enabled;
+    $('quantBtn').classList.toggle('active', quantize.enabled);
+    setStatus('Quantization ' + (quantize.enabled ? 'ON – play triggers snap to beat grid' : 'OFF'), 'ok');
+});
+$('quantStr').addEventListener('input', e => {
+    quantize.strength = parseInt(e.target.value);
+    const acc = 90 + Math.round((quantize.strength / 100) * 9);
+    $('quantAcc').textContent = 'ACC ' + acc + '%';
+});
+
+/* ---------- Recording (MediaRecorder on master bus) ---------- */
+let recorder = null, recChunks = [], recStopping = false;
+$('recBtn').addEventListener('click', () => {
+    ensureAudio();
+    if (recStopping) return;
+    if (recorder && recorder.state === 'recording') {
+        recStopping = true;
+        recorder.stop();
+        return;
+    }
+    if (recorder && recorder.state !== 'inactive') return;
+    recChunks = [];
+    if (typeof MediaRecorder === 'undefined') {
+        setStatus('Recording not supported in this browser.', 'err');
+        return;
+    }
+    try {
+        recorder = new MediaRecorder(master.recDest.stream);
+    } catch (err) {
+        setStatus('Recording unavailable: ' + err.message, 'err');
+        return;
+    }
+    recorder.ondataavailable = e => { if (e.data.size) recChunks.push(e.data); };
+    recorder.onstop = () => {
+        recStopping = false;
+        const blob = new Blob(recChunks, { type: recorder.mimeType || 'audio/webm' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'ivdj-session-' + new Date().toISOString().replace(/[:.]/g, '-') + '.webm';
+        a.click();
+        URL.revokeObjectURL(a.href);
+        $('recBtn').classList.remove('rec-active');
+        $('recBtn').textContent = '● REC';
+        setStatus('Recording saved (' + (blob.size / 1024).toFixed(0) + ' KB).', 'ok');
+    };
+    recorder.start();
+    $('recBtn').classList.add('rec-active');
+    $('recBtn').textContent = '■ STOP REC';
+    setStatus('Recording master output …', 'ok');
+    haptic([20, 10, 20]);
+});
+
+/* ---------- Predictive mix points ---------- */
+function updatePredictor() {
+    const loaded = decks.filter(d => d.energy);
+    const box = $('predictor');
+    if (loaded.length === 0) return;
+    let html = '';
+    loaded.forEach(d => {
+        const e = d.energy;
+        // find lowest-energy valley after the first quarter → suggested mix-out
+        let minI = Math.floor(e.length / 4), minV = 2;
+        for (let i = minI; i < e.length; i++) if (e[i] < minV) { minV = e[i]; minI = i; }
+        const outT = minI * 5;
+        // first sustained high-energy point → suggested mix-in
+        let inI = 0;
+        for (let i = 0; i < e.length; i++) if (e[i] > 0.75) { inI = i; break; }
+        const peak = Math.max(...e);
+        html += `<strong>Deck ${d.id}</strong> · mix-in ≈ ${fmtTime(inI * 5)} · breakdown/mix-out ≈ ${fmtTime(outT)} · energy peak ${(peak * 100).toFixed(0)}%<br>`;
+    });
+    // Compare within each crossfader pair so 4-deck use gets accurate guidance
+    [['A','B'],['C','D']].forEach(([x, y]) => {
+        const da = deckById[x], db = deckById[y];
+        if (!da.energy || !db.energy) return;
+        const diff = Math.abs(da.bpm * da.pitch - db.bpm * db.pitch);
+        html += diff > 4
+            ? `<span class="warn">⚠ Tempo gap ${diff.toFixed(1)} BPM between deck ${x}/${y} – use BPM SYNC before transition.</span><br>`
+            : `✓ Decks ${x}/${y} tempo-compatible (Δ ${diff.toFixed(1)} BPM) – clean blend possible.<br>`;
+    });
+    box.innerHTML = html;
+}
+function fmtTime(s) {
+    return Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+}
+
+/* ---------- Haptic feedback ---------- */
+let hapticOn = true;
+function haptic(pattern) { if (hapticOn && navigator.vibrate) navigator.vibrate(pattern); }
+$('hapticBtn').addEventListener('click', () => {
+    hapticOn = !hapticOn;
+    $('hapticBtn').classList.toggle('active', hapticOn);
+    setStatus('Haptic feedback ' + (hapticOn ? 'enabled' : 'disabled'), 'ok');
+});
+$('hapticBtn').classList.add('active');
+
+/* ---------- High contrast ---------- */
+$('contrastBtn').addEventListener('click', () => {
+    document.body.classList.toggle('high-contrast');
+    $('contrastBtn').classList.toggle('active');
+});
+
+/* ---------- MIDI (WebMIDI API) ---------- */
+$('midiBtn').addEventListener('click', async () => {
+    if (!navigator.requestMIDIAccess) {
+        setStatus('WebMIDI not supported in this browser (try Chrome/Edge).', 'err');
+        return;
+    }
+    try {
+        const access = await navigator.requestMIDIAccess();
+        let count = 0;
+        access.inputs.forEach(input => { input.onmidimessage = onMIDI; count++; });
+        access.onstatechange = e => {
+            if (e.port.type === 'input' && e.port.state === 'connected') e.port.onmidimessage = onMIDI;
+        };
+        $('midiBtn').classList.add('active');
+        setStatus(`MIDI enabled · ${count} input device(s). Notes 36-43 → play/cue · CC 1-9 → faders.`, 'ok');
+    } catch (err) {
+        setStatus('MIDI access denied: ' + err.message, 'err');
+    }
+});
+function onMIDI(msg) {
+    const [status, d1, d2] = msg.data;
+    const cmd = status & 0xf0;
+    if (cmd === 0x90 && d2 > 0) {                    // Note On → transport / cues
+        const noteMap = { 36: () => deckById.A.togglePlay(), 37: () => deckById.B.togglePlay(),
+                          38: () => deckById.C.togglePlay(), 39: () => deckById.D.togglePlay() };
+        if (noteMap[d1]) noteMap[d1]();
+        else if (d1 >= 40 && d1 <= 43) deckById.A.cue(d1 - 40);
+        else if (d1 >= 44 && d1 <= 47) deckById.B.cue(d1 - 44);
+    } else if (cmd === 0xb0) {                       // Control Change → faders
+        const v = d2 / 127;
+        switch (d1) {
+            case 1: $('xfAB').value = v * 100; applyCrossfaders(); break;
+            case 2: $('xfCD').value = v * 100; applyCrossfaders(); break;
+            case 3: deckById.A.setPitch((v * 30) - 15); break;
+            case 4: deckById.B.setPitch((v * 30) - 15); break;
+            case 5: $('mVol').value = v * 100; $('mVol').dispatchEvent(new Event('input')); break;
+        }
+    }
+}
+
+/* ---------- Voice control (Web Speech API) ---------- */
+let recognition = null, voiceOn = false;
+$('voiceBtn').addEventListener('click', () => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { setStatus('Speech recognition not supported in this browser.', 'err'); return; }
+    if (voiceOn) {
+        recognition.stop(); voiceOn = false;
+        $('voiceBtn').classList.remove('active');
+        setStatus('Voice control off.', 'ok');
+        return;
+    }
+    recognition = new SR();
+    recognition.lang = 'en-US';
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.onresult = e => {
+        const text = e.results[e.results.length - 1][0].transcript.toLowerCase().trim();
+        handleVoice(text);
+    };
+    recognition.onerror = e => {
+        // Permission denied or unrecoverable error — stop trying to restart
+        if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+            voiceOn = false;
+            $('voiceBtn').classList.remove('active');
+            setStatus('Voice control: microphone access denied.', 'err');
+        }
+    };
+    recognition.onend = () => { if (voiceOn) recognition.start(); };
+    recognition.start();
+    voiceOn = true;
+    $('voiceBtn').classList.add('active');
+    setStatus('Voice control ON. Try: "play deck a" · "pause deck b" · "sync" · "record" · "stop all"', 'ok');
+});
+function handleVoice(text) {
+    setStatus('🎤 "' + text + '"');
+    const deckMatch = text.match(/deck\s+([abcd])/);
+    const d = deckMatch ? deckById[deckMatch[1].toUpperCase()] : null;
+    if (/pause/.test(text) && d) d.pause();
+    else if (/stop all/.test(text)) decks.forEach(x => x.stop());
+    else if (/stop/.test(text) && d) d.stop();
+    else if (/\bplay\b/.test(text) && d) { if (!d.isPlaying) d.play(); }
+    else if (/sync/.test(text)) $('syncBtn').click();
+    else if (/stop.*record|record.*stop/.test(text)) {
+        if (recorder && recorder.state === 'recording') $('recBtn').click();
+    }
+    else if (/record/.test(text)) $('recBtn').click();
+    else if (/loop/.test(text) && d) d.toggleLoop();
+    else if (/cue\s+(one|two|three|four|[1-4])/.test(text) && d) {
+        const m = text.match(/cue\s+(one|two|three|four|[1-4])/)[1];
+        const idx = { one: 0, two: 1, three: 2, four: 3 }[m] ?? (parseInt(m) - 1);
+        d.cue(idx);
+    }
+}
+
+/* ---------- Cloud sync (sessions in localStorage) ---------- */
+const SESSION_KEY = 'ivdj-supreme-sessions';
+function getSessions() {
+    try { return JSON.parse(localStorage.getItem(SESSION_KEY)) || []; } catch { return []; }
+}
+$('saveBtn').addEventListener('click', () => {
+    const sessions = getSessions();
+    sessions.unshift({
+        name: 'Session ' + new Date().toLocaleString(),
+        ts: Date.now(),
+        decks: decks.map(d => d.getState()),
+        master: {
+            eqLow: $('mEqLow').value, eqMid: $('mEqMid').value, eqHigh: $('mEqHigh').value,
+            vol: $('mVol').value, thresh: $('cThresh').value, ratio: $('cRatio').value,
+            attack: $('cAttack').value, limCeil: $('limCeil').value,
+            xfAB: $('xfAB').value, xfCD: $('xfCD').value,
+        },
+    });
+    try {
+        localStorage.setItem(SESSION_KEY, JSON.stringify(sessions.slice(0, 10)));
+        setStatus('Session saved to browser storage (' + Math.min(sessions.length, 10) + '/10 slots).', 'ok');
+    } catch (err) {
+        setStatus('Session save failed: ' + err.message, 'err');
+        return;
+    }
+    haptic([20, 10, 20]);
+});
+$('loadBtn').addEventListener('click', () => {
+    const sessions = getSessions();
+    const list = $('sessionList');
+    list.innerHTML = sessions.length === 0
+        ? '<p style="color:var(--dim);font-size:.8rem">No saved sessions yet.</p>'
+        : sessions.map((s, i) => `
+            <div class="session-item">
+                <span class="mono">${s.name}</span>
+                <span>
+                    <button onclick="restoreSession(${i})">Load</button>
+                    <button onclick="deleteSession(${i})" aria-label="Delete session">✕</button>
+                </span>
+            </div>`).join('');
+    $('sessionModal').classList.add('show');
+});
+window.restoreSession = function (i) {
+    const s = getSessions()[i];
+    if (!s) return;
+    ensureAudio();
+    decks.forEach((d, j) => d.loadState(s.decks[j]));
+    const m = s.master;
+    [['mEqLow', m.eqLow], ['mEqMid', m.eqMid], ['mEqHigh', m.eqHigh], ['mVol', m.vol],
+     ['cThresh', m.thresh], ['cRatio', m.ratio], ['cAttack', m.attack], ['limCeil', m.limCeil],
+     ['xfAB', m.xfAB], ['xfCD', m.xfCD]]
+        .forEach(([id, v]) => { $(id).value = v; $(id).dispatchEvent(new Event('input')); });
+    closeModal('sessionModal');
+    setStatus('Session restored: ' + s.name + ' (re-load audio files to restore tracks).', 'ok');
+};
+window.deleteSession = function (i) {
+    const sessions = getSessions();
+    sessions.splice(i, 1);
+    localStorage.setItem(SESSION_KEY, JSON.stringify(sessions));
+    $('loadBtn').click();
+};
+window.closeModal = id => $(id).classList.remove('show');
+document.querySelectorAll('.modal-bg').forEach(m =>
+    m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); }));
+
+/* ---------- Mobile companion QR ---------- */
+$('qrBtn').addEventListener('click', () => {
+    const url = location.href;
+    $('qrImg').src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(url);
+    $('qrModal').classList.add('show');
+});
+
+/* ---------- Keyboard shortcuts ---------- */
+document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' ||
+        e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON' ||
+        e.target.tagName === 'A' || e.target.getAttribute('role') === 'button') return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.code === 'Space') { e.preventDefault(); deckById.A.togglePlay(); }
+    else if (e.code === 'Enter') { e.preventDefault(); deckById.B.togglePlay(); }
+    else if (e.key >= '1' && e.key <= '4') deckById.A.cue(parseInt(e.key) - 1);
+    else if (['7', '8', '9', '0'].includes(e.key)) deckById.B.cue(['7', '8', '9', '0'].indexOf(e.key));
+    else if (e.key === 's') $('syncBtn').click();
+    else if (e.key === 'r') $('recBtn').click();
+});
+
+/* ================================================================
+   Visual FX Engine – 6 modes
+   ================================================================ */
+let vizMode = 'spectrum';
+document.querySelectorAll('[data-viz]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-viz]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        vizMode = btn.dataset.viz;
+        galaxyParticles = null;                       // reset particle state on mode switch
+    });
+});
+
+const vizCanvas = $('vizCanvas');
+const vg = vizCanvas.getContext('2d');
+let vizT = 0, galaxyParticles = null;
+
+function getFreqData() {
+    if (!ctx) return null;
+    const n = master.analyser.frequencyBinCount;
+    const arr = new Uint8Array(n);
+    master.analyser.getByteFrequencyData(arr);
+    return arr;
+}
+function getTimeData(analyser) {
+    const n = analyser.fftSize;
+    const arr = new Uint8Array(n);
+    analyser.getByteTimeDomainData(arr);
+    return arr;
+}
+
+function drawViz() {
+    const w = vizCanvas.width = vizCanvas.offsetWidth * 2;
+    const h = vizCanvas.height = vizCanvas.offsetHeight * 2;
+    vg.fillStyle = 'rgba(4,6,15,1)';
+    vg.fillRect(0, 0, w, h);
+    vizT += 0.016;
+    const freq = getFreqData();
+    if (!freq) {
+        vg.fillStyle = '#1e2747';
+        vg.font = '24px monospace'; vg.textAlign = 'center';
+        vg.fillText('— audio engine idle —', w / 2, h / 2);
+        return;
+    }
+    const avg = freq.reduce((a, b) => a + b, 0) / freq.length / 255;
+
+    if (vizMode === 'spectrum') {
+        const bars = Math.min(256, freq.length);
+        const bw = w / bars;
+        for (let i = 0; i < bars; i++) {
+            const v = freq[i] / 255;
+            const hue = 180 + (i / bars) * 140;
+            vg.fillStyle = `hsl(${hue} 100% ${40 + v * 30}%)`;
+            vg.fillRect(i * bw, h - v * h, bw - 1, v * h);
+        }
+    } else if (vizMode === 'circular') {
+        const cx = w / 2, cy = h / 2, r0 = Math.min(w, h) * 0.16 * (1 + avg * 0.5);
+        const bars = 96;
+        for (let i = 0; i < bars; i++) {
+            const v = freq[Math.floor(i / bars * freq.length * 0.7)] / 255;
+            const a = (i / bars) * Math.PI * 2 + vizT * 0.3;
+            const len = v * Math.min(w, h) * 0.3;
+            vg.strokeStyle = `hsl(${180 + v * 140} 100% 55%)`;
+            vg.lineWidth = 4;
+            vg.beginPath();
+            vg.moveTo(cx + Math.cos(a) * r0, cy + Math.sin(a) * r0);
+            vg.lineTo(cx + Math.cos(a) * (r0 + len), cy + Math.sin(a) * (r0 + len));
+            vg.stroke();
+        }
+    } else if (vizMode === 'waveform') {
+        const data = getTimeData(master.analyser);
+        vg.strokeStyle = '#00f0ff'; vg.lineWidth = 3;
+        vg.shadowColor = '#00f0ff'; vg.shadowBlur = 12;
+        vg.beginPath();
+        for (let i = 0; i < data.length; i++) {
+            const x = (i / data.length) * w;
+            const y = (data[i] / 255) * h;
+            i === 0 ? vg.moveTo(x, y) : vg.lineTo(x, y);
+        }
+        vg.stroke();
+        vg.shadowBlur = 0;
+    } else if (vizMode === 'phase') {
+        const l = getTimeData(master.anL), r = getTimeData(master.anR);
+        vg.strokeStyle = '#ff00e0'; vg.lineWidth = 2;
+        vg.shadowColor = '#ff00e0'; vg.shadowBlur = 8;
+        vg.beginPath();
+        const n = Math.min(l.length, r.length);
+        for (let i = 0; i < n; i++) {
+            const x = w / 2 + ((l[i] - 128) / 128) * w * 0.45;
+            const y = h / 2 + ((r[i] - 128) / 128) * h * 0.45;
+            i === 0 ? vg.moveTo(x, y) : vg.lineTo(x, y);
+        }
+        vg.stroke();
+        vg.shadowBlur = 0;
+    } else if (vizMode === 'dna') {
+        const points = 60;
+        for (let i = 0; i < points; i++) {
+            const x = (i / points) * w;
+            const phase = vizT * 2 + i * 0.35;
+            const amp = h * 0.22 * (1 + (freq[i % freq.length] / 255) * 0.8);
+            const y1 = h / 2 + Math.sin(phase) * amp;
+            const y2 = h / 2 - Math.sin(phase) * amp;
+            vg.fillStyle = '#00f0ff'; vg.beginPath(); vg.arc(x, y1, 6, 0, 7); vg.fill();
+            vg.fillStyle = '#ff00e0'; vg.beginPath(); vg.arc(x, y2, 6, 0, 7); vg.fill();
+            if (i % 4 === 0) {
+                vg.strokeStyle = 'rgba(170,255,0,.4)'; vg.lineWidth = 2;
+                vg.beginPath(); vg.moveTo(x, y1); vg.lineTo(x, y2); vg.stroke();
+            }
+        }
+    } else if (vizMode === 'galaxy') {
+        if (!galaxyParticles) {
+            galaxyParticles = Array.from({ length: 260 }, (_, i) => ({
+                a: Math.random() * Math.PI * 2, r: Math.random(), s: 0.2 + Math.random() * 0.8,
+                band: Math.floor(Math.random() * 64),
+            }));
+        }
+        const cx = w / 2, cy = h / 2, maxR = Math.min(w, h) * 0.48;
+        galaxyParticles.forEach(p => {
+            const boost = freq[p.band] / 255;
+            p.a += 0.004 * p.s * (1 + boost * 3);
+            const r = p.r * maxR * (1 + boost * 0.25);
+            const spiral = p.a + p.r * 5;
+            const x = cx + Math.cos(spiral) * r, y = cy + Math.sin(spiral) * r * 0.6;
+            vg.fillStyle = `hsl(${180 + boost * 160} 100% ${50 + boost * 40}%)`;
+            vg.beginPath(); vg.arc(x, y, 2 + boost * 5, 0, 7); vg.fill();
+        });
+    }
+}
+
+/* ---------- Meters + playheads animation loop ---------- */
+function dbLevel(analyser) {
+    const data = getTimeData(analyser);
+    let sum = 0;
+    for (let i = 0; i < data.length; i++) {
+        const v = (data[i] - 128) / 128;
+        sum += v * v;
+    }
+    return Math.min(1, Math.sqrt(sum / data.length) * 2.5);
+}
+
+function loop() {
+    requestAnimationFrame(loop);
+    drawViz();
+    if (!ctx) return;
+    $('vuL').style.height = (dbLevel(master.anL) * 100) + '%';
+    $('vuR').style.height = (dbLevel(master.anR) * 100) + '%';
+    decks.forEach(d => {
+        if (d.buffer) d.drawPlayhead();
+        if (d.nodes) {
+            const lvl = dbLevel(d.nodes.analyser);
+            $('meter' + d.id).style.width = (lvl * 100) + '%';
+        }
+    });
+}
+loop();
+
+/* ---------- Clock ---------- */
+setInterval(() => {
+    $('clock').textContent = new Date().toLocaleTimeString();
+}, 1000);
+
+/* ---------- First-gesture audio unlock ---------- */
+document.addEventListener('pointerdown', function unlock() {
+    ensureAudio();
+    document.removeEventListener('pointerdown', unlock);
+}, { once: false });
+
+window.addEventListener('resize', () => decks.forEach(d => d.drawWaveform()));
+</script>
+</body>
+</html>
