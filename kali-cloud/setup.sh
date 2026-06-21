@@ -246,6 +246,13 @@ SERVICE
   fi
 }
 
+# ── Hermes Agent (Nous Research, MIT) – optionaler Offline-Provider ───────────
+# Nicht automatisch installiert (curl|bash vermieden).
+# Manuell: curl -fsSL \
+#   https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh \
+#   | bash
+# Dann: AD_SPEC=hermes:NousResearch/Hermes-3-Llama-3.1-70B hack <target> ad
+
 # ── Claude Code CLI ─────────────────────────────────────────────────────────────
 install_claude_code() {
   step "Claude Code CLI"
@@ -410,7 +417,7 @@ print_summary() {
   echo -e "\e[1;32m║  Stage 1 bereit. Evil Corp hat keine Ahnung.                  ║\e[0m"
   echo -e "\e[1;32m╚══════════════════════════════════════════════════════════════╝\e[0m"
   echo -e " \e[32mElliot (Claude Code):\e[0m $(command -v claude            2>/dev/null || echo 'nicht im PATH')"
-  echo -e " \e[32mGehirn:\e[0m              $MODEL"
+  echo -e " \e[32mDefault-Modell:\e[0m      $MODEL (via ANTHROPIC_MODEL)"
   echo -e " \e[32mfsociety Operatives:\e[0m 5 Mitglieder (Elliot/Darlene/Mr.Robot/Tyrell/Whiterose)"
   echo -e " \e[32mZero-Day Engine:\e[0m     $(command -v hexstrike         2>/dev/null || echo 'nicht im PATH')"
   echo -e " \e[32mHexStrike Port:\e[0m      13145"

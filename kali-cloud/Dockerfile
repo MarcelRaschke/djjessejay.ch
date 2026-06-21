@@ -131,6 +131,13 @@ RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
     && rm -rf /var/lib/apt/lists/* \
     && npm install -g @anthropic-ai/claude-code
 
+# ── Hermes Agent (Nous Research, MIT) – optionaler Offline-Provider ───────────
+# Manuell nach dem ersten Start installieren (curl|bash nicht im Build-Layer):
+#   docker exec kali-cloud bash -c "curl -fsSL \
+#     https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh \
+#     | bash"
+# Dann: AD_SPEC=hermes:NousResearch/Hermes-3-Llama-3.1-70B hack <target> ad
+
 # ── Claude Code Konfiguration (Opus 4.6 + HexStrike MCP + SubAgent Power) ────
 RUN mkdir -p /root/.claude/agents /root/pentest-reports && \
     printf '{\n  "model": "%s",\n  "mcpServers": {\n    "hexstrike-ai": {\n      "command": "/opt/hexstrike-ai/hexstrike-env/bin/python3",\n      "args": ["/opt/hexstrike-ai/hexstrike_mcp.py", "--server", "http://127.0.0.1:13145"],\n      "env": { "PYTHONPATH": "/opt/hexstrike-ai" }\n    }\n  },\n  "permissions": {\n    "allow": ["Bash(*)", "Read(*)", "Write(*)", "Edit(*)", "Glob(*)", "Grep(*)", "WebFetch(*)", "WebSearch(*)", "Agent(*)", "mcp__hexstrike-ai__*"],\n    "deny": []\n  },\n  "dangerouslySkipPermissions": true\n}\n' "$MODEL" \

@@ -25,6 +25,17 @@ services:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       # Claude Code: Modell festlegen (Host-Env überschreibt den Default)
       - ANTHROPIC_MODEL=${ANTHROPIC_MODEL:-claude-opus-4-6}
+      # Mistral API Key – für Codestral-Provider
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY:-}
+      # Pro-Operatives Provider:Model-Specs (leer = fällt auf ANTHROPIC_MODEL zurück)
+      # Beispiel: EXPLOIT_SPEC=mistral:codestral-latest docker compose up
+      - RECON_SPEC=${RECON_SPEC:-}
+      - ENUM_SPEC=${ENUM_SPEC:-}
+      - EXPLOIT_SPEC=${EXPLOIT_SPEC:-}
+      - WEB_SPEC=${WEB_SPEC:-}
+      - AD_SPEC=${AD_SPEC:-}
+      - CTF_SPEC=${CTF_SPEC:-}
+      - REPORT_SPEC=${REPORT_SPEC:-}
     volumes:
       - ./setup.sh:/opt/setup.sh:ro
       - kali-home:/root
