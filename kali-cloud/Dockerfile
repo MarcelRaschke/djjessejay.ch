@@ -12,6 +12,10 @@ LABEL description="fsociety: Kali + HexStrike AI + Claude Opus 4.6 – Hello, Fr
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Claude-Modell zentral – Build-Arg, zur Laufzeit via ANTHROPIC_MODEL verfügbar
+ARG MODEL=claude-opus-4-6
+ENV ANTHROPIC_MODEL=${MODEL}
+
 # ── Basis-Pakete ───────────────────────────────────────────────────────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl wget git unzip ca-certificates gnupg \
@@ -129,7 +133,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
 
 # ── Claude Code Konfiguration (Opus 4.6 + HexStrike MCP + SubAgent Power) ────
 RUN mkdir -p /root/.claude/agents /root/pentest-reports && \
-    printf '{\n  "model": "claude-opus-4-6",\n  "mcpServers": {\n    "hexstrike-ai": {\n      "command": "/opt/hexstrike-ai/hexstrike-env/bin/python3",\n      "args": ["/opt/hexstrike-ai/hexstrike_mcp.py", "--server", "http://127.0.0.1:13145"],\n      "env": { "PYTHONPATH": "/opt/hexstrike-ai" }\n    }\n  },\n  "permissions": {\n    "allow": ["Bash(*)", "Read(*)", "Write(*)", "Edit(*)", "Glob(*)", "Grep(*)", "WebFetch(*)", "WebSearch(*)", "Agent(*)", "mcp__hexstrike-ai__*"],\n    "deny": []\n  },\n  "dangerouslySkipPermissions": true\n}\n' \
+    printf '{\n  "model": "%s",\n  "mcpServers": {\n    "hexstrike-ai": {\n      "command": "/opt/hexstrike-ai/hexstrike-env/bin/python3",\n      "args": ["/opt/hexstrike-ai/hexstrike_mcp.py", "--server", "http://127.0.0.1:13145"],\n      "env": { "PYTHONPATH": "/opt/hexstrike-ai" }\n    }\n  },\n  "permissions": {\n    "allow": ["Bash(*)", "Read(*)", "Write(*)", "Edit(*)", "Glob(*)", "Grep(*)", "WebFetch(*)", "WebSearch(*)", "Agent(*)", "mcp__hexstrike-ai__*"],\n    "deny": []\n  },\n  "dangerouslySkipPermissions": true\n}\n' "$MODEL" \
     > /root/.claude/settings.json
 
 # SubAgent-Rollen

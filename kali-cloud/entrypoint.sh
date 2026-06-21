@@ -2,6 +2,8 @@
 # Container-Einstiegspunkt – fsociety · Hello, Friend.
 set -euo pipefail
 
+MODEL="${ANTHROPIC_MODEL:-claude-opus-4-6}"    # zentral – via ANTHROPIC_MODEL überschreibbar
+
 # SSH-Dienst starten
 service ssh start 2>/dev/null || true
 
@@ -40,7 +42,7 @@ echo -e "\e[1;32m║  fsociety – Hello, Friend.                               
 echo -e "\e[1;32m║  Elliot Alderson · Zero-Day Legend · Stage 1 bereit           ║\e[0m"
 echo -e "\e[1;32m╚══════════════════════════════════════════════════════════════╝\e[0m"
 echo -e " \e[32mElliot (Claude Code):\e[0m  $(command -v claude           2>/dev/null || echo 'nicht gefunden')"
-echo -e " \e[32mGehirn:\e[0m               claude-opus-4-6"
+echo -e " \e[32mGehirn:\e[0m               $MODEL"
 echo -e " \e[32mfsociety Arsenal:\e[0m     $HEXSTRIKE_STATUS"
 echo -e " \e[32mNmap:\e[0m                 $(command -v nmap             2>/dev/null || echo 'nicht gefunden')"
 echo -e " \e[32mMetasploit:\e[0m           $(command -v msfconsole       2>/dev/null || echo 'nicht gefunden')"

@@ -23,8 +23,8 @@ services:
       - PULSE_SERVER=unix:/run/pulse/native
       # Anthropic API Key – für Claude Code (Opus 4.6)
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
-      # Claude Code: Modell festlegen
-      - ANTHROPIC_MODEL=claude-opus-4-6
+      # Claude Code: Modell festlegen (Host-Env überschreibt den Default)
+      - ANTHROPIC_MODEL=${ANTHROPIC_MODEL:-claude-opus-4-6}
     volumes:
       - ./setup.sh:/opt/setup.sh:ro
       - kali-home:/root

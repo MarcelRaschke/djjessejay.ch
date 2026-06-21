@@ -8,6 +8,8 @@ set -euo pipefail
 LOGFILE="/var/log/kali-cloud-setup.log"
 exec > >(tee -a "$LOGFILE") 2>&1
 
+MODEL="${ANTHROPIC_MODEL:-claude-opus-4-6}"    # zentral – via ANTHROPIC_MODEL überschreibbar
+
 info()  { echo -e "\e[32m[INFO]\e[0m  $*"; }
 warn()  { echo -e "\e[33m[WARN]\e[0m  $*"; }
 error() { echo -e "\e[31m[ERROR]\e[0m $*" >&2; exit 1; }
@@ -272,9 +274,9 @@ configure_claude_code() {
   mkdir -p /root/.claude /root/.claude/agents /root/pentest-reports
 
   # Globale Claude Code Settings: Opus 4.6 + HexStrike AI + volle SubAgent-Power
-  cat > /root/.claude/settings.json <<'CLAUDECFG'
+  cat > /root/.claude/settings.json <<CLAUDECFG
 {
-  "model": "claude-opus-4-6",
+  "model": "${MODEL}",
   "mcpServers": {
     "hexstrike-ai": {
       "command": "/opt/hexstrike-ai/hexstrike-env/bin/python3",
@@ -358,7 +360,7 @@ CLAUDEMD
     info "hack.sh installiert → /usr/local/bin/hack ✓"
   fi
 
-  info "Claude Code konfiguriert: Modell=claude-opus-4-6, SubAgent-Power=true ✓"
+  info "Claude Code konfiguriert: Modell=${MODEL}, SubAgent-Power=true ✓"
   info "CLAUDE.md erstellt: /root/CLAUDE.md ✓"
 }
 
@@ -408,7 +410,7 @@ print_summary() {
   echo -e "\e[1;32m║  Stage 1 bereit. Evil Corp hat keine Ahnung.                  ║\e[0m"
   echo -e "\e[1;32m╚══════════════════════════════════════════════════════════════╝\e[0m"
   echo -e " \e[32mElliot (Claude Code):\e[0m $(command -v claude            2>/dev/null || echo 'nicht im PATH')"
-  echo -e " \e[32mGehirn:\e[0m              claude-opus-4-6"
+  echo -e " \e[32mGehirn:\e[0m              $MODEL"
   echo -e " \e[32mfsociety Operatives:\e[0m 5 Mitglieder (Elliot/Darlene/Mr.Robot/Tyrell/Whiterose)"
   echo -e " \e[32mZero-Day Engine:\e[0m     $(command -v hexstrike         2>/dev/null || echo 'nicht im PATH')"
   echo -e " \e[32mHexStrike Port:\e[0m      13145"

@@ -1,7 +1,3 @@
----
-model: claude-opus-4-6
----
-
 # Whiterose – Report Operative · fsociety
 
 Zeit ist das Kostbarste, was wir haben. Ich verschwende keine davon.

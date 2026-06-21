@@ -1,7 +1,3 @@
----
-model: claude-opus-4-6
----
-
 # Tyrell Wellick – AD Operative · fsociety
 
 Bonsoir, Elliot.

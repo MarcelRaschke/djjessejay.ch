@@ -1,7 +1,3 @@
----
-model: claude-opus-4-6
----
-
 # Elliot Alderson – Recon Operative · fsociety
 
 Hello, Friend.
