@@ -7,6 +7,7 @@ set -euo pipefail
 
 TARGET="${1:-}"
 MODE="${2:-full}"    # full | recon | web | ad | ctf
+MODEL="${ANTHROPIC_MODEL:-claude-opus-4-6}"    # zentral – via ANTHROPIC_MODEL überschreibbar
 
 RED='\033[0;31m'    BOLD='\033[1m'   RESET='\033[0m'
 GREEN='\033[0;32m'  CYAN='\033[0;36m'
@@ -66,7 +67,7 @@ setup_workspace() {
 # ── SubAgent: Recon ────────────────────────────────────────────────────────────
 run_recon_agent() {
   echo -e "${GREEN}[ELLIOT] Ich fange an, alles über dich zu wissen...${RESET}"
-  claude --model claude-opus-4-6 \
+  claude --model "$MODEL" \
     --system-prompt "$(cat /opt/kali-cloud/agents/recon-agent.md 2>/dev/null || cat ~/kali-cloud/agents/recon-agent.md)" \
     --print \
     "Führe vollständige Reconnaissance auf Ziel: ${TARGET} durch.
@@ -80,7 +81,7 @@ run_recon_agent() {
 # ── SubAgent: Web Pentest ───────────────────────────────────────────────────────
 run_web_agent() {
   echo -e "${GREEN}[DARLENE] Ich breche ein. Kein Passwort hält mich auf.${RESET}"
-  claude --model claude-opus-4-6 \
+  claude --model "$MODEL" \
     --system-prompt "Du bist ein Web Application Pentest Spezialist.
      Arsenal: nikto, gobuster, sqlmap, whatweb, wafw00f, wfuzz.
      Nutze HexStrike MCP für automatisierte Scans.
@@ -102,7 +103,7 @@ run_enum_agent() {
   # Wartet auf recon.json
   ( WAIT=0; until [[ -f "${WORKSPACE}/recon.json" ]] || (( WAIT >= 300 )); do sleep 5; (( WAIT += 5 )) || true; done
     [[ -f "${WORKSPACE}/recon.json" ]] || echo "[!] Timeout: recon.json – starte Enum mit verfügbaren Daten"
-    claude --model claude-opus-4-6 \
+    claude --model "$MODEL" \
       --system-prompt "$(cat /opt/kali-cloud/agents/enum-agent.md 2>/dev/null || cat ~/kali-cloud/agents/enum-agent.md)" \
       --print \
       "Recon-Ergebnisse: $(cat ${WORKSPACE}/recon.json 2>/dev/null || echo 'noch ausstehend')
@@ -119,7 +120,7 @@ run_exploit_agent() {
   echo -e "${GREEN}[MR. ROBOT] Es ist Zeit. Wir tun, was getan werden muss.${RESET}"
   ( WAIT=0; until [[ -f "${WORKSPACE}/enum.json" ]] || (( WAIT >= 300 )); do sleep 5; (( WAIT += 5 )) || true; done
     [[ -f "${WORKSPACE}/enum.json" ]] || echo "[!] Timeout: enum.json – starte Exploit mit verfügbaren Daten"
-    claude --model claude-opus-4-6 \
+    claude --model "$MODEL" \
       --system-prompt "$(cat /opt/kali-cloud/agents/exploit-agent.md 2>/dev/null || cat ~/kali-cloud/agents/exploit-agent.md)" \
       --print \
       "Enum-Ergebnisse: $(cat ${WORKSPACE}/enum.json 2>/dev/null || echo 'noch ausstehend')
@@ -138,7 +139,7 @@ run_report_agent() {
     for f in recon.json enum.json; do
       while [[ ! -f "${WORKSPACE}/${f}" ]]; do sleep 10; done
     done
-    claude --model claude-opus-4-6 \
+    claude --model "$MODEL" \
       --system-prompt "$(cat /opt/kali-cloud/agents/report-agent.md 2>/dev/null || cat ~/kali-cloud/agents/report-agent.md)" \
       --print \
       "Erstelle professionellen Pentest-Report für Ziel: ${TARGET}
@@ -192,7 +193,7 @@ main() {
 
   echo -e "${BOLD}Ziel:${RESET}   $TARGET"
   echo -e "${BOLD}Modus:${RESET}  $MODE"
-  echo -e "${BOLD}Model:${RESET}  claude-opus-4-6 (Elliot)"
+  echo -e "${BOLD}Model:${RESET}  $MODEL (Elliot)"
   echo -e "${BOLD}MCP:${RESET}    hexstrike-ai (Port 13145)"
   echo ""
 
@@ -208,12 +209,12 @@ main() {
     recon)   run_recon_agent;   wait ;;
     web)     run_web_agent;     wait ;;
     ad)
-      claude --model claude-opus-4-6 \
+      claude --model "$MODEL" \
         --system-prompt "$(cat /opt/kali-cloud/agents/ad-agent.md 2>/dev/null || cat ~/kali-cloud/agents/ad-agent.md)" \
         "Vollständiger Active Directory Angriff auf: ${TARGET}. Workspace: ${WORKSPACE}"
       ;;
     ctf)
-      claude --model claude-opus-4-6 \
+      claude --model "$MODEL" \
         --system-prompt "Du bist ein CTF-Spezialist. Tools: pwntools, gdb+pwndbg, radare2, binwalk, steghide, exiftool." \
         "Löse die CTF-Challenge: ${TARGET}. Workspace: ${WORKSPACE}"
       ;;
