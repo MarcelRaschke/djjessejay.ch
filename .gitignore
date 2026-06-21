@@ -9,6 +9,7 @@ npm-debug.log*
 # Environment / secrets
 .env
 .env.local
+.claude/settings.local.json
 
 # Temporary & backup files
 *.tmp
