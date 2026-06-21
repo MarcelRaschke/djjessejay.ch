@@ -1,0 +1,58 @@
+name: Auto-create draft PR
+
+# Opens a draft pull request automatically when a feature branch is pushed,
+# so work-in-progress branches always have a PR without manual steps.
+
+on:
+  push:
+    branches:
+      - 'claude/**'
+      - 'feature/**'
+      - 'feat/**'
+      - 'fix/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  open-draft-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create draft PR if none exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ github.ref_name }}
+          BASE: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+
+          # Skip if the branch already has an open PR
+          existing=$(gh pr list --head "$BRANCH" --state open --json number --jq 'length')
+          if [ "$existing" != "0" ]; then
+            echo "PR already open for $BRANCH — nothing to do."
+            exit 0
+          fi
+
+          # Skip if there are no commits between base and this branch
+          if ! git rev-parse --verify "origin/$BASE" >/dev/null 2>&1; then
+            git fetch origin "$BASE" --depth=50
+          fi
+          if [ -z "$(git log --oneline "origin/$BASE..HEAD" 2>/dev/null)" ]; then
+            echo "No commits ahead of $BASE — skipping PR creation."
+            exit 0
+          fi
+
+          title="$(git log -1 --pretty=%s HEAD)"
+          gh pr create \
+            --draft \
+            --base "$BASE" \
+            --head "$BRANCH" \
+            --title "$title" \
+            --body "$(printf 'Auto-generated draft PR for \`%s\`.\n\n## Commits\n%s\n\n🤖 Opened automatically by the auto-pr workflow.' \
+              "$BRANCH" "$(git log --pretty='- %s' "origin/$BASE..HEAD")")"
