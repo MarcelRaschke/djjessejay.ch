@@ -1,7 +1,37 @@
+# Dependencies & build output
 node_modules/
 dist/
+
+# Logs
 *.log
 npm-debug.log*
-.DS_Store
+
+# Environment / secrets
 .env
 .env.local
+
+# Temporary & backup files
+*.tmp
+*.temp
+*~
+*.bak
+*.backup
+*.cache
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor files
+.vscode/settings.json
+*.swp
+*.swo
+
+# Archive/backup content
+*wayback*
+*archive.org*
