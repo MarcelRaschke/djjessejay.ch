@@ -7,8 +7,21 @@
     <meta name="description" content="DJ Jesse Jay - Professioneller DJ aus Zürich, seit 1997 aktiv. Betreiber der Radiosendung 'Blue Dimension Space Night ehemals Galaxy Space Night' auf Radio LoRa. Musikstile: Progressiv, House, Techno, Deep House.">
     <meta name="keywords" content="DJ, Jesse Jay, Zürich, Techno, House, Progressive, Organic, Radio LoRa, Blue Dimension, Galaxy Space Night, Michael Fellner">
     <meta name="author" content="DJ Jesse Jay, Marcin Kolonko, Marcel Raschke">
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="DJ Jesse Jay - Zürich">
+    <meta property="og:description" content="Professioneller DJ aus Zürich seit 1997. Progressiv, House, Techno. Radiosendung 'The Blue Dimension' auf Radio LoRa.">
+    <meta property="og:url" content="https://djjessejay.ch">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="DJ Jesse Jay - Zürich">
+    <meta name="twitter:description" content="Professioneller DJ aus Zürich seit 1997. Progressiv, House, Techno. Radiosendung 'The Blue Dimension' auf Radio LoRa.">
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://api.anthropic.com https://www.google.com/recaptcha/; img-src 'self' data:; frame-src https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/">
+    <!-- Google reCAPTCHA v3 -->
+    <script src="https://www.google.com/recaptcha/api.js?render=YOUR_RECAPTCHA_SITE_KEY" async defer></script>
+    <!-- Tailwind CSS (local build) -->
+    <link rel="stylesheet" href="tailwind.css" integrity="sha384-qxsTu5eQzvwilYNPZ++HmqcRTSFm08jjw4P3MIdEMeyOyGnCi4m1Wx9AlPchJD7n" crossorigin="anonymous">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
@@ -117,6 +130,7 @@
     </style>
 </head>
 <body class="min-h-screen">
+    <a href="#about" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-cyan-500 focus:text-white focus:rounded" data-translate="skip-to-content">Zum Inhalt springen</a>
     <!-- Cookie Banner -->
     <div id="cookie-banner" class="cookie-banner fixed inset-x-0 bottom-0 bg-slate-900/80 backdrop-blur-md text-white p-4 md:p-6 z-[1000] hidden items-center justify-between flex-wrap gap-4">
         <p data-translate="cookie-message" class="text-center md:text-left flex-grow">Diese Website verwendet Cookies, um Ihr Browsererlebnis zu verbessern.</p>
@@ -207,7 +221,7 @@
                     <h3 class="text-3xl font-bold text-white mb-4" data-translate="ai-setlist-title">✨ Kreiere dein Traum-Set</h3>
                     <p class="text-slate-300 mb-6 max-w-2xl mx-auto" data-translate="ai-setlist-desc">Beschreibe einen Vibe, und die KI erstellt eine hypothetische Setlist, die Jesse Jay spielen könnte.</p>
                     <div class="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto">
-                        <input type="text" id="setlist-vibe-input" class="w-full p-3 rounded-lg border border-slate-600 bg-slate-800/50 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all" data-translate-placeholder="ai-setlist-placeholder">
+                        <input type="text" id="setlist-vibe-input" maxlength="500" class="w-full p-3 rounded-lg border border-slate-600 bg-slate-800/50 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all" data-translate-placeholder="ai-setlist-placeholder">
                         <button id="generate-setlist-btn" class="px-6 py-3 bg-cyan-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-cyan-600 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" data-translate="ai-setlist-btn" disabled>Generieren</button>
                     </div>
                     <div id="dream-setlist-result" class="mt-6 p-6 bg-slate-800/50 rounded-lg text-left hidden min-h-[200px] max-w-2xl mx-auto">
@@ -220,7 +234,7 @@
                     <h3 class="text-3xl font-bold text-white mb-4" data-translate="ai-reco-title">✨ Finde den perfekten Mix</h3>
                     <p class="text-slate-300 mb-6 max-w-2xl mx-auto" data-translate="ai-reco-desc">Beschreibe deine Stimmung oder dein Event und lass die KI den passenden Sound für dich finden.</p>
                     <div class="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto">
-                        <input type="text" id="vibe-input" class="w-full p-3 rounded-lg border border-slate-600 bg-slate-800/50 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all" data-translate-placeholder="ai-reco-placeholder">
+                        <input type="text" id="vibe-input" maxlength="500" class="w-full p-3 rounded-lg border border-slate-600 bg-slate-800/50 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all" data-translate-placeholder="ai-reco-placeholder">
                         <button id="get-recommendation-btn" class="px-6 py-3 bg-cyan-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-cyan-600 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" data-translate="ai-reco-btn" disabled>Empfehlen</button>
                     </div>
                     <div id="recommendation-result" class="mt-6 p-6 bg-slate-800/50 rounded-lg text-left hidden min-h-[100px] max-w-2xl mx-auto">
@@ -239,7 +253,7 @@
                 </div>
                 <div class="p-4 border-t border-slate-700/50">
                     <div class="flex gap-4">
-                        <input type="text" id="chat-input" class="w-full p-3 rounded-lg border border-slate-600 bg-slate-800/50 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all" data-translate-placeholder="chatbot-placeholder">
+                        <input type="text" id="chat-input" maxlength="500" class="w-full p-3 rounded-lg border border-slate-600 bg-slate-800/50 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all" data-translate-placeholder="chatbot-placeholder">
                         <button id="chat-send-btn" class="px-6 py-3 bg-cyan-500 rounded-lg font-semibold text-white no-underline transition-all hover:bg-cyan-600 shadow-lg" data-translate="send">Senden</button>
                     </div>
                 </div>
@@ -402,6 +416,7 @@
                 'ai-press-title': '✨ KI-Presseassistent', 'ai-press-desc': 'Geben Sie Ihre Event-Details ein, und die KI erstellt eine professionelle Ankündigung für Sie.', 'ai-press-date': 'Event-Datum:', 'ai-press-date-placeholder': 'z.B. 15. Oktober', 'ai-press-venue': 'Veranstaltungsort:', 'ai-press-venue-placeholder': 'z.B. Club X, Zürich', 'ai-press-notes': 'Besonderheiten:', 'ai-press-notes-placeholder': 'z.B. Support von DJ Y', 'ai-press-btn': 'Ankündigung generieren', 'ai-press-copy': 'Text kopieren', 'ai-press-copied': 'Kopiert!',
                 'chatbot-title': '✨ Frag die KI', 'chatbot-placeholder': 'Stelle eine Frage...', 'chatbot-greeting': 'Hallo! Ich bin JJ-AI, der digitale Assistent von Jesse Jay. Wie kann ich dir helfen?',
                 'ai-setlist-title': '✨ Kreiere dein Traum-Set', 'ai-setlist-desc': 'Beschreibe einen Vibe, und die KI erstellt eine hypothetische Setlist, die Jesse Jay spielen könnte.', 'ai-setlist-placeholder': "z.B. 'Sonnenaufgang auf einer Dachterrasse'", 'ai-setlist-btn': 'Generieren',
+                'skip-to-content': 'Zum Inhalt springen',
                 'ai-act-nav': 'EU AI Act', 'ai-act-title': 'EU AI Act: Eine Zusammenfassung', 'ai-act-p1': "Der EU AI Act ist das weltweit erste umfassende Gesetz zur Regulierung von Künstlicher Intelligenz. Sein Ziel ist es, sicherzustellen, dass KI-Systeme in der EU sicher, transparent und nicht diskriminierend sind, während gleichzeitig Innovation gefördert wird.", 'ai-act-h-risk': "Der risikobasierte Ansatz", 'ai-act-p2': "Das Gesetz teilt KI-Anwendungen in Risikokategorien ein: von <b class=\"text-rose-400\">inakzeptablen Risiken</b> (die verboten werden, z.B. Social Scoring), über <b class=\"text-amber-400\">hohe Risiken</b> (die strengen Auflagen unterliegen, z.B. KI in der Medizin), bis hin zu <b class=\"text-cyan-400\">begrenzten</b> und <b class=\"text-green-400\">minimalen Risiken</b> (mit leichten Transparenzpflichten oder keinen neuen Regeln).", 'ai-act-h-impact': "Bedeutung für diese Webseite", 'ai-act-p3': "Die KI-Funktionen auf dieser Seite (z.B. der Chatbot oder der Biografie-Generator) fallen unter die Kategorie des begrenzten oder minimalen Risikos. Gemäss dem AI Act verpflichten wir uns zur Transparenz. Alle KI-generierten Inhalte sind klar als solche gekennzeichnet, um sicherzustellen, dass Sie immer wissen, wann Sie mit einer KI interagieren."
             },
             en: {
@@ -411,22 +426,65 @@
                 'ai-press-title': '✨ AI Press Assistant', 'ai-press-desc': 'Enter your event details, and the AI will create a professional announcement for you.', 'ai-press-date': 'Event Date:', 'ai-press-date-placeholder': 'e.g., October 15th', 'ai-press-venue': 'Venue:', 'ai-press-venue-placeholder': 'e.g., Club X, Zurich', 'ai-press-notes': 'Special Notes:', 'ai-press-notes-placeholder': 'e.g., Support by DJ Y', 'ai-press-btn': 'Generate Announcement', 'ai-press-copy': 'Copy Text', 'ai-press-copied': 'Copied!',
                 'chatbot-title': '✨ Ask the AI', 'chatbot-placeholder': 'Ask a question...', 'chatbot-greeting': "Hi! I'm JJ-AI, Jesse Jay's digital assistant. How can I help you?",
                 'ai-setlist-title': '✨ Create Your Dream Set', 'ai-setlist-desc': 'Describe a vibe, and the AI will create a hypothetical setlist that Jesse Jay might play.', 'ai-setlist-placeholder': "e.g., 'sunrise on a rooftop terrace'", 'ai-setlist-btn': 'Generate',
+                'skip-to-content': 'Skip to content',
                 'ai-act-nav': 'EU AI Act', 'ai-act-title': 'EU AI Act: A Summary', 'ai-act-p1': "The EU AI Act is the world's first comprehensive law regulating Artificial Intelligence. Its goal is to ensure that AI systems in the EU are safe, transparent, and non-discriminatory, while fostering innovation.", 'ai-act-h-risk': "The Risk-Based Approach", 'ai-act-p2': "The law categorizes AI applications into risk levels: from <b class=\"text-rose-400\">unacceptable risks</b> (which are banned, e.g., social scoring), to <b class=\"text-amber-400\">high risks</b> (subject to strict requirements, e.g., AI in medicine), down to <b class=\"text-cyan-400\">limited</b> and <b class=\"text-green-400\">minimal risks</b> (with light transparency obligations or no new rules).", 'ai-act-h-impact': "What it means for this website", 'ai-act-p3': "The AI features on this site (like the chatbot or bio generator) fall into the limited or minimal risk category. In line with the AI Act, we are committed to transparency. All AI-generated content is clearly marked as such, ensuring you always know when you are interacting with an AI."
             },
             fr: {
                 // French translations including AI Act
+                'skip-to-content': 'Aller au contenu',
                 'ai-act-nav': 'Loi IA de l\'UE', 'ai-act-title': "Loi IA de l'UE : Un résumé", 'ai-act-p1': "La Loi sur l'IA de l'UE est la première loi complète au monde réglementant l'intelligence artificielle. Son objectif est de garantir que les systèmes d'IA dans l'UE sont sûrs, transparents et non discriminatoires, tout en encourageant l'innovation.", 'ai-act-h-risk': "L'approche basée sur les risques", 'ai-act-p2': "La loi classe les applications d'IA par niveaux de risque : des <b class=\"text-rose-400\">risques inacceptables</b> (qui sont interdits, par ex. le scoring social), aux <b class=\"text-amber-400\">risques élevés</b> (soumis à des exigences strictes, par ex. l'IA en médecine), jusqu'aux <b class=\"text-cyan-400\">risques limités</b> et <b class=\"text-green-400\">minimes</b> (avec de légères obligations de transparence ou aucune nouvelle règle).", 'ai-act-h-impact': "Ce que cela signifie pour ce site web", 'ai-act-p3': "Les fonctionnalités d'IA de ce site (comme le chatbot ou le générateur de biographie) entrent dans la catégorie des risques limités ou minimes. Conformément à la Loi sur l'IA, nous nous engageons à la transparence. Tout le contenu généré par l'IA est clairement identifié comme tel, garantissant que vous sachiez toujours quand vous interagissez avec une IA."
                 // ... other FR translations
             },
             it: {
                 // Italian translations including AI Act
+                'skip-to-content': 'Vai al contenuto',
                 'ai-act-nav': 'AI Act UE', 'ai-act-title': "AI Act UE: Un riassunto", 'ai-act-p1': "L'AI Act dell'UE è la prima legge completa al mondo che regolamenta l'Intelligenza Artificiale. Il suo obiettivo è garantire che i sistemi di IA nell'UE siano sicuri, trasparenti e non discriminatori, promuovendo al contempo l'innovazione.", 'ai-act-h-risk': "L'approccio basato sul rischio", 'ai-act-p2': "La legge classifica le applicazioni di IA in livelli di rischio: da <b class=\"text-rose-400\">rischi inaccettabili</b> (che sono vietati, es. il social scoring), a <b class=\"text-amber-400\">rischi alti</b> (soggetti a requisiti rigorosi, es. l'IA in medicina), fino a <b class=\"text-cyan-400\">rischi limitati</b> e <b class=\"text-green-400\">minimi</b> (con leggeri obblighi di trasparenza o nessuna nuova regola).", 'ai-act-h-impact': "Cosa significa per questo sito web", 'ai-act-p3': "Le funzionalità di IA di questo sito (come la chatbot o il generatore di biografie) rientrano nella categoria di rischio limitato o minimo. In linea con l'AI Act, ci impegniamo per la trasparenza. Tutti i contenuti generati dall'IA sono chiaramente contrassegnati come tali, assicurando che tu sappia sempre quando interagisci con un'IA."
                  // ... other IT translations
             }
         };
 
-        const memoryStorage = { 'preferred-language': 'de', 'cookies-accepted': null };
         const apiKey = ""; // Provided by environment
+
+        function safeHTML(text) {
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/\n\n/g, '</p><p class="mt-4">')
+                .replace(/\n/g, '<br>');
+        }
+
+        function sanitizePromptInput(input) {
+            if (typeof input !== 'string') return '';
+            const trimmed = input.slice(0, 500);
+            const injectionPatterns = [
+                /ignore\s+(previous|all|above)\s+instructions/i,
+                /you\s+are\s+now\s+(DAN|an?\s+AI|a\s+language)/i,
+                /\[SYSTEM\]|\[INST\]|<\|system\|>/i,
+                /forget\s+(everything|all)\s+(you|your)/i,
+                /act\s+as\s+(if|though)/i,
+            ];
+            for (const pattern of injectionPatterns) {
+                if (pattern.test(trimmed)) return '[Input blocked]';
+            }
+            return trimmed;
+        }
+
+        function withBtnLoading(btn, asyncFn, loadingHTML = '<span class="spinner"></span>') {
+            const orig = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = loadingHTML;
+            return asyncFn().finally(() => { btn.innerHTML = orig; btn.disabled = false; });
+        }
+
+        function showResultLoading(el) {
+            el.classList.remove('hidden');
+            el.innerHTML = '<div class="flex justify-center items-center h-full"><div class="spinner"></div></div>';
+        }
+
+        function formatAIResponse(text) {
+            return safeHTML(text).replace(/\*\*(.*?)\*\*/g, '<strong class="text-cyan-400">$1</strong>');
+        }
 
         // --- Claude API Call Function ---
         async function callClaudeAPI(prompt, systemInstruction, maxRetries = 3) {
@@ -490,7 +548,7 @@
             const aiResponse = await callClaudeAPI(userPrompt, systemInstruction);
 
             if (aiResponse) {
-                bioContent.innerHTML = `<p>${aiResponse.replace(/\n\n/g, '</p><p class="mt-4">').replace(/\n/g, '<br>')}</p>`;
+                bioContent.innerHTML = `<p>${safeHTML(aiResponse)}</p>`;
             } else {
                 bioContent.innerHTML = `<p class="text-red-400">Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.</p>`;
             }
@@ -509,83 +567,48 @@
         async function refineContactMessage() {
             const messageTextarea = document.getElementById('message');
             const refineBtn = document.getElementById('refine-message-btn');
-            const originalText = refineBtn.innerHTML;
-            const loadingText = translations[memoryStorage['preferred-language']]['ai-refine-btn-loading'] || 'Refining...';
-
             if (!messageTextarea.value.trim()) return;
-
-            refineBtn.disabled = true;
-            refineBtn.innerHTML = `<span class="spinner"></span> ${loadingText}`;
-
+            const loadingText = translations[localStorage.getItem('preferred-language') || 'de']['ai-refine-btn-loading'] || 'Refining...';
             const systemInstruction = "You are a helpful AI assistant. Your task is to refine a user's message into a more professional and clear booking or contact request. Correct any grammar or spelling mistakes and structure it politely, but retain the original intent and key information. Respond in the same language as the user's message.";
-            const userPrompt = `Refine the following message into a professional inquiry: "${messageTextarea.value}"`;
-
-            const aiResponse = await callClaudeAPI(userPrompt, systemInstruction);
-            if (aiResponse) {
-                messageTextarea.value = aiResponse;
-            } else {
-                console.error("Failed to refine message.");
-            }
-            refineBtn.disabled = false;
-            refineBtn.innerHTML = originalText;
+            const userPrompt = `Refine the following message into a professional inquiry: "${sanitizePromptInput(messageTextarea.value)}"`;
+            await withBtnLoading(refineBtn, async () => {
+                const aiResponse = await callClaudeAPI(userPrompt, systemInstruction);
+                if (aiResponse) messageTextarea.value = aiResponse;
+            }, `<span class="spinner"></span> ${loadingText}`);
         }
 
         async function getAIRecommendation() {
             const vibeInput = document.getElementById('vibe-input');
             const getRecoBtn = document.getElementById('get-recommendation-btn');
             const resultDiv = document.getElementById('recommendation-result');
-
             if (!vibeInput.value.trim()) return;
-
-            const originalBtnText = getRecoBtn.innerHTML;
-            getRecoBtn.disabled = true;
-            getRecoBtn.innerHTML = `<span class="spinner"></span>`;
-            resultDiv.classList.remove('hidden');
-            resultDiv.innerHTML = `<div class="flex justify-center items-center h-full"><div class="spinner"></div></div>`;
-
             const systemInstruction = "You are a knowledgeable and enthusiastic music curator for DJ Jesse Jay. Based on a user's described mood or event, you recommend one of three categories of his mixes: 'Latest Mixes' for modern, cutting-edge sounds; 'Radio Show' for deep, long-form journeys; or 'Classic Sets' for timeless, nostalgic vibes. Your response should first state the recommended category in bold, surrounded by asterisks (e.g., **Latest Mixes**), followed by a creative, short paragraph explaining why it's the perfect fit. Respond in the same language as the user's prompt.";
-            const userPrompt = `The mood I'm looking for is: "${vibeInput.value}". Which mix category should I listen to? Respond in the language of the prompt.`;
-
-            const aiResponse = await callClaudeAPI(userPrompt, systemInstruction);
-
-            if (aiResponse) {
-                const formattedResponse = aiResponse.replace(/\*\*(.*?)\*\*/g, '<strong class="text-cyan-400">$1</strong>');
-                resultDiv.innerHTML = `<p>${formattedResponse.replace(/\n/g, '<br>')}</p>`;
-            } else {
-                resultDiv.innerHTML = `<p class="text-red-400">An error occurred. Please try again later.</p>`;
-            }
-
-            getRecoBtn.innerHTML = originalBtnText;
+            const userPrompt = `The mood I'm looking for is: "${sanitizePromptInput(vibeInput.value)}". Which mix category should I listen to? Respond in the language of the prompt.`;
+            await withBtnLoading(getRecoBtn, async () => {
+                showResultLoading(resultDiv);
+                const aiResponse = await callClaudeAPI(userPrompt, systemInstruction);
+                resultDiv.innerHTML = aiResponse
+                    ? `<p>${formatAIResponse(aiResponse)}</p>`
+                    : `<p class="text-red-400">An error occurred. Please try again later.</p>`;
+            });
             getRecoBtn.disabled = !vibeInput.value.trim();
         }
 
         async function generatePressRelease() {
-            const date = document.getElementById('event-date').value;
-            const venue = document.getElementById('event-venue').value;
-            const notes = document.getElementById('event-notes').value;
+            const date = sanitizePromptInput(document.getElementById('event-date').value);
+            const venue = sanitizePromptInput(document.getElementById('event-venue').value);
+            const notes = sanitizePromptInput(document.getElementById('event-notes').value);
             const genBtn = document.getElementById('generate-press-btn');
             const resultContainer = document.getElementById('press-result-container');
             const resultDiv = document.getElementById('press-result');
-
-            const originalBtnText = genBtn.innerHTML;
-            genBtn.disabled = true;
-            genBtn.innerHTML = `<span class="spinner"></span>`;
-            resultContainer.classList.remove('hidden');
-            resultDiv.innerHTML = `<div class="flex justify-center items-center h-full"><div class="spinner"></div></div>`;
-
             const systemInstruction = "You are a professional PR agent specializing in electronic music. Your task is to write a short, exciting press release or social media announcement (around 100-150 words) for a gig by DJ Jesse Jay. The tone should be professional yet energetic. Use the provided event details. The output should be ready to copy and paste. Respond in the language of the user's details.";
             const userPrompt = `Create a press release for an event with DJ Jesse Jay. Details: Date: ${date}, Venue: ${venue}, Special Notes: ${notes}.`;
-
-            const aiResponse = await callClaudeAPI(userPrompt, systemInstruction);
-
-            if (aiResponse) {
-                resultDiv.innerText = aiResponse;
-            } else {
-                resultDiv.innerText = "An error occurred. Please try again later.";
-            }
-
-            genBtn.innerHTML = originalBtnText;
-            genBtn.disabled = false;
+            await withBtnLoading(genBtn, async () => {
+                resultContainer.classList.remove('hidden');
+                showResultLoading(resultDiv);
+                const aiResponse = await callClaudeAPI(userPrompt, systemInstruction);
+                resultDiv.innerText = aiResponse || "An error occurred. Please try again later.";
+            });
         }
 
         function copyPressRelease() {
@@ -593,11 +616,9 @@
             navigator.clipboard.writeText(text).then(() => {
                 const copyBtn = document.getElementById('copy-press-btn');
                 const originalText = copyBtn.innerText;
-                const copiedText = translations[memoryStorage['preferred-language']]['ai-press-copied'] || 'Copied!';
+                const copiedText = translations[localStorage.getItem('preferred-language') || 'de']['ai-press-copied'] || 'Copied!';
                 copyBtn.innerText = copiedText;
-                setTimeout(() => {
-                    copyBtn.innerText = originalText;
-                }, 2000);
+                setTimeout(() => { copyBtn.innerText = originalText; }, 2000);
             });
         }
         
@@ -605,35 +626,21 @@
             const vibeInput = document.getElementById('setlist-vibe-input');
             const genBtn = document.getElementById('generate-setlist-btn');
             const resultDiv = document.getElementById('dream-setlist-result');
-
             if (!vibeInput.value.trim()) return;
-
-            const originalBtnText = genBtn.innerHTML;
-            genBtn.disabled = true;
-            genBtn.innerHTML = `<span class="spinner"></span>`;
-            resultDiv.classList.remove('hidden');
-            resultDiv.innerHTML = `<div class="flex justify-center items-center h-full"><div class="spinner"></div></div>`;
-
             const systemInstruction = "You are an expert AI music curator with deep knowledge of Progressive House, Techno, and Deep House from the 90s to today. Your task is to create a hypothetical 5-track setlist that DJ Jesse Jay might play, based on a user's description of a mood or theme. You must adhere to his known style: soulful, deep, journey-like, and sometimes sexy. The setlist should have a logical flow. RULES: 1. Generate a list of exactly 5 tracks. 2. Format the output as a numbered list. 3. Each item must follow this format: `Artist Name - Track Title (Remix if applicable)`. 4. Choose plausible, real tracks from the appropriate genres. 5. After the list, add one short, creative sentence describing the overall vibe of the generated set. 6. Respond in the same language as the user's prompt.";
-            const userPrompt = `Create a 5-track setlist for the following vibe: "${vibeInput.value}"`;
-
-            const aiResponse = await callClaudeAPI(userPrompt, systemInstruction);
-
-            if (aiResponse) {
-                const parts = aiResponse.split('\n').filter(p => p.trim());
-                if (parts.length > 1) {
-                    const lastLine = parts.pop(); 
-                    const listItems = parts.map(item => `<li>${item.replace(/^\d+\.\s*/, '')}</li>`).join('');
-                    resultDiv.innerHTML = `<ol>${listItems}</ol><p class="mt-4 italic text-slate-400">${lastLine}</p>`;
+            const userPrompt = `Create a 5-track setlist for the following vibe: "${sanitizePromptInput(vibeInput.value)}"`;
+            await withBtnLoading(genBtn, async () => {
+                showResultLoading(resultDiv);
+                const aiResponse = await callClaudeAPI(userPrompt, systemInstruction);
+                if (aiResponse) {
+                    const parts = aiResponse.split('\n').filter(p => p.trim());
+                    const lastLine = parts.pop() || '';
+                    const items = parts.map(item => `<li>${safeHTML(item.replace(/^\d+\.\s*/, ''))}</li>`).join('');
+                    resultDiv.innerHTML = `<ol>${items}</ol><p class="mt-4 italic text-slate-400">${safeHTML(lastLine)}</p>`;
                 } else {
-                     resultDiv.innerHTML = `<p>${aiResponse}</p>`;
+                    resultDiv.innerHTML = `<p class="text-red-400">An error occurred. Please try again later.</p>`;
                 }
-            } else {
-                 resultDiv.innerHTML = `<p class="text-red-400">An error occurred. Please try again later.</p>`;
-            }
-
-            genBtn.innerHTML = originalBtnText;
-            genBtn.disabled = false;
+            });
         }
 
         const chatWindow = document.getElementById('chat-window');
@@ -648,7 +655,7 @@
         }
 
         async function handleChatSubmit() {
-            const userMessage = chatInput.value.trim();
+            const userMessage = sanitizePromptInput(chatInput.value.trim());
             if (!userMessage) return;
 
             addChatMessage(userMessage, 'user');
@@ -674,31 +681,75 @@
 
         // --- Standard Website Functions ---
         function switchLanguage(lang) {
-            if (!translations[lang]) return; 
-            memoryStorage['preferred-language'] = lang; 
-            document.documentElement.lang = lang; 
-            document.querySelectorAll('[data-translate]').forEach(el => { const key = el.dataset.translate; if (translations[lang]?.[key]) { el.innerHTML = translations[lang][key]; } }); 
-            document.querySelectorAll('[data-translate-placeholder]').forEach(el => { const key = el.dataset.translatePlaceholder; if (translations[lang]?.[key]) { el.placeholder = translations[lang][key]; } });
-            document.querySelectorAll('.language-selector a').forEach(a => { a.classList.toggle('active', a.dataset.lang === lang);});
+            if (!translations[lang]) return;
+            localStorage.setItem('preferred-language', lang);
+            document.documentElement.lang = lang;
+            document.querySelectorAll('[data-translate]').forEach(el => {
+                const key = el.dataset.translate;
+                const value = translations[lang]?.[key] ?? translations['de']?.[key];
+                if (value) el.innerHTML = value;
+            });
+            document.querySelectorAll('[data-translate-placeholder]').forEach(el => {
+                const key = el.dataset.translatePlaceholder;
+                const value = translations[lang]?.[key] ?? translations['de']?.[key];
+                if (value) el.placeholder = value;
+            });
+            document.querySelectorAll('.language-selector a').forEach(a => { a.classList.toggle('active', a.dataset.lang === lang); });
         }
         
-        function showCookieBanner() { if (!memoryStorage['cookies-accepted']) { document.getElementById('cookie-banner').classList.add('show'); }}
-        function acceptCookies() { memoryStorage['cookies-accepted'] = 'true'; document.getElementById('cookie-banner').classList.remove('show');}
-        function declineCookies() { memoryStorage['cookies-accepted'] = 'false'; document.getElementById('cookie-banner').classList.remove('show');}
+        function showCookieBanner() { if (!localStorage.getItem('cookies-accepted')) { document.getElementById('cookie-banner').classList.add('show'); } }
+        function acceptCookies() { localStorage.setItem('cookies-accepted', 'true'); document.getElementById('cookie-banner').classList.remove('show'); }
+        function declineCookies() { localStorage.setItem('cookies-accepted', 'false'); document.getElementById('cookie-banner').classList.remove('show'); }
         
-        function handleFormSubmit(event) {
+        const RECAPTCHA_SITE_KEY = 'YOUR_RECAPTCHA_SITE_KEY';
+
+        async function handleFormSubmit(event) {
             event.preventDefault();
             const form = event.target;
             const successMsg = document.getElementById('form-success');
             const errorMsg = document.getElementById('form-error');
+            const submitBtn = form.querySelector('[type="submit"]');
             successMsg.classList.add('hidden');
             errorMsg.classList.add('hidden');
-            setTimeout(() => {
-                const formData = new FormData(form);
-                console.log('Form data:', Object.fromEntries(formData.entries()));
-                successMsg.classList.remove('hidden');
-                form.reset();
-            }, 1000);
+
+            const doSubmit = async (token) => {
+                submitBtn.disabled = true;
+                try {
+                    const res = await fetch('/api/contact', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            name: document.getElementById('name').value,
+                            email: document.getElementById('email').value,
+                            message: document.getElementById('message').value,
+                            'g-recaptcha-response': token || '',
+                        }),
+                    });
+                    if (res.ok) {
+                        successMsg.classList.remove('hidden');
+                        form.reset();
+                    } else {
+                        const data = await res.json().catch(() => ({}));
+                        errorMsg.textContent = data.error || 'Es gab ein Problem. Bitte versuchen Sie es später erneut.';
+                        errorMsg.classList.remove('hidden');
+                    }
+                } catch {
+                    errorMsg.textContent = 'Keine Verbindung. Bitte versuchen Sie es später erneut.';
+                    errorMsg.classList.remove('hidden');
+                } finally {
+                    submitBtn.disabled = false;
+                }
+            };
+
+            if (typeof grecaptcha !== 'undefined') {
+                grecaptcha.ready(() => {
+                    grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'contact' })
+                        .then(token => doSubmit(token))
+                        .catch(() => doSubmit());
+                });
+            } else {
+                doSubmit();
+            }
         }
 
         function initSmoothScrolling() {
@@ -731,7 +782,7 @@
             originalBioHTML = document.getElementById('bio-content').innerHTML;
 
             showCookieBanner();
-            const savedLang = memoryStorage['preferred-language'] || 'de';
+            const savedLang = localStorage.getItem('preferred-language') || 'de';
             switchLanguage(savedLang);
             
             document.querySelectorAll('.language-selector a').forEach(link => { link.addEventListener('click', e => { e.preventDefault(); switchLanguage(link.dataset.lang); }); });
