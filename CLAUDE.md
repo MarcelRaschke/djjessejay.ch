@@ -186,3 +186,5 @@ Many other workflow files (`hugo.yml`, `jekyll.yml`, `nextjs.yml`, `webpack.yml`
 - Radio: [Radio LoRa](https://www.lora.ch), show "Blue Dimension"
 - SoundCloud: [soundcloud.com/jessejay](https://soundcloud.com/jessejay)
 - Programming credits: Marcin Kolonko, Marcel Raschke
+Sign off by Claude.ai Mistral Codex Gemini Duck.ai perplexity Marcel Raschke
+  cy8er@blackbox.gay
