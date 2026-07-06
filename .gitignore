@@ -10,6 +10,13 @@ npm-debug.log*
 .env
 .env.local
 .claude/settings.local.json
+.dev.vars
+.dev.vars.local
+
+# Cloudflare Wrangler
+.wrangler/
+# Assembled public asset dir (build artifact of scripts/build-public.mjs)
+public/
 
 # Temporary & backup files
 *.tmp

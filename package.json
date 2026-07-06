@@ -9,6 +9,9 @@
     "dev": "webpack --mode development --watch",
     "build:css": "tailwindcss -i ./src/input.css -o ./tailwind.css --minify",
     "watch:css": "tailwindcss -i ./src/input.css -o ./tailwind.css --watch",
+    "build:public": "node scripts/build-public.mjs",
+    "cf:dev": "npm run build:public && wrangler dev",
+    "deploy": "npm run build:public && wrangler deploy",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": ["dj", "vanilla", "javascript", "tailwind", "express"],
@@ -37,6 +40,7 @@
     "tailwindcss": "^4.2.2",
     "webpack": "^5.90.0",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.2.5"
+    "webpack-dev-server": "^5.2.5",
+    "wrangler": "^4.42.0"
   }
 }

@@ -1,0 +1,30 @@
+# Cloudflare Worker config for djjessejay.ch
+# Serves the static site (assets binding) and the /api/contact endpoint from a
+# single Worker. Deploy with: npm run deploy
+#
+# SECRETS (set once per environment, never committed):
+#   npx wrangler secret put RECAPTCHA_SECRET_KEY
+#   npx wrangler secret put RESEND_API_KEY
+# Non-secret values live in [vars] below.
+
+name = "djjessejay"
+main = "worker/index.js"
+compatibility_date = "2025-01-01"
+
+[assets]
+# ./public is assembled by `npm run build:public` (scripts/build-public.mjs) —
+# an explicit allow-list of website files, so server code, SQL archives,
+# node_modules and secrets are never uploaded as public assets.
+directory = "./public"
+binding = "ASSETS"
+# Serve index.html for unknown routes; /api/contact falls through to the Worker
+# because no asset matches it.
+not_found_handling = "single-page-application"
+
+[vars]
+# reCAPTCHA v3 minimum score to accept (0.0–1.0). Overridable per environment.
+RECAPTCHA_SCORE_THRESHOLD = "0.5"
+# Resend sender — must be a verified domain/sender in your Resend account.
+CONTACT_EMAIL_FROM = "DJ Jesse Jay Website <noreply@djjessejay.ch>"
+# Recipient for contact form submissions.
+CONTACT_EMAIL_TO = "info@djjessejay.ch"

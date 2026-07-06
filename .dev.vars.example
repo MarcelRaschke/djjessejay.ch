@@ -1,0 +1,14 @@
+# Local development secrets for `wrangler dev` (copy to .dev.vars — GITIGNORED).
+# In production these are set via `npx wrangler secret put <NAME>` (secrets) or
+# the [vars] block in wrangler.toml (non-secret values).
+
+# reCAPTCHA v3 server-side secret (secret)
+RECAPTCHA_SECRET_KEY=your_recaptcha_v3_secret
+
+# Resend API key (secret) — https://resend.com/api-keys
+RESEND_API_KEY=re_your_resend_api_key
+
+# Optional local overrides of the [vars] defaults in wrangler.toml:
+# RECAPTCHA_SCORE_THRESHOLD=0.5
+# CONTACT_EMAIL_FROM=DJ Jesse Jay Website <noreply@djjessejay.ch>
+# CONTACT_EMAIL_TO=info@djjessejay.ch
