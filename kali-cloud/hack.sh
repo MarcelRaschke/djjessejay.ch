@@ -157,7 +157,7 @@ check_deps() {
       hermes)
         command -v hermes &>/dev/null || {
           echo "[!] hermes nicht gefunden."
-          echo "    Installiere: curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash"
+          echo "    Installiere (an Commit gepinnt): curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/449706cb5219257e2028ace22e7870cbb2bf3760/scripts/install.sh | bash"
           exit 1
         }
         ;;

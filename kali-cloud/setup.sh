@@ -248,8 +248,9 @@ SERVICE
 
 # ── Hermes Agent (Nous Research, MIT) – optionaler Offline-Provider ───────────
 # Nicht automatisch installiert (curl|bash vermieden).
+# An Commit gepinnt (reproduzierbar, kein Moving-Target auf main):
 # Manuell: curl -fsSL \
-#   https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh \
+#   https://raw.githubusercontent.com/NousResearch/hermes-agent/449706cb5219257e2028ace22e7870cbb2bf3760/scripts/install.sh \
 #   | bash
 # Dann: AD_SPEC=hermes:NousResearch/Hermes-3-Llama-3.1-70B hack <target> ad
 

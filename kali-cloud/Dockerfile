@@ -132,9 +132,10 @@ RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
     && npm install -g @anthropic-ai/claude-code
 
 # ── Hermes Agent (Nous Research, MIT) – optionaler Offline-Provider ───────────
-# Manuell nach dem ersten Start installieren (curl|bash nicht im Build-Layer):
+# Manuell nach dem ersten Start installieren (curl|bash nicht im Build-Layer).
+# An Commit gepinnt (reproduzierbar, kein Moving-Target auf main):
 #   docker exec kali-cloud bash -c "curl -fsSL \
-#     https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh \
+#     https://raw.githubusercontent.com/NousResearch/hermes-agent/449706cb5219257e2028ace22e7870cbb2bf3760/scripts/install.sh \
 #     | bash"
 # Dann: AD_SPEC=hermes:NousResearch/Hermes-3-Llama-3.1-70B hack <target> ad
 
