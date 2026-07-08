@@ -87,7 +87,7 @@ djjessejay.ch/
 ### HTML
 - The primary page is `index.html`. It uses Tailwind CSS loaded from CDN (`cdn.tailwindcss.com`).
 - The page is in **German** (`<html lang="de">`), with some English content in biography sections.
-- The site includes a **cookie banner**, **language selector** (DE/EN/FR/IT), and a **contact form** with reCAPTCHA placeholder.
+- The site includes a **cookie banner**, **language selector** (DE/EN/FR/IT), and a **contact form** wired to [Formspree](https://formspree.io) with a honeypot (`_gotcha`) for spam protection.
 - Sections: Biography (`#about`/`#biografie`), Music (`#music`/`#musik`), Contact (`#contact`/`#kontakt`).
 - Flash-era assets (`.swf`, Flash detection code) are present but non-functional — do not try to revive them.
 
@@ -170,11 +170,11 @@ Many other workflow files (`hugo.yml`, `jekyll.yml`, `nextjs.yml`, `webpack.yml`
 ## Important Context for AI Assistants
 
 1. **No build system** — do not introduce npm, webpack, or build tools without being asked.
-2. **No backend** — the site is purely static. The README describes Flask/Node.js options for a contact form backend, but none is implemented. The contact form currently does not send emails.
+2. **No backend** — the site is purely static. The README describes Flask/Node.js options, but the contact form instead uses **Formspree** (a third-party form-to-email service that works with static hosting). The `<form>` in `index.html` POSTs via `fetch` to a Formspree endpoint. To activate it, replace the `YOUR_FORMSPREE_ID` placeholder in the form `action` with a real Formspree form ID; until then, `handleFormSubmit` shows the error message (it no longer fakes success).
 3. **Legacy assets** — `.swf`, `.gif` (Flash-era), `.mov` files are historical. Treat them as read-only artifacts.
 4. **SQL files are archives** — they document the original database schema, not a live database.
 5. **Tailwind via CDN** — `index.html` uses CDN Tailwind, which is appropriate for this simple static site. Do not switch to a PostCSS/npm Tailwind setup unless explicitly requested.
-6. **reCAPTCHA placeholder** — `YOUR_RECAPTCHA_SITE_KEY` in `index.html` is a placeholder that needs a real key to work.
+6. **Contact form placeholder** — `YOUR_FORMSPREE_ID` in the `index.html` form `action` must be replaced with a real Formspree form ID before the contact form can deliver email. (The legacy README/`home.html` reference an older `YOUR_RECAPTCHA_SITE_KEY`; the modern `index.html` uses a honeypot instead of reCAPTCHA.)
 7. **SECURITY.md is a template** — the version table (`5.1.x`, `4.0.x`) is boilerplate and does not reflect real versioning for this project.
 8. **Copyright** — content is © 2003–2025 DJ Jesse Jay. Music/tracks in videos are not freely licensed. Background assets are CC BY 4.0. Site code is Apache License 2.0.
 

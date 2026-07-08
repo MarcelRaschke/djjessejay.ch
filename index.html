@@ -248,8 +248,15 @@
 
         <!-- Contact Section -->
         <section id="contact" class="py-20 flex items-center justify-center p-4 md:p-8 fade-in-section">
-            <form class="max-w-3xl w-full bg-slate-900/50 backdrop-blur-lg p-6 md:p-10 rounded-2xl shadow-2xl border border-slate-700/50" id="contact-form">
+            <!-- To activate this form: create a free form at https://formspree.io, then replace
+                 YOUR_FORMSPREE_ID below with the ID Formspree gives you (e.g. action="https://formspree.io/f/mabcwxyz").
+                 Until then, submissions show the error message instead of silently pretending to succeed. -->
+            <form class="max-w-3xl w-full bg-slate-900/50 backdrop-blur-lg p-6 md:p-10 rounded-2xl shadow-2xl border border-slate-700/50" id="contact-form" action="https://formspree.io/f/YOUR_FORMSPREE_ID" method="POST">
                 <h2 class="text-4xl font-bold text-center mb-8 text-white" data-translate="contact-title">Kontakt aufnehmen</h2>
+                <!-- Honeypot: hidden from real users; Formspree discards submissions where this is filled in (spam bots). -->
+                <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
+                <!-- Subject line of the notification email Formspree sends you. -->
+                <input type="hidden" name="_subject" value="Neue Kontaktanfrage über djjessejay.ch">
                 <div class="mb-5">
                     <label for="name" data-translate="name" class="block text-slate-300 mb-2 font-bold">Name:</label>
                     <input type="text" id="name" name="name" required class="w-full p-3 rounded-lg border border-slate-600 bg-slate-800/50 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all" data-translate-placeholder="name-placeholder">
@@ -677,19 +684,41 @@
         function acceptCookies() { memoryStorage['cookies-accepted'] = 'true'; document.getElementById('cookie-banner').classList.remove('show');}
         function declineCookies() { memoryStorage['cookies-accepted'] = 'false'; document.getElementById('cookie-banner').classList.remove('show');}
         
-        function handleFormSubmit(event) {
+        async function handleFormSubmit(event) {
             event.preventDefault();
             const form = event.target;
             const successMsg = document.getElementById('form-success');
             const errorMsg = document.getElementById('form-error');
+            const submitBtn = form.querySelector('button[type="submit"]');
             successMsg.classList.add('hidden');
             errorMsg.classList.add('hidden');
-            setTimeout(() => {
-                const formData = new FormData(form);
-                console.log('Form data:', Object.fromEntries(formData.entries()));
-                successMsg.classList.remove('hidden');
-                form.reset();
-            }, 1000);
+
+            // Guard: the form only works once a real Formspree endpoint is configured.
+            if (!form.action || form.action.includes('YOUR_FORMSPREE_ID')) {
+                console.warn('Contact form not configured: replace YOUR_FORMSPREE_ID in the form action with your Formspree form ID.');
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            if (submitBtn) submitBtn.disabled = true;
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (response.ok) {
+                    successMsg.classList.remove('hidden');
+                    form.reset();
+                } else {
+                    errorMsg.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Form submission failed:', error);
+                errorMsg.classList.remove('hidden');
+            } finally {
+                if (submitBtn) submitBtn.disabled = false;
+            }
         }
 
         function initSmoothScrolling() {
