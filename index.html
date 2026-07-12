@@ -153,12 +153,11 @@
     <header class="bg-slate-900/50 backdrop-blur-xl fixed w-full top-0 z-40 border-b border-slate-700/50">
         <nav class="container mx-auto flex flex-wrap justify-center items-center gap-x-6 gap-y-2 p-4">
             <a href="#about" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="biography">Biografie</a>
-            <a href="#music" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="music">Musik</a>
+            <a href="#events" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="events-nav">Events</a>
+            <a href="#music" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="tracks-nav">Tracks</a>
+            <a href="#media" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="media-nav">Media</a>
             <a href="#chatbot" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="chatbot-nav">Frag die KI</a>
             <a href="#contact" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="contact">Kontakt</a>
-            <a href="#privacy" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="privacy">Datenschutz</a>
-            <a href="#imprint" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="imprint">Impressum</a>
-            <a href="#ai-act" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="ai-act-nav">EU AI Act</a>
         </nav>
     </header>
 
@@ -169,8 +168,11 @@
             <div class="container mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-8 items-center text-center lg:text-left">
                 <div class="flex flex-col items-center">
                     <div class="profile-image w-64 h-64 md:w-80 md:h-80 rounded-full bg-gradient-to-br from-rose-500 to-cyan-500 flex items-center justify-center text-6xl md:text-8xl font-bold animate-float animate-pulse-glow bg-gradient-animated">JJ</div>
-                    <div class="social-icons flex gap-4 md:gap-6 mt-8 justify-center">
+                    <div class="social-icons flex flex-wrap gap-4 md:gap-6 mt-8 justify-center">
                         <a href="https://soundcloud.com/jessejay" target="_blank" aria-label="Soundcloud" class="w-14 h-14 bg-slate-800/50 backdrop-blur-lg rounded-full flex items-center justify-center text-3xl text-white no-underline transition-all hover:bg-rose-500 hover:scale-110 shadow-lg">🎵</a>
+                        <!-- TODO: Such-URLs durch offizielle Künstlerprofile ersetzen, sobald vorhanden -->
+                        <a href="https://open.spotify.com/search/DJ%20Jesse%20Jay" target="_blank" aria-label="Spotify" class="w-14 h-14 bg-slate-800/50 backdrop-blur-lg rounded-full flex items-center justify-center text-3xl text-white no-underline transition-all hover:bg-green-500 hover:scale-110 shadow-lg">🎧</a>
+                        <a href="https://www.youtube.com/results?search_query=DJ+Jesse+Jay+Blue+Dimension" target="_blank" aria-label="YouTube" class="w-14 h-14 bg-slate-800/50 backdrop-blur-lg rounded-full flex items-center justify-center text-3xl text-white no-underline transition-all hover:bg-red-500 hover:scale-110 shadow-lg">▶️</a>
                         <a href="https://www.lora.ch/radio/sendungen/blue-dimension" target="_blank" aria-label="LoRa" class="w-14 h-14 bg-slate-800/50 backdrop-blur-lg rounded-full flex items-center justify-center text-3xl text-white no-underline transition-all hover:bg-cyan-500 hover:scale-110 shadow-lg">📻</a>
                     </div>
                 </div>
@@ -193,6 +195,25 @@
                     <div class="mt-6 flex flex-wrap gap-4">
                         <button id="generate-bio-btn" class="flex items-center justify-center gap-2 px-5 py-2 rounded-full bg-cyan-500/80 text-white font-bold transition-all hover:bg-cyan-500 hover:scale-105 shadow-lg" data-translate="ai-bio-btn">✨ Kreative Bio generieren</button>
                         <button id="reset-bio-btn" class="px-5 py-2 rounded-full bg-slate-600/80 text-white font-bold transition-all hover:bg-slate-600 hover:scale-105 shadow-lg hidden" data-translate="ai-bio-reset-btn">Original wiederherstellen</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Events Section -->
+        <section id="events" class="py-20 flex items-center justify-center p-4 md:p-8 fade-in-section">
+            <div class="container mx-auto max-w-6xl">
+                <h2 class="text-4xl font-bold text-center mb-12 text-white" data-translate="events-title">Nächste Events</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-cyan-500/20 border border-slate-700/50">
+                        <h3 class="text-white text-2xl font-bold mb-2" data-translate="events-radio-title">The Blue Dimension</h3>
+                        <p class="text-slate-300 mb-4" data-translate="events-radio-desc">Jeden Donnerstag, 00:00–06:00 Uhr auf Radio LoRa 97.5 FM (lora.ch &amp; DAB+).</p>
+                        <a href="https://www.lora.ch/radio/sendungen/blue-dimension" target="_blank" class="inline-block mt-4 px-6 py-3 bg-cyan-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-cyan-600 hover:scale-105 shadow-lg" data-translate="events-radio-btn">Live hören</a>
+                    </div>
+                    <div class="bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-rose-500/20 border border-slate-700/50">
+                        <h3 class="text-white text-2xl font-bold mb-2" data-translate="events-booking-title">Gigs &amp; Bookings</h3>
+                        <p class="text-slate-300 mb-4" data-translate="events-booking-desc">Weitere Termine werden hier angekündigt. Für Booking-Anfragen einfach das Kontaktformular nutzen.</p>
+                        <a href="#contact" class="inline-block mt-4 px-6 py-3 bg-rose-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-rose-600 hover:scale-105 shadow-lg" data-translate="events-booking-btn">Booking anfragen</a>
                     </div>
                 </div>
             </div>
@@ -244,6 +265,31 @@
             </div>
         </section>
         
+        <!-- Media Section -->
+        <section id="media" class="py-20 flex items-center justify-center p-4 md:p-8 fade-in-section">
+            <div class="container mx-auto max-w-6xl">
+                <h2 class="text-4xl font-bold text-center mb-12 text-white" data-translate="media-title">Media</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-cyan-500/20 border border-slate-700/50">
+                        <img src="DJPult.gif" alt="DJ Jesse Jay am DJ-Pult" loading="lazy" class="w-full rounded-lg mb-4 max-w-full">
+                        <h3 class="text-white text-2xl font-bold mb-2" data-translate="media-studio-title">Im Studio</h3>
+                        <p class="text-slate-300" data-translate="media-studio-desc">Eindrücke vom DJ-Pult und aus dem Radiostudio.</p>
+                    </div>
+                    <div class="bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-red-500/20 border border-slate-700/50 flex flex-col justify-center">
+                        <h3 class="text-white text-2xl font-bold mb-2" data-translate="media-video-title">Videos</h3>
+                        <p class="text-slate-300 mb-4" data-translate="media-video-desc">Set-Videos und Clips von Gigs und Radio-Shows.</p>
+                        <!-- TODO: Such-URL durch offiziellen YouTube-Kanal ersetzen, sobald vorhanden -->
+                        <a href="https://www.youtube.com/results?search_query=DJ+Jesse+Jay+Blue+Dimension" target="_blank" class="inline-block mt-4 px-6 py-3 bg-red-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-red-600 hover:scale-105 shadow-lg mx-auto">YouTube</a>
+                    </div>
+                    <div class="bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-rose-500/20 border border-slate-700/50 flex flex-col justify-center">
+                        <h3 class="text-white text-2xl font-bold mb-2" data-translate="media-audio-title">Mixes &amp; Tracks</h3>
+                        <p class="text-slate-300 mb-4" data-translate="media-audio-desc">Alle Mixes und Sets zum Nachhören auf SoundCloud.</p>
+                        <a href="https://soundcloud.com/jessejay" target="_blank" class="inline-block mt-4 px-6 py-3 bg-rose-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-rose-600 hover:scale-105 shadow-lg mx-auto">Soundcloud</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Chatbot Section -->
         <section id="chatbot" class="py-20 flex items-center justify-center p-4 md:p-8 fade-in-section">
             <div class="max-w-3xl w-full bg-slate-900/50 backdrop-blur-lg rounded-2xl shadow-2xl border border-slate-700/50 flex flex-col h-[70vh]">
@@ -408,6 +454,9 @@
         const translations = {
             de: {
                 'cookie-message': 'Diese Website verwendet Cookies, um Ihr Browsererlebnis zu verbessern.', 'accept': 'Akzeptieren', 'decline': 'Ablehnen', 'learn-more': 'Mehr erfahren', 'biography': 'Biografie', 'music': 'Musik', 'contact': 'Kontakt', 'privacy': 'Datenschutz', 'imprint': 'Impressum', 'chatbot-nav': 'Frag die KI',
+                'events-nav': 'Events', 'tracks-nav': 'Tracks', 'media-nav': 'Media',
+                'events-title': 'Nächste Events', 'events-radio-title': 'The Blue Dimension', 'events-radio-desc': 'Jeden Donnerstag, 00:00–06:00 Uhr auf Radio LoRa 97.5 FM (lora.ch & DAB+).', 'events-radio-btn': 'Live hören', 'events-booking-title': 'Gigs & Bookings', 'events-booking-desc': 'Weitere Termine werden hier angekündigt. Für Booking-Anfragen einfach das Kontaktformular nutzen.', 'events-booking-btn': 'Booking anfragen',
+                'media-title': 'Media', 'media-studio-title': 'Im Studio', 'media-studio-desc': 'Eindrücke vom DJ-Pult und aus dem Radiostudio.', 'media-video-title': 'Videos', 'media-video-desc': 'Set-Videos und Clips von Gigs und Radio-Shows.', 'media-audio-title': 'Mixes & Tracks', 'media-audio-desc': 'Alle Mixes und Sets zum Nachhören auf SoundCloud.',
                 'bio-text-1': 'Seit 1997 prägt DJ Jesse Jay die elektronische Musikszene von Zürich aus. Seine Sets sind seelentragende Reisen, die Horizonte erweitern und mit sexy Fantasien spielen. Er liebt es, eins mit der Musik zu werden und diese Emotionen an die Crowd weiterzugeben.', 
                 'bio-text-2': 'Aufgewachsen in legendären Clubs wie Aera, Labyrinth, SpiderGalaxy und Dachkantine, verkörpert er die "we are family"-Philosophie der Zürcher Partyszene.', 
                 'bio-text-3': 'Seit 2001 betreibt er seine Radiosendung auf Radio LoRa (lora.ch & DAB+), die seit 2025 "The Blue Dimension" heisst. Jeden Donnerstag von Mitternacht bis 6 Uhr morgens liefert er tiefgründige und zeitlose musikalische Erlebnisse.', 
@@ -421,6 +470,9 @@
             },
             en: {
                 'cookie-message': 'This website uses cookies to improve your browsing experience.', 'accept': 'Accept', 'decline': 'Decline', 'learn-more': 'Learn more', 'biography': 'Biography', 'music': 'Music', 'contact': 'Contact', 'privacy': 'Privacy', 'imprint': 'Imprint', 'chatbot-nav': 'Ask AI',
+                'events-nav': 'Events', 'tracks-nav': 'Tracks', 'media-nav': 'Media',
+                'events-title': 'Next Events', 'events-radio-title': 'The Blue Dimension', 'events-radio-desc': 'Every Thursday, 00:00–06:00 on Radio LoRa 97.5 FM (lora.ch & DAB+).', 'events-radio-btn': 'Listen live', 'events-booking-title': 'Gigs & Bookings', 'events-booking-desc': 'Upcoming dates will be announced here. For booking requests, simply use the contact form.', 'events-booking-btn': 'Request booking',
+                'media-title': 'Media', 'media-studio-title': 'In the Studio', 'media-studio-desc': 'Impressions from the DJ booth and the radio studio.', 'media-video-title': 'Videos', 'media-video-desc': 'Set videos and clips from gigs and radio shows.', 'media-audio-title': 'Mixes & Tracks', 'media-audio-desc': 'All mixes and sets available on SoundCloud.',
                 'bio-text-1': 'Since 1997, DJ Jesse Jay has been shaping the electronic music scene from Zurich...', 'bio-text-2': 'Growing up in legendary clubs like Aera, Labyrinth...', 'bio-text-3': 'Since 2001, he has been running his radio show on Radio LoRa...', 'latest-mix': 'Latest Mixes', 'radio-show': 'Radio Show', 'classic-sets': 'Classic Sets', 'contact-title': 'Get in Touch', 'name': 'Name:', 'email': 'Email:', 'message': 'Message:', 'name-placeholder': 'Your Name', 'email-placeholder': 'your@email.com', 'message-placeholder': 'Your message...', 'privacy-accept': 'I accept the', 'send': 'Send', 'success-message': 'Your message has been sent successfully!', 'error-message': 'There was a problem. Please try again later.', 'legal': 'Legal', 'copyright-notice': 'The tracks in the mixes are not for free use...', 'open-source': 'Open Source', 'thanks': 'This site was created with open source software...', 'download-files': 'Downloads', 'privacy-title': 'Privacy Policy', 'privacy-p1': 'We highly value the protection of your data...', 'imprint-title': 'Imprint', 'imprint-h-owner': 'Information according to legal requirements', 'imprint-h-contact': 'Contact', 'imprint-contact-details': 'Email: [your-email-address@domain.com]', 'imprint-h-liability': 'Disclaimer of Liability', 'imprint-p1': 'The author assumes no liability...', 'download-title': 'Downloads', 'download-p1': 'Here you will find materials for press and promoters.', 'download-presskit': 'Press Kit (.zip)', 'download-logos': 'Logos & Images (.zip)',
                 'ai-bio-btn': '✨ Generate Creative Bio', 'ai-bio-reset-btn': 'Restore Original', 'ai-refine-btn': '✨ Refine Message', 'ai-bio-loading': 'Generating creative biography...', 'ai-refine-btn-loading': 'Refining...', 'ai-reco-title': '✨ Find the Perfect Mix', 'ai-reco-desc': 'Describe your mood or event, and let the AI find the right sound for you.', 'ai-reco-placeholder': "e.g., 'chilled evening at home'", 'ai-reco-btn': 'Recommend',
                 'ai-press-title': '✨ AI Press Assistant', 'ai-press-desc': 'Enter your event details, and the AI will create a professional announcement for you.', 'ai-press-date': 'Event Date:', 'ai-press-date-placeholder': 'e.g., October 15th', 'ai-press-venue': 'Venue:', 'ai-press-venue-placeholder': 'e.g., Club X, Zurich', 'ai-press-notes': 'Special Notes:', 'ai-press-notes-placeholder': 'e.g., Support by DJ Y', 'ai-press-btn': 'Generate Announcement', 'ai-press-copy': 'Copy Text', 'ai-press-copied': 'Copied!',
@@ -431,12 +483,14 @@
             },
             fr: {
                 // French translations including AI Act
+                'events-nav': 'Événements', 'tracks-nav': 'Tracks', 'media-nav': 'Médias',
                 'skip-to-content': 'Aller au contenu',
                 'ai-act-nav': 'Loi IA de l\'UE', 'ai-act-title': "Loi IA de l'UE : Un résumé", 'ai-act-p1': "La Loi sur l'IA de l'UE est la première loi complète au monde réglementant l'intelligence artificielle. Son objectif est de garantir que les systèmes d'IA dans l'UE sont sûrs, transparents et non discriminatoires, tout en encourageant l'innovation.", 'ai-act-h-risk': "L'approche basée sur les risques", 'ai-act-p2': "La loi classe les applications d'IA par niveaux de risque : des <b class=\"text-rose-400\">risques inacceptables</b> (qui sont interdits, par ex. le scoring social), aux <b class=\"text-amber-400\">risques élevés</b> (soumis à des exigences strictes, par ex. l'IA en médecine), jusqu'aux <b class=\"text-cyan-400\">risques limités</b> et <b class=\"text-green-400\">minimes</b> (avec de légères obligations de transparence ou aucune nouvelle règle).", 'ai-act-h-impact': "Ce que cela signifie pour ce site web", 'ai-act-p3': "Les fonctionnalités d'IA de ce site (comme le chatbot ou le générateur de biographie) entrent dans la catégorie des risques limités ou minimes. Conformément à la Loi sur l'IA, nous nous engageons à la transparence. Tout le contenu généré par l'IA est clairement identifié comme tel, garantissant que vous sachiez toujours quand vous interagissez avec une IA."
                 // ... other FR translations
             },
             it: {
                 // Italian translations including AI Act
+                'events-nav': 'Eventi', 'tracks-nav': 'Tracks', 'media-nav': 'Media',
                 'skip-to-content': 'Vai al contenuto',
                 'ai-act-nav': 'AI Act UE', 'ai-act-title': "AI Act UE: Un riassunto", 'ai-act-p1': "L'AI Act dell'UE è la prima legge completa al mondo che regolamenta l'Intelligenza Artificiale. Il suo obiettivo è garantire che i sistemi di IA nell'UE siano sicuri, trasparenti e non discriminatori, promuovendo al contempo l'innovazione.", 'ai-act-h-risk': "L'approccio basato sul rischio", 'ai-act-p2': "La legge classifica le applicazioni di IA in livelli di rischio: da <b class=\"text-rose-400\">rischi inaccettabili</b> (che sono vietati, es. il social scoring), a <b class=\"text-amber-400\">rischi alti</b> (soggetti a requisiti rigorosi, es. l'IA in medicina), fino a <b class=\"text-cyan-400\">rischi limitati</b> e <b class=\"text-green-400\">minimi</b> (con leggeri obblighi di trasparenza o nessuna nuova regola).", 'ai-act-h-impact': "Cosa significa per questo sito web", 'ai-act-p3': "Le funzionalità di IA di questo sito (come la chatbot o il generatore di biografie) rientrano nella categoria di rischio limitato o minimo. In linea con l'AI Act, ci impegniamo per la trasparenza. Tutti i contenuti generati dall'IA sono chiaramente contrassegnati come tali, assicurando che tu sappia sempre quando interagisci con un'IA."
                  // ... other IT translations
