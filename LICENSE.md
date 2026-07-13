@@ -186,7 +186,10 @@
       same "printed page" as the copyright notice for easier
       identification within third-party archives.
 
-   Copyright [yyyy] [name of copyright owner]
+   Copyright [2003-2013] [Marcin Kolonko], [2017-2026] [Marcel Raschke]
+
+[2003] [Michael Fellner alias Dj Jesse Jay]
+
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
