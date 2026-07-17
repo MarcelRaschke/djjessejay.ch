@@ -8,7 +8,7 @@ cd "$(dirname "$0")"
 if [ ! -f CNAME ] || [ "$(cat CNAME)" != "djjessejay.ch" ]; then
     echo "djjessejay.ch" > CNAME
     git add CNAME
-    git commit -s -m "Add CNAME for djjessejay.ch custom domain"
+    git commit -s -m "Add CNAME for djjessejay.ch custom domain" -- CNAME
 fi
 
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
