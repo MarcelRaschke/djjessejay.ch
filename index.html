@@ -41,6 +41,13 @@
             display: none;
         }
 
+        /* tailwind.css is a prebuilt/committed file (see integrity hash below);
+           object-cover wasn't in use anywhere before this image, so the
+           compiled CSS doesn't include it yet. */
+        .profile-image {
+            object-fit: cover;
+        }
+
         /* Animations */
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
@@ -167,7 +174,7 @@
         <section id="about" class="min-h-screen flex items-center justify-center p-4 fade-in-section">
             <div class="container mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-8 items-center text-center lg:text-left">
                 <div class="flex flex-col items-center">
-                    <img src="DJ-Jesse-Jay.jpg" alt="DJ Jesse Jay" class="profile-image w-64 h-64 md:w-80 md:h-80 rounded-full object-cover animate-float animate-pulse-glow">
+                    <img src="DJ-Jesse-Jay.jpg" alt="DJ Jesse Jay" class="profile-image w-64 h-64 md:w-80 md:h-80 rounded-full animate-float animate-pulse-glow">
                     <div class="social-icons flex flex-wrap gap-4 md:gap-6 mt-8 justify-center">
                         <a href="https://soundcloud.com/jessejay" target="_blank" aria-label="Soundcloud" class="w-14 h-14 bg-slate-800/50 backdrop-blur-lg rounded-full flex items-center justify-center text-3xl text-white no-underline transition-all hover:bg-rose-500 hover:scale-110 shadow-lg">🎵</a>
                         <!-- TODO: Such-URLs durch offizielle Künstlerprofile ersetzen, sobald vorhanden -->
