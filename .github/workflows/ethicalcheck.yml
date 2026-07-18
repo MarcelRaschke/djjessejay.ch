@@ -19,7 +19,8 @@ jobs:
       - name: Trivy Scan
         uses: aquasecurity/trivy-action@0.35.0
         with:
-          image-ref: ''
+          scan-type: 'fs'
+          scan-ref: '.'
           format: 'table'
 
   ethical-check:
