@@ -1,0 +1,26 @@
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/*.md'
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/workflows/**'
+
+frontend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '*.html'
+          - '*.css'
+          - '*.js'
+
+assets:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '*.gif'
+          - '*.jpg'
+          - '*.jpeg'
+          - '*.png'
+          - '*.svg'
+          - '*.mov'
