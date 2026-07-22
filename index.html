@@ -53,6 +53,26 @@
             object-fit: cover;
         }
 
+        #radio-live-badge .dot {
+            width: 0.375rem;
+            height: 0.375rem;
+            border-radius: 9999px;
+            background-color: #94a3b8; /* slate-400 */
+            display: inline-block;
+        }
+        #radio-live-badge.live {
+            background-color: rgba(244, 63, 94, 0.15); /* rose-500/15 */
+            color: #fda4af; /* rose-300 */
+        }
+        #radio-live-badge.live .dot {
+            background-color: #f43f5e; /* rose-500 */
+            animation: dot-pulse 1.6s ease-in-out infinite;
+        }
+        @keyframes dot-pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.5); }
+            50% { opacity: 0.6; box-shadow: 0 0 0 4px rgba(244, 63, 94, 0); }
+        }
+
         /* Animations */
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
@@ -219,6 +239,10 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-cyan-500/20 border border-slate-700/50">
                         <h3 class="text-white text-2xl font-bold mb-2" data-translate="events-radio-title">The Blue Dimension</h3>
+                        <span id="radio-live-badge" class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide px-2.5 py-1 rounded-full mb-3 bg-slate-700/50 text-slate-300">
+                            <span id="radio-live-dot" class="dot"></span>
+                            <span id="radio-live-text" data-translate="events-radio-offline">Nächste Sendung: Donnerstag ab Mitternacht</span>
+                        </span>
                         <p class="text-slate-300 mb-4" data-translate="events-radio-desc">Jeden Donnerstag, 00:00–06:00 Uhr auf Radio LoRa 97.5 FM (lora.ch &amp; DAB+).</p>
                         <a href="https://www.lora.ch/radio/sendungen/blue-dimension" target="_blank" class="inline-block mt-4 px-6 py-3 bg-cyan-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-cyan-600 hover:scale-105 shadow-lg" data-translate="events-radio-btn">Live hören</a>
                     </div>
@@ -467,7 +491,7 @@
             de: {
                 'cookie-message': 'Diese Website verwendet Cookies, um Ihr Browsererlebnis zu verbessern.', 'accept': 'Akzeptieren', 'decline': 'Ablehnen', 'learn-more': 'Mehr erfahren', 'biography': 'Biografie', 'music': 'Musik', 'contact': 'Kontakt', 'privacy': 'Datenschutz', 'imprint': 'Impressum', 'chatbot-nav': 'Frag die KI',
                 'events-nav': 'Events', 'tracks-nav': 'Tracks', 'media-nav': 'Media',
-                'events-title': 'Nächste Events', 'events-radio-title': 'The Blue Dimension', 'events-radio-desc': 'Jeden Donnerstag, 00:00–06:00 Uhr auf Radio LoRa 97.5 FM (lora.ch & DAB+).', 'events-radio-btn': 'Live hören', 'events-booking-title': 'Gigs & Bookings', 'events-booking-desc': 'Weitere Termine werden hier angekündigt. Für Booking-Anfragen einfach das Kontaktformular nutzen.', 'events-booking-btn': 'Booking anfragen',
+                'events-title': 'Nächste Events', 'events-radio-title': 'The Blue Dimension', 'events-radio-desc': 'Jeden Donnerstag, 00:00–06:00 Uhr auf Radio LoRa 97.5 FM (lora.ch & DAB+).', 'events-radio-btn': 'Live hören', 'events-radio-live': '🔴 Live on Air', 'events-radio-offline': 'Nächste Sendung: Donnerstag ab Mitternacht', 'events-booking-title': 'Gigs & Bookings', 'events-booking-desc': 'Weitere Termine werden hier angekündigt. Für Booking-Anfragen einfach das Kontaktformular nutzen.', 'events-booking-btn': 'Booking anfragen',
                 'media-title': 'Media', 'media-studio-title': 'Im Studio', 'media-studio-desc': 'Eindrücke vom DJ-Pult und aus dem Radiostudio.', 'media-video-title': 'Videos', 'media-video-desc': 'Set-Videos und Clips von Gigs und Radio-Shows.', 'media-audio-title': 'Mixes & Tracks', 'media-audio-desc': 'Alle Mixes und Sets zum Nachhören auf SoundCloud.',
                 'bio-text-1': 'Seit 1997 prägt DJ Jesse Jay die elektronische Musikszene von Zürich aus. Seine Sets sind seelentragende Reisen, die Horizonte erweitern und mit sexy Fantasien spielen. Er liebt es, eins mit der Musik zu werden und diese Emotionen an die Crowd weiterzugeben.', 
                 'bio-text-2': 'Aufgewachsen in legendären Clubs wie Aera, Labyrinth, SpiderGalaxy und Dachkantine, verkörpert er die "we are family"-Philosophie der Zürcher Partyszene.', 
@@ -483,7 +507,7 @@
             en: {
                 'cookie-message': 'This website uses cookies to improve your browsing experience.', 'accept': 'Accept', 'decline': 'Decline', 'learn-more': 'Learn more', 'biography': 'Biography', 'music': 'Music', 'contact': 'Contact', 'privacy': 'Privacy', 'imprint': 'Imprint', 'chatbot-nav': 'Ask AI',
                 'events-nav': 'Events', 'tracks-nav': 'Tracks', 'media-nav': 'Media',
-                'events-title': 'Next Events', 'events-radio-title': 'The Blue Dimension', 'events-radio-desc': 'Every Thursday, 00:00–06:00 on Radio LoRa 97.5 FM (lora.ch & DAB+).', 'events-radio-btn': 'Listen live', 'events-booking-title': 'Gigs & Bookings', 'events-booking-desc': 'Upcoming dates will be announced here. For booking requests, simply use the contact form.', 'events-booking-btn': 'Request booking',
+                'events-title': 'Next Events', 'events-radio-title': 'The Blue Dimension', 'events-radio-desc': 'Every Thursday, 00:00–06:00 on Radio LoRa 97.5 FM (lora.ch & DAB+).', 'events-radio-btn': 'Listen live', 'events-radio-live': '🔴 Live on Air', 'events-radio-offline': 'Next show: Thursday from midnight', 'events-booking-title': 'Gigs & Bookings', 'events-booking-desc': 'Upcoming dates will be announced here. For booking requests, simply use the contact form.', 'events-booking-btn': 'Request booking',
                 'media-title': 'Media', 'media-studio-title': 'In the Studio', 'media-studio-desc': 'Impressions from the DJ booth and the radio studio.', 'media-video-title': 'Videos', 'media-video-desc': 'Set videos and clips from gigs and radio shows.', 'media-audio-title': 'Mixes & Tracks', 'media-audio-desc': 'All mixes and sets available on SoundCloud.',
                 'bio-text-1': 'Since 1997, DJ Jesse Jay has been shaping the electronic music scene from Zurich...', 'bio-text-2': 'Growing up in legendary clubs like Aera, Labyrinth...', 'bio-text-3': 'Since 2001, he has been running his radio show on Radio LoRa...', 'latest-mix': 'Latest Mixes', 'radio-show': 'Radio Show', 'classic-sets': 'Classic Sets', 'contact-title': 'Get in Touch', 'name': 'Name:', 'email': 'Email:', 'message': 'Message:', 'name-placeholder': 'Your Name', 'email-placeholder': 'your@email.com', 'message-placeholder': 'Your message...', 'privacy-accept': 'I accept the', 'send': 'Send', 'success-message': 'Your message has been sent successfully!', 'error-message': 'There was a problem. Please try again later.', 'legal': 'Legal', 'copyright-notice': 'The tracks in the mixes are not for free use...', 'open-source': 'Open Source', 'thanks': 'This site was created with open source software...', 'download-files': 'Downloads', 'privacy-title': 'Privacy Policy', 'privacy-p1': 'We highly value the protection of your data...', 'imprint-title': 'Imprint', 'imprint-h-owner': 'Information according to legal requirements', 'imprint-h-contact': 'Contact', 'imprint-contact-details': 'Email: [your-email-address@domain.com]', 'imprint-h-liability': 'Disclaimer of Liability', 'imprint-p1': 'The author assumes no liability...', 'download-title': 'Downloads', 'download-p1': 'Here you will find materials for press and promoters.', 'download-presskit': 'Press Kit (.zip)', 'download-logos-soon': 'Logos & Images (coming soon)',
                 'ai-bio-btn': '✨ Generate Creative Bio', 'ai-bio-reset-btn': 'Restore Original', 'ai-refine-btn': '✨ Refine Message', 'ai-bio-loading': 'Generating creative biography...', 'ai-refine-btn-loading': 'Refining...', 'ai-reco-title': '✨ Find the Perfect Mix', 'ai-reco-desc': 'Describe your mood or event, and let the AI find the right sound for you.', 'ai-reco-placeholder': "e.g., 'chilled evening at home'", 'ai-reco-btn': 'Recommend',
@@ -496,7 +520,7 @@
             fr: {
                 'cookie-message': 'Ce site utilise des cookies pour améliorer votre expérience de navigation.', 'accept': 'Accepter', 'decline': 'Refuser', 'learn-more': 'En savoir plus', 'biography': 'Biographie', 'music': 'Musique', 'contact': 'Contact', 'privacy': 'Confidentialité', 'imprint': 'Mentions légales', 'chatbot-nav': "Demander à l'IA",
                 'events-nav': 'Événements', 'tracks-nav': 'Tracks', 'media-nav': 'Médias',
-                'events-title': 'Prochains événements', 'events-radio-title': 'The Blue Dimension', 'events-radio-desc': 'Chaque jeudi, de 00h00 à 06h00 sur Radio LoRa 97.5 FM (lora.ch & DAB+).', 'events-radio-btn': 'Écouter en direct', 'events-booking-title': 'Concerts & Bookings', 'events-booking-desc': 'Les prochaines dates seront annoncées ici. Pour toute demande de booking, utilisez simplement le formulaire de contact.', 'events-booking-btn': 'Demander un booking',
+                'events-title': 'Prochains événements', 'events-radio-title': 'The Blue Dimension', 'events-radio-desc': 'Chaque jeudi, de 00h00 à 06h00 sur Radio LoRa 97.5 FM (lora.ch & DAB+).', 'events-radio-btn': 'Écouter en direct', 'events-radio-live': '🔴 En direct', 'events-radio-offline': 'Prochaine émission : jeudi dès minuit', 'events-booking-title': 'Concerts & Bookings', 'events-booking-desc': 'Les prochaines dates seront annoncées ici. Pour toute demande de booking, utilisez simplement le formulaire de contact.', 'events-booking-btn': 'Demander un booking',
                 'media-title': 'Média', 'media-studio-title': 'En studio', 'media-studio-desc': "Impressions depuis la cabine DJ et le studio radio.", 'media-video-title': 'Vidéos', 'media-video-desc': "Vidéos de sets et extraits de concerts et d'émissions radio.", 'media-audio-title': 'Mixes & Tracks', 'media-audio-desc': 'Tous les mixes et sets à réécouter sur SoundCloud.',
                 'bio-text-1': "Depuis 1997, DJ Jesse Jay façonne la scène musicale électronique de Zurich. Ses sets sont des voyages qui portent l'âme, élargissent les horizons et jouent avec des fantaisies sensuelles. Il aime ne faire qu'un avec la musique et transmettre ces émotions au public.",
                 'bio-text-2': "Ayant grandi dans des clubs légendaires comme Aera, Labyrinth, SpiderGalaxy et Dachkantine, il incarne la philosophie « we are family » de la scène festive zurichoise.",
@@ -512,7 +536,7 @@
             it: {
                 'cookie-message': 'Questo sito utilizza cookie per migliorare la tua esperienza di navigazione.', 'accept': 'Accetta', 'decline': 'Rifiuta', 'learn-more': 'Scopri di più', 'biography': 'Biografia', 'music': 'Musica', 'contact': 'Contatto', 'privacy': 'Privacy', 'imprint': 'Note legali', 'chatbot-nav': "Chiedi all'IA",
                 'events-nav': 'Eventi', 'tracks-nav': 'Tracks', 'media-nav': 'Media',
-                'events-title': 'Prossimi eventi', 'events-radio-title': 'The Blue Dimension', 'events-radio-desc': 'Ogni giovedì, dalle 00:00 alle 06:00 su Radio LoRa 97.5 FM (lora.ch & DAB+).', 'events-radio-btn': 'Ascolta dal vivo', 'events-booking-title': 'Concerti & Booking', 'events-booking-desc': 'Le prossime date verranno annunciate qui. Per richieste di booking, utilizza semplicemente il modulo di contatto.', 'events-booking-btn': 'Richiedi booking',
+                'events-title': 'Prossimi eventi', 'events-radio-title': 'The Blue Dimension', 'events-radio-desc': 'Ogni giovedì, dalle 00:00 alle 06:00 su Radio LoRa 97.5 FM (lora.ch & DAB+).', 'events-radio-btn': 'Ascolta dal vivo', 'events-radio-live': '🔴 In diretta', 'events-radio-offline': 'Prossima puntata: giovedì da mezzanotte', 'events-booking-title': 'Concerti & Booking', 'events-booking-desc': 'Le prossime date verranno annunciate qui. Per richieste di booking, utilizza semplicemente il modulo di contatto.', 'events-booking-btn': 'Richiedi booking',
                 'media-title': 'Media', 'media-studio-title': 'In studio', 'media-studio-desc': 'Immagini dalla consolle DJ e dallo studio radiofonico.', 'media-video-title': 'Video', 'media-video-desc': 'Video di set e clip di concerti e trasmissioni radio.', 'media-audio-title': 'Mix & Tracks', 'media-audio-desc': 'Tutti i mix e i set da riascoltare su SoundCloud.',
                 'bio-text-1': "Dal 1997, DJ Jesse Jay plasma la scena della musica elettronica di Zurigo. I suoi set sono viaggi che toccano l'anima, ampliano gli orizzonti e giocano con fantasie sensuali. Ama diventare tutt'uno con la musica e trasmettere queste emozioni al pubblico.",
                 'bio-text-2': 'Cresciuto in club leggendari come Aera, Labyrinth, SpiderGalaxy e Dachkantine, incarna la filosofia "we are family" della scena delle feste zurighese.',
@@ -781,6 +805,24 @@
             document.querySelectorAll('.language-selector a').forEach(a => { a.classList.toggle('active', a.dataset.lang === lang); });
         }
         
+        function updateRadioLiveBadge() {
+            const badge = document.getElementById('radio-live-badge');
+            const textEl = document.getElementById('radio-live-text');
+            if (!badge || !textEl) return;
+            const parts = new Intl.DateTimeFormat('en-GB', {
+                timeZone: 'Europe/Zurich', weekday: 'short', hour: 'numeric', hour12: false
+            }).formatToParts(new Date());
+            const weekday = parts.find(p => p.type === 'weekday')?.value;
+            const hour = parseInt(parts.find(p => p.type === 'hour')?.value, 10);
+            const isLive = weekday === 'Thu' && hour >= 0 && hour < 6;
+            const key = isLive ? 'events-radio-live' : 'events-radio-offline';
+            textEl.dataset.translate = key;
+            badge.classList.toggle('live', isLive);
+            const lang = document.documentElement.lang || 'de';
+            const value = translations[lang]?.[key] ?? translations['de']?.[key];
+            if (value) textEl.textContent = value;
+        }
+
         function showCookieBanner() { if (!localStorage.getItem('cookies-accepted')) { document.getElementById('cookie-banner').classList.add('show'); } }
         function acceptCookies() { localStorage.setItem('cookies-accepted', 'true'); document.getElementById('cookie-banner').classList.remove('show'); }
         function declineCookies() { localStorage.setItem('cookies-accepted', 'false'); document.getElementById('cookie-banner').classList.remove('show'); }
@@ -869,7 +911,9 @@
             showCookieBanner();
             const savedLang = localStorage.getItem('preferred-language') || 'de';
             switchLanguage(savedLang);
-            
+            updateRadioLiveBadge();
+            setInterval(updateRadioLiveBadge, 60000);
+
             document.querySelectorAll('.language-selector a').forEach(link => { link.addEventListener('click', e => { e.preventDefault(); switchLanguage(link.dataset.lang); }); });
             document.getElementById('contact-form').addEventListener('submit', handleFormSubmit);
             initSmoothScrolling();
