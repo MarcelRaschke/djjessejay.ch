@@ -26,14 +26,41 @@ npm run deploy:dry-run
 4. `DEPLOYMENT_ENV=preview` belassen, bis die workers.dev-Adresse geprüft wurde.
 5. Noch keine produktive Custom Domain oder Route setzen.
 
-## GitHub Environment
+## GitHub Environment `cloudflare-preview`
 
-Environment `cloudflare-preview` anlegen und folgende Repository- oder Environment-Secrets setzen:
+Unter **Repository → Settings → Environments → cloudflare-preview** folgende Schutzregeln setzen:
+
+1. **Required reviewers** aktivieren und mindestens einen unabhängigen Reviewer auswählen.
+2. **Prevent self-review** aktivieren, sofern ein zweiter berechtigter Account oder ein Team verfügbar ist.
+3. **Deployment branches and tags → Selected branches and tags** auswählen.
+4. Als einzige Branch-Regel `main` eintragen.
+5. Administrator-Bypass nach Möglichkeit deaktivieren.
+
+Folgende Environment-Secrets setzen:
 
 - `CLOUDFLARE_ACCOUNT_ID`
 - `CLOUDFLARE_API_TOKEN`
 
-Das API-Token erhält nur die minimal erforderlichen Worker-Script-Rechte für das Zielkonto.
+Environment-Secrets sind erst nach erfolgreicher Freigabe durch die Deployment-Schutzregeln für den Job verfügbar.
+
+## Cloudflare API-Token
+
+Einen **Custom API Token** erstellen und auf das konkrete Cloudflare-Konto begrenzen.
+
+Erforderliche Account-Berechtigungen:
+
+- **Workers Scripts: Edit**
+- **Account Settings: Read**
+
+Nicht freigeben:
+
+- Workers Routes: Edit
+- Workers KV Storage: Edit
+- Workers R2 Storage: Edit
+- API Tokens: Edit
+- zusätzliche Konten oder Zonen
+
+Keinen **Global API Key** und keine Kombination aus `CLOUDFLARE_EMAIL` und `CLOUDFLARE_API_KEY` verwenden. Der Workflow akzeptiert ausschließlich `CLOUDFLARE_API_TOKEN` zusammen mit `CLOUDFLARE_ACCOUNT_ID`.
 
 ## Deployment
 
@@ -41,10 +68,19 @@ Der Workflow validiert Pull Requests automatisch. Deployments erfolgen ausschlie
 
 1. GitHub Actions öffnen.
 2. Workflow **Cloudflare PGP Worker** auswählen.
-3. **Run workflow** starten.
-4. Eingabe `deploy=true` setzen.
-5. Nach dem Deploy `/health` prüfen.
-6. Erst anschließend den Public-Key-Endpunkt prüfen.
+3. Branch `main` auswählen.
+4. **Run workflow** starten.
+5. Eingabe `deploy=true` setzen.
+6. Required-Reviewer-Freigabe abwarten.
+7. Nach dem Deploy `/health` prüfen.
+8. Erst anschließend den Public-Key-Endpunkt prüfen.
+
+Der Deploy-Job enthält zusätzlich zur Environment-Branch-Regel einen Code-Guard und läuft nur, wenn:
+
+- das Ereignis `workflow_dispatch` ist,
+- `deploy == true` ist,
+- `github.ref == refs/heads/main` ist,
+- beide Cloudflare-Secrets nicht leer sind.
 
 ## Healthcheck
 
