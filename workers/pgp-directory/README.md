@@ -28,12 +28,32 @@ npm run deploy:dry-run
 
 ## GitHub Environment
 
-Environment `cloudflare-preview` anlegen und folgende Repository- oder Environment-Secrets setzen:
+Environment `cloudflare-preview` unter **Settings → Environments** anlegen und wie folgt schützen:
 
-- `CLOUDFLARE_ACCOUNT_ID`
-- `CLOUDFLARE_API_TOKEN`
+1. Unter **Required reviewers** mindestens einen Reviewer mit Repository-Lesezugriff eintragen.
+2. Optional **Prevent self-review** aktivieren, sofern ein zweiter berechtigter Reviewer verfügbar ist.
+3. Unter **Deployment branches and tags** die Option **Selected branches and tags** wählen.
+4. Als einzige Branch-Regel `main` eintragen.
+5. Folgende Environment-Secrets setzen:
+   - `CLOUDFLARE_ACCOUNT_ID`
+   - `CLOUDFLARE_API_TOKEN`
 
-Das API-Token erhält nur die minimal erforderlichen Worker-Script-Rechte für das Zielkonto.
+Der Workflow enthält zusätzlich eine technische Sperre auf `refs/heads/main`. Environment-Branch-Regel und Workflow-Gate müssen beide erfüllt sein.
+
+## Cloudflare API-Token
+
+Ein benutzerdefiniertes Cloudflare API-Token erstellen. Kein Global API Key und keine Kombination aus E-Mail plus Global API Key verwenden.
+
+Erforderliche Berechtigungen:
+
+- **Account → Workers Scripts → Edit**
+- **Account → Account Settings → Read**
+
+Ressourcenbereich:
+
+- ausschließlich das Cloudflare-Konto, in dem `cy8er-pgp-directory` betrieben wird
+
+Das Token nicht als Repository-Variable, Klartextdatei oder `wrangler.jsonc` speichern. Es wird ausschließlich als GitHub Environment Secret `CLOUDFLARE_API_TOKEN` hinterlegt.
 
 ## Deployment
 
@@ -41,10 +61,14 @@ Der Workflow validiert Pull Requests automatisch. Deployments erfolgen ausschlie
 
 1. GitHub Actions öffnen.
 2. Workflow **Cloudflare PGP Worker** auswählen.
-3. **Run workflow** starten.
-4. Eingabe `deploy=true` setzen.
-5. Nach dem Deploy `/health` prüfen.
-6. Erst anschließend den Public-Key-Endpunkt prüfen.
+3. Branch `main` auswählen.
+4. **Run workflow** starten.
+5. Eingabe `deploy=true` setzen.
+6. Required-Reviewer-Freigabe erteilen.
+7. Nach dem Deploy `/health` prüfen.
+8. Erst anschließend den Public-Key-Endpunkt prüfen.
+
+Ein manueller Start von einem anderen Branch führt nicht zum Deploy-Job.
 
 ## Healthcheck
 
