@@ -9,9 +9,16 @@
     "dev": "webpack --mode development --watch",
     "build:css": "tailwindcss -i ./src/input.css -o ./tailwind.css --minify",
     "watch:css": "tailwindcss -i ./src/input.css -o ./tailwind.css --watch",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --check render-farm/render-farm-master.js && python3 -m py_compile render-farm/render-worker.py",
+    "render:master": "node render-farm/render-farm-master.js"
   },
-  "keywords": ["dj", "vanilla", "javascript", "tailwind", "express"],
+  "keywords": [
+    "dj",
+    "vanilla",
+    "javascript",
+    "tailwind",
+    "express"
+  ],
   "author": "Marcel Raschke",
   "license": "MIT",
   "repository": {
@@ -23,7 +30,8 @@
   },
   "dependencies": {
     "express": "^5.2.1",
-    "nodemailer": "^9.0.1"
+    "nodemailer": "^9.0.1",
+    "ws": "^8.21.0"
   },
   "overrides": {
     "http-proxy-middleware": "^3.0.7",
