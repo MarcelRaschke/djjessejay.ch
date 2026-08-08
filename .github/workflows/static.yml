@@ -42,8 +42,10 @@ jobs:
           rm -f *.swf
           # Remove old HTML versions (not needed for deploy)
           rm -f home.html home.htm
-          # Remove documentation, configs, build files
-          rm -rf .github web_scraper presskit.zip *.md CONTRIBUTING.md CODE_OF_CONDUCT.md LICENSE
+          # Remove web scraper utility (not site content)
+          rm -rf web_scraper
+          # Remove markdown docs and license (not served, just metadata)
+          rm -f *.md CONTRIBUTING.md CODE_OF_CONDUCT.md LICENSE
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
