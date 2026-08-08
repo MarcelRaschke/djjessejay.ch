@@ -159,6 +159,36 @@
             margin-left: 1.5rem;
             line-height: 1.8;
         }
+
+        /* Phase 1: Event Card Enhancements */
+        .event-card-radio {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .event-card-radio:hover {
+            box-shadow: 0 20px 40px rgba(0, 183, 255, 0.3), 0 10px 20px rgba(0, 183, 255, 0.15);
+        }
+
+        .event-card-booking {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .event-card-booking:hover {
+            box-shadow: 0 20px 40px rgba(255, 107, 107, 0.3), 0 10px 20px rgba(255, 107, 107, 0.15);
+        }
+
+        .btn-primary {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-primary:hover {
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+        }
+        .btn-primary:focus-visible {
+            outline: 2px solid currentColor;
+            outline-offset: 2px;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -237,19 +267,19 @@
             <div class="container mx-auto max-w-6xl">
                 <h2 class="text-4xl font-bold text-center mb-12 text-white" data-translate="events-title">Nächste Events</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-cyan-500/20 border border-slate-700/50">
+                    <div class="event-card-radio bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-cyan-500/20 border border-slate-700/50">
                         <h3 class="text-white text-2xl font-bold mb-2" data-translate="events-radio-title">The Blue Dimension</h3>
                         <span id="radio-live-badge" class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide px-2.5 py-1 rounded-full mb-3 bg-slate-700/50 text-slate-300">
                             <span id="radio-live-dot" class="dot"></span>
                             <span id="radio-live-text" data-translate="events-radio-offline">Nächste Sendung: Donnerstag ab Mitternacht</span>
                         </span>
                         <p class="text-slate-300 mb-4" data-translate="events-radio-desc">Jeden Donnerstag, 00:00–06:00 Uhr auf Radio LoRa 97.5 FM (lora.ch &amp; DAB+).</p>
-                        <a href="https://www.lora.ch/radio/sendungen/blue-dimension" target="_blank" class="inline-block mt-4 px-6 py-3 bg-cyan-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-cyan-600 hover:scale-105 shadow-lg" data-translate="events-radio-btn">Live hören</a>
+                        <a href="https://www.lora.ch/radio/sendungen/blue-dimension" target="_blank" class="btn-primary inline-block mt-4 px-6 py-3 bg-cyan-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-cyan-600 hover:scale-105 shadow-lg" data-translate="events-radio-btn">Live hören</a>
                     </div>
-                    <div class="bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-rose-500/20 border border-slate-700/50">
+                    <div class="event-card-booking bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-rose-500/20 border border-slate-700/50">
                         <h3 class="text-white text-2xl font-bold mb-2" data-translate="events-booking-title">Gigs &amp; Bookings</h3>
                         <p class="text-slate-300 mb-4" data-translate="events-booking-desc">Weitere Termine werden hier angekündigt. Für Booking-Anfragen einfach das Kontaktformular nutzen.</p>
-                        <a href="#contact" class="inline-block mt-4 px-6 py-3 bg-rose-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-rose-600 hover:scale-105 shadow-lg" data-translate="events-booking-btn">Booking anfragen</a>
+                        <a href="#contact" class="btn-primary inline-block mt-4 px-6 py-3 bg-rose-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-rose-600 hover:scale-105 shadow-lg" data-translate="events-booking-btn">Booking anfragen</a>
                     </div>
                 </div>
             </div>
