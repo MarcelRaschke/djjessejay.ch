@@ -249,6 +249,36 @@
             margin-top: 0.5rem;
             line-height: 1.5;
         }
+
+        /* Phase 4: Global Micro-Interactions */
+        input[type="text"]:focus-visible,
+        input[type="email"]:focus-visible,
+        textarea:focus-visible {
+            border-color: #00b7ff;
+            box-shadow: 0 0 0 3px rgba(0, 183, 255, 0.1), inset 0 0 0 2px rgba(0, 183, 255, 0.3);
+            background-color: rgba(30, 60, 114, 0.7);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        a:not(.btn-primary):not(.nav-link):focus-visible {
+            outline: 2px dashed #00b7ff;
+            outline-offset: 2px;
+            transition: outline 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input[type="checkbox"]:focus-visible {
+            box-shadow: 0 0 0 3px rgba(0, 183, 255, 0.3);
+            transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        button:disabled:hover {
+            transform: scale(1);
+        }
     </style>
 </head>
 <body class="min-h-screen">
