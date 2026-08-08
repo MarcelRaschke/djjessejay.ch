@@ -189,6 +189,25 @@
             outline-offset: 2px;
             box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
         }
+
+        /* Phase 2: Music Card Consistency */
+        .music-card-rose {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease-in-out;
+        }
+        .music-card-rose:hover {
+            box-shadow: 0 20px 40px rgba(244, 63, 94, 0.3), 0 10px 20px rgba(244, 63, 94, 0.15);
+            transform: translateY(-8px);
+        }
+
+        .music-card-cyan {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease-in-out;
+        }
+        .music-card-cyan:hover {
+            box-shadow: 0 20px 40px rgba(0, 183, 255, 0.3), 0 10px 20px rgba(0, 183, 255, 0.15);
+            transform: translateY(-8px);
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -289,15 +308,15 @@
         <section id="music" class="py-20 bg-slate-900/30 flex items-center justify-center p-4 md:p-8 fade-in-section">
             <div class="container mx-auto max-w-6xl space-y-16">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-cyan-500/20 border border-slate-700/50">
+                    <div class="music-card-rose bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-cyan-500/20 border border-slate-700/50">
                         <h3 data-translate="latest-mix" class="text-white text-2xl font-bold mb-4">Neueste Mixes</h3>
                         <a href="https://soundcloud.com/jessejay" target="_blank" class="inline-block mt-4 px-6 py-3 bg-rose-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-rose-600 hover:scale-105 shadow-lg">Soundcloud</a>
                     </div>
-                    <div class="bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-cyan-500/20 border border-slate-700/50">
+                    <div class="music-card-cyan bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-cyan-500/20 border border-slate-700/50">
                         <h3 data-translate="radio-show" class="text-white text-2xl font-bold mb-4">Radio Show</h3>
                         <a href="https://www.lora.ch/radio/sendungen/blue-dimension" target="_blank" class="inline-block mt-4 px-6 py-3 bg-cyan-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-cyan-600 hover:scale-105 shadow-lg">Radio LoRa</a>
                     </div>
-                    <div class="bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-cyan-500/20 border border-slate-700/50">
+                    <div class="music-card-rose bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-cyan-500/20 border border-slate-700/50">
                         <h3 data-translate="classic-sets" class="text-white text-2xl font-bold mb-4">Klassische Sets</h3>
                         <a href="https://soundcloud.com/jessejay/sets/djjessejay" target="_blank" class="inline-block mt-4 px-6 py-3 bg-rose-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-rose-600 hover:scale-105 shadow-lg">Soundcloud</a>
                     </div>
