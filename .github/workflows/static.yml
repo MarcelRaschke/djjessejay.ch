@@ -1,5 +1,5 @@
-# Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+# Build & Deploy to GitHub Pages
+name: Build & Deploy
 
 on:
   # Runs on pushes targeting the default branch
@@ -30,8 +30,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build CSS with Tailwind
+        run: npm run build:css
+
       - name: Remove large/unnecessary files before upload
         run: |
           # Remove database dumps (SQL/XML archives)
@@ -46,11 +57,17 @@ jobs:
           rm -rf web_scraper
           # Remove markdown docs and license (not served, just metadata)
           rm -f *.md CONTRIBUTING.md CODE_OF_CONDUCT.md LICENSE
+          # Remove legacy files
+          rm -f michi.swf get_flashplayer_88_31.gif
+          # Remove node_modules (not needed for static deployment)
+          rm -rf node_modules
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload minimal, optimized site directory
           path: '.'
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

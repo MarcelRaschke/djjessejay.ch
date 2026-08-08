@@ -9,6 +9,7 @@ npm-debug.log*
 # Environment / secrets
 .env
 .env.local
+.env*.local
 .claude/settings.local.json
 
 # Temporary & backup files
@@ -30,8 +31,11 @@ Thumbs.db
 
 # Editor files
 .vscode/settings.json
+.vscode/*.json
 *.swp
 *.swo
+*~
+.idea/
 
 # Archive/backup content
 *wayback*
@@ -52,3 +56,29 @@ Thumbs.db
 # Old HTML versions (legacy, not deployed)
 home.html
 home.htm
+
+# Large binary files
+*.zip
+*.rar
+*.7z
+
+# IDE specific files
+.idea/
+.vs/
+
+# Build artifacts
+*.exe
+*.dll
+*.so
+
+# Coverage reports
+coverage/
+.nyc_output/
+
+# Test results
+.test.cache
+
+# Package lock files (optional, but can be regenerated)
+# package-lock.json
+# pnpm-lock.yaml
+# yarn.lock
