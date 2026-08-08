@@ -7,8 +7,26 @@
     <meta name="description" content="DJ Jesse Jay - Professioneller DJ aus Zürich, seit 1997 aktiv. Betreiber der Radiosendung 'Blue Dimension Space Night ehemals Galaxy Space Night' auf Radio LoRa. Musikstile: Progressiv, House, Techno, Deep House.">
     <meta name="keywords" content="DJ, Jesse Jay, Zürich, Techno, House, Progressive, Organic, Radio LoRa, Blue Dimension, Galaxy Space Night, Michael Fellner">
     <meta name="author" content="DJ Jesse Jay, Marcin Kolonko, Marcel Raschke">
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="DJ Jesse Jay - Zürich">
+    <meta property="og:description" content="Professioneller DJ aus Zürich seit 1997. Progressiv, House, Techno. Radiosendung 'The Blue Dimension' auf Radio LoRa.">
+    <meta property="og:url" content="https://djjessejay.ch">
+    <link rel="canonical" href="https://djjessejay.ch/">
+    <meta property="og:image" content="https://djjessejay.ch/DJ-Jesse-Jay.jpg">
+    <meta property="og:image:alt" content="DJ Jesse Jay">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="DJ Jesse Jay - Zürich">
+    <meta name="twitter:description" content="Professioneller DJ aus Zürich seit 1997. Progressiv, House, Techno. Radiosendung 'The Blue Dimension' auf Radio LoRa.">
+    <meta name="twitter:image" content="https://djjessejay.ch/DJ-Jesse-Jay.jpg">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://api.anthropic.com https://www.google.com/recaptcha/; img-src 'self' data:; frame-src https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/">
+    <!-- Google reCAPTCHA v3 -->
+    <script src="https://www.google.com/recaptcha/api.js?render=YOUR_RECAPTCHA_SITE_KEY" async defer></script>
+    <!-- Tailwind CSS (local build) -->
+    <link rel="stylesheet" href="tailwind.css" integrity="sha384-qxsTu5eQzvwilYNPZ++HmqcRTSFm08jjw4P3MIdEMeyOyGnCi4m1Wx9AlPchJD7n" crossorigin="anonymous">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
@@ -26,6 +44,33 @@
 
         .hidden {
             display: none;
+        }
+
+        /* tailwind.css is a prebuilt/committed file (see integrity hash below);
+           object-cover wasn't in use anywhere before this image, so the
+           compiled CSS doesn't include it yet. */
+        .profile-image {
+            object-fit: cover;
+        }
+
+        #radio-live-badge .dot {
+            width: 0.375rem;
+            height: 0.375rem;
+            border-radius: 9999px;
+            background-color: #94a3b8; /* slate-400 */
+            display: inline-block;
+        }
+        #radio-live-badge.live {
+            background-color: rgba(244, 63, 94, 0.15); /* rose-500/15 */
+            color: #fda4af; /* rose-300 */
+        }
+        #radio-live-badge.live .dot {
+            background-color: #f43f5e; /* rose-500 */
+            animation: dot-pulse 1.6s ease-in-out infinite;
+        }
+        @keyframes dot-pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.5); }
+            50% { opacity: 0.6; box-shadow: 0 0 0 4px rgba(244, 63, 94, 0); }
         }
 
         /* Animations */
@@ -117,6 +162,7 @@
     </style>
 </head>
 <body class="min-h-screen">
+    <a href="#about" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-cyan-500 focus:text-white focus:rounded" data-translate="skip-to-content">Zum Inhalt springen</a>
     <!-- Cookie Banner -->
     <div id="cookie-banner" class="cookie-banner fixed inset-x-0 bottom-0 bg-slate-900/80 backdrop-blur-md text-white p-4 md:p-6 z-[1000] hidden items-center justify-between flex-wrap gap-4">
         <p data-translate="cookie-message" class="text-center md:text-left flex-grow">Diese Website verwendet Cookies, um Ihr Browsererlebnis zu verbessern.</p>
@@ -128,7 +174,7 @@
     </div>
 
     <!-- Language Selector -->
-    <div class="fixed top-5 right-5 z-50 bg-slate-900/50 backdrop-blur-lg p-2 rounded-lg shadow-lg">
+    <div class="language-selector fixed top-5 right-5 z-50 bg-slate-900/50 backdrop-blur-lg p-2 rounded-lg shadow-lg">
         <a href="#" class="active inline-block text-slate-300 no-underline px-2 py-1 rounded-md transition-colors hover:bg-slate-700/50 hover:text-white" data-lang="de">DE</a>
         <a href="#" class="inline-block text-slate-300 no-underline px-2 py-1 rounded-md transition-colors hover:bg-slate-700/50 hover:text-white" data-lang="en">EN</a>
         <a href="#" class="inline-block text-slate-300 no-underline px-2 py-1 rounded-md transition-colors hover:bg-slate-700/50 hover:text-white" data-lang="fr">FR</a>
@@ -139,12 +185,11 @@
     <header class="bg-slate-900/50 backdrop-blur-xl fixed w-full top-0 z-40 border-b border-slate-700/50">
         <nav class="container mx-auto flex flex-wrap justify-center items-center gap-x-6 gap-y-2 p-4">
             <a href="#about" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="biography">Biografie</a>
-            <a href="#music" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="music">Musik</a>
+            <a href="#events" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="events-nav">Events</a>
+            <a href="#music" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="tracks-nav">Tracks</a>
+            <a href="#media" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="media-nav">Media</a>
             <a href="#chatbot" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="chatbot-nav">Frag die KI</a>
             <a href="#contact" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="contact">Kontakt</a>
-            <a href="#privacy" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="privacy">Datenschutz</a>
-            <a href="#imprint" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="imprint">Impressum</a>
-            <a href="#ai-act" class="nav-link text-slate-300 font-bold no-underline py-2 px-3" data-translate="ai-act-nav">EU AI Act</a>
         </nav>
     </header>
 
@@ -154,9 +199,12 @@
         <section id="about" class="min-h-screen flex items-center justify-center p-4 fade-in-section">
             <div class="container mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-8 items-center text-center lg:text-left">
                 <div class="flex flex-col items-center">
-                    <div class="profile-image w-64 h-64 md:w-80 md:h-80 rounded-full bg-gradient-to-br from-rose-500 to-cyan-500 flex items-center justify-center text-6xl md:text-8xl font-bold animate-float animate-pulse-glow bg-gradient-animated">JJ</div>
-                    <div class="social-icons flex gap-4 md:gap-6 mt-8 justify-center">
+                    <img src="DJ-Jesse-Jay.jpg" alt="DJ Jesse Jay" class="profile-image w-64 h-64 md:w-80 md:h-80 rounded-full animate-float animate-pulse-glow">
+                    <div class="social-icons flex flex-wrap gap-4 md:gap-6 mt-8 justify-center">
                         <a href="https://soundcloud.com/jessejay" target="_blank" aria-label="Soundcloud" class="w-14 h-14 bg-slate-800/50 backdrop-blur-lg rounded-full flex items-center justify-center text-3xl text-white no-underline transition-all hover:bg-rose-500 hover:scale-110 shadow-lg">🎵</a>
+                        <!-- TODO: Such-URLs durch offizielle Künstlerprofile ersetzen, sobald vorhanden -->
+                        <a href="https://open.spotify.com/search/DJ%20Jesse%20Jay" target="_blank" aria-label="Spotify" class="w-14 h-14 bg-slate-800/50 backdrop-blur-lg rounded-full flex items-center justify-center text-3xl text-white no-underline transition-all hover:bg-green-500 hover:scale-110 shadow-lg">🎧</a>
+                        <a href="https://www.youtube.com/results?search_query=DJ+Jesse+Jay+Blue+Dimension" target="_blank" aria-label="YouTube" class="w-14 h-14 bg-slate-800/50 backdrop-blur-lg rounded-full flex items-center justify-center text-3xl text-white no-underline transition-all hover:bg-red-500 hover:scale-110 shadow-lg">▶️</a>
                         <a href="https://www.lora.ch/radio/sendungen/blue-dimension" target="_blank" aria-label="LoRa" class="w-14 h-14 bg-slate-800/50 backdrop-blur-lg rounded-full flex items-center justify-center text-3xl text-white no-underline transition-all hover:bg-cyan-500 hover:scale-110 shadow-lg">📻</a>
                     </div>
                 </div>
@@ -179,6 +227,29 @@
                     <div class="mt-6 flex flex-wrap gap-4">
                         <button id="generate-bio-btn" class="flex items-center justify-center gap-2 px-5 py-2 rounded-full bg-cyan-500/80 text-white font-bold transition-all hover:bg-cyan-500 hover:scale-105 shadow-lg" data-translate="ai-bio-btn">✨ Kreative Bio generieren</button>
                         <button id="reset-bio-btn" class="px-5 py-2 rounded-full bg-slate-600/80 text-white font-bold transition-all hover:bg-slate-600 hover:scale-105 shadow-lg hidden" data-translate="ai-bio-reset-btn">Original wiederherstellen</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Events Section -->
+        <section id="events" class="py-20 flex items-center justify-center p-4 md:p-8 fade-in-section">
+            <div class="container mx-auto max-w-6xl">
+                <h2 class="text-4xl font-bold text-center mb-12 text-white" data-translate="events-title">Nächste Events</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-cyan-500/20 border border-slate-700/50">
+                        <h3 class="text-white text-2xl font-bold mb-2" data-translate="events-radio-title">The Blue Dimension</h3>
+                        <span id="radio-live-badge" class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide px-2.5 py-1 rounded-full mb-3 bg-slate-700/50 text-slate-300">
+                            <span id="radio-live-dot" class="dot"></span>
+                            <span id="radio-live-text" data-translate="events-radio-offline">Nächste Sendung: Donnerstag ab Mitternacht</span>
+                        </span>
+                        <p class="text-slate-300 mb-4" data-translate="events-radio-desc">Jeden Donnerstag, 00:00–06:00 Uhr auf Radio LoRa 97.5 FM (lora.ch &amp; DAB+).</p>
+                        <a href="https://www.lora.ch/radio/sendungen/blue-dimension" target="_blank" class="inline-block mt-4 px-6 py-3 bg-cyan-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-cyan-600 hover:scale-105 shadow-lg" data-translate="events-radio-btn">Live hören</a>
+                    </div>
+                    <div class="bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-rose-500/20 border border-slate-700/50">
+                        <h3 class="text-white text-2xl font-bold mb-2" data-translate="events-booking-title">Gigs &amp; Bookings</h3>
+                        <p class="text-slate-300 mb-4" data-translate="events-booking-desc">Weitere Termine werden hier angekündigt. Für Booking-Anfragen einfach das Kontaktformular nutzen.</p>
+                        <a href="#contact" class="inline-block mt-4 px-6 py-3 bg-rose-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-rose-600 hover:scale-105 shadow-lg" data-translate="events-booking-btn">Booking anfragen</a>
                     </div>
                 </div>
             </div>
@@ -207,7 +278,7 @@
                     <h3 class="text-3xl font-bold text-white mb-4" data-translate="ai-setlist-title">✨ Kreiere dein Traum-Set</h3>
                     <p class="text-slate-300 mb-6 max-w-2xl mx-auto" data-translate="ai-setlist-desc">Beschreibe einen Vibe, und die KI erstellt eine hypothetische Setlist, die Jesse Jay spielen könnte.</p>
                     <div class="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto">
-                        <input type="text" id="setlist-vibe-input" class="w-full p-3 rounded-lg border border-slate-600 bg-slate-800/50 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all" data-translate-placeholder="ai-setlist-placeholder">
+                        <input type="text" id="setlist-vibe-input" maxlength="500" class="w-full p-3 rounded-lg border border-slate-600 bg-slate-800/50 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all" data-translate-placeholder="ai-setlist-placeholder">
                         <button id="generate-setlist-btn" class="px-6 py-3 bg-cyan-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-cyan-600 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" data-translate="ai-setlist-btn" disabled>Generieren</button>
                     </div>
                     <div id="dream-setlist-result" class="mt-6 p-6 bg-slate-800/50 rounded-lg text-left hidden min-h-[200px] max-w-2xl mx-auto">
@@ -220,7 +291,7 @@
                     <h3 class="text-3xl font-bold text-white mb-4" data-translate="ai-reco-title">✨ Finde den perfekten Mix</h3>
                     <p class="text-slate-300 mb-6 max-w-2xl mx-auto" data-translate="ai-reco-desc">Beschreibe deine Stimmung oder dein Event und lass die KI den passenden Sound für dich finden.</p>
                     <div class="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto">
-                        <input type="text" id="vibe-input" class="w-full p-3 rounded-lg border border-slate-600 bg-slate-800/50 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all" data-translate-placeholder="ai-reco-placeholder">
+                        <input type="text" id="vibe-input" maxlength="500" class="w-full p-3 rounded-lg border border-slate-600 bg-slate-800/50 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all" data-translate-placeholder="ai-reco-placeholder">
                         <button id="get-recommendation-btn" class="px-6 py-3 bg-cyan-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-cyan-600 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" data-translate="ai-reco-btn" disabled>Empfehlen</button>
                     </div>
                     <div id="recommendation-result" class="mt-6 p-6 bg-slate-800/50 rounded-lg text-left hidden min-h-[100px] max-w-2xl mx-auto">
@@ -230,6 +301,31 @@
             </div>
         </section>
         
+        <!-- Media Section -->
+        <section id="media" class="py-20 flex items-center justify-center p-4 md:p-8 fade-in-section">
+            <div class="container mx-auto max-w-6xl">
+                <h2 class="text-4xl font-bold text-center mb-12 text-white" data-translate="media-title">Media</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-cyan-500/20 border border-slate-700/50">
+                        <img src="DJPult.gif" alt="DJ Jesse Jay am DJ-Pult" loading="lazy" class="w-full rounded-lg mb-4 max-w-full">
+                        <h3 class="text-white text-2xl font-bold mb-2" data-translate="media-studio-title">Im Studio</h3>
+                        <p class="text-slate-300" data-translate="media-studio-desc">Eindrücke vom DJ-Pult und aus dem Radiostudio.</p>
+                    </div>
+                    <div class="bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-red-500/20 border border-slate-700/50 flex flex-col justify-center">
+                        <h3 class="text-white text-2xl font-bold mb-2" data-translate="media-video-title">Videos</h3>
+                        <p class="text-slate-300 mb-4" data-translate="media-video-desc">Set-Videos und Clips von Gigs und Radio-Shows.</p>
+                        <!-- TODO: Such-URL durch offiziellen YouTube-Kanal ersetzen, sobald vorhanden -->
+                        <a href="https://www.youtube.com/results?search_query=DJ+Jesse+Jay+Blue+Dimension" target="_blank" class="inline-block mt-4 px-6 py-3 bg-red-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-red-600 hover:scale-105 shadow-lg mx-auto">YouTube</a>
+                    </div>
+                    <div class="bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-rose-500/20 border border-slate-700/50 flex flex-col justify-center">
+                        <h3 class="text-white text-2xl font-bold mb-2" data-translate="media-audio-title">Mixes &amp; Tracks</h3>
+                        <p class="text-slate-300 mb-4" data-translate="media-audio-desc">Alle Mixes und Sets zum Nachhören auf SoundCloud.</p>
+                        <a href="https://soundcloud.com/jessejay" target="_blank" class="inline-block mt-4 px-6 py-3 bg-rose-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-rose-600 hover:scale-105 shadow-lg mx-auto">Soundcloud</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Chatbot Section -->
         <section id="chatbot" class="py-20 flex items-center justify-center p-4 md:p-8 fade-in-section">
             <div class="max-w-3xl w-full bg-slate-900/50 backdrop-blur-lg rounded-2xl shadow-2xl border border-slate-700/50 flex flex-col h-[70vh]">
@@ -239,7 +335,7 @@
                 </div>
                 <div class="p-4 border-t border-slate-700/50">
                     <div class="flex gap-4">
-                        <input type="text" id="chat-input" class="w-full p-3 rounded-lg border border-slate-600 bg-slate-800/50 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all" data-translate-placeholder="chatbot-placeholder">
+                        <input type="text" id="chat-input" maxlength="500" class="w-full p-3 rounded-lg border border-slate-600 bg-slate-800/50 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all" data-translate-placeholder="chatbot-placeholder">
                         <button id="chat-send-btn" class="px-6 py-3 bg-cyan-500 rounded-lg font-semibold text-white no-underline transition-all hover:bg-cyan-600 shadow-lg" data-translate="send">Senden</button>
                     </div>
                 </div>
@@ -327,8 +423,8 @@
                         <h2 class="text-3xl font-bold mb-4 text-white" data-translate="download-title">Downloads</h2>
                         <p class="mb-8 text-slate-300" data-translate="download-p1">Hier finden Sie Materialien für Presse und Veranstalter.</p>
                         <div class="flex flex-col sm:flex-row justify-center gap-4">
-                             <a href="/path/to/presskit.zip" download class="px-6 py-3 bg-gradient-to-r from-rose-500 to-cyan-500 rounded-full font-semibold text-white no-underline transition-all hover:scale-105 shadow-lg" data-translate="download-presskit">Pressekit (.zip)</a>
-                             <a href="/path/to/logo.zip" download class="px-6 py-3 bg-slate-700/50 rounded-full font-semibold text-white no-underline transition-all hover:bg-slate-600/50" data-translate="download-logos">Logos & Bilder (.zip)</a>
+                             <a href="presskit.zip" download class="px-6 py-3 bg-gradient-to-r from-rose-500 to-cyan-500 rounded-full font-semibold text-white no-underline transition-all hover:scale-105 shadow-lg" data-translate="download-presskit">Pressekit (.zip)</a>
+                             <span class="px-6 py-3 bg-slate-700/30 rounded-full font-semibold text-slate-400 cursor-not-allowed" data-translate="download-logos-soon" aria-disabled="true">Logos & Bilder (bald verfügbar)</span>
                         </div>
                     </div>
 
@@ -394,39 +490,109 @@
         const translations = {
             de: {
                 'cookie-message': 'Diese Website verwendet Cookies, um Ihr Browsererlebnis zu verbessern.', 'accept': 'Akzeptieren', 'decline': 'Ablehnen', 'learn-more': 'Mehr erfahren', 'biography': 'Biografie', 'music': 'Musik', 'contact': 'Kontakt', 'privacy': 'Datenschutz', 'imprint': 'Impressum', 'chatbot-nav': 'Frag die KI',
+                'events-nav': 'Events', 'tracks-nav': 'Tracks', 'media-nav': 'Media',
+                'events-title': 'Nächste Events', 'events-radio-title': 'The Blue Dimension', 'events-radio-desc': 'Jeden Donnerstag, 00:00–06:00 Uhr auf Radio LoRa 97.5 FM (lora.ch & DAB+).', 'events-radio-btn': 'Live hören', 'events-radio-live': '🔴 Live on Air', 'events-radio-offline': 'Nächste Sendung: Donnerstag ab Mitternacht', 'events-booking-title': 'Gigs & Bookings', 'events-booking-desc': 'Weitere Termine werden hier angekündigt. Für Booking-Anfragen einfach das Kontaktformular nutzen.', 'events-booking-btn': 'Booking anfragen',
+                'media-title': 'Media', 'media-studio-title': 'Im Studio', 'media-studio-desc': 'Eindrücke vom DJ-Pult und aus dem Radiostudio.', 'media-video-title': 'Videos', 'media-video-desc': 'Set-Videos und Clips von Gigs und Radio-Shows.', 'media-audio-title': 'Mixes & Tracks', 'media-audio-desc': 'Alle Mixes und Sets zum Nachhören auf SoundCloud.',
                 'bio-text-1': 'Seit 1997 prägt DJ Jesse Jay die elektronische Musikszene von Zürich aus. Seine Sets sind seelentragende Reisen, die Horizonte erweitern und mit sexy Fantasien spielen. Er liebt es, eins mit der Musik zu werden und diese Emotionen an die Crowd weiterzugeben.', 
                 'bio-text-2': 'Aufgewachsen in legendären Clubs wie Aera, Labyrinth, SpiderGalaxy und Dachkantine, verkörpert er die "we are family"-Philosophie der Zürcher Partyszene.', 
                 'bio-text-3': 'Seit 2001 betreibt er seine Radiosendung auf Radio LoRa (lora.ch & DAB+), die seit 2025 "The Blue Dimension" heisst. Jeden Donnerstag von Mitternacht bis 6 Uhr morgens liefert er tiefgründige und zeitlose musikalische Erlebnisse.', 
-                'latest-mix': 'Neueste Mixes', 'radio-show': 'Radio Show', 'classic-sets': 'Klassische Sets', 'contact-title': 'Kontakt aufnehmen', 'name': 'Name:', 'email': 'E-Mail:', 'message': 'Nachricht:', 'name-placeholder': 'Ihr Name', 'email-placeholder': 'ihre@email.com', 'message-placeholder': 'Ihre Nachricht...', 'privacy-accept': 'Ich akzeptiere die', 'send': 'Senden', 'success-message': 'Ihre Nachricht wurde erfolgreich gesendet!', 'error-message': 'Es gab ein Problem. Bitte versuchen Sie es später erneut.', 'legal': 'Rechtliches', 'copyright-notice': 'Die Tracks in den Mixes sind nicht frei verwendbar. Bei Interesse wenden Sie sich bitte an die Künstler oder Labels.', 'open-source': 'Open Source', 'thanks': 'Diese Seite wurde mit Open Source Software erstellt. Dank an Marcin Kolonko und Marcel Raschke.', 'download-files': 'Downloads', 'privacy-title': 'Datenschutzerklärung', 'privacy-p1': 'Wir legen grossen Wert auf den Schutz Ihrer Daten. Um unsere Webseite zu besuchen, müssen Sie keine personenbezogenen Daten angeben...', 'imprint-title': 'Impressum', 'imprint-h-owner': 'Angaben gemäss gesetzlicher Vorgaben', 'imprint-h-contact': 'Kontakt', 'imprint-contact-details': 'E-Mail: [Ihre-E-Mail-Adresse@domain.com]', 'imprint-h-liability': 'Haftungsausschluss', 'imprint-p1': 'Der Autor übernimmt keinerlei Gewähr...', 'download-title': 'Downloads', 'download-p1': 'Hier finden Sie Materialien für Presse und Veranstalter.', 'download-presskit': 'Pressekit (.zip)', 'download-logos': 'Logos & Bilder (.zip)',
+                'latest-mix': 'Neueste Mixes', 'radio-show': 'Radio Show', 'classic-sets': 'Klassische Sets', 'contact-title': 'Kontakt aufnehmen', 'name': 'Name:', 'email': 'E-Mail:', 'message': 'Nachricht:', 'name-placeholder': 'Ihr Name', 'email-placeholder': 'ihre@email.com', 'message-placeholder': 'Ihre Nachricht...', 'privacy-accept': 'Ich akzeptiere die', 'send': 'Senden', 'success-message': 'Ihre Nachricht wurde erfolgreich gesendet!', 'error-message': 'Es gab ein Problem. Bitte versuchen Sie es später erneut.', 'legal': 'Rechtliches', 'copyright-notice': 'Die Tracks in den Mixes sind nicht frei verwendbar. Bei Interesse wenden Sie sich bitte an die Künstler oder Labels.', 'open-source': 'Open Source', 'thanks': 'Diese Seite wurde mit Open Source Software erstellt. Dank an Marcin Kolonko und Marcel Raschke.', 'download-files': 'Downloads', 'privacy-title': 'Datenschutzerklärung', 'privacy-p1': 'Wir legen grossen Wert auf den Schutz Ihrer Daten. Um unsere Webseite zu besuchen, müssen Sie keine personenbezogenen Daten angeben...', 'imprint-title': 'Impressum', 'imprint-h-owner': 'Angaben gemäss gesetzlicher Vorgaben', 'imprint-h-contact': 'Kontakt', 'imprint-contact-details': 'E-Mail: [Ihre-E-Mail-Adresse@domain.com]', 'imprint-h-liability': 'Haftungsausschluss', 'imprint-p1': 'Der Autor übernimmt keinerlei Gewähr...', 'download-title': 'Downloads', 'download-p1': 'Hier finden Sie Materialien für Presse und Veranstalter.', 'download-presskit': 'Pressekit (.zip)', 'download-logos-soon': 'Logos & Bilder (bald verfügbar)',
                 'ai-bio-btn': '✨ Kreative Bio generieren', 'ai-bio-reset-btn': 'Original wiederherstellen', 'ai-refine-btn': '✨ Nachricht verbessern', 'ai-bio-loading': 'Generiere kreative Biografie...', 'ai-refine-btn-loading': 'Verfeinere...', 'ai-reco-title': '✨ Finde den perfekten Mix', 'ai-reco-desc': 'Beschreibe deine Stimmung oder dein Event und lass die KI den passenden Sound für dich finden.', 'ai-reco-placeholder': "z.B. 'entspannter Abend zu Hause'", 'ai-reco-btn': 'Empfehlen',
                 'ai-press-title': '✨ KI-Presseassistent', 'ai-press-desc': 'Geben Sie Ihre Event-Details ein, und die KI erstellt eine professionelle Ankündigung für Sie.', 'ai-press-date': 'Event-Datum:', 'ai-press-date-placeholder': 'z.B. 15. Oktober', 'ai-press-venue': 'Veranstaltungsort:', 'ai-press-venue-placeholder': 'z.B. Club X, Zürich', 'ai-press-notes': 'Besonderheiten:', 'ai-press-notes-placeholder': 'z.B. Support von DJ Y', 'ai-press-btn': 'Ankündigung generieren', 'ai-press-copy': 'Text kopieren', 'ai-press-copied': 'Kopiert!',
                 'chatbot-title': '✨ Frag die KI', 'chatbot-placeholder': 'Stelle eine Frage...', 'chatbot-greeting': 'Hallo! Ich bin JJ-AI, der digitale Assistent von Jesse Jay. Wie kann ich dir helfen?',
                 'ai-setlist-title': '✨ Kreiere dein Traum-Set', 'ai-setlist-desc': 'Beschreibe einen Vibe, und die KI erstellt eine hypothetische Setlist, die Jesse Jay spielen könnte.', 'ai-setlist-placeholder': "z.B. 'Sonnenaufgang auf einer Dachterrasse'", 'ai-setlist-btn': 'Generieren',
+                'skip-to-content': 'Zum Inhalt springen',
                 'ai-act-nav': 'EU AI Act', 'ai-act-title': 'EU AI Act: Eine Zusammenfassung', 'ai-act-p1': "Der EU AI Act ist das weltweit erste umfassende Gesetz zur Regulierung von Künstlicher Intelligenz. Sein Ziel ist es, sicherzustellen, dass KI-Systeme in der EU sicher, transparent und nicht diskriminierend sind, während gleichzeitig Innovation gefördert wird.", 'ai-act-h-risk': "Der risikobasierte Ansatz", 'ai-act-p2': "Das Gesetz teilt KI-Anwendungen in Risikokategorien ein: von <b class=\"text-rose-400\">inakzeptablen Risiken</b> (die verboten werden, z.B. Social Scoring), über <b class=\"text-amber-400\">hohe Risiken</b> (die strengen Auflagen unterliegen, z.B. KI in der Medizin), bis hin zu <b class=\"text-cyan-400\">begrenzten</b> und <b class=\"text-green-400\">minimalen Risiken</b> (mit leichten Transparenzpflichten oder keinen neuen Regeln).", 'ai-act-h-impact': "Bedeutung für diese Webseite", 'ai-act-p3': "Die KI-Funktionen auf dieser Seite (z.B. der Chatbot oder der Biografie-Generator) fallen unter die Kategorie des begrenzten oder minimalen Risikos. Gemäss dem AI Act verpflichten wir uns zur Transparenz. Alle KI-generierten Inhalte sind klar als solche gekennzeichnet, um sicherzustellen, dass Sie immer wissen, wann Sie mit einer KI interagieren."
             },
             en: {
                 'cookie-message': 'This website uses cookies to improve your browsing experience.', 'accept': 'Accept', 'decline': 'Decline', 'learn-more': 'Learn more', 'biography': 'Biography', 'music': 'Music', 'contact': 'Contact', 'privacy': 'Privacy', 'imprint': 'Imprint', 'chatbot-nav': 'Ask AI',
-                'bio-text-1': 'Since 1997, DJ Jesse Jay has been shaping the electronic music scene from Zurich...', 'bio-text-2': 'Growing up in legendary clubs like Aera, Labyrinth...', 'bio-text-3': 'Since 2001, he has been running his radio show on Radio LoRa...', 'latest-mix': 'Latest Mixes', 'radio-show': 'Radio Show', 'classic-sets': 'Classic Sets', 'contact-title': 'Get in Touch', 'name': 'Name:', 'email': 'Email:', 'message': 'Message:', 'name-placeholder': 'Your Name', 'email-placeholder': 'your@email.com', 'message-placeholder': 'Your message...', 'privacy-accept': 'I accept the', 'send': 'Send', 'success-message': 'Your message has been sent successfully!', 'error-message': 'There was a problem. Please try again later.', 'legal': 'Legal', 'copyright-notice': 'The tracks in the mixes are not for free use...', 'open-source': 'Open Source', 'thanks': 'This site was created with open source software...', 'download-files': 'Downloads', 'privacy-title': 'Privacy Policy', 'privacy-p1': 'We highly value the protection of your data...', 'imprint-title': 'Imprint', 'imprint-h-owner': 'Information according to legal requirements', 'imprint-h-contact': 'Contact', 'imprint-contact-details': 'Email: [your-email-address@domain.com]', 'imprint-h-liability': 'Disclaimer of Liability', 'imprint-p1': 'The author assumes no liability...', 'download-title': 'Downloads', 'download-p1': 'Here you will find materials for press and promoters.', 'download-presskit': 'Press Kit (.zip)', 'download-logos': 'Logos & Images (.zip)',
+                'events-nav': 'Events', 'tracks-nav': 'Tracks', 'media-nav': 'Media',
+                'events-title': 'Next Events', 'events-radio-title': 'The Blue Dimension', 'events-radio-desc': 'Every Thursday, 00:00–06:00 on Radio LoRa 97.5 FM (lora.ch & DAB+).', 'events-radio-btn': 'Listen live', 'events-radio-live': '🔴 Live on Air', 'events-radio-offline': 'Next show: Thursday from midnight', 'events-booking-title': 'Gigs & Bookings', 'events-booking-desc': 'Upcoming dates will be announced here. For booking requests, simply use the contact form.', 'events-booking-btn': 'Request booking',
+                'media-title': 'Media', 'media-studio-title': 'In the Studio', 'media-studio-desc': 'Impressions from the DJ booth and the radio studio.', 'media-video-title': 'Videos', 'media-video-desc': 'Set videos and clips from gigs and radio shows.', 'media-audio-title': 'Mixes & Tracks', 'media-audio-desc': 'All mixes and sets available on SoundCloud.',
+                'bio-text-1': 'Since 1997, DJ Jesse Jay has been shaping the electronic music scene from Zurich...', 'bio-text-2': 'Growing up in legendary clubs like Aera, Labyrinth...', 'bio-text-3': 'Since 2001, he has been running his radio show on Radio LoRa...', 'latest-mix': 'Latest Mixes', 'radio-show': 'Radio Show', 'classic-sets': 'Classic Sets', 'contact-title': 'Get in Touch', 'name': 'Name:', 'email': 'Email:', 'message': 'Message:', 'name-placeholder': 'Your Name', 'email-placeholder': 'your@email.com', 'message-placeholder': 'Your message...', 'privacy-accept': 'I accept the', 'send': 'Send', 'success-message': 'Your message has been sent successfully!', 'error-message': 'There was a problem. Please try again later.', 'legal': 'Legal', 'copyright-notice': 'The tracks in the mixes are not for free use...', 'open-source': 'Open Source', 'thanks': 'This site was created with open source software...', 'download-files': 'Downloads', 'privacy-title': 'Privacy Policy', 'privacy-p1': 'We highly value the protection of your data...', 'imprint-title': 'Imprint', 'imprint-h-owner': 'Information according to legal requirements', 'imprint-h-contact': 'Contact', 'imprint-contact-details': 'Email: [your-email-address@domain.com]', 'imprint-h-liability': 'Disclaimer of Liability', 'imprint-p1': 'The author assumes no liability...', 'download-title': 'Downloads', 'download-p1': 'Here you will find materials for press and promoters.', 'download-presskit': 'Press Kit (.zip)', 'download-logos-soon': 'Logos & Images (coming soon)',
                 'ai-bio-btn': '✨ Generate Creative Bio', 'ai-bio-reset-btn': 'Restore Original', 'ai-refine-btn': '✨ Refine Message', 'ai-bio-loading': 'Generating creative biography...', 'ai-refine-btn-loading': 'Refining...', 'ai-reco-title': '✨ Find the Perfect Mix', 'ai-reco-desc': 'Describe your mood or event, and let the AI find the right sound for you.', 'ai-reco-placeholder': "e.g., 'chilled evening at home'", 'ai-reco-btn': 'Recommend',
                 'ai-press-title': '✨ AI Press Assistant', 'ai-press-desc': 'Enter your event details, and the AI will create a professional announcement for you.', 'ai-press-date': 'Event Date:', 'ai-press-date-placeholder': 'e.g., October 15th', 'ai-press-venue': 'Venue:', 'ai-press-venue-placeholder': 'e.g., Club X, Zurich', 'ai-press-notes': 'Special Notes:', 'ai-press-notes-placeholder': 'e.g., Support by DJ Y', 'ai-press-btn': 'Generate Announcement', 'ai-press-copy': 'Copy Text', 'ai-press-copied': 'Copied!',
                 'chatbot-title': '✨ Ask the AI', 'chatbot-placeholder': 'Ask a question...', 'chatbot-greeting': "Hi! I'm JJ-AI, Jesse Jay's digital assistant. How can I help you?",
                 'ai-setlist-title': '✨ Create Your Dream Set', 'ai-setlist-desc': 'Describe a vibe, and the AI will create a hypothetical setlist that Jesse Jay might play.', 'ai-setlist-placeholder': "e.g., 'sunrise on a rooftop terrace'", 'ai-setlist-btn': 'Generate',
+                'skip-to-content': 'Skip to content',
                 'ai-act-nav': 'EU AI Act', 'ai-act-title': 'EU AI Act: A Summary', 'ai-act-p1': "The EU AI Act is the world's first comprehensive law regulating Artificial Intelligence. Its goal is to ensure that AI systems in the EU are safe, transparent, and non-discriminatory, while fostering innovation.", 'ai-act-h-risk': "The Risk-Based Approach", 'ai-act-p2': "The law categorizes AI applications into risk levels: from <b class=\"text-rose-400\">unacceptable risks</b> (which are banned, e.g., social scoring), to <b class=\"text-amber-400\">high risks</b> (subject to strict requirements, e.g., AI in medicine), down to <b class=\"text-cyan-400\">limited</b> and <b class=\"text-green-400\">minimal risks</b> (with light transparency obligations or no new rules).", 'ai-act-h-impact': "What it means for this website", 'ai-act-p3': "The AI features on this site (like the chatbot or bio generator) fall into the limited or minimal risk category. In line with the AI Act, we are committed to transparency. All AI-generated content is clearly marked as such, ensuring you always know when you are interacting with an AI."
             },
             fr: {
-                // French translations including AI Act
+                'cookie-message': 'Ce site utilise des cookies pour améliorer votre expérience de navigation.', 'accept': 'Accepter', 'decline': 'Refuser', 'learn-more': 'En savoir plus', 'biography': 'Biographie', 'music': 'Musique', 'contact': 'Contact', 'privacy': 'Confidentialité', 'imprint': 'Mentions légales', 'chatbot-nav': "Demander à l'IA",
+                'events-nav': 'Événements', 'tracks-nav': 'Tracks', 'media-nav': 'Médias',
+                'events-title': 'Prochains événements', 'events-radio-title': 'The Blue Dimension', 'events-radio-desc': 'Chaque jeudi, de 00h00 à 06h00 sur Radio LoRa 97.5 FM (lora.ch & DAB+).', 'events-radio-btn': 'Écouter en direct', 'events-radio-live': '🔴 En direct', 'events-radio-offline': 'Prochaine émission : jeudi dès minuit', 'events-booking-title': 'Concerts & Bookings', 'events-booking-desc': 'Les prochaines dates seront annoncées ici. Pour toute demande de booking, utilisez simplement le formulaire de contact.', 'events-booking-btn': 'Demander un booking',
+                'media-title': 'Média', 'media-studio-title': 'En studio', 'media-studio-desc': "Impressions depuis la cabine DJ et le studio radio.", 'media-video-title': 'Vidéos', 'media-video-desc': "Vidéos de sets et extraits de concerts et d'émissions radio.", 'media-audio-title': 'Mixes & Tracks', 'media-audio-desc': 'Tous les mixes et sets à réécouter sur SoundCloud.',
+                'bio-text-1': "Depuis 1997, DJ Jesse Jay façonne la scène musicale électronique de Zurich. Ses sets sont des voyages qui portent l'âme, élargissent les horizons et jouent avec des fantaisies sensuelles. Il aime ne faire qu'un avec la musique et transmettre ces émotions au public.",
+                'bio-text-2': "Ayant grandi dans des clubs légendaires comme Aera, Labyrinth, SpiderGalaxy et Dachkantine, il incarne la philosophie « we are family » de la scène festive zurichoise.",
+                'bio-text-3': "Depuis 2001, il anime son émission de radio sur Radio LoRa (lora.ch & DAB+), qui s'appelle « The Blue Dimension » depuis 2025. Chaque jeudi de minuit à 6 heures du matin, il propose des expériences musicales profondes et intemporelles.",
+                'latest-mix': 'Derniers mixes', 'radio-show': 'Émission radio', 'classic-sets': 'Sets classiques', 'contact-title': 'Contactez-nous', 'name': 'Nom :', 'email': 'E-mail :', 'message': 'Message :', 'name-placeholder': 'Votre nom', 'email-placeholder': 'votre@email.com', 'message-placeholder': 'Votre message...', 'privacy-accept': "J'accepte la", 'send': 'Envoyer', 'success-message': 'Votre message a été envoyé avec succès !', 'error-message': 'Un problème est survenu. Veuillez réessayer plus tard.', 'legal': 'Mentions légales', 'copyright-notice': 'Les morceaux utilisés dans les mixes ne sont pas libres de droits. Pour toute demande, veuillez contacter les artistes ou labels concernés.', 'open-source': 'Open Source', 'thanks': 'Ce site a été réalisé avec des logiciels open source. Merci à Marcin Kolonko et Marcel Raschke.', 'download-files': 'Téléchargements', 'privacy-title': 'Politique de confidentialité', 'privacy-p1': "Nous accordons une grande importance à la protection de vos données. Pour visiter notre site web, vous n'avez besoin de fournir aucune donnée personnelle...", 'imprint-title': 'Mentions légales', 'imprint-h-owner': 'Informations conformément aux exigences légales', 'imprint-h-contact': 'Contact', 'imprint-contact-details': 'E-mail : [votre-adresse-email@domaine.com]', 'imprint-h-liability': 'Exclusion de responsabilité', 'imprint-p1': "L'auteur décline toute responsabilité...", 'download-title': 'Téléchargements', 'download-p1': 'Vous trouverez ici des documents pour la presse et les organisateurs.', 'download-presskit': 'Dossier de presse (.zip)', 'download-logos-soon': 'Logos & images (bientôt disponible)',
+                'ai-bio-btn': '✨ Générer une bio créative', 'ai-bio-reset-btn': "Restaurer l'original", 'ai-refine-btn': '✨ Améliorer le message', 'ai-bio-loading': "Génération d'une biographie créative...", 'ai-refine-btn-loading': 'Amélioration en cours...', 'ai-reco-title': '✨ Trouvez le mix parfait', 'ai-reco-desc': "Décrivez votre humeur ou votre événement, et laissez l'IA trouver le son qui vous convient.", 'ai-reco-placeholder': "par ex. « soirée détente à la maison »", 'ai-reco-btn': 'Recommander',
+                'ai-press-title': '✨ Assistant presse IA', 'ai-press-desc': "Saisissez les détails de votre événement, et l'IA rédigera une annonce professionnelle pour vous.", 'ai-press-date': "Date de l'événement :", 'ai-press-date-placeholder': 'par ex. le 15 octobre', 'ai-press-venue': 'Lieu :', 'ai-press-venue-placeholder': 'par ex. Club X, Zurich', 'ai-press-notes': 'Particularités :', 'ai-press-notes-placeholder': 'par ex. en première partie DJ Y', 'ai-press-btn': "Générer l'annonce", 'ai-press-copy': 'Copier le texte', 'ai-press-copied': 'Copié !',
+                'chatbot-title': "✨ Demander à l'IA", 'chatbot-placeholder': 'Posez une question...', 'chatbot-greeting': "Bonjour ! Je suis JJ-AI, l'assistant numérique de Jesse Jay. Comment puis-je vous aider ?",
+                'ai-setlist-title': '✨ Créez votre set de rêve', 'ai-setlist-desc': "Décrivez une ambiance, et l'IA créera une setlist hypothétique que Jesse Jay pourrait jouer.", 'ai-setlist-placeholder': "par ex. « lever de soleil sur une terrasse »", 'ai-setlist-btn': 'Générer',
+                'skip-to-content': 'Aller au contenu',
                 'ai-act-nav': 'Loi IA de l\'UE', 'ai-act-title': "Loi IA de l'UE : Un résumé", 'ai-act-p1': "La Loi sur l'IA de l'UE est la première loi complète au monde réglementant l'intelligence artificielle. Son objectif est de garantir que les systèmes d'IA dans l'UE sont sûrs, transparents et non discriminatoires, tout en encourageant l'innovation.", 'ai-act-h-risk': "L'approche basée sur les risques", 'ai-act-p2': "La loi classe les applications d'IA par niveaux de risque : des <b class=\"text-rose-400\">risques inacceptables</b> (qui sont interdits, par ex. le scoring social), aux <b class=\"text-amber-400\">risques élevés</b> (soumis à des exigences strictes, par ex. l'IA en médecine), jusqu'aux <b class=\"text-cyan-400\">risques limités</b> et <b class=\"text-green-400\">minimes</b> (avec de légères obligations de transparence ou aucune nouvelle règle).", 'ai-act-h-impact': "Ce que cela signifie pour ce site web", 'ai-act-p3': "Les fonctionnalités d'IA de ce site (comme le chatbot ou le générateur de biographie) entrent dans la catégorie des risques limités ou minimes. Conformément à la Loi sur l'IA, nous nous engageons à la transparence. Tout le contenu généré par l'IA est clairement identifié comme tel, garantissant que vous sachiez toujours quand vous interagissez avec une IA."
-                // ... other FR translations
             },
             it: {
-                // Italian translations including AI Act
+                'cookie-message': 'Questo sito utilizza cookie per migliorare la tua esperienza di navigazione.', 'accept': 'Accetta', 'decline': 'Rifiuta', 'learn-more': 'Scopri di più', 'biography': 'Biografia', 'music': 'Musica', 'contact': 'Contatto', 'privacy': 'Privacy', 'imprint': 'Note legali', 'chatbot-nav': "Chiedi all'IA",
+                'events-nav': 'Eventi', 'tracks-nav': 'Tracks', 'media-nav': 'Media',
+                'events-title': 'Prossimi eventi', 'events-radio-title': 'The Blue Dimension', 'events-radio-desc': 'Ogni giovedì, dalle 00:00 alle 06:00 su Radio LoRa 97.5 FM (lora.ch & DAB+).', 'events-radio-btn': 'Ascolta dal vivo', 'events-radio-live': '🔴 In diretta', 'events-radio-offline': 'Prossima puntata: giovedì da mezzanotte', 'events-booking-title': 'Concerti & Booking', 'events-booking-desc': 'Le prossime date verranno annunciate qui. Per richieste di booking, utilizza semplicemente il modulo di contatto.', 'events-booking-btn': 'Richiedi booking',
+                'media-title': 'Media', 'media-studio-title': 'In studio', 'media-studio-desc': 'Immagini dalla consolle DJ e dallo studio radiofonico.', 'media-video-title': 'Video', 'media-video-desc': 'Video di set e clip di concerti e trasmissioni radio.', 'media-audio-title': 'Mix & Tracks', 'media-audio-desc': 'Tutti i mix e i set da riascoltare su SoundCloud.',
+                'bio-text-1': "Dal 1997, DJ Jesse Jay plasma la scena della musica elettronica di Zurigo. I suoi set sono viaggi che toccano l'anima, ampliano gli orizzonti e giocano con fantasie sensuali. Ama diventare tutt'uno con la musica e trasmettere queste emozioni al pubblico.",
+                'bio-text-2': 'Cresciuto in club leggendari come Aera, Labyrinth, SpiderGalaxy e Dachkantine, incarna la filosofia "we are family" della scena delle feste zurighese.',
+                'bio-text-3': 'Dal 2001 conduce il suo programma radiofonico su Radio LoRa (lora.ch & DAB+), che dal 2025 si chiama "The Blue Dimension". Ogni giovedì, dalla mezzanotte alle 6 del mattino, offre esperienze musicali profonde e senza tempo.',
+                'latest-mix': 'Ultimi mix', 'radio-show': 'Programma radio', 'classic-sets': 'Set classici', 'contact-title': 'Contattaci', 'name': 'Nome:', 'email': 'E-mail:', 'message': 'Messaggio:', 'name-placeholder': 'Il tuo nome', 'email-placeholder': 'tua@email.com', 'message-placeholder': 'Il tuo messaggio...', 'privacy-accept': 'Accetto la', 'send': 'Invia', 'success-message': 'Il tuo messaggio è stato inviato con successo!', 'error-message': 'Si è verificato un problema. Riprova più tardi.', 'legal': 'Note legali', 'copyright-notice': 'I brani utilizzati nei mix non sono liberamente utilizzabili. Per richieste, contattare gli artisti o le etichette.', 'open-source': 'Open Source', 'thanks': 'Questo sito è stato creato con software open source. Grazie a Marcin Kolonko e Marcel Raschke.', 'download-files': 'Download', 'privacy-title': 'Informativa sulla privacy', 'privacy-p1': 'Diamo grande importanza alla protezione dei tuoi dati. Per visitare il nostro sito non è necessario fornire alcun dato personale...', 'imprint-title': 'Note legali', 'imprint-h-owner': 'Informazioni secondo gli obblighi di legge', 'imprint-h-contact': 'Contatto', 'imprint-contact-details': 'E-mail: [tuo-indirizzo-email@dominio.com]', 'imprint-h-liability': 'Esclusione di responsabilità', 'imprint-p1': "L'autore non si assume alcuna responsabilità...", 'download-title': 'Download', 'download-p1': 'Qui puoi trovare materiali per la stampa e gli organizzatori.', 'download-presskit': 'Press kit (.zip)', 'download-logos-soon': 'Loghi & immagini (in arrivo)',
+                'ai-bio-btn': '✨ Genera bio creativa', 'ai-bio-reset-btn': 'Ripristina originale', 'ai-refine-btn': '✨ Migliora messaggio', 'ai-bio-loading': 'Generazione biografia creativa...', 'ai-refine-btn-loading': 'Miglioramento in corso...', 'ai-reco-title': '✨ Trova il mix perfetto', 'ai-reco-desc': "Descrivi il tuo stato d'animo o il tuo evento, e lascia che l'IA trovi il suono giusto per te.", 'ai-reco-placeholder': "es. 'serata rilassante a casa'", 'ai-reco-btn': 'Consiglia',
+                'ai-press-title': '✨ Assistente stampa IA', 'ai-press-desc': "Inserisci i dettagli del tuo evento, e l'IA creerà un annuncio professionale per te.", 'ai-press-date': 'Data evento:', 'ai-press-date-placeholder': 'es. 15 ottobre', 'ai-press-venue': 'Luogo:', 'ai-press-venue-placeholder': 'es. Club X, Zurigo', 'ai-press-notes': 'Particolarità:', 'ai-press-notes-placeholder': 'es. supporto di DJ Y', 'ai-press-btn': 'Genera annuncio', 'ai-press-copy': 'Copia testo', 'ai-press-copied': 'Copiato!',
+                'chatbot-title': "✨ Chiedi all'IA", 'chatbot-placeholder': 'Fai una domanda...', 'chatbot-greeting': "Ciao! Sono JJ-AI, l'assistente digitale di Jesse Jay. Come posso aiutarti?",
+                'ai-setlist-title': '✨ Crea il tuo set dei sogni', 'ai-setlist-desc': "Descrivi un'atmosfera, e l'IA creerà una scaletta ipotetica che Jesse Jay potrebbe suonare.", 'ai-setlist-placeholder': "es. 'alba su una terrazza'", 'ai-setlist-btn': 'Genera',
+                'skip-to-content': 'Vai al contenuto',
                 'ai-act-nav': 'AI Act UE', 'ai-act-title': "AI Act UE: Un riassunto", 'ai-act-p1': "L'AI Act dell'UE è la prima legge completa al mondo che regolamenta l'Intelligenza Artificiale. Il suo obiettivo è garantire che i sistemi di IA nell'UE siano sicuri, trasparenti e non discriminatori, promuovendo al contempo l'innovazione.", 'ai-act-h-risk': "L'approccio basato sul rischio", 'ai-act-p2': "La legge classifica le applicazioni di IA in livelli di rischio: da <b class=\"text-rose-400\">rischi inaccettabili</b> (che sono vietati, es. il social scoring), a <b class=\"text-amber-400\">rischi alti</b> (soggetti a requisiti rigorosi, es. l'IA in medicina), fino a <b class=\"text-cyan-400\">rischi limitati</b> e <b class=\"text-green-400\">minimi</b> (con leggeri obblighi di trasparenza o nessuna nuova regola).", 'ai-act-h-impact': "Cosa significa per questo sito web", 'ai-act-p3': "Le funzionalità di IA di questo sito (come la chatbot o il generatore di biografie) rientrano nella categoria di rischio limitato o minimo. In linea con l'AI Act, ci impegniamo per la trasparenza. Tutti i contenuti generati dall'IA sono chiaramente contrassegnati come tali, assicurando che tu sappia sempre quando interagisci con un'IA."
-                 // ... other IT translations
             }
         };
 
-        const memoryStorage = { 'preferred-language': 'de', 'cookies-accepted': null };
         const apiKey = ""; // Provided by environment
+
+        function safeHTML(text) {
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/\n\n/g, '</p><p class="mt-4">')
+                .replace(/\n/g, '<br>');
+        }
+
+        function sanitizePromptInput(input) {
+            if (typeof input !== 'string') return '';
+            const trimmed = input.slice(0, 500);
+            const injectionPatterns = [
+                /ignore\s+(previous|all|above)\s+instructions/i,
+                /you\s+are\s+now\s+(DAN|an?\s+AI|a\s+language)/i,
+                /\[SYSTEM\]|\[INST\]|<\|system\|>/i,
+                /forget\s+(everything|all)\s+(you|your)/i,
+                /act\s+as\s+(if|though)/i,
+            ];
+            for (const pattern of injectionPatterns) {
+                if (pattern.test(trimmed)) return '[Input blocked]';
+            }
+            return trimmed;
+        }
+
+        function withBtnLoading(btn, asyncFn, loadingHTML = '<span class="spinner"></span>') {
+            const orig = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = loadingHTML;
+            return asyncFn().finally(() => { btn.innerHTML = orig; btn.disabled = false; });
+        }
+
+        function showResultLoading(el) {
+            el.classList.remove('hidden');
+            el.innerHTML = '<div class="flex justify-center items-center h-full"><div class="spinner"></div></div>';
+        }
+
+        function formatAIResponse(text) {
+            return safeHTML(text).replace(/\*\*(.*?)\*\*/g, '<strong class="text-cyan-400">$1</strong>');
+        }
 
         // --- Claude API Call Function ---
         async function callClaudeAPI(prompt, systemInstruction, maxRetries = 3) {
@@ -490,7 +656,7 @@
             const aiResponse = await callClaudeAPI(userPrompt, systemInstruction);
 
             if (aiResponse) {
-                bioContent.innerHTML = `<p>${aiResponse.replace(/\n\n/g, '</p><p class="mt-4">').replace(/\n/g, '<br>')}</p>`;
+                bioContent.innerHTML = `<p>${safeHTML(aiResponse)}</p>`;
             } else {
                 bioContent.innerHTML = `<p class="text-red-400">Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.</p>`;
             }
@@ -509,83 +675,48 @@
         async function refineContactMessage() {
             const messageTextarea = document.getElementById('message');
             const refineBtn = document.getElementById('refine-message-btn');
-            const originalText = refineBtn.innerHTML;
-            const loadingText = translations[memoryStorage['preferred-language']]['ai-refine-btn-loading'] || 'Refining...';
-
             if (!messageTextarea.value.trim()) return;
-
-            refineBtn.disabled = true;
-            refineBtn.innerHTML = `<span class="spinner"></span> ${loadingText}`;
-
+            const loadingText = translations[localStorage.getItem('preferred-language') || 'de']['ai-refine-btn-loading'] || 'Refining...';
             const systemInstruction = "You are a helpful AI assistant. Your task is to refine a user's message into a more professional and clear booking or contact request. Correct any grammar or spelling mistakes and structure it politely, but retain the original intent and key information. Respond in the same language as the user's message.";
-            const userPrompt = `Refine the following message into a professional inquiry: "${messageTextarea.value}"`;
-
-            const aiResponse = await callClaudeAPI(userPrompt, systemInstruction);
-            if (aiResponse) {
-                messageTextarea.value = aiResponse;
-            } else {
-                console.error("Failed to refine message.");
-            }
-            refineBtn.disabled = false;
-            refineBtn.innerHTML = originalText;
+            const userPrompt = `Refine the following message into a professional inquiry: "${sanitizePromptInput(messageTextarea.value)}"`;
+            await withBtnLoading(refineBtn, async () => {
+                const aiResponse = await callClaudeAPI(userPrompt, systemInstruction);
+                if (aiResponse) messageTextarea.value = aiResponse;
+            }, `<span class="spinner"></span> ${loadingText}`);
         }
 
         async function getAIRecommendation() {
             const vibeInput = document.getElementById('vibe-input');
             const getRecoBtn = document.getElementById('get-recommendation-btn');
             const resultDiv = document.getElementById('recommendation-result');
-
             if (!vibeInput.value.trim()) return;
-
-            const originalBtnText = getRecoBtn.innerHTML;
-            getRecoBtn.disabled = true;
-            getRecoBtn.innerHTML = `<span class="spinner"></span>`;
-            resultDiv.classList.remove('hidden');
-            resultDiv.innerHTML = `<div class="flex justify-center items-center h-full"><div class="spinner"></div></div>`;
-
             const systemInstruction = "You are a knowledgeable and enthusiastic music curator for DJ Jesse Jay. Based on a user's described mood or event, you recommend one of three categories of his mixes: 'Latest Mixes' for modern, cutting-edge sounds; 'Radio Show' for deep, long-form journeys; or 'Classic Sets' for timeless, nostalgic vibes. Your response should first state the recommended category in bold, surrounded by asterisks (e.g., **Latest Mixes**), followed by a creative, short paragraph explaining why it's the perfect fit. Respond in the same language as the user's prompt.";
-            const userPrompt = `The mood I'm looking for is: "${vibeInput.value}". Which mix category should I listen to? Respond in the language of the prompt.`;
-
-            const aiResponse = await callClaudeAPI(userPrompt, systemInstruction);
-
-            if (aiResponse) {
-                const formattedResponse = aiResponse.replace(/\*\*(.*?)\*\*/g, '<strong class="text-cyan-400">$1</strong>');
-                resultDiv.innerHTML = `<p>${formattedResponse.replace(/\n/g, '<br>')}</p>`;
-            } else {
-                resultDiv.innerHTML = `<p class="text-red-400">An error occurred. Please try again later.</p>`;
-            }
-
-            getRecoBtn.innerHTML = originalBtnText;
+            const userPrompt = `The mood I'm looking for is: "${sanitizePromptInput(vibeInput.value)}". Which mix category should I listen to? Respond in the language of the prompt.`;
+            await withBtnLoading(getRecoBtn, async () => {
+                showResultLoading(resultDiv);
+                const aiResponse = await callClaudeAPI(userPrompt, systemInstruction);
+                resultDiv.innerHTML = aiResponse
+                    ? `<p>${formatAIResponse(aiResponse)}</p>`
+                    : `<p class="text-red-400">An error occurred. Please try again later.</p>`;
+            });
             getRecoBtn.disabled = !vibeInput.value.trim();
         }
 
         async function generatePressRelease() {
-            const date = document.getElementById('event-date').value;
-            const venue = document.getElementById('event-venue').value;
-            const notes = document.getElementById('event-notes').value;
+            const date = sanitizePromptInput(document.getElementById('event-date').value);
+            const venue = sanitizePromptInput(document.getElementById('event-venue').value);
+            const notes = sanitizePromptInput(document.getElementById('event-notes').value);
             const genBtn = document.getElementById('generate-press-btn');
             const resultContainer = document.getElementById('press-result-container');
             const resultDiv = document.getElementById('press-result');
-
-            const originalBtnText = genBtn.innerHTML;
-            genBtn.disabled = true;
-            genBtn.innerHTML = `<span class="spinner"></span>`;
-            resultContainer.classList.remove('hidden');
-            resultDiv.innerHTML = `<div class="flex justify-center items-center h-full"><div class="spinner"></div></div>`;
-
             const systemInstruction = "You are a professional PR agent specializing in electronic music. Your task is to write a short, exciting press release or social media announcement (around 100-150 words) for a gig by DJ Jesse Jay. The tone should be professional yet energetic. Use the provided event details. The output should be ready to copy and paste. Respond in the language of the user's details.";
             const userPrompt = `Create a press release for an event with DJ Jesse Jay. Details: Date: ${date}, Venue: ${venue}, Special Notes: ${notes}.`;
-
-            const aiResponse = await callClaudeAPI(userPrompt, systemInstruction);
-
-            if (aiResponse) {
-                resultDiv.innerText = aiResponse;
-            } else {
-                resultDiv.innerText = "An error occurred. Please try again later.";
-            }
-
-            genBtn.innerHTML = originalBtnText;
-            genBtn.disabled = false;
+            await withBtnLoading(genBtn, async () => {
+                resultContainer.classList.remove('hidden');
+                showResultLoading(resultDiv);
+                const aiResponse = await callClaudeAPI(userPrompt, systemInstruction);
+                resultDiv.innerText = aiResponse || "An error occurred. Please try again later.";
+            });
         }
 
         function copyPressRelease() {
@@ -593,11 +724,9 @@
             navigator.clipboard.writeText(text).then(() => {
                 const copyBtn = document.getElementById('copy-press-btn');
                 const originalText = copyBtn.innerText;
-                const copiedText = translations[memoryStorage['preferred-language']]['ai-press-copied'] || 'Copied!';
+                const copiedText = translations[localStorage.getItem('preferred-language') || 'de']['ai-press-copied'] || 'Copied!';
                 copyBtn.innerText = copiedText;
-                setTimeout(() => {
-                    copyBtn.innerText = originalText;
-                }, 2000);
+                setTimeout(() => { copyBtn.innerText = originalText; }, 2000);
             });
         }
         
@@ -605,35 +734,21 @@
             const vibeInput = document.getElementById('setlist-vibe-input');
             const genBtn = document.getElementById('generate-setlist-btn');
             const resultDiv = document.getElementById('dream-setlist-result');
-
             if (!vibeInput.value.trim()) return;
-
-            const originalBtnText = genBtn.innerHTML;
-            genBtn.disabled = true;
-            genBtn.innerHTML = `<span class="spinner"></span>`;
-            resultDiv.classList.remove('hidden');
-            resultDiv.innerHTML = `<div class="flex justify-center items-center h-full"><div class="spinner"></div></div>`;
-
             const systemInstruction = "You are an expert AI music curator with deep knowledge of Progressive House, Techno, and Deep House from the 90s to today. Your task is to create a hypothetical 5-track setlist that DJ Jesse Jay might play, based on a user's description of a mood or theme. You must adhere to his known style: soulful, deep, journey-like, and sometimes sexy. The setlist should have a logical flow. RULES: 1. Generate a list of exactly 5 tracks. 2. Format the output as a numbered list. 3. Each item must follow this format: `Artist Name - Track Title (Remix if applicable)`. 4. Choose plausible, real tracks from the appropriate genres. 5. After the list, add one short, creative sentence describing the overall vibe of the generated set. 6. Respond in the same language as the user's prompt.";
-            const userPrompt = `Create a 5-track setlist for the following vibe: "${vibeInput.value}"`;
-
-            const aiResponse = await callClaudeAPI(userPrompt, systemInstruction);
-
-            if (aiResponse) {
-                const parts = aiResponse.split('\n').filter(p => p.trim());
-                if (parts.length > 1) {
-                    const lastLine = parts.pop(); 
-                    const listItems = parts.map(item => `<li>${item.replace(/^\d+\.\s*/, '')}</li>`).join('');
-                    resultDiv.innerHTML = `<ol>${listItems}</ol><p class="mt-4 italic text-slate-400">${lastLine}</p>`;
+            const userPrompt = `Create a 5-track setlist for the following vibe: "${sanitizePromptInput(vibeInput.value)}"`;
+            await withBtnLoading(genBtn, async () => {
+                showResultLoading(resultDiv);
+                const aiResponse = await callClaudeAPI(userPrompt, systemInstruction);
+                if (aiResponse) {
+                    const parts = aiResponse.split('\n').filter(p => p.trim());
+                    const lastLine = parts.pop() || '';
+                    const items = parts.map(item => `<li>${safeHTML(item.replace(/^\d+\.\s*/, ''))}</li>`).join('');
+                    resultDiv.innerHTML = `<ol>${items}</ol><p class="mt-4 italic text-slate-400">${safeHTML(lastLine)}</p>`;
                 } else {
-                     resultDiv.innerHTML = `<p>${aiResponse}</p>`;
+                    resultDiv.innerHTML = `<p class="text-red-400">An error occurred. Please try again later.</p>`;
                 }
-            } else {
-                 resultDiv.innerHTML = `<p class="text-red-400">An error occurred. Please try again later.</p>`;
-            }
-
-            genBtn.innerHTML = originalBtnText;
-            genBtn.disabled = false;
+            });
         }
 
         const chatWindow = document.getElementById('chat-window');
@@ -648,7 +763,7 @@
         }
 
         async function handleChatSubmit() {
-            const userMessage = chatInput.value.trim();
+            const userMessage = sanitizePromptInput(chatInput.value.trim());
             if (!userMessage) return;
 
             addChatMessage(userMessage, 'user');
@@ -674,38 +789,101 @@
 
         // --- Standard Website Functions ---
         function switchLanguage(lang) {
-            if (!translations[lang]) return; 
-            memoryStorage['preferred-language'] = lang; 
-            document.documentElement.lang = lang; 
-            document.querySelectorAll('[data-translate]').forEach(el => { const key = el.dataset.translate; if (translations[lang]?.[key]) { el.innerHTML = translations[lang][key]; } }); 
-            document.querySelectorAll('[data-translate-placeholder]').forEach(el => { const key = el.dataset.translatePlaceholder; if (translations[lang]?.[key]) { el.placeholder = translations[lang][key]; } });
-            document.querySelectorAll('.language-selector a').forEach(a => { a.classList.toggle('active', a.dataset.lang === lang);});
+            if (!translations[lang]) return;
+            localStorage.setItem('preferred-language', lang);
+            document.documentElement.lang = lang;
+            document.querySelectorAll('[data-translate]').forEach(el => {
+                const key = el.dataset.translate;
+                const value = translations[lang]?.[key] ?? translations['de']?.[key];
+                if (value) el.innerHTML = value;
+            });
+            document.querySelectorAll('[data-translate-placeholder]').forEach(el => {
+                const key = el.dataset.translatePlaceholder;
+                const value = translations[lang]?.[key] ?? translations['de']?.[key];
+                if (value) el.placeholder = value;
+            });
+            document.querySelectorAll('.language-selector a').forEach(a => { a.classList.toggle('active', a.dataset.lang === lang); });
         }
         
-        function showCookieBanner() { if (!memoryStorage['cookies-accepted']) { document.getElementById('cookie-banner').classList.add('show'); }}
-        function acceptCookies() { memoryStorage['cookies-accepted'] = 'true'; document.getElementById('cookie-banner').classList.remove('show');}
-        function declineCookies() { memoryStorage['cookies-accepted'] = 'false'; document.getElementById('cookie-banner').classList.remove('show');}
+        function updateRadioLiveBadge() {
+            const badge = document.getElementById('radio-live-badge');
+            const textEl = document.getElementById('radio-live-text');
+            if (!badge || !textEl) return;
+            const parts = new Intl.DateTimeFormat('en-GB', {
+                timeZone: 'Europe/Zurich', weekday: 'short', hour: 'numeric', hour12: false
+            }).formatToParts(new Date());
+            const weekday = parts.find(p => p.type === 'weekday')?.value;
+            const hour = parseInt(parts.find(p => p.type === 'hour')?.value, 10);
+            const isLive = weekday === 'Thu' && hour >= 0 && hour < 6;
+            const key = isLive ? 'events-radio-live' : 'events-radio-offline';
+            textEl.dataset.translate = key;
+            badge.classList.toggle('live', isLive);
+            const lang = document.documentElement.lang || 'de';
+            const value = translations[lang]?.[key] ?? translations['de']?.[key];
+            if (value) textEl.textContent = value;
+        }
+
+        function showCookieBanner() { if (!localStorage.getItem('cookies-accepted')) { document.getElementById('cookie-banner').classList.add('show'); } }
+        function acceptCookies() { localStorage.setItem('cookies-accepted', 'true'); document.getElementById('cookie-banner').classList.remove('show'); }
+        function declineCookies() { localStorage.setItem('cookies-accepted', 'false'); document.getElementById('cookie-banner').classList.remove('show'); }
         
-        function handleFormSubmit(event) {
+        const RECAPTCHA_SITE_KEY = 'YOUR_RECAPTCHA_SITE_KEY';
+
+        async function handleFormSubmit(event) {
             event.preventDefault();
             const form = event.target;
             const successMsg = document.getElementById('form-success');
             const errorMsg = document.getElementById('form-error');
+            const submitBtn = form.querySelector('[type="submit"]');
             successMsg.classList.add('hidden');
             errorMsg.classList.add('hidden');
-            setTimeout(() => {
-                const formData = new FormData(form);
-                console.log('Form data:', Object.fromEntries(formData.entries()));
-                successMsg.classList.remove('hidden');
-                form.reset();
-            }, 1000);
+
+            const doSubmit = async (token) => {
+                submitBtn.disabled = true;
+                try {
+                    const res = await fetch('/api/contact', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            name: document.getElementById('name').value,
+                            email: document.getElementById('email').value,
+                            message: document.getElementById('message').value,
+                            'g-recaptcha-response': token || '',
+                        }),
+                    });
+                    if (res.ok) {
+                        successMsg.classList.remove('hidden');
+                        form.reset();
+                    } else {
+                        const data = await res.json().catch(() => ({}));
+                        errorMsg.textContent = data.error || 'Es gab ein Problem. Bitte versuchen Sie es später erneut.';
+                        errorMsg.classList.remove('hidden');
+                    }
+                } catch {
+                    errorMsg.textContent = 'Keine Verbindung. Bitte versuchen Sie es später erneut.';
+                    errorMsg.classList.remove('hidden');
+                } finally {
+                    submitBtn.disabled = false;
+                }
+            };
+
+            if (typeof grecaptcha !== 'undefined') {
+                grecaptcha.ready(() => {
+                    grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'contact' })
+                        .then(token => doSubmit(token))
+                        .catch(() => doSubmit());
+                });
+            } else {
+                doSubmit();
+            }
         }
 
         function initSmoothScrolling() {
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 anchor.addEventListener('click', function (e) {
-                    e.preventDefault();
                     const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    e.preventDefault();
                     const targetElement = document.querySelector(targetId);
                     if (targetElement) {
                         targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -731,9 +909,11 @@
             originalBioHTML = document.getElementById('bio-content').innerHTML;
 
             showCookieBanner();
-            const savedLang = memoryStorage['preferred-language'] || 'de';
+            const savedLang = localStorage.getItem('preferred-language') || 'de';
             switchLanguage(savedLang);
-            
+            updateRadioLiveBadge();
+            setInterval(updateRadioLiveBadge, 60000);
+
             document.querySelectorAll('.language-selector a').forEach(link => { link.addEventListener('click', e => { e.preventDefault(); switchLanguage(link.dataset.lang); }); });
             document.getElementById('contact-form').addEventListener('submit', handleFormSubmit);
             initSmoothScrolling();

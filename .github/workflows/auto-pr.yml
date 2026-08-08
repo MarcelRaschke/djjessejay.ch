@@ -1,0 +1,88 @@
+name: Auto-create draft PR
+
+# Opens a draft pull request automatically when a feature branch is pushed,
+# so work-in-progress branches always have a PR without manual steps.
+#
+# TOKEN SETUP (one of two options):
+#   Option A — Enable GITHUB_TOKEN PR writes:
+#     Repo → Settings → Actions → General → Workflow permissions
+#     → "Allow GitHub Actions to create and approve pull requests" ✓
+#
+#   Option B — Personal Access Token (works even when org policy blocks option A):
+#     Create a PAT with scope: repo (or pull_requests:write for fine-grained PAT)
+#     Repo → Settings → Secrets and variables → Actions → New secret
+#     Name: GH_PR_TOKEN  Value: <your PAT>
+#
+# If both are available, GH_PR_TOKEN takes precedence.
+
+on:
+  push:
+    branches:
+      - 'claude/**'
+      - 'feature/**'
+      - 'feat/**'
+      - 'fix/**'
+
+permissions:
+  contents: read
+  pull-requests: write   # effective only if org/repo policy allows it
+
+jobs:
+  open-draft-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check token capability
+        id: token-check
+        env:
+          GH_TOKEN: ${{ secrets.GH_PR_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # Probe whether the token can list PRs (requires pull-requests:read at minimum)
+          if gh pr list --limit 1 --json number >/dev/null 2>&1; then
+            echo "token_ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "token_ok=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Token cannot access pull requests."
+            echo "::warning::Add a GH_PR_TOKEN secret (PAT with pull_requests scope)"
+            echo "::warning::or enable 'Allow GitHub Actions to create and approve pull requests'"
+            echo "::warning::in Repo → Settings → Actions → General → Workflow permissions."
+          fi
+
+      - name: Create draft PR if none exists
+        if: steps.token-check.outputs.token_ok == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GH_PR_TOKEN || secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ github.ref_name }}
+          BASE: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+
+          # Skip if the branch already has an open PR
+          existing=$(gh pr list --head "$BRANCH" --state open --json number --jq 'length')
+          if [ "$existing" != "0" ]; then
+            echo "PR already open for $BRANCH — nothing to do."
+            exit 0
+          fi
+
+          # Skip if there are no commits ahead of the base branch
+          if [ -z "$(git log --oneline "origin/$BASE..HEAD" 2>/dev/null)" ]; then
+            echo "No commits ahead of $BASE — skipping PR creation."
+            exit 0
+          fi
+
+          title="$(git log -1 --pretty=%s HEAD)"
+          body="$(printf 'Auto-generated draft PR for \`%s\`.\n\n## Commits\n%s\n\n🤖 Opened automatically by the auto-pr workflow.' \
+            "$BRANCH" "$(git log --pretty='- %s' "origin/$BASE..HEAD")")"
+
+          gh pr create \
+            --draft \
+            --base "$BASE" \
+            --head "$BRANCH" \
+            --title "$title" \
+            --body "$body"
+          echo "Draft PR created for $BRANCH."

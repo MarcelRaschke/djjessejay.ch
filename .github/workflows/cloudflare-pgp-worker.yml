@@ -1,0 +1,96 @@
+name: Cloudflare PGP Worker
+
+on:
+  pull_request:
+    paths:
+      - "workers/pgp-directory/**"
+      - ".github/workflows/cloudflare-pgp-worker.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "workers/pgp-directory/**"
+      - ".github/workflows/cloudflare-pgp-worker.yml"
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: "Deploy to Cloudflare workers.dev"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-pgp-worker-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: workers/pgp-directory
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: workers/pgp-directory/package.json
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+
+      - name: Test
+        run: npm run check
+
+      - name: Wrangler dry run
+        run: npm run deploy:dry-run
+
+  deploy:
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      inputs.deploy == true &&
+      github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: cloudflare-preview
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: workers/pgp-directory/package.json
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+
+      - name: Verify deployment guard and scoped credentials
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF}" = "refs/heads/main"
+          test -n "${CLOUDFLARE_API_TOKEN:-}"
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}"
+
+      - name: Deploy workers.dev preview
+        run: npm run deploy
+        env:
+          # Scoped API token only. Never use CLOUDFLARE_API_KEY/CLOUDFLARE_EMAIL.
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

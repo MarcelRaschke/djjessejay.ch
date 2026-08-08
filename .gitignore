@@ -1,7 +1,54 @@
+# Dependencies & build output
 node_modules/
 dist/
+
+# Logs
 *.log
 npm-debug.log*
-.DS_Store
+
+# Environment / secrets
 .env
 .env.local
+.claude/settings.local.json
+
+# Temporary & backup files
+*.tmp
+*.temp
+*~
+*.bak
+*.backup
+*.cache
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor files
+.vscode/settings.json
+*.swp
+*.swo
+
+# Archive/backup content
+*wayback*
+*archive.org*
+
+# Database dumps & exports (historical data archives, not used by static site)
+*.sql
+*.xml
+
+# Video files (large assets, not needed for GitHub Pages deployment)
+*.mov
+*.mp4
+*.webm
+
+# Legacy Flash files (non-functional, no longer supported)
+*.swf
+
+# Old HTML versions (legacy, not deployed)
+home.html
+home.htm

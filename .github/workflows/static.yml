@@ -32,10 +32,24 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      - name: Remove large/unnecessary files before upload
+        run: |
+          # Remove database dumps (SQL/XML archives)
+          rm -f *.sql *.xml
+          # Remove video files (large legacy assets)
+          rm -f *.mov *.mp4 *.webm
+          # Remove Flash files (non-functional)
+          rm -f *.swf
+          # Remove old HTML versions (not needed for deploy)
+          rm -f home.html home.htm
+          # Remove web scraper utility (not site content)
+          rm -rf web_scraper
+          # Remove markdown docs and license (not served, just metadata)
+          rm -f *.md CONTRIBUTING.md CODE_OF_CONDUCT.md LICENSE
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
+          # Upload minimal, optimized site directory
           path: '.'
       - name: Deploy to GitHub Pages
         id: deployment
