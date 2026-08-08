@@ -208,6 +208,47 @@
             box-shadow: 0 20px 40px rgba(0, 183, 255, 0.3), 0 10px 20px rgba(0, 183, 255, 0.15);
             transform: translateY(-8px);
         }
+
+        /* Phase 3: Media Section Framing & Image Polish */
+        .media-image-frame {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            border: 2px solid rgba(0, 183, 255, 0.4);
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.5), rgba(30, 60, 114, 0.5));
+            padding: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .media-image-frame img {
+            width: 100%;
+            display: block;
+            border-radius: calc(0.5rem - 2px);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: center;
+        }
+
+        .media-image-frame:hover img {
+            transform: scale(1.05);
+        }
+
+        .media-card-studio {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease-in-out;
+        }
+        .media-card-studio:hover {
+            box-shadow: 0 20px 40px rgba(0, 183, 255, 0.3), 0 10px 20px rgba(0, 183, 255, 0.15);
+            transform: translateY(-8px);
+        }
+
+        .media-caption {
+            font-size: 0.875rem;
+            color: #94a3b8;
+            margin-top: 0.5rem;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -355,10 +396,12 @@
             <div class="container mx-auto max-w-6xl">
                 <h2 class="text-4xl font-bold text-center mb-12 text-white" data-translate="media-title">Media</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-cyan-500/20 border border-slate-700/50">
-                        <img src="DJPult.gif" alt="DJ Jesse Jay am DJ-Pult" loading="lazy" class="w-full rounded-lg mb-4 max-w-full">
+                    <div class="media-card-studio bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-cyan-500/20 border border-slate-700/50">
+                        <div class="media-image-frame">
+                            <img src="DJPult.gif" alt="DJ Jesse Jay am DJ-Pult" loading="lazy" class="w-full max-w-full">
+                        </div>
                         <h3 class="text-white text-2xl font-bold mb-2" data-translate="media-studio-title">Im Studio</h3>
-                        <p class="text-slate-300" data-translate="media-studio-desc">Eindrücke vom DJ-Pult und aus dem Radiostudio.</p>
+                        <p class="media-caption text-slate-300" data-translate="media-studio-desc">Eindrücke vom DJ-Pult und aus dem Radiostudio.</p>
                     </div>
                     <div class="bg-slate-900/50 backdrop-blur-lg rounded-xl p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-red-500/20 border border-slate-700/50 flex flex-col justify-center">
                         <h3 class="text-white text-2xl font-bold mb-2" data-translate="media-video-title">Videos</h3>
