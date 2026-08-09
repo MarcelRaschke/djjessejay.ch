@@ -1,0 +1,154 @@
+name: Provenance finalize
+
+on:
+  push:
+    branches:
+      - provenance/canonical-profile-2026-08
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    if: ${{ !contains(github.event.head_commit.message, '[provenance-finalize]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Reconcile lockfile metadata
+        run: npm install --package-lock-only --ignore-scripts
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+      - name: Apply canonical index metadata
+        run: npm run sync:metadata
+      - name: Validate structured data
+        run: |
+          node -e "for (const f of ['artist-profile.json','website/provenance.json','website/schema.org.jsonld','website/social-metadata.json','website/open-graph.json','jj-ai/knowledge-context.json','archive/MANIFEST.json']) JSON.parse(require('fs').readFileSync(f,'utf8'));"
+      - name: Test
+        run: npm test
+      - name: Build CSS
+        run: npm run build:css
+      - name: Validate canonical metadata in index
+        run: |
+          grep -q '<title>DJ Jesse Jay — Zürich electronic DJ since 1997</title>' index.html
+          grep -q '<meta property="og:type" content="profile">' index.html
+          grep -q 'Canonical structured identity' index.html
+          grep -q 'application/ld+json' index.html
+      - name: Render visual review
+        run: |
+          mkdir -p archive/review
+          python3 -m http.server 8000 >/tmp/djjessejay-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill $server_pid || true' EXIT
+          sleep 2
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          if [ -z "$CHROME" ]; then
+            echo 'No Chrome/Chromium executable found on runner' >&2
+            exit 1
+          fi
+          "$CHROME" --headless --disable-gpu --no-sandbox --hide-scrollbars \
+            --window-size=1440,2200 \
+            --screenshot=archive/review/index-canonical.png \
+            http://127.0.0.1:8000/index.html
+          test -s archive/review/index-canonical.png
+      - name: Upload visual review artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: index-canonical-visual-review
+          path: archive/review/index-canonical.png
+          if-no-files-found: error
+      - name: Capture Wayback P0 receipts
+        continue-on-error: true
+        run: |
+          mkdir -p archive/receipts
+          : > archive/receipts/wayback.jsonl
+          urls=(
+            'https://djjessejay.ch/'
+            'https://soundcloud.com/jessejay'
+            'https://ra.co/events/896816'
+            'https://github.com/MarcelRaschke/djjessejay.ch'
+          )
+          for url in "${urls[@]}"; do
+            hdr="$(mktemp)"
+            body="$(mktemp)"
+            status=$(curl -sS --max-time 180 -D "$hdr" -o "$body" -w '%{http_code}' "https://web.archive.org/save/$url" || true)
+            location=$(awk 'BEGIN{IGNORECASE=1} /^content-location:|^location:/ {gsub(/\r/,"",$2); print $2}' "$hdr" | tail -1)
+            if [[ "$location" == /web/* ]]; then
+              archived="https://web.archive.org$location"
+              printf '{"provider":"wayback","sourceUrl":%s,"archiveUrl":%s,"httpStatus":%s,"capturedAt":%s}\n' \
+                "$(node -p 'JSON.stringify(process.argv[1])' "$url")" \
+                "$(node -p 'JSON.stringify(process.argv[1])' "$archived")" \
+                "$(node -p 'JSON.stringify(process.argv[1])' "$status")" \
+                "$(node -p 'JSON.stringify(new Date().toISOString())')" \
+                >> archive/receipts/wayback.jsonl
+            else
+              echo "Wayback capture did not return an archive location for $url (HTTP $status)" >&2
+            fi
+            rm -f "$hdr" "$body"
+            sleep 2
+          done
+          test -s archive/receipts/wayback.jsonl || echo 'No Wayback receipts captured in this run.'
+      - name: Merge real receipts into manifest
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const p = 'archive/MANIFEST.json';
+          const m = JSON.parse(fs.readFileSync(p,'utf8'));
+          const receipts = [];
+          const f = 'archive/receipts/wayback.jsonl';
+          if (fs.existsSync(f)) {
+            for (const line of fs.readFileSync(f,'utf8').split(/\n+/).filter(Boolean)) {
+              try { receipts.push(JSON.parse(line)); } catch {}
+            }
+          }
+          m.archiveReceipts = receipts;
+          m.permaStatus = 'not-created: authenticated Perma.cc API key required';
+          fs.writeFileSync(p, JSON.stringify(m, null, 2) + '\n');
+          NODE
+      - name: Generate SHA-256 manifest
+        run: |
+          sha256sum \
+            DJ_JESSE_JAY_CANONICAL_PROFILE.md \
+            README.md \
+            index.html \
+            artist-profile.json \
+            website/schema.org.jsonld \
+            website/provenance.json \
+            website/social-metadata.json \
+            website/open-graph.json \
+            ARCHIVE_CITATION_APPENDIX.md \
+            AI_SYSTEM_PROMPT.md \
+            jj-ai/knowledge-context.json \
+            presskit/README.md \
+            pressekit/README.md \
+            release/PROVENANCE_V7_RELEASE_NOTES.md \
+            > archive/SHA256SUMS
+          node - <<'NODE'
+          const fs = require('fs');
+          const crypto = require('crypto');
+          const p = 'archive/MANIFEST.json';
+          const m = JSON.parse(fs.readFileSync(p,'utf8'));
+          m.generatedAt = new Date().toISOString();
+          m.integrity = {
+            algorithm: 'SHA-256',
+            sumsFile: 'archive/SHA256SUMS',
+            sumsSha256: crypto.createHash('sha256').update(fs.readFileSync('archive/SHA256SUMS')).digest('hex')
+          };
+          fs.writeFileSync(p, JSON.stringify(m, null, 2) + '\n');
+          NODE
+      - name: Commit finalized artifacts
+        run: |
+          git config user.name 'DJ Jesse Jay Provenance Bot'
+          git config user.email '42359664+MarcelRaschke@users.noreply.github.com'
+          git add index.html package-lock.json tailwind.css archive/SHA256SUMS archive/MANIFEST.json archive/receipts/wayback.jsonl
+          if git diff --cached --quiet; then
+            echo 'No generated changes to commit.'
+          else
+            git commit -m 'chore(provenance): finalize metadata and integrity [provenance-finalize]'
+            git push
+          fi

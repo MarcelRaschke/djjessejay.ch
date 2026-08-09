@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-08-09T21:04:00+02:00",
+  "artistName": "DJ Jesse Jay",
+  "civilName": "Michael Fellner",
+  "location": {"city":"Zürich","country":"Switzerland","countryCode":"CH"},
+  "activeSince": 1997,
+  "genres": ["Progressive House","House","Techno","Deep House","Organic House"],
+  "djFormats": ["Vinyl","CDJ","XDJ"],
+  "radio": {
+    "station": "Radio LoRa",
+    "location": "Zürich",
+    "frequencyBrand": "97.5",
+    "historicalShow": "Galaxy Space Night",
+    "currentProjectIdentity": "Blue Dimension",
+    "since": {"value":2001,"status":"historical-first-party-claim"}
+  },
+  "urls": {
+    "website":"https://djjessejay.ch",
+    "repository":"https://github.com/MarcelRaschke/djjessejay.ch",
+    "soundcloud":"https://soundcloud.com/jessejay"
+  },
+  "canonicalProfile":"DJ_JESSE_JAY_CANONICAL_PROFILE.md",
+  "provenance":"website/provenance.json"
+}
