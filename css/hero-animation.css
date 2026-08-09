@@ -1,0 +1,230 @@
+/**
+ * DJ Jesse Jay - Blue Dimension Hero Animation Styles
+ * 
+ * Cinematic 3D WebGL experience styles
+ */
+
+/* Hero Animation Container */
+#hero-animation {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    min-height: 600px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #0f172a 0%, #1e3c72 100%);
+    z-index: 1;
+}
+
+#hero-animation canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Hero Section Layout */
+.hero-section {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0f172a 0%, #1e3c72 100%);
+    overflow: hidden;
+}
+
+.hero-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.hero-title {
+    font-size: clamp(2rem, 5vw, 4rem);
+    font-weight: 700;
+    color: #00b7ff;
+    text-align: center;
+    text-shadow: 0 0 20px rgba(0, 183, 255, 0.5);
+    margin-bottom: 1rem;
+    animation: fadeInDown 1s ease-out;
+}
+
+.hero-subtitle {
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
+    color: #94a3b8;
+    text-align: center;
+    max-width: 600px;
+    animation: fadeInUp 1s ease-out 0.3s both;
+}
+
+.hero-frequency {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #00ffff;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+    animation: pulse 2s ease-in-out infinite;
+    z-index: 20;
+}
+
+.hero-controls {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 1rem;
+    z-index: 20;
+    pointer-events: auto;
+}
+
+.hero-controls button {
+    padding: 0.75rem 1.5rem;
+    border: 2px solid #00b7ff;
+    background: rgba(0, 183, 255, 0.1);
+    color: #00b7ff;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.hero-controls button:hover {
+    background: rgba(0, 183, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 183, 255, 0.3);
+}
+
+.hero-controls button:active {
+    transform: translateY(0);
+}
+
+/* Loading State */
+.hero-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    z-index: 30;
+}
+
+.hero-loading .spinner {
+    width: 3rem;
+    height: 3rem;
+    border: 4px solid rgba(0, 183, 255, 0.3);
+    border-top-color: #00b7ff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.hero-loading p {
+    color: #94a3b8;
+    font-size: 1rem;
+}
+
+/* Progress Bar */
+.hero-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 20;
+}
+
+.hero-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #00b7ff, #00ffff, #00b7ff);
+    width: 0%;
+    transition: width 0.1s ease;
+    box-shadow: 0 0 10px rgba(0, 183, 255, 0.5);
+}
+
+/* Animations */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+    }
+    50% {
+        opacity: 0.8;
+        text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .hero-frequency {
+        font-size: 1.2rem;
+        top: 1rem;
+        right: 1rem;
+    }
+    
+    .hero-controls {
+        bottom: 1rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .hero-controls button {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    #hero-animation canvas,
+    .hero-title,
+    .hero-subtitle,
+    .hero-frequency,
+    .hero-progress-bar {
+        animation: none !important;
+        transition: none !important;
+    }
+}
