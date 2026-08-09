@@ -3,7 +3,7 @@
 # Purpose: Immutable release verification for DJ Jesse Jay Public Provenance v7
 
 89e654afed540d6f692d913604e997bdc0f3a26e2cd51c23526125f396acf2bb  index.html
-84a9a0104b0109b6d9726aa1deb0b7affaaaf055e891835da126e55fc50825df  tailwind.css
+7e418917dd3de44777bdfcdc2412d42b259f3433b8bfc452a2f82b31ec40d83b  tailwind.css
 bf54abe3f24104f4c07e7ba076695634e5b375a9cff3b2a7aacfdc980058487c  DJ-Jesse-Jay.jpg
 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  favicon.ico
 7f9ea57a25832429fb7c19301482008007b138f2abc9efceee2182527e8f5d8e  scripts.js
@@ -22,6 +22,7 @@ bfbe0fc0716b30c9262f9d4c9b43976e814ff50a5ec9f8954b3effe575af4962  AI_SYSTEM_PROM
 fd47fea4f4a4f995a6371540b5e26fb26068a1b66da36e2907056f0127b80af2  CLAUDE.md
 0367b645488469cc8b7787e35899285fbf638e8ef0d4d195840cc2c19bf429d6  README.md
 c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4  LICENSE
+
 # Verification Instructions
 # To verify this release:
 #   sha256sum -c SHA256SUMS.txt
