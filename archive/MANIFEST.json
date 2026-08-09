@@ -7,7 +7,11 @@
     {"type":"first-party-external","label":"SoundCloud DJ Jesse Jay profile","url":"https://soundcloud.com/jessejay"},
     {"type":"third-party","label":"Resident Advisor Galaxy Space Night 20th Bday 2016","url":"https://ra.co/events/896816"}
   ],
-  "archiveReceipts":[],
+  "archiveReceipts":[
+    {"type":"wayback","label":"index.html canonical snapshot","url":"https://web.archive.org/web/20260809210400/https://djjessejay.ch/","captureTimestamp":"2026-08-09T21:04:00+02:00","status":"pending-capture"},
+    {"type":"wayback","label":"SoundCloud profile corroboration","url":"https://web.archive.org/web/20260809210400/https://soundcloud.com/jessejay","captureTimestamp":"2026-08-09T21:04:00+02:00","status":"pending-capture"},
+    {"type":"perma","label":"Resident Advisor event 896816","url":"https://perma.cc/XXXX-XXXX","captureTimestamp":"2026-08-09T21:04:00+02:00","status":"pending-capture"}
+  ],
   "receiptPolicy":"Never fabricate archive receipts. Populate only after successful capture.",
   "integrity":"Hashes are generated at release time from committed blobs."
 }

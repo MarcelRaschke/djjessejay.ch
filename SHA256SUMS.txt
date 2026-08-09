@@ -1,0 +1,30 @@
+# DJ Jesse Jay Website - SHA-256 Manifest
+# Generated: 2026-08-09T21:04:00+02:00
+# Purpose: Immutable release verification for DJ Jesse Jay Public Provenance v7
+
+89e654afed540d6f692d913604e997bdc0f3a26e2cd51c23526125f396acf2bb  index.html
+84a9a0104b0109b6d9726aa1deb0b7affaaaf055e891835da126e55fc50825df  tailwind.css
+bf54abe3f24104f4c07e7ba076695634e5b375a9cff3b2a7aacfdc980058487c  DJ-Jesse-Jay.jpg
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  favicon.ico
+7f9ea57a25832429fb7c19301482008007b138f2abc9efceee2182527e8f5d8e  scripts.js
+f1dedaaac273d1adbd6fc30281abb581a1f4492c6892b9d4655968d8a1bdf8c8  server.js
+84e3e91d897dac448a5101c83c359469c353edabb92cd004174f1ec98cda89bc  package.json
+7039a26044754e201ea474da7348c309e6a9620e035222301d818e68632ded4e  package-lock.json
+767e5bb4e2c52bd695073ef52a85c040ea976471ec68eccb68f76dbb627bc125  artist-profile.json
+d86b29067374c74a626b4f46e049c7cbfa7a0718b6bfe3104120300884e40b17  website/schema.org.jsonld
+74d53c00edff950c8af6991b1394f8528b91e8a2fb86eb31f30d05e8872d2151  website/provenance.json
+c1ed7d82298a9280a50566c2194ccb54881f36f22a93d49448f3012c84f3e386  website/social-metadata.json
+9f45c12760b4d6d7da5c71a38cdc908e92fe2cd8bbe8a779a69e673d8a52e217  website/open-graph.json
+c47af5c9497dbfbe20720855832dd1adbc9e58c8950bf9fd5e8e7442a9640f07  archive/MANIFEST.json
+35ec0128fc1acdd03899ca7e18fee606834dad0f2d2ae815a088730c476f5d62  ARCHIVE_CITATION_APPENDIX.md
+abd63aeca9f753c08d3858a0ee7a7792063a12e8d26f9bdc24473d9d740c172d  DJ_JESSE_JAY_CANONICAL_PROFILE.md
+bfbe0fc0716b30c9262f9d4c9b43976e814ff50a5ec9f8954b3effe575af4962  AI_SYSTEM_PROMPT.md
+fd47fea4f4a4f995a6371540b5e26fb26068a1b66da36e2907056f0127b80af2  CLAUDE.md
+0367b645488469cc8b7787e35899285fbf638e8ef0d4d195840cc2c19bf429d6  README.md
+c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4  LICENSE
+# Verification Instructions
+# To verify this release:
+#   sha256sum -c SHA256SUMS.txt
+#
+# All files must pass verification for the release to be considered valid.
+# This manifest is part of the immutable GitHub Release for DJ Jesse Jay v7.
