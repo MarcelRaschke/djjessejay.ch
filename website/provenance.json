@@ -1,0 +1,22 @@
+{
+  "schemaVersion":"1.0.1",
+  "subject":{"id":"https://djjessejay.ch/#dj-jesse-jay","name":"DJ Jesse Jay"},
+  "generatedAt":"2026-08-09T21:04:00+02:00",
+  "policy":{"classes":{"P0":"independently archived evidence","P1":"versioned first-party repository evidence","P2":"first-party external publication","P3":"credible third-party reference","P4":"unverified claim"},"generatedContentIsEvidence":false},
+  "claims":[
+    {"id":"artist-name","value":"DJ Jesse Jay","status":"verified","sources":["repo:index.html","repo:CLAUDE.md","soundcloud:jessejay"]},
+    {"id":"civil-name","value":"Michael Fellner","status":"first-party-public","sources":["repo:index.html","repo:CLAUDE.md"]},
+    {"id":"location","value":"Zürich, Switzerland","status":"corroborated","sources":["repo:index.html","soundcloud:jessejay"]},
+    {"id":"active-since","value":1997,"status":"corroborated-first-party","sources":["repo:index.html","soundcloud:jessejay"]},
+    {"id":"radio-association","value":"Radio LoRa","status":"corroborated-historical-and-recording","sources":["repo:index.html","soundcloud:jessejay","soundcloud:blue-dimension-2026"]},
+    {"id":"galaxy-space-night","value":true,"status":"corroborated","sources":["soundcloud:galaxy-space-night","residentadvisor:event-896816"]},
+    {"id":"blue-dimension","value":true,"status":"contemporary-project-recording-identity","sources":["repo:index.html","soundcloud:blue-dimension-2026"]},
+    {"id":"radio-since-2001","value":2001,"status":"historical-first-party-claim","sources":["repo:historical-biography","soundcloud:jessejay"]},
+    {"id":"current-radio-schedule","value":null,"status":"not-verified","sources":["radio-lora:blue-dimension-url-404-2026-08-09"]}
+  ],
+  "knownConflicts":[
+    {"id":"architecture","status":"repaired-on-provenance-branch","description":"CLAUDE.md was stale relative to package.json; canonical branch updates it."},
+    {"id":"license","status":"repaired-on-provenance-branch","description":"LICENSE is Apache-2.0; package metadata is synchronized to Apache-2.0."},
+    {"id":"radio-schedule","status":"open","description":"No current primary station page was found; do not publish a present-day cadence as fact."}
+  ]
+}

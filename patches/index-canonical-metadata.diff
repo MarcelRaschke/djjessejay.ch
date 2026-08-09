@@ -1,0 +1,23 @@
+--- a/index.html
++++ b/index.html
+@@
+-    <title>DJ Jesse Jay - Zürich</title>
+-    <meta name="description" content="DJ Jesse Jay - Professioneller DJ aus Zürich, seit 1997 aktiv. Betreiber der Radiosendung 'Blue Dimension Space Night ehemals Galaxy Space Night' auf Radio LoRa. Musikstile: Progressiv, House, Techno, Deep House.">
++    <title>DJ Jesse Jay — Zürich electronic DJ since 1997</title>
++    <meta name="description" content="DJ Jesse Jay — Zürich electronic DJ since 1997, vinyl-rooted and connected with Radio LoRa through Galaxy Space Night and Blue Dimension.">
+@@
+-    <meta property="og:type" content="website">
+-    <meta property="og:title" content="DJ Jesse Jay - Zürich">
+-    <meta property="og:description" content="Professioneller DJ aus Zürich seit 1997. Progressiv, House, Techno. Radiosendung 'The Blue Dimension' auf Radio LoRa.">
+-    <meta property="og:url" content="https://djjessejay.ch">
++    <meta property="og:type" content="profile">
++    <meta property="og:title" content="DJ Jesse Jay — Zürich electronic DJ since 1997">
++    <meta property="og:description" content="DJ Jesse Jay — Zürich electronic DJ since 1997, vinyl-rooted and connected with Radio LoRa through Galaxy Space Night and Blue Dimension.">
++    <meta property="og:url" content="https://djjessejay.ch/">
+@@
+-    <meta name="twitter:title" content="DJ Jesse Jay - Zürich">
+-    <meta name="twitter:description" content="Professioneller DJ aus Zürich seit 1997. Progressiv, House, Techno. Radiosendung 'The Blue Dimension' auf Radio LoRa.">
++    <meta name="twitter:title" content="DJ Jesse Jay — Zürich electronic DJ since 1997">
++    <meta name="twitter:description" content="DJ Jesse Jay — Zürich electronic DJ since 1997, vinyl-rooted and connected with Radio LoRa through Galaxy Space Night and Blue Dimension.">
+@@
++    <!-- Canonical structured identity is generated from website/schema.org.jsonld by npm run sync:metadata -->

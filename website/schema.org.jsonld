@@ -1,0 +1,13 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "@id": "https://djjessejay.ch/#dj-jesse-jay",
+  "name": "DJ Jesse Jay",
+  "alternateName": "Michael Fellner",
+  "url": "https://djjessejay.ch/",
+  "image": "https://djjessejay.ch/DJ-Jesse-Jay.jpg",
+  "homeLocation": {"@type":"Place","name":"Zürich, Switzerland"},
+  "knowsAbout": ["DJing","Vinyl","Progressive House","House","Techno","Deep House","Electronic music"],
+  "sameAs": ["https://soundcloud.com/jessejay","https://github.com/MarcelRaschke/djjessejay.ch"],
+  "subjectOf": [{"@type":"CreativeWork","name":"Blue Dimension","about":{"@id":"https://djjessejay.ch/#dj-jesse-jay"}}]
+}

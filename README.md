@@ -1,106 +1,52 @@
 # djjessejay.ch
 
-Vanilla JavaScript project with Webpack and Babel support.
+Official repository for **DJ Jesse Jay — Zürich electronic DJ since 1997**.
 
-## Setup
+## Canonical identity and provenance
 
-### Prerequisites
-- Node.js 24+
-- npm
+Identity claims are governed by:
 
-### Installation
+- `DJ_JESSE_JAY_CANONICAL_PROFILE.md` — human-readable source of truth
+- `artist-profile.json` — machine-readable identity
+- `website/provenance.json` — claim/evidence ledger
+- `website/schema.org.jsonld` — structured public identity
+- `ARCHIVE_CITATION_APPENDIX.md` — evidence register
+- `AI_SYSTEM_PROMPT.md` / `jj-ai/knowledge-context.json` — AI guardrails
+
+Generated AI content is **not evidence** and must not promote new biographical claims without provenance.
+
+## Current technical architecture
+
+The repository has evolved beyond the earlier static/no-build description. Current `package.json` defines Node.js 24+, Express 5, CORS, rate limiting, Nodemailer, WebSocket support, Tailwind CLI and render-farm test commands. Historical GitHub Pages/static deployment files remain and must be reconciled rather than treated as the only architecture.
+
+### Commands
 
 ```bash
 npm install
-```
-
-## Development
-
-```bash
-npm run dev
-```
-
-Starts webpack in watch mode.
-
-## Production Build
-
-```bash
-npm run build
-```
-
-Builds the project to the `dist/` directory.
-
-## Development Server
-
-```bash
+npm run build:css
+npm run sync:metadata
+npm test
 npm start
 ```
 
-Starts webpack dev server on http://localhost:8080
+## `index.html` canonical metadata
 
-## Features
+`index.html` is large and contains live UI/AI/animation code. To avoid destructive full-file rewrites, canonical title/description/Open Graph/Twitter/JSON-LD metadata is applied deterministically:
 
-- ✅ Webpack 5 bundler
-- ✅ Babel transpilation (ES2021+ support)
-- ✅ Node 24+ compatible
-- ✅ GitHub Actions CI/CD
-- ✅ Modern JavaScript support (including ||= operator)
+```bash
+npm run sync:metadata
+```
 
-## License
+Review and commit the resulting `index.html` diff. CI checks that the generated metadata stays synchronized.
 
-MIT
+## Evidence status
 
-::: {#cookie-banner .cookie-banner} ::: cookie-content Diese Website verwendet Cookies, um Ihr Browsererlebnis zu verbessern.
+Current evidence supports DJ Jesse Jay / Zürich / active-since-1997, Galaxy Space Night context, Radio LoRa association and Blue Dimension as a contemporary project/recording identity. The `Radio LoRa since 2001` statement remains classified as a historical first-party claim. A previously referenced Radio LoRa Blue Dimension URL returned 404 during the 2026-08-09 review, so no current broadcast schedule is asserted.
 
-::: cookie-buttons Akzeptieren
+## Licensing
 
-Ablehnen
+The repository `LICENSE` file contains **Apache License 2.0** and is authoritative for repository source code. Music, photography, logos, recordings and other media may have separate copyright or licensing conditions.
 
-Mehr erfahren{#cookie-more .cookie-more} ::: ::: :::
+## Public provenance release
 
-::: language-selector DE{.active data-lang="de"} EN{data-lang="en"} FR{data-lang="fr"} IT{data-lang="it"} :::
-
-DJ Jesse Jay
-Biografie{.translate key="biography"}
-Musik{.translate key="music"}
-Kontakt{.translate key="contact"}
-Datenschutz{.translate key="privacy"}
-::: {role="main"} ::: {#about .section} ::: profile-container DJ Jesse Jay{.profile-image}
-
-::: social-icons {target="_blank" aria-label="Soundcloud"} :::
-
-{target="_blank" aria-label="LoRa"} :::
-
-Biografie {#biografie .translate key="biography"} ::: biography-text Do you know the feelings like this one you feel when you drive deeply in the track „DJ..DJ...all your sound seems the same to me"? Being suddenly taken into a round, remarkably awakening of passion, ...our party passion. Soul carrying voyages... , heart spaces creating horizons and feelings to music with sexy fantasies arise, got seldom since quite a while. That is how Jesse loves to feel when he is giving himself to the music and this is how he passes on his sound and the emotions to the crowd. Embracing with his radical sensitiveness. Jesse grew up in his contagious party senses at the individuality-reigning, going mad and „we are family" philosophical, to legendary Clubs like: Aera, Labyrinth, SpiderGalaxy, Take A Dance, Hermetschloo and Dachkantine. At Radio Lora he plays each two weeks since 2001 at Galaxy Space Nights. A 6 hours long, deep-tender holidays of the mind. With his timeless, surprising choices of pearl-tracks. Heartful and at the same time est porno stories, seamlessly woben with his distinctive DJ's skills. He gives the same dimension of importance to play like at the beginning, same as a main act, or the outro. Continuously grown since 1997. A loyal Vinyl Lover, with equally pleasuring with the CDJ & XDJ. Do you know the feeling of an unconditional, passionate music trip, too? ::: :::
-
-::: {#music .section}
-
-Musik {#musik .translate key="music"} Gemischt von DJ Jesse Jay
-
-::: media-container ::: :::
-
-::: {#contact .section}
-
-Kontakt {#kontakt .translate key="contact"} ::: form-group Name: :::
-
-::: form-group E-Mail: :::
-
-::: form-group Nachricht: :::
-
-::: {.form-group .checkbox-group} Ich akzeptiere die Datenschutzbestimmungen. :::
-
-::: {.g-recaptcha sitekey="YOUR_RECAPTCHA_SITE_KEY"} :::
-
-Senden
-
-::: {#form-success .form-message .hidden} Ihre Nachricht wurde erfolgreich gesendet! :::
-
-::: {#form-error .form-message .hidden} Es gab ein Problem beim Senden Ihrer Nachricht. Bitte versuchen Sie es später erneut. ::: ::: :::
-
-::: footer-content ::: footer-section © 2003-2025 by DJ Jesse Jay & @®† from Zürich 🇨🇭 :::
-
-::: footer-section The tracks in the videos are not free to use. If you'd like to use the music in these videos, please contact the Artist or Label. All Backgrounds & Sounds that we use are licensed CC by 4.0. ALL OTHER CONTENT MAY ALSO BE PROTECTED BY COPYRIGHT (17 U.S.C.SECTION 108(a)(3)). :::
-
-::: footer-section This site is made with Open Source Software. Apache License Version 2.0, January 2004 https://www.apache.org/licenses/{target="_blank"} ❤️ thanks to Marcin Kolonko and Marcel Raschke for programming this site. :::
-
-::: footer-nav Datenschutz{.translate key="privacy"} | Impressum{.translate key="imprint"} | Dateien herunterladen{#download-files .translate key="download-files"} ::: :::
+See `release/PROVENANCE_V7_RELEASE_NOTES.md` and `archive/MANIFEST.json`. P0 archive receipt URLs are added only after successful external archival capture; they are never fabricated.

@@ -1,0 +1,13 @@
+{
+  "manifestVersion":"1.0.0",
+  "releaseName":"DJ Jesse Jay Public Provenance v7",
+  "generatedAt":"2026-08-09T21:04:00+02:00",
+  "canonicalFiles":["DJ_JESSE_JAY_CANONICAL_PROFILE.md","artist-profile.json","website/schema.org.jsonld","website/provenance.json","ARCHIVE_CITATION_APPENDIX.md","AI_SYSTEM_PROMPT.md","jj-ai/knowledge-context.json","presskit/README.md","pressekit/README.md"],
+  "externalEvidence":[
+    {"type":"first-party-external","label":"SoundCloud DJ Jesse Jay profile","url":"https://soundcloud.com/jessejay"},
+    {"type":"third-party","label":"Resident Advisor Galaxy Space Night 20th Bday 2016","url":"https://ra.co/events/896816"}
+  ],
+  "archiveReceipts":[],
+  "receiptPolicy":"Never fabricate archive receipts. Populate only after successful capture.",
+  "integrity":"Hashes are generated at release time from committed blobs."
+}

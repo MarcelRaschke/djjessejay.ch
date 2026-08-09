@@ -1,0 +1,9 @@
+{
+  "version":"1.0.0",
+  "identityRef":"../artist-profile.json",
+  "provenanceRef":"../website/provenance.json",
+  "systemPromptRef":"../AI_SYSTEM_PROMPT.md",
+  "safeFacts":["DJ Jesse Jay","Zürich, Switzerland","active since 1997","vinyl-rooted DJ practice","Radio LoRa association","Galaxy Space Night historical identity","Blue Dimension contemporary identity"],
+  "qualifiedFacts":[{"claim":"Radio LoRa association since 2001","qualification":"historical first-party claim; retain attribution"}],
+  "forbiddenInferences":["current radio schedule without verification","unverified residency claims","audience/streaming metrics as career significance","ownership of similarly named accounts","invented discography or awards"]
+}

@@ -1,0 +1,28 @@
+name: Canonical metadata check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  canonical-metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate JSON files
+        run: |
+          node -e "for (const f of ['artist-profile.json','website/provenance.json','website/schema.org.jsonld','website/social-metadata.json','website/open-graph.json','jj-ai/knowledge-context.json','archive/MANIFEST.json']) JSON.parse(require('fs').readFileSync(f,'utf8'));"
+      - name: Validate metadata synchronizer
+        run: |
+          node --check scripts/sync-canonical-metadata.mjs
+          cp index.html /tmp/index.html
+          node scripts/sync-canonical-metadata.mjs /tmp/index.html
+          grep -q 'DJ Jesse Jay — Zürich electronic DJ since 1997' /tmp/index.html
+          grep -q 'application/ld+json' /tmp/index.html

@@ -1,14 +1,17 @@
-# Press Kit Overview
+# DJ Jesse Jay — Pressekit (DE)
 
-This press kit contains all necessary information about DJ Jesse Jay, including biographies, technical riders, and downloadable content in various languages. 
+Kanonische Quelle: `../DJ_JESSE_JAY_CANONICAL_PROFILE.md`.
 
-## Contents
-- [German Press Kit](de/PRESSEMAPPE.md)
-- [English Press Kit](en/PRESS_KIT.md)
-- [French Press Kit](fr/KIT_PRESSE.md)
-- [Italian Press Kit](it/PRESS_KIT.md)
-- [German Technical Rider](de/TECH_RIDER.md)
-- [English Technical Rider](en/TECH_RIDER.md)
-- [French Technical Rider](fr/FICHE_TECHNIQUE.md)
-- [Italian Technical Rider](it/SCHEDA_TECNICA.md)
-- [Download Instructions](DOWNLOAD_INSTRUCTIONS.md)
+**One-Liner:** DJ Jesse Jay — Zürcher Underground-DJ für elektronische Musik seit 1997, verwurzelt in Vinyl-Kultur und dokumentiert über die Radio-Geschichte Galaxy Space Night → Blue Dimension.
+
+## Verifizierbarer öffentlicher Kern
+
+- Zürich, Schweiz
+- aktiv seit 1997
+- Progressive House / House / Techno / Deep House
+- Vinyl sowie CDJ/XDJ
+- Verbindung zu Radio LoRa
+- Galaxy Space Night als historische Identität
+- Blue Dimension als zeitgenössische Identität
+
+Aktuelle Sendezeiten, Residencies, Awards, Reichweiten und Plattform-Accounts dürfen nur mit Provenance-Nachweis ergänzt werden.
