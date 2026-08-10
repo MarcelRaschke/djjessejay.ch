@@ -1,0 +1,27 @@
+{
+  "project": "DJ JESSE JAY — BLUE DIMENSION // SIGNAL 97.5",
+  "bpm": 125,
+  "beat_seconds": 0.48,
+  "beats_per_shot": 8,
+  "shot_seconds": 3.84,
+  "duration_seconds": 23.04,
+  "aspect_ratio": "16:9",
+  "delivery": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 60,
+    "audio_hz": 48000
+  },
+  "working": {
+    "target_fps": 120,
+    "policy": "native-if-supported-otherwise-interpolate"
+  },
+  "shots": [
+    {"id":"01","name":"frequency-lock","start":0.00,"end":3.84,"start_beat":1,"end_beat":8},
+    {"id":"02","name":"awakening","start":3.84,"end":7.68,"start_beat":9,"end_beat":16},
+    {"id":"03","name":"break-seal","start":7.68,"end":11.52,"start_beat":17,"end_beat":24},
+    {"id":"04","name":"materialization","start":11.52,"end":15.36,"start_beat":25,"end_beat":32},
+    {"id":"05","name":"performance","start":15.36,"end":19.20,"start_beat":33,"end_beat":40},
+    {"id":"06","name":"portal","start":19.20,"end":23.04,"start_beat":41,"end_beat":48}
+  ]
+}
