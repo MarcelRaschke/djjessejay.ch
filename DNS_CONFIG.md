@@ -199,3 +199,90 @@ rosalyn.ns.cloudflare.com.
 ---
 
 *This file was generated on 2026-07-17 and should be updated whenever DNS changes are made.*
+
+
+---
+
+## Live drift audit (2026-08-14)
+
+A live verification against the documented target state revealed significant drift.
+Live DNS was resolved via DNS-over-HTTPS (Cloudflare `1.1.1.1` and Google
+`dns.google`, cross-checked) and the GitHub Pages API (`gh api
+repos/MarcelRaschke/djjessejay.ch/pages`). The certificate presented on `:443`
+was inspected with `openssl s_client`.
+
+The result is authoritative: **the domain is no longer delegated to Cloudflare,
+the A records no longer point at GitHub Pages, the GitHub Pages custom domain is
+not set, and the active TLS certificate is expired and belongs to a different
+domain (`mibraflex.de`).** There is therefore no `djjessejay.ch` certificate to
+renew — the underlying DNS delegation is wrong.
+
+### Soll/Ist comparison
+
+| Record / Setting | Documented target (`Soll`) | Live state (`Ist`) | Status |
+|---|---|---|---|
+| Authoritative NS | `aarav.ns.cloudflare.com.`, `rosalyn.ns.cloudflare.com.` | `ns1.hosttech.ch.`, `ns2.hosttech.ch.`, `ns3.hosttech.ch.` | **DRIFT** |
+| SOA mname | `aarav.ns.cloudflare.com.` | `ns1.hosttech.ch.` | **DRIFT** |
+| SOA rname | `dns.cloudflare.com.` | `dns.hosttech.eu.` | **DRIFT** |
+| SOA serial | `2053592236` | `2026040135` | **DRIFT** |
+| Apex A records | `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153` | `185.101.158.113` (single record) | **DRIFT** |
+| Apex AAAA record | not documented | `2001:1680:101:8bd::1` (hosttech) | undocumented / hosttech |
+| `www` CNAME | `www.djjessejay.ch. -> djjessejay.ch.` | no CNAME; `www` resolves to `185.101.158.113` via A | **DRIFT** |
+| `_github-pages-challenge-marcelraschke` TXT | `"60e5f988c1da04523b99e4208c1726"` | not present (resolves to hosttech apex via wildcard, no TXT) | **DRIFT / missing** |
+| Apex TXT (SPF) | not documented | `"v=spf1 +mx +a include:_spf.mail.hostserv.eu ~all"` | undocumented / hosttech |
+| GitHub Pages `cname` | `djjessejay.ch` | `null` (not configured; only `marcelraschke.github.io` active) | **DRIFT** |
+| GitHub Pages `https_enforced` | `true` | `true` (on the default `github.io` domain) | OK (but irrelevant while `cname` is null) |
+| TLS certificate on `djjessejay.ch:443` | Let's Encrypt for `djjessejay.ch` | Let's Encrypt `R3` for `mibraflex.de`, expired `2021-04-02` | **DRIFT / expired** |
+
+### Interpretation
+
+The registrar has been re-delegated from Cloudflare to hosttech. The hosttech
+zone points the apex (and `www`, and the challenge subdomain) at
+`185.101.158.113`, which serves an expired Let's Encrypt certificate for
+`mibraflex.de`. Because GitHub Pages has no custom domain configured
+(`cname: null`), GitHub is not terminating TLS for `djjessejay.ch` at all — the
+site is reachable only via `https://marcelraschke.github.io/djjessejay.ch/`.
+
+This is not a certificate-renewal task. It is a DNS delegation + GitHub Pages
+configuration drift that must be corrected before any `djjessejay.ch` TLS
+certificate can exist.
+
+### Corrective steps (owner action; not repo-editable)
+
+These require access to the domain registrar, the active DNS provider
+(hosttech), and GitHub repository settings — none of which can be performed from
+this repository.
+
+1. Re-delegate the domain back to Cloudflare (or keep hosttech and recreate the
+   GitHub Pages records there). NS must match `aarav.ns.cloudflare.com.` /
+   `rosalyn.ns.cloudflare.com.`.
+2. Set apex A records to the four GitHub Pages IPs:
+   `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`.
+3. Set `www.djjessejay.ch.` CNAME -> `djjessejay.ch.` (not an A record).
+4. Restore the verification TXT:
+   `_github-pages-challenge-marcelraschke.djjessejay.ch. TXT "60e5f988c1da04523b99e4208c1726"`.
+5. Ensure the Cloudflare proxy (orange cloud) is **off** (DNS only) for all
+   GitHub Pages records, and SSL/TLS mode is `Full (Strict)`.
+6. In GitHub -> Settings -> Pages, set the custom domain to `djjessejay.ch`
+   (currently `null`) and enable Enforce HTTPS.
+7. Wait for DNS propagation and automatic Let's Encrypt provisioning (minutes to
+   ~24 h), then verify the certificate subject equals `djjessejay.ch`.
+
+### Live verification commands
+
+```bash
+# Authoritative state (replace @1.1.1.1 with the authoritative NS once known)
+dig djjessejay.ch NS +short
+dig djjessejay.ch A +short
+dig www.djjessejay.ch CNAME +short
+dig _github-pages-challenge-marcelraschke.djjessejay.ch TXT +short
+
+# GitHub Pages configuration
+gh api repos/MarcelRaschke/djjessejay.ch/pages | jq '{status, cname, https_enforced}'
+
+# Active TLS certificate (subject must be djjessejay.ch, issuer Let's Encrypt)
+echo | openssl s_client -connect djjessejay.ch:443 -servername djjessejay.ch 2>/dev/null \
+  | openssl x509 -noout -issuer -subject -dates -ext subjectAltName
+```
+
+*Audit performed 2026-08-14 via DoH (1.1.1.1, dns.google) and the GitHub Pages API.*
