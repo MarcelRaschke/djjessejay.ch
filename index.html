@@ -1079,7 +1079,34 @@
         });
     </script>
 
-    <!-- Blue Dimension hero animation (lightweight CSS/JS version; CSP-compatible, no external deps) -->
-    <script src="js/hero-simple.js" defer></script>
+    <!-- Blue Dimension hero animation: import map for self-hosted Three.js (keeps strict CSP) -->
+    <script type="importmap">
+      { "imports": { "three": "./vendor/three/build/three.module.js" } }
+    </script>
+    <!--
+      Blue Dimension hero animation.
+      Loads the Three.js 3D version when WebGL is available, otherwise falls back to
+      the lightweight CSS/JS variant. Both are self-hosted (no external requests),
+      so the strict Content-Security-Policy is preserved.
+    -->
+    <script type="module">
+      (async () => {
+        const container = document.getElementById("hero-animation");
+        if (!container) return;
+        const test = document.createElement("canvas");
+        const hasWebGL = !!(window.WebGLRenderingContext && (test.getContext("webgl") || test.getContext("experimental-webgl")));
+        if (hasWebGL) {
+          try {
+            const mod = await import("./js/hero-animation.js");
+            window.heroAnimation = mod.createHeroAnimation("hero-animation");
+          } catch (err) {
+            console.warn("3D hero failed, falling back to CSS version:", err);
+            await import("./js/hero-simple.js");
+          }
+        } else {
+          await import("./js/hero-simple.js");
+        }
+      })();
+    </script>
 </body>
 </html>
