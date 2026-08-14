@@ -21,15 +21,15 @@
  * @license MIT
  */
 
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160/build/three.module.js';
-import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160/examples/jsm/controls/OrbitControls.js';
-import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160/examples/jsm/loaders/GLTFLoader.js';
-import { EffectComposer } from 'https://cdn.jsdelivr.net/npm/three@0.160/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three@0.160/examples/jsm/postprocessing/RenderPass.js';
-import { ShaderPass } from 'https://cdn.jsdelivr.net/npm/three@0.160/examples/jsm/postprocessing/ShaderPass.js';
-import { GammaCorrectionShader } from 'https://cdn.jsdelivr.net/npm/three@0.160/examples/jsm/shaders/GammaCorrectionShader.js';
-import { RGBShiftShader } from 'https://cdn.jsdelivr.net/npm/three@0.160/examples/jsm/shaders/RGBShiftShader.js';
-import { FilmPass } from 'https://cdn.jsdelivr.net/npm/three@0.160/examples/jsm/postprocessing/FilmPass.js';
+import * as THREE from '../vendor/three/build/three.module.js';
+import { OrbitControls } from '../vendor/three/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader } from '../vendor/three/examples/jsm/loaders/GLTFLoader.js';
+import { EffectComposer } from '../vendor/three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from '../vendor/three/examples/jsm/postprocessing/RenderPass.js';
+import { ShaderPass } from '../vendor/three/examples/jsm/postprocessing/ShaderPass.js';
+import { GammaCorrectionShader } from '../vendor/three/examples/jsm/shaders/GammaCorrectionShader.js';
+import { RGBShiftShader } from '../vendor/three/examples/jsm/shaders/RGBShiftShader.js';
+import { FilmPass } from '../vendor/three/examples/jsm/postprocessing/FilmPass.js';
 
 // ============================================
 // CONFIGURATION

@@ -1,0 +1,21 @@
+Three.js r0.160 (three@0.160.0)
+vendored from https://www.npmjs.com/package/three
+
+Only the files required by js/hero-animation.js are included:
+  build/three.module.js
+  examples/jsm/controls/OrbitControls.js
+  examples/jsm/loaders/GLTFLoader.js
+  examples/jsm/postprocessing/EffectComposer.js
+  examples/jsm/postprocessing/FilmPass.js
+  examples/jsm/postprocessing/MaskPass.js
+  examples/jsm/postprocessing/Pass.js
+  examples/jsm/postprocessing/RenderPass.js
+  examples/jsm/postprocessing/ShaderPass.js
+  examples/jsm/shaders/CopyShader.js
+  examples/jsm/shaders/FilmShader.js
+  examples/jsm/shaders/GammaCorrectionShader.js
+  examples/jsm/shaders/RGBShiftShader.js
+  examples/jsm/utils/BufferGeometryUtils.js
+
+License: MIT (see ./LICENSE)
+Copyright (c) 2010-2023 three.js authors
