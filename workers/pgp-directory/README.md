@@ -9,6 +9,37 @@ Isolierter Cloudflare Worker für den öffentlichen PGP-Schlüssel von `cy8er@dj
 - `/cy8er.djjessejay.ch.asc` — ASCII-armored Public Key
 - `/.well-known/openpgpkey/*` — absichtlich deaktiviert, bis WKD-Hashing und binärer Export validiert sind
 
+## Neue Funktionen
+
+### Sicherheits-Header
+
+Alle Antworten enthalten folgende Sicherheits-Header:
+
+- `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload` (HSTS)
+- `Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()`
+- `X-Robots-Tag: noindex, nofollow`
+
+Zusätzlich zu den bestehenden Headern (`Content-Security-Policy`, `Referrer-Policy`, `X-Content-Type-Options`, `Access-Control-Allow-Origin`).
+
+### Rate Limiting
+
+- **Limit**: 60 Anfragen pro Minute pro Client-IP.
+- **Header** auf jeder Antwort:
+  - `X-RateLimit-Limit: 60`
+  - `X-RateLimit-Remaining: <verbleibende Anfragen>`
+  - `X-RateLimit-Reset: <Unix-Zeitstempel>`
+- Bei Überschreitung: `429 Too Many Requests` mit `Retry-After`-Header.
+- Der Limiter ist prozessintern (in-memory). Cloudflare-Worker-Isolate werden unregelmäßig recycelt, daher ist das Limit ein Best-Effort-Schutz und keine strikte Garantie. Für harte Limits Cloudflare-Rate-Limiting-Regeln im Dashboard verwenden.
+
+### Authentifizierung für `/health` (optional)
+
+- **Mechanismus**: Bearer-Token-Authentifizierung.
+- **Umgebungsvariable**: `HEALTH_AUTH_TOKEN` (als **Secret** in Cloudflare oder GitHub setzen).
+- **Verhalten**:
+  - Ist `HEALTH_AUTH_TOKEN` **nicht gesetzt**, ist `/health` öffentlich erreichbar.
+  - Ist `HEALTH_AUTH_TOKEN` **gesetzt**, erfordert `/health` den Header `Authorization: Bearer <token>`.
+  - Bei fehlendem/ungültigem Token: `401 Unauthorized` mit `WWW-Authenticate: Bearer`.
+
 ## Lokal prüfen
 
 ```bash
@@ -24,7 +55,8 @@ npm run deploy:dry-run
 2. In **Settings → Variables and Secrets** `PUBLIC_PGP_KEY` als verschlüsseltes Secret setzen.
 3. Den vollständigen ASCII-armored Public Key einfügen; niemals den Private Key.
 4. `DEPLOYMENT_ENV=preview` belassen, bis die workers.dev-Adresse geprüft wurde.
-5. Noch keine produktive Custom Domain oder Route setzen.
+5. Optional `HEALTH_AUTH_TOKEN` als Secret setzen, um `/health` hinter eine Bearer-Token-Authentifizierung zu stellen.
+6. Noch keine produktive Custom Domain oder Route setzen.
 
 ## GitHub Environment `cloudflare-preview`
 
@@ -88,6 +120,8 @@ Der Deploy-Job enthält zusätzlich zur Environment-Branch-Regel einen Code-Guar
 curl --fail --silent --show-error \
   https://cy8er-pgp-directory.<workers-subdomain>.workers.dev/health | jq
 ```
+
+Ist `HEALTH_AUTH_TOKEN` gesetzt, zusätzlich `-H "Authorization: Bearer <token>"` anhängen.
 
 Die Antwort muss `status: ok` und `keyConfigured: true` enthalten.
 
