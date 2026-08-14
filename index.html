@@ -24,9 +24,10 @@
     <!-- Content Security Policy -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://api.anthropic.com https://www.google.com/recaptcha/; img-src 'self' data:; frame-src https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/">
     <!-- Google reCAPTCHA v3 -->
-    <script src="https://www.google.com/recaptcha/api.js?render=6LeIxAcTAAAAAA9sXWJ8hJJJhJJJhJJJhJJJ" async defer></script>
+    <script src="https://www.google.com/recaptcha/api.js?render=YOUR_RECAPTCHA_SITE_KEY" async defer></script>
     <!-- Tailwind CSS (local build) -->
     <link rel="stylesheet" href="tailwind.css" integrity="sha384-qxsTu5eQzvwilYNPZ++HmqcRTSFm08jjw4P3MIdEMeyOyGnCi4m1Wx9AlPchJD7n" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/hero-animation.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
@@ -315,6 +316,8 @@
 
     <!-- Main Content -->
     <main class="pt-24 md:pt-32">
+        <!-- Blue Dimension Hero Animation (lightweight CSS/JS version; full 3D version available in hero-test.html) -->
+        <section id="hero-animation" aria-label="Blue Dimension 97.5 MHz hero animation"></section>
         <!-- About Section -->
         <section id="about" class="min-h-screen flex items-center justify-center p-4 fade-in-section">
             <div class="container mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-8 items-center text-center lg:text-left">
@@ -519,7 +522,7 @@
                         <h3 class="text-xl font-bold text-white" data-translate="imprint-h-owner">Angaben gemäss gesetzlicher Vorgaben</h3>
                         <p>Michael Fellner<br>Wallisellenstrasse 12<br>8600 Dübendorf<br>Schweiz</p>
                          <h3 class="text-xl font-bold text-white pt-4" data-translate="imprint-h-contact">Kontakt</h3>
-                        <p data-translate="imprint-contact-details">E-Mail: info@djjessejay.ch</p>
+                        <p data-translate="imprint-contact-details">E-Mail: [Ihre-E-Mail-Adresse@domain.com]</p>
                     </div>
                 </div>
             </section>
@@ -545,8 +548,8 @@
                         <h2 class="text-3xl font-bold mb-4 text-white" data-translate="download-title">Downloads</h2>
                         <p class="mb-8 text-slate-300" data-translate="download-p1">Hier finden Sie Materialien für Presse und Veranstalter.</p>
                         <div class="flex flex-col sm:flex-row justify-center gap-4">
-                             <a href="presskit/presskit.zip" class="px-6 py-3 bg-cyan-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-cyan-600 hover:scale-105 shadow-lg" data-translate="download-presskit">Pressekit (.zip)</a>
-                             <a href="presskit/images/" class="px-6 py-3 bg-rose-500 rounded-full font-semibold text-white no-underline transition-all hover:bg-rose-600 hover:scale-105 shadow-lg" data-translate="download-logos">Logos & Bilder</a>
+                             <a href="presskit.zip" download class="px-6 py-3 bg-gradient-to-r from-rose-500 to-cyan-500 rounded-full font-semibold text-white no-underline transition-all hover:scale-105 shadow-lg" data-translate="download-presskit">Pressekit (.zip)</a>
+                             <span class="px-6 py-3 bg-slate-700/30 rounded-full font-semibold text-slate-400 cursor-not-allowed" data-translate="download-logos-soon" aria-disabled="true">Logos & Bilder (bald verfügbar)</span>
                         </div>
                     </div>
 
@@ -618,7 +621,7 @@
                 'bio-text-1': 'Seit 1997 prägt DJ Jesse Jay die elektronische Musikszene von Zürich aus. Seine Sets sind seelentragende Reisen, die Horizonte erweitern und mit sexy Fantasien spielen. Er liebt es, eins mit der Musik zu werden und diese Emotionen an die Crowd weiterzugeben.', 
                 'bio-text-2': 'Aufgewachsen in legendären Clubs wie Aera, Labyrinth, SpiderGalaxy und Dachkantine, verkörpert er die "we are family"-Philosophie der Zürcher Partyszene.', 
                 'bio-text-3': 'Seit 2001 betreibt er seine Radiosendung auf Radio LoRa (lora.ch & DAB+), die seit 2025 "The Blue Dimension" heisst. Jeden Donnerstag von Mitternacht bis 6 Uhr morgens liefert er tiefgründige und zeitlose musikalische Erlebnisse.', 
-                'latest-mix': 'Neueste Mixes', 'radio-show': 'Radio Show', 'classic-sets': 'Klassische Sets', 'contact-title': 'Kontakt aufnehmen', 'name': 'Name:', 'email': 'E-Mail:', 'message': 'Nachricht:', 'name-placeholder': 'Ihr Name', 'email-placeholder': 'ihre@email.com', 'message-placeholder': 'Ihre Nachricht...', 'privacy-accept': 'Ich akzeptiere die', 'send': 'Senden', 'success-message': 'Ihre Nachricht wurde erfolgreich gesendet!', 'error-message': 'Es gab ein Problem. Bitte versuchen Sie es später erneut.', 'legal': 'Rechtliches', 'copyright-notice': 'Die Tracks in den Mixes sind nicht frei verwendbar. Bei Interesse wenden Sie sich bitte an die Künstler oder Labels.', 'open-source': 'Open Source', 'thanks': 'Diese Seite wurde mit Open Source Software erstellt. Dank an Marcin Kolonko und Marcel Raschke.', 'download-files': 'Downloads', 'privacy-title': 'Datenschutzerklärung', 'privacy-p1': 'Wir legen grossen Wert auf den Schutz Ihrer Daten. Um unsere Webseite zu besuchen, müssen Sie keine personenbezogenen Daten angeben...', 'imprint-title': 'Impressum', 'imprint-h-owner': 'Angaben gemäss gesetzlicher Vorgaben', 'imprint-h-contact': 'Kontakt', 'imprint-contact-details': 'E-Mail: info@djjessejay.ch', 'imprint-h-liability': 'Haftungsausschluss', 'imprint-p1': 'Der Autor übernimmt keinerlei Gewähr...', 'download-title': 'Downloads', 'download-p1': 'Hier finden Sie Materialien für Presse und Veranstalter.', 'download-presskit': 'Pressekit (.zip)', 'download-logos': 'Logos download-logos': 'Logos download-logos': 'Logos download-logos': 'Logos & Bilder', Images
+                'latest-mix': 'Neueste Mixes', 'radio-show': 'Radio Show', 'classic-sets': 'Klassische Sets', 'contact-title': 'Kontakt aufnehmen', 'name': 'Name:', 'email': 'E-Mail:', 'message': 'Nachricht:', 'name-placeholder': 'Ihr Name', 'email-placeholder': 'ihre@email.com', 'message-placeholder': 'Ihre Nachricht...', 'privacy-accept': 'Ich akzeptiere die', 'send': 'Senden', 'success-message': 'Ihre Nachricht wurde erfolgreich gesendet!', 'error-message': 'Es gab ein Problem. Bitte versuchen Sie es später erneut.', 'legal': 'Rechtliches', 'copyright-notice': 'Die Tracks in den Mixes sind nicht frei verwendbar. Bei Interesse wenden Sie sich bitte an die Künstler oder Labels.', 'open-source': 'Open Source', 'thanks': 'Diese Seite wurde mit Open Source Software erstellt. Dank an Marcin Kolonko und Marcel Raschke.', 'download-files': 'Downloads', 'privacy-title': 'Datenschutzerklärung', 'privacy-p1': 'Wir legen grossen Wert auf den Schutz Ihrer Daten. Um unsere Webseite zu besuchen, müssen Sie keine personenbezogenen Daten angeben...', 'imprint-title': 'Impressum', 'imprint-h-owner': 'Angaben gemäss gesetzlicher Vorgaben', 'imprint-h-contact': 'Kontakt', 'imprint-contact-details': 'E-Mail: [Ihre-E-Mail-Adresse@domain.com]', 'imprint-h-liability': 'Haftungsausschluss', 'imprint-p1': 'Der Autor übernimmt keinerlei Gewähr...', 'download-title': 'Downloads', 'download-p1': 'Hier finden Sie Materialien für Presse und Veranstalter.', 'download-presskit': 'Pressekit (.zip)', 'download-logos-soon': 'Logos & Bilder (bald verfügbar)',
                 'ai-bio-btn': '✨ Kreative Bio generieren', 'ai-bio-reset-btn': 'Original wiederherstellen', 'ai-refine-btn': '✨ Nachricht verbessern', 'ai-bio-loading': 'Generiere kreative Biografie...', 'ai-refine-btn-loading': 'Verfeinere...', 'ai-reco-title': '✨ Finde den perfekten Mix', 'ai-reco-desc': 'Beschreibe deine Stimmung oder dein Event und lass die KI den passenden Sound für dich finden.', 'ai-reco-placeholder': "z.B. 'entspannter Abend zu Hause'", 'ai-reco-btn': 'Empfehlen',
                 'ai-press-title': '✨ KI-Presseassistent', 'ai-press-desc': 'Geben Sie Ihre Event-Details ein, und die KI erstellt eine professionelle Ankündigung für Sie.', 'ai-press-date': 'Event-Datum:', 'ai-press-date-placeholder': 'z.B. 15. Oktober', 'ai-press-venue': 'Veranstaltungsort:', 'ai-press-venue-placeholder': 'z.B. Club X, Zürich', 'ai-press-notes': 'Besonderheiten:', 'ai-press-notes-placeholder': 'z.B. Support von DJ Y', 'ai-press-btn': 'Ankündigung generieren', 'ai-press-copy': 'Text kopieren', 'ai-press-copied': 'Kopiert!',
                 'chatbot-title': '✨ Frag die KI', 'chatbot-placeholder': 'Stelle eine Frage...', 'chatbot-greeting': 'Hallo! Ich bin JJ-AI, der digitale Assistent von Jesse Jay. Wie kann ich dir helfen?',
@@ -631,7 +634,7 @@
                 'events-nav': 'Events', 'tracks-nav': 'Tracks', 'media-nav': 'Media',
                 'events-title': 'Next Events', 'events-radio-title': 'The Blue Dimension', 'events-radio-desc': 'Every Thursday, 00:00–06:00 on Radio LoRa 97.5 FM (lora.ch & DAB+).', 'events-radio-btn': 'Listen live', 'events-radio-live': '🔴 Live on Air', 'events-radio-offline': 'Next show: Thursday from midnight', 'events-booking-title': 'Gigs & Bookings', 'events-booking-desc': 'Upcoming dates will be announced here. For booking requests, simply use the contact form.', 'events-booking-btn': 'Request booking',
                 'media-title': 'Media', 'media-studio-title': 'In the Studio', 'media-studio-desc': 'Impressions from the DJ booth and the radio studio.', 'media-video-title': 'Videos', 'media-video-desc': 'Set videos and clips from gigs and radio shows.', 'media-audio-title': 'Mixes & Tracks', 'media-audio-desc': 'All mixes and sets available on SoundCloud.',
-                'bio-text-1': 'Since 1997, DJ Jesse Jay has been shaping the electronic music scene from Zurich...', 'bio-text-2': 'Growing up in legendary clubs like Aera, Labyrinth...', 'bio-text-3': 'Since 2001, he has been running his radio show on Radio LoRa...', 'latest-mix': 'Latest Mixes', 'radio-show': 'Radio Show', 'classic-sets': 'Classic Sets', 'contact-title': 'Get in Touch', 'name': 'Name:', 'email': 'Email:', 'message': 'Message:', 'name-placeholder': 'Your Name', 'email-placeholder': 'your@email.com', 'message-placeholder': 'Your message...', 'privacy-accept': 'I accept the', 'send': 'Send', 'success-message': 'Your message has been sent successfully!', 'error-message': 'There was a problem. Please try again later.', 'legal': 'Legal', 'copyright-notice': 'The tracks in the mixes are not for free use...', 'open-source': 'Open Source', 'thanks': 'This site was created with open source software...', 'download-files': 'Downloads', 'privacy-title': 'Privacy Policy', 'privacy-p1': 'We highly value the protection of your data...', 'imprint-title': 'Imprint', 'imprint-h-owner': 'Information according to legal requirements', 'imprint-h-contact': 'Contact', 'imprint-contact-details': 'Email: info@djjessejay.ch', 'imprint-h-liability': 'Disclaimer of Liability', 'imprint-p1': 'The author assumes no liability...', 'download-title': 'Downloads', 'download-p1': 'Here you will find materials for press and promoters.', 'download-presskit': 'Press Kit (.zip)', 'download-logos': 'Logos download-logos': 'Logos download-logos': 'Logos download-logos': 'Logos & Bilder', Images
+                'bio-text-1': 'Since 1997, DJ Jesse Jay has been shaping the electronic music scene from Zurich...', 'bio-text-2': 'Growing up in legendary clubs like Aera, Labyrinth...', 'bio-text-3': 'Since 2001, he has been running his radio show on Radio LoRa...', 'latest-mix': 'Latest Mixes', 'radio-show': 'Radio Show', 'classic-sets': 'Classic Sets', 'contact-title': 'Get in Touch', 'name': 'Name:', 'email': 'Email:', 'message': 'Message:', 'name-placeholder': 'Your Name', 'email-placeholder': 'your@email.com', 'message-placeholder': 'Your message...', 'privacy-accept': 'I accept the', 'send': 'Send', 'success-message': 'Your message has been sent successfully!', 'error-message': 'There was a problem. Please try again later.', 'legal': 'Legal', 'copyright-notice': 'The tracks in the mixes are not for free use...', 'open-source': 'Open Source', 'thanks': 'This site was created with open source software...', 'download-files': 'Downloads', 'privacy-title': 'Privacy Policy', 'privacy-p1': 'We highly value the protection of your data...', 'imprint-title': 'Imprint', 'imprint-h-owner': 'Information according to legal requirements', 'imprint-h-contact': 'Contact', 'imprint-contact-details': 'Email: [your-email-address@domain.com]', 'imprint-h-liability': 'Disclaimer of Liability', 'imprint-p1': 'The author assumes no liability...', 'download-title': 'Downloads', 'download-p1': 'Here you will find materials for press and promoters.', 'download-presskit': 'Press Kit (.zip)', 'download-logos-soon': 'Logos & Images (coming soon)',
                 'ai-bio-btn': '✨ Generate Creative Bio', 'ai-bio-reset-btn': 'Restore Original', 'ai-refine-btn': '✨ Refine Message', 'ai-bio-loading': 'Generating creative biography...', 'ai-refine-btn-loading': 'Refining...', 'ai-reco-title': '✨ Find the Perfect Mix', 'ai-reco-desc': 'Describe your mood or event, and let the AI find the right sound for you.', 'ai-reco-placeholder': "e.g., 'chilled evening at home'", 'ai-reco-btn': 'Recommend',
                 'ai-press-title': '✨ AI Press Assistant', 'ai-press-desc': 'Enter your event details, and the AI will create a professional announcement for you.', 'ai-press-date': 'Event Date:', 'ai-press-date-placeholder': 'e.g., October 15th', 'ai-press-venue': 'Venue:', 'ai-press-venue-placeholder': 'e.g., Club X, Zurich', 'ai-press-notes': 'Special Notes:', 'ai-press-notes-placeholder': 'e.g., Support by DJ Y', 'ai-press-btn': 'Generate Announcement', 'ai-press-copy': 'Copy Text', 'ai-press-copied': 'Copied!',
                 'chatbot-title': '✨ Ask the AI', 'chatbot-placeholder': 'Ask a question...', 'chatbot-greeting': "Hi! I'm JJ-AI, Jesse Jay's digital assistant. How can I help you?",
@@ -647,7 +650,7 @@
                 'bio-text-1': "Depuis 1997, DJ Jesse Jay façonne la scène musicale électronique de Zurich. Ses sets sont des voyages qui portent l'âme, élargissent les horizons et jouent avec des fantaisies sensuelles. Il aime ne faire qu'un avec la musique et transmettre ces émotions au public.",
                 'bio-text-2': "Ayant grandi dans des clubs légendaires comme Aera, Labyrinth, SpiderGalaxy et Dachkantine, il incarne la philosophie « we are family » de la scène festive zurichoise.",
                 'bio-text-3': "Depuis 2001, il anime son émission de radio sur Radio LoRa (lora.ch & DAB+), qui s'appelle « The Blue Dimension » depuis 2025. Chaque jeudi de minuit à 6 heures du matin, il propose des expériences musicales profondes et intemporelles.",
-                'latest-mix': 'Derniers mixes', 'radio-show': 'Émission radio', 'classic-sets': 'Sets classiques', 'contact-title': 'Contactez-nous', 'name': 'Nom :', 'email': 'E-mail :', 'message': 'Message :', 'name-placeholder': 'Votre nom', 'email-placeholder': 'votre@email.com', 'message-placeholder': 'Votre message...', 'privacy-accept': "J'accepte la", 'send': 'Envoyer', 'success-message': 'Votre message a été envoyé avec succès !', 'error-message': 'Un problème est survenu. Veuillez réessayer plus tard.', 'legal': 'Mentions légales', 'copyright-notice': 'Les morceaux utilisés dans les mixes ne sont pas libres de droits. Pour toute demande, veuillez contacter les artistes ou labels concernés.', 'open-source': 'Open Source', 'thanks': 'Ce site a été réalisé avec des logiciels open source. Merci à Marcin Kolonko et Marcel Raschke.', 'download-files': 'Téléchargements', 'privacy-title': 'Politique de confidentialité', 'privacy-p1': "Nous accordons une grande importance à la protection de vos données. Pour visiter notre site web, vous n'avez besoin de fournir aucune donnée personnelle...", 'imprint-title': 'Mentions légales', 'imprint-h-owner': 'Informations conformément aux exigences légales', 'imprint-h-contact': 'Contact', 'imprint-contact-details': 'E-mail : info@djjessejay.ch', 'imprint-h-liability': 'Exclusion de responsabilité', 'imprint-p1': "L'auteur décline toute responsabilité...", 'download-title': 'Téléchargements', 'download-p1': 'Vous trouverez ici des documents pour la presse et les organisateurs.', 'download-presskit': 'Dossier de presse (.zip)', 'download-logos': 'Logos download-logos': 'Logos download-logos': 'Logos & Bilder', Images
+                'latest-mix': 'Derniers mixes', 'radio-show': 'Émission radio', 'classic-sets': 'Sets classiques', 'contact-title': 'Contactez-nous', 'name': 'Nom :', 'email': 'E-mail :', 'message': 'Message :', 'name-placeholder': 'Votre nom', 'email-placeholder': 'votre@email.com', 'message-placeholder': 'Votre message...', 'privacy-accept': "J'accepte la", 'send': 'Envoyer', 'success-message': 'Votre message a été envoyé avec succès !', 'error-message': 'Un problème est survenu. Veuillez réessayer plus tard.', 'legal': 'Mentions légales', 'copyright-notice': 'Les morceaux utilisés dans les mixes ne sont pas libres de droits. Pour toute demande, veuillez contacter les artistes ou labels concernés.', 'open-source': 'Open Source', 'thanks': 'Ce site a été réalisé avec des logiciels open source. Merci à Marcin Kolonko et Marcel Raschke.', 'download-files': 'Téléchargements', 'privacy-title': 'Politique de confidentialité', 'privacy-p1': "Nous accordons une grande importance à la protection de vos données. Pour visiter notre site web, vous n'avez besoin de fournir aucune donnée personnelle...", 'imprint-title': 'Mentions légales', 'imprint-h-owner': 'Informations conformément aux exigences légales', 'imprint-h-contact': 'Contact', 'imprint-contact-details': 'E-mail : [votre-adresse-email@domaine.com]', 'imprint-h-liability': 'Exclusion de responsabilité', 'imprint-p1': "L'auteur décline toute responsabilité...", 'download-title': 'Téléchargements', 'download-p1': 'Vous trouverez ici des documents pour la presse et les organisateurs.', 'download-presskit': 'Dossier de presse (.zip)', 'download-logos-soon': 'Logos & images (bientôt disponible)',
                 'ai-bio-btn': '✨ Générer une bio créative', 'ai-bio-reset-btn': "Restaurer l'original", 'ai-refine-btn': '✨ Améliorer le message', 'ai-bio-loading': "Génération d'une biographie créative...", 'ai-refine-btn-loading': 'Amélioration en cours...', 'ai-reco-title': '✨ Trouvez le mix parfait', 'ai-reco-desc': "Décrivez votre humeur ou votre événement, et laissez l'IA trouver le son qui vous convient.", 'ai-reco-placeholder': "par ex. « soirée détente à la maison »", 'ai-reco-btn': 'Recommander',
                 'ai-press-title': '✨ Assistant presse IA', 'ai-press-desc': "Saisissez les détails de votre événement, et l'IA rédigera une annonce professionnelle pour vous.", 'ai-press-date': "Date de l'événement :", 'ai-press-date-placeholder': 'par ex. le 15 octobre', 'ai-press-venue': 'Lieu :', 'ai-press-venue-placeholder': 'par ex. Club X, Zurich', 'ai-press-notes': 'Particularités :', 'ai-press-notes-placeholder': 'par ex. en première partie DJ Y', 'ai-press-btn': "Générer l'annonce", 'ai-press-copy': 'Copier le texte', 'ai-press-copied': 'Copié !',
                 'chatbot-title': "✨ Demander à l'IA", 'chatbot-placeholder': 'Posez une question...', 'chatbot-greeting': "Bonjour ! Je suis JJ-AI, l'assistant numérique de Jesse Jay. Comment puis-je vous aider ?",
@@ -663,7 +666,7 @@
                 'bio-text-1': "Dal 1997, DJ Jesse Jay plasma la scena della musica elettronica di Zurigo. I suoi set sono viaggi che toccano l'anima, ampliano gli orizzonti e giocano con fantasie sensuali. Ama diventare tutt'uno con la musica e trasmettere queste emozioni al pubblico.",
                 'bio-text-2': 'Cresciuto in club leggendari come Aera, Labyrinth, SpiderGalaxy e Dachkantine, incarna la filosofia "we are family" della scena delle feste zurighese.',
                 'bio-text-3': 'Dal 2001 conduce il suo programma radiofonico su Radio LoRa (lora.ch & DAB+), che dal 2025 si chiama "The Blue Dimension". Ogni giovedì, dalla mezzanotte alle 6 del mattino, offre esperienze musicali profonde e senza tempo.',
-                'latest-mix': 'Ultimi mix', 'radio-show': 'Programma radio', 'classic-sets': 'Set classici', 'contact-title': 'Contattaci', 'name': 'Nome:', 'email': 'E-mail:', 'message': 'Messaggio:', 'name-placeholder': 'Il tuo nome', 'email-placeholder': 'tua@email.com', 'message-placeholder': 'Il tuo messaggio...', 'privacy-accept': 'Accetto la', 'send': 'Invia', 'success-message': 'Il tuo messaggio è stato inviato con successo!', 'error-message': 'Si è verificato un problema. Riprova più tardi.', 'legal': 'Note legali', 'copyright-notice': 'I brani utilizzati nei mix non sono liberamente utilizzabili. Per richieste, contattare gli artisti o le etichette.', 'open-source': 'Open Source', 'thanks': 'Questo sito è stato creato con software open source. Grazie a Marcin Kolonko e Marcel Raschke.', 'download-files': 'Download', 'privacy-title': 'Informativa sulla privacy', 'privacy-p1': 'Diamo grande importanza alla protezione dei tuoi dati. Per visitare il nostro sito non è necessario fornire alcun dato personale...', 'imprint-title': 'Note legali', 'imprint-h-owner': 'Informazioni secondo gli obblighi di legge', 'imprint-h-contact': 'Contatto', 'imprint-contact-details': 'E-mail: info@djjessejay.ch', 'imprint-h-liability': 'Esclusione di responsabilità', 'imprint-p1': "L'autore non si assume alcuna responsabilità...", 'download-title': 'Download', 'download-p1': 'Qui puoi trovare materiali per la stampa e gli organizzatori.', 'download-presskit': 'Press kit (.zip)', 'download-logos': 'Logos download-logos': 'Loghi download-logos': 'Loghi download-logos': 'Logos & Bilder', Images
+                'latest-mix': 'Ultimi mix', 'radio-show': 'Programma radio', 'classic-sets': 'Set classici', 'contact-title': 'Contattaci', 'name': 'Nome:', 'email': 'E-mail:', 'message': 'Messaggio:', 'name-placeholder': 'Il tuo nome', 'email-placeholder': 'tua@email.com', 'message-placeholder': 'Il tuo messaggio...', 'privacy-accept': 'Accetto la', 'send': 'Invia', 'success-message': 'Il tuo messaggio è stato inviato con successo!', 'error-message': 'Si è verificato un problema. Riprova più tardi.', 'legal': 'Note legali', 'copyright-notice': 'I brani utilizzati nei mix non sono liberamente utilizzabili. Per richieste, contattare gli artisti o le etichette.', 'open-source': 'Open Source', 'thanks': 'Questo sito è stato creato con software open source. Grazie a Marcin Kolonko e Marcel Raschke.', 'download-files': 'Download', 'privacy-title': 'Informativa sulla privacy', 'privacy-p1': 'Diamo grande importanza alla protezione dei tuoi dati. Per visitare il nostro sito non è necessario fornire alcun dato personale...', 'imprint-title': 'Note legali', 'imprint-h-owner': 'Informazioni secondo gli obblighi di legge', 'imprint-h-contact': 'Contatto', 'imprint-contact-details': 'E-mail: [tuo-indirizzo-email@dominio.com]', 'imprint-h-liability': 'Esclusione di responsabilità', 'imprint-p1': "L'autore non si assume alcuna responsabilità...", 'download-title': 'Download', 'download-p1': 'Qui puoi trovare materiali per la stampa e gli organizzatori.', 'download-presskit': 'Press kit (.zip)', 'download-logos-soon': 'Loghi & immagini (in arrivo)',
                 'ai-bio-btn': '✨ Genera bio creativa', 'ai-bio-reset-btn': 'Ripristina originale', 'ai-refine-btn': '✨ Migliora messaggio', 'ai-bio-loading': 'Generazione biografia creativa...', 'ai-refine-btn-loading': 'Miglioramento in corso...', 'ai-reco-title': '✨ Trova il mix perfetto', 'ai-reco-desc': "Descrivi il tuo stato d'animo o il tuo evento, e lascia che l'IA trovi il suono giusto per te.", 'ai-reco-placeholder': "es. 'serata rilassante a casa'", 'ai-reco-btn': 'Consiglia',
                 'ai-press-title': '✨ Assistente stampa IA', 'ai-press-desc': "Inserisci i dettagli del tuo evento, e l'IA creerà un annuncio professionale per te.", 'ai-press-date': 'Data evento:', 'ai-press-date-placeholder': 'es. 15 ottobre', 'ai-press-venue': 'Luogo:', 'ai-press-venue-placeholder': 'es. Club X, Zurigo', 'ai-press-notes': 'Particolarità:', 'ai-press-notes-placeholder': 'es. supporto di DJ Y', 'ai-press-btn': 'Genera annuncio', 'ai-press-copy': 'Copia testo', 'ai-press-copied': 'Copiato!',
                 'chatbot-title': "✨ Chiedi all'IA", 'chatbot-placeholder': 'Fai una domanda...', 'chatbot-greeting': "Ciao! Sono JJ-AI, l'assistente digitale di Jesse Jay. Come posso aiutarti?",
@@ -673,132 +676,7 @@
             }
         };
 
-        // KI API Configuration - Use OpenRouter (free tier) or Mock responses
-        const apiKey = ""; // Optional: Add OpenRouter API key here
-        const useMockAI = !apiKey || apiKey === ""; // Fallback to mock if no key
-
-        // Mock responses for demo purposes
-        const mockResponses = {
-            chatbot: {
-                de: (msg) => `Das klingt nach einem tollen Event! DJ Jesse Jay spielt seit 1997 Progressive House und Techno. Für Buchungen nutzen Sie bitte das Kontaktformular.`,
-                en: (msg) => `That sounds like a great event! DJ Jesse Jay has been playing Progressive House and Techno since 1997. For bookings, please use the contact form.`,
-                fr: (msg) => `Cela semble être un événement génial ! DJ Jesse Jay joue du Progressive House et Techno depuis 1997. Pour les réservations, veuillez utiliser le formulaire de contact.`,
-                it: (msg) => `Sembra un evento fantastico! DJ Jesse Jay suona Progressive House e Techno dal 1997. Per prenotazioni, utilizzate il modulo di contatto.`
-            },
-            bio: {
-                de: `Seit 1997 prägt DJ Jesse Jay die elektronische Musikszene Zürichs. Seine Sets sind seelentragende Reisen durch Progressive House, Techno und Deep House. Mit seiner Radiosendung "The Blue Dimension" auf Radio LoRa bringt er jeden Donnerstag von Mitternacht bis 6 Uhr morgens tiefgründige musikalische Erlebnisse zu Ihnen.`,
-                en: `Since 1997, DJ Jesse Jay has been shaping Zurich's electronic music scene. His sets are soulful journeys through Progressive House, Techno, and Deep House. With his radio show "The Blue Dimension" on Radio LoRa, he brings profound musical experiences every Thursday from midnight to 6 AM.`
-            },
-            recommendation: {
-                de: (vibe) => `**Neueste Mixes**\nPerfekt für Ihren beschriebenen Vibe! Jesse Jays neueste Kreationen bieten genau die richtige Energie für ${vibe}.`,
-                en: (vibe) => `**Latest Mixes**\nPerfect for your described vibe! Jesse Jay's latest creations provide just the right energy for ${vibe}.`
-            },
-            setlist: {
-                de: (vibe) => `1. Artist A - Track Title (Original Mix)\n2. Artist B - Another Track\n3. Artist C - Deep House Anthem\n4. Artist D - Progressive Journey\n5. Artist E - Techno Finale\n\nEine perfekte Reise durch die Welt von DJ Jesse Jay für ${vibe}.`,
-                en: (vibe) => `1. Artist A - Track Title (Original Mix)\n2. Artist B - Another Track\n3. Artist C - Deep House Anthem\n4. Artist D - Progressive Journey\n5. Artist E - Techno Finale\n\nA perfect journey through DJ Jesse Jay's world for ${vibe}.`
-            },
-            press: {
-                de: (date, venue, notes) => `🎵 **DJ Jesse Jay Live** 🎵\n\nAm ${date} rockt DJ Jesse Jay den ${venue}!\n\nErwarten Sie eine Nacht voller Progressive House, Techno und Deep House - genau wie Sie es von Jesse Jay kennen und lieben. ${notes ? 'Besonderheit: ' + notes : ''}\n\nMehr Infos: djjessejay.ch`,
-                en: (date, venue, notes) => `🎵 **DJ Jesse Jay Live** 🎵\n\nOn ${date}, DJ Jesse Jay will rock ${venue}!\n\nExpect a night full of Progressive House, Techno, and Deep House - just as you know and love from Jesse Jay. ${notes ? 'Special: ' + notes : ''}\n\nMore info: djjessejay.ch`
-            }
-        };
-
-        // Mock AI call function
-        async function callMockAI(prompt, systemInstruction, lang = 'de') {
-            const lowerPrompt = prompt.toLowerCase();
-            
-            // Detect language from prompt
-            if (lowerPrompt.includes('chilled') || lowerPrompt.includes('evening') || lowerPrompt.includes('at home')) lang = 'en';
-            if (lowerPrompt.includes('soirée') || lowerPrompt.includes('à la maison')) lang = 'fr';
-            if (lowerPrompt.includes('serata') || lowerPrompt.includes('a casa')) lang = 'it';
-            
-            // Bio generator
-            if (systemInstruction && systemInstruction.includes('creative biography')) {
-                return mockResponses.bio[lang] || mockResponses.bio.de;
-            }
-            
-            // Chatbot
-            if (systemInstruction && systemInstruction.includes('JJ-AI')) {
-                return (mockResponses.chatbot[lang] || mockResponses.chatbot.de)(prompt);
-            }
-            
-            // Recommendation
-            if (systemInstruction && systemInstruction.includes('music curator')) {
-                return (mockResponses.recommendation[lang] || mockResponses.recommendation.de)(prompt);
-            }
-            
-            // Setlist
-            if (systemInstruction && systemInstruction.includes('expert AI music curator')) {
-                return (mockResponses.setlist[lang] || mockResponses.setlist.de)(prompt);
-            }
-            
-            // Press release
-            if (systemInstruction && systemInstruction.includes('professional PR agent')) {
-                const match = prompt.match(/Date: (.*?), Venue: (.*?), Special Notes: (.*?)\./);
-                if (match) {
-                    return (mockResponses.press[lang] || mockResponses.press.de)(match[1], match[2], match[3]);
-                }
-                return mockResponses.press[lang] ? mockResponses.press[lang]('TBD', 'TBD', '') : mockResponses.press.de('TBD', 'TBD', '');
-            }
-            
-            // Message refinement
-            if (systemInstruction && systemInstruction.includes('refine a user\'s message')) {
-                return `Verbesserte Nachricht: ${prompt}\n\nDiese Version ist professioneller und klarer formuliert.`;
-            }
-            
-            return "Entschuldigung, ich konnte keine passende Antwort generieren. Bitte versuchen Sie es erneut.";
-        }
-
-        // Unified AI call function
-        async function callClaudeAPI(prompt, systemInstruction, maxRetries = 3) {
-            if (useMockAI) {
-                const lang = document.documentElement.lang || 'de';
-                return await callMockAI(prompt, systemInstruction, lang);
-            }
-            
-            // Original Anthropic API implementation
-            const apiUrl = "https://api.anthropic.com/v1/messages";
-            const payload = {
-                model: "claude-sonnet-4-6",
-                max_tokens: 1024,
-                messages: [{ role: "user", content: prompt }]
-            };
-            if (systemInstruction) {
-                payload.system = systemInstruction;
-            }
-            for (let i = 0; i < maxRetries; i++) {
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'x-api-key': apiKey,
-                            'anthropic-version': '2023-06-01',
-                            'anthropic-dangerous-direct-browser-access': 'true'
-                        },
-                        body: JSON.stringify(payload)
-                    });
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    const result = await response.json();
-                    if (result.content && result.content[0] && result.content[0].text) {
-                        return result.content[0].text;
-                    } else {
-                        throw new Error("Invalid API response structure");
-                    }
-                } catch (error) {
-                    console.error(`API call attempt ${i + 1} failed:`, error);
-                    if (i === maxRetries - 1) {
-                        // Fallback to mock on final failure
-                        const lang = document.documentElement.lang || 'de';
-                        return await callMockAI(prompt, systemInstruction, lang);
-                    }
-                    await new Promise(res => setTimeout(res, Math.pow(2, i) * 1000));
-                }
-            }
-            return null;
-        }
+        const apiKey = ""; // Provided by environment
 
         function safeHTML(text) {
             return text
@@ -1074,7 +952,7 @@
         function acceptCookies() { localStorage.setItem('cookies-accepted', 'true'); document.getElementById('cookie-banner').classList.remove('show'); }
         function declineCookies() { localStorage.setItem('cookies-accepted', 'false'); document.getElementById('cookie-banner').classList.remove('show'); }
         
-        const RECAPTCHA_SITE_KEY = '6LeIxAcTAAAAAA9sXWJ8hJJJhJJJhJJJhJJJ';
+        const RECAPTCHA_SITE_KEY = 'YOUR_RECAPTCHA_SITE_KEY';
 
         async function handleFormSubmit(event) {
             event.preventDefault();
@@ -1200,6 +1078,8 @@
             });
         });
     </script>
-    <script src="js/render-farm-client.js" defer></script>
+
+    <!-- Blue Dimension hero animation (lightweight CSS/JS version; CSP-compatible, no external deps) -->
+    <script src="js/hero-simple.js" defer></script>
 </body>
 </html>
