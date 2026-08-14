@@ -27,6 +27,7 @@
     <script src="https://www.google.com/recaptcha/api.js?render=YOUR_RECAPTCHA_SITE_KEY" async defer></script>
     <!-- Tailwind CSS (local build) -->
     <link rel="stylesheet" href="tailwind.css" integrity="sha384-qxsTu5eQzvwilYNPZ++HmqcRTSFm08jjw4P3MIdEMeyOyGnCi4m1Wx9AlPchJD7n" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/hero-animation.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
@@ -315,6 +316,8 @@
 
     <!-- Main Content -->
     <main class="pt-24 md:pt-32">
+        <!-- Blue Dimension Hero Animation (lightweight CSS/JS version; full 3D version available in hero-test.html) -->
+        <section id="hero-animation" aria-label="Blue Dimension 97.5 MHz hero animation"></section>
         <!-- About Section -->
         <section id="about" class="min-h-screen flex items-center justify-center p-4 fade-in-section">
             <div class="container mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-8 items-center text-center lg:text-left">
@@ -1075,5 +1078,8 @@
             });
         });
     </script>
+
+    <!-- Blue Dimension hero animation (lightweight CSS/JS version; CSP-compatible, no external deps) -->
+    <script src="js/hero-simple.js" defer></script>
 </body>
 </html>
