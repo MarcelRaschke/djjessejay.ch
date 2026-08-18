@@ -56,7 +56,7 @@ echo_result() {
 }
 
 echo "=========================================="
-echo "DNS Verification for $DOMAIN"
+echo "DNS Verification for djjessejay.ch"
 echo "=========================================="
 echo ""
 
