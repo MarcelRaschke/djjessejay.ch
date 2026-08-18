@@ -1,0 +1,116 @@
+# ============================================================================
+# M3²0N Render Farm — TLS reverse proxy fronting the render master.
+#
+# Purpose: terminate wss:// (TLS) for browsers and inject the bearer token the
+# render master requires (Authorization: Bearer $RENDER_TOKEN) so the token
+# never reaches the browser. The master itself should only listen on localhost.
+#
+# This is an EXAMPLE. Adjust hostnames, certificate paths and the token before
+# use. Never commit a real token.
+#
+# Usage (Ubuntu/Debian):
+#   1. Install nginx with the stream/http WebSocket support (default in nginx >=1.3.13).
+#   2. Copy this file to /etc/nginx/conf.d/render-farm.conf (or sites-available).
+#   3. Put certs at the paths below (e.g. via Let's Encrypt / certbot).
+#   4. Set the token via nginx's authenticated-subrequest pattern below, or
+#      better, read it from a file the master also reads. Here we show the
+#      simple "inject a static header" approach guarded by an include file
+#      that is NOT version controlled.
+#   5. sudo nginx -t && sudo systemctl reload nginx
+#
+# Security notes:
+#   - Keep render-farm-master.js bound to 127.0.0.1 (set the host arg of
+#     server.listen, or reverse-proxy from the same host).
+#   - The token file (/etc/nginx/render_farm_token) must be chmod 0400, owned
+#     by root, and never committed to this repository.
+#   - Do NOT expose the plain ws:// endpoint (port 8081) to the Internet.
+# ============================================================================
+
+# The upstream is the local render master (plain http/ws).
+upstream render_farm_master {
+    server 127.0.0.1:8081;
+    keepalive 8;
+}
+
+# ---- Bearer token injection ------------------------------------------------
+# The token the render master expects must NOT live in this repository. Define
+# it in a separate file (gitignored) that is NOT checked in:
+#
+#   /etc/nginx/render_farm_token.conf  ->  map $http_host $render_token {
+#                                            default "replace-with-the-real-token";
+#                                          }
+#
+# Create it with:
+#   echo "map \$http_host \$render_token { default \"$(head -c 32 /dev/urandom | base64)\"; }" \
+#     | sudo tee /etc/nginx/render_farm_token.conf
+#   sudo chown root:root /etc/nginx/render_farm_token.conf
+#   sudo chmod 0400 /etc/nginx/render_farm_token.conf
+#
+# Use the SAME token value when starting the master:
+#   export RENDER_TOKEN='replace-with-the-real-token'
+include /etc/nginx/render_farm_token.conf;
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+
+    # Replace with your real hostname, e.g. render.djjessejay.ch
+    server_name render.example.com;
+
+    # ---- TLS ----------------------------------------------------------------
+    ssl_certificate     /etc/letsencrypt/live/render.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/render.example.com/privkey.pem;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache   shared:SSL:10m;
+    ssl_session_timeout 1d;
+
+    # ---- Optional HTTP endpoint for frame uploads (worker side) -------------
+    # Workers upload frames with PUT /frames/<n>. The proxy injects the token
+    # so workers do not need RENDER_TOKEN either (optional convenience).
+    location /frames/ {
+        limit_except PUT { deny all; }
+
+        proxy_pass         http://render_farm_master;
+        proxy_http_version 1.1;
+        proxy_set_header   Host              $host;
+        proxy_set_header   Authorization     "Bearer $render_token";
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto https;
+
+        # Frames can be large PNGs; raise limits accordingly.
+        client_max_body_size 32m;
+        proxy_read_timeout    300s;
+        proxy_send_timeout    300s;
+    }
+
+    # ---- wss:// endpoint for browsers AND workers ---------------------------
+    # Upgrade any request to the master. The proxy injects Authorization so
+    # the browser (which cannot set that header) is authenticated by the proxy.
+    location / {
+        # WebSocket upgrade support.
+        proxy_pass         http://render_farm_master;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade           $http_upgrade;
+        proxy_set_header   Connection       "upgrade";
+
+        proxy_set_header   Host              $host;
+        proxy_set_header   Authorization     "Bearer $render_token";
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto https;
+
+        # WebSocket connections are long-lived.
+        proxy_read_timeout    3600s;
+        proxy_send_timeout    3600s;
+        proxy_buffering       off;
+    }
+}
+
+# ---- Redirect plain HTTP -> HTTPS (optional but recommended) ---------------
+server {
+    listen 80;
+    listen [::]:80;
+    server_name render.example.com;
+    return 301 https://$host$request_uri;
+}
