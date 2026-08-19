@@ -2,9 +2,31 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import worker from "../src/index.js";
 
-const envWithoutKey = { DEPLOYMENT_ENV: "test" };
+const alwaysAllowLimiter = {
+  async limit() {
+    return { success: true };
+  },
+};
+
+function createRateLimiter(maxRequests) {
+  const counts = new Map();
+  return {
+    async limit({ key }) {
+      const count = counts.get(key) || 0;
+      if (count >= maxRequests) return { success: false };
+      counts.set(key, count + 1);
+      return { success: true };
+    },
+  };
+}
+
+const envWithoutKey = {
+  DEPLOYMENT_ENV: "test",
+  PUBLIC_RATE_LIMITER: alwaysAllowLimiter,
+};
 const envWithKey = {
   DEPLOYMENT_ENV: "test",
+  PUBLIC_RATE_LIMITER: alwaysAllowLimiter,
   PUBLIC_PGP_KEY: "-----BEGIN PGP PUBLIC KEY BLOCK-----\nVersion: test\n\nZmFrZQ==\n-----END PGP PUBLIC KEY BLOCK-----",
 };
 const envWithHealthToken = {
@@ -93,45 +115,62 @@ test("rate limit headers are exposed while under the limit", async () => {
   );
   assert.equal(response.status, 200);
   assert.equal(response.headers.get("x-ratelimit-limit"), "60");
-  const remaining = Number(response.headers.get("x-ratelimit-remaining"));
-  assert.ok(remaining >= 0 && remaining < 60, "remaining must be within valid range");
-  const reset = Number(response.headers.get("x-ratelimit-reset"));
-  assert.ok(reset > 0, "reset must be a positive unix timestamp");
+  assert.equal(response.headers.get("x-ratelimit-remaining"), null);
+  assert.equal(response.headers.get("x-ratelimit-reset"), null);
 });
 
 test("rate limiting returns 429 once the limit is exceeded", async () => {
   const ip = "198.51.100.42";
+  const rateLimitedEnv = {
+    ...envWithoutKey,
+    PUBLIC_RATE_LIMITER: createRateLimiter(60),
+  };
   let lastResponse;
   for (let i = 0; i < 61; i += 1) {
     lastResponse = await worker.fetch(
       requestWithIp("https://example.test/health", {}, ip),
-      envWithoutKey,
+      rateLimitedEnv,
     );
   }
   assert.equal(lastResponse.status, 429);
   const body = await lastResponse.json();
   assert.equal(body.error, "rate_limit_exceeded");
-  assert.equal(lastResponse.headers.get("x-ratelimit-remaining"), "0");
+  assert.equal(lastResponse.headers.get("x-ratelimit-limit"), "60");
   const retryAfter = Number(lastResponse.headers.get("retry-after"));
-  assert.ok(retryAfter >= 1, "Retry-After must be at least 1 second");
+  assert.equal(retryAfter, 60);
 });
 
 test("rate limiting is independent per client IP", async () => {
   const ipA = "198.51.100.1";
   const ipB = "198.51.100.2";
+  const rateLimitedEnv = {
+    ...envWithoutKey,
+    PUBLIC_RATE_LIMITER: createRateLimiter(60),
+  };
   for (let i = 0; i < 61; i += 1) {
-    await worker.fetch(requestWithIp("https://example.test/health", {}, ipA), envWithoutKey);
+    await worker.fetch(requestWithIp("https://example.test/health", {}, ipA), rateLimitedEnv);
   }
   const blocked = await worker.fetch(
     requestWithIp("https://example.test/health", {}, ipA),
-    envWithoutKey,
+    rateLimitedEnv,
   );
   assert.equal(blocked.status, 429);
   const otherIp = await worker.fetch(
     requestWithIp("https://example.test/health", {}, ipB),
-    envWithoutKey,
+    rateLimitedEnv,
   );
   assert.equal(otherIp.status, 200);
+});
+
+test("requests fail closed when the rate limiter binding is missing", async () => {
+  const response = await worker.fetch(
+    requestWithIp("https://example.test/health"),
+    { DEPLOYMENT_ENV: "test" },
+  );
+  assert.equal(response.status, 503);
+  assert.equal(response.headers.get("retry-after"), "1");
+  const body = await response.json();
+  assert.equal(body.error, "service_unavailable");
 });
 
 test("health endpoint is public when HEALTH_AUTH_TOKEN is not set", async () => {

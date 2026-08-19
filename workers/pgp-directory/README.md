@@ -23,13 +23,22 @@ Zusätzlich zu den bestehenden Headern (`Content-Security-Policy`, `Referrer-Pol
 
 ### Rate Limiting
 
-- **Limit**: 60 Anfragen pro Minute pro Client-IP.
-- **Header** auf jeder Antwort:
-  - `X-RateLimit-Limit: 60`
-  - `X-RateLimit-Remaining: <verbleibende Anfragen>`
-  - `X-RateLimit-Reset: <Unix-Zeitstempel>`
-- Bei Überschreitung: `429 Too Many Requests` mit `Retry-After`-Header.
-- Der Limiter ist prozessintern (in-memory). Cloudflare-Worker-Isolate werden unregelmäßig recycelt, daher ist das Limit ein Best-Effort-Schutz und keine strikte Garantie. Für harte Limits Cloudflare-Rate-Limiting-Regeln im Dashboard verwenden.
+- **Limit**: 60 Anfragen pro Minute und Client-IP über das native
+  `PUBLIC_RATE_LIMITER`-Binding.
+- Das Binding verwendet die Cloudflare-Rate-Limiting-Infrastruktur; es speichert
+  keinen Request-Zustand im globalen Worker-Isolate.
+- Die Zählung erfolgt pro Cloudflare-Standort. Sie ist für Missbrauchsschutz
+  ausgelegt, nicht für exakte Abrechnung oder Quotenabrechnung.
+- Jede erfolgreiche Antwort enthält `X-RateLimit-Limit: 60`. Die Runtime-API
+  liefert keine exakten `remaining`- oder `reset`-Werte; der Worker erfindet
+  diese deshalb nicht.
+- Bei Überschreitung: `429 Too Many Requests` mit `Retry-After: 60`.
+- Fehlt das Binding oder ist es nicht erreichbar, antwortet der Worker
+  fail-closed mit `503 Service Unavailable`.
+- Die konfigurierte Namespace-ID `581521568` ist ein deterministischer
+  Kandidat für diesen Worker. Vor dem ersten Deploy muss bestätigt werden,
+  dass sie im Zielkonto nicht bereits von einem anderen Rate-Limit-Binding
+  verwendet wird.
 
 ### Authentifizierung für `/health` (optional)
 
@@ -44,19 +53,23 @@ Zusätzlich zu den bestehenden Headern (`Content-Security-Policy`, `Referrer-Pol
 
 ```bash
 cd workers/pgp-directory
-npm install --ignore-scripts
+npm ci --ignore-scripts
 npm run check
 npm run deploy:dry-run
 ```
 
+Voraussetzungen: Node.js 24+ und Wrangler 4.124.0 aus dem Lockfile.
+
 ## Cloudflare Dashboard
 
-1. Worker `cy8er-pgp-directory` anlegen oder den ersten manuellen Workflow-Deploy ausführen.
+1. Den ersten manuellen Workflow-Deploy ausführen; Wrangler legt den Worker
+   und das deklarierte Rate-Limit-Binding an.
 2. In **Settings → Variables and Secrets** `PUBLIC_PGP_KEY` als verschlüsseltes Secret setzen.
 3. Den vollständigen ASCII-armored Public Key einfügen; niemals den Private Key.
 4. `DEPLOYMENT_ENV=preview` belassen, bis die workers.dev-Adresse geprüft wurde.
 5. Optional `HEALTH_AUTH_TOKEN` als Secret setzen, um `/health` hinter eine Bearer-Token-Authentifizierung zu stellen.
-6. Noch keine produktive Custom Domain oder Route setzen.
+6. Noch keine produktive Custom Domain oder Route setzen, solange
+   `djjessejay.ch` nicht kontrolliert zu Cloudflare DNS migriert wurde.
 
 ## GitHub Environment `cloudflare-preview`
 

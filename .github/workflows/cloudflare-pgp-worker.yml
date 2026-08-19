@@ -41,12 +41,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
-          cache-dependency-path: workers/pgp-directory/package.json
+          cache-dependency-path: workers/pgp-directory/package-lock.json
 
       - name: Install dependencies
-        run: npm install --ignore-scripts
+        run: npm ci --ignore-scripts
 
       - name: Test
         run: npm run check
@@ -70,12 +70,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
-          cache-dependency-path: workers/pgp-directory/package.json
+          cache-dependency-path: workers/pgp-directory/package-lock.json
 
       - name: Install dependencies
-        run: npm install --ignore-scripts
+        run: npm ci --ignore-scripts
 
       - name: Verify deployment guard and scoped credentials
         shell: bash

@@ -2,13 +2,25 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "cy8er-pgp-directory",
   "main": "src/index.js",
-  "compatibility_date": "2026-07-14",
+  "compatibility_date": "2026-08-19",
   "workers_dev": true,
   "preview_urls": true,
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1
   },
+  "ratelimits": [
+    {
+      "name": "PUBLIC_RATE_LIMITER",
+      // Deterministic account-unique candidate derived from "cy8er-pgp-directory".
+      // Confirm that it is unused in the target account before the first deploy.
+      "namespace_id": "581521568",
+      "simple": {
+        "limit": 60,
+        "period": 60
+      }
+    }
+  ],
   "vars": {
     "DEPLOYMENT_ENV": "preview"
   }

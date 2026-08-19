@@ -1,6 +1,6 @@
 {
   "name": "@djjessejay/pgp-directory-worker",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,9 +11,9 @@
     "tail": "wrangler tail"
   },
   "devDependencies": {
-    "wrangler": "^4.24.3"
+    "wrangler": "4.124.0"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   }
 }

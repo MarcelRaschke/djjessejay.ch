@@ -1,237 +1,202 @@
-# DNS Configuration for djjessejay.ch
+# DNS and Cloudflare migration runbook for djjessejay.ch
 
-This document contains the authoritative DNS zone configuration for the djjessejay.ch domain, configured for **Cloudflare Proxy with custom server** (IPv4 + IPv6 support).
+This document separates the **observed production state** from the intended
+Cloudflare target. It is a migration runbook, not a claim that Cloudflare is
+already authoritative.
 
-## Domain Overview
+Last verified: **2026-08-19 UTC**
 
-- **Domain**: djjessejay.ch
-- **DNS Provider**: Cloudflare
-- **Hosting**: Custom Server (IPv4: `185.101.158.113`, IPv6: `2001:1680:101:8bd::1`)
-- **CDN/Proxy**: Cloudflare (DDoS protection, caching, SSL termination)
-- **Last Updated**: 08.08.2025
+## 1. Observed public baseline
 
-## Important Notes
+The following records were queried through Cloudflare's public DNS-over-HTTPS
+resolver with DNSSEC enabled.
 
-1. **Cloudflare Proxy**: The A record (IPv4) is **proxied** (orange cloud) for DDoS protection, caching, and SSL termination. The AAAA record (IPv6) must remain **DNS only** (gray cloud) due to Cloudflare limitations.
+| Record | Observed value | Interpretation |
+|---|---|---|
+| NS | `ns1.hosttech.ch`, `ns2.hosttech.ch`, `ns3.hosttech.ch` | Hosttech is authoritative; Cloudflare DNS is not active. |
+| SOA | `ns1.hosttech.ch. dns.hosttech.eu. 2026040137 ...` | Hosttech owns the live zone serial. |
+| A `@` | `185.101.158.113` | Visitors reach the origin directly. |
+| AAAA `@` | `2001:1680:101:8bd::1` | IPv6 reaches the origin directly. |
+| A/AAAA `*` | Same origin addresses | A signed wildcard exposes the origin for arbitrary subdomains. |
+| `www` | Resolves through the wildcard; no CNAME was returned | It is not an explicit Cloudflare-proxied alias. |
+| MX | priority 10: `mail1.hosttech.eu`, `mail2.hosttech.eu` | Inbound mail is handled by Hosttech. |
+| TXT `@` | `v=spf1 +mx +a include:_spf.mail.hostserv.eu ~all` | SPF currently authorizes Hosttech plus the web-origin addresses. |
+| TXT `_dmarc` | `v=DMARC1; p=reject; pct=100` | DMARC enforcement is active, without an aggregate report address. |
+| DS | key tag `20485`, algorithm `8`, digest type `2` | DNSSEC is active at the parent. |
+| CAA | none | Certificate issuance is not restricted by CAA. |
+| TXT `_mta-sts` | none | MTA-STS policy discovery is not active. |
+| TXT `_smtp._tls` | none | SMTP TLS reporting is not active. |
 
-2. **IPv6 Support**: Cloudflare automatically routes IPv6 traffic through its own IPv6 network when the A record is proxied, even if the AAAA record is DNS only. Visitors on IPv6 will still benefit from Cloudflare's infrastructure.
+### Consequences
 
-3. **SSL**: Cloudflare Universal SSL is used for all proxied records (automatically provisioned).
+- Cloudflare proxying, CDN caching, zone WAF rules and Cloudflare DNS analytics
+  do **not** currently protect the production hostname.
+- The old values `aarav.ns.cloudflare.com` and
+  `rosalyn.ns.cloudflare.com` must not be copied into the registrar. A
+  Cloudflare zone must be created first, and only the nameservers assigned to
+  that exact zone may be used.
+- The wildcard A/AAAA records make every undeclared subdomain resolve to the
+  origin. Do not recreate this wildcard in Cloudflare without an explicit
+  subdomain inventory and a documented need.
+- Changing nameservers while the current DS record is still cached can break
+  DNSSEC validation and make the domain return `SERVFAIL`.
 
-4. **GitHub Pages**: **Disabled** for this domain. Static files are served directly from the custom server.
+## 2. Target architecture
 
----
+Production remains on the Hosttech origin during the first migration stage.
 
-## DNS Zone Records
-
-### SOA Record (Start of Authority)
-
-```
-djjessejay.ch. 3600 IN SOA aarav.ns.cloudflare.com. dns.cloudflare.com. 2053592237 10000 2400 604800 3600
-```
-
-- **Primary Name Server**: aarav.ns.cloudflare.com.
-- **Responsible Email**: dns.cloudflare.com. (admin contact)
-- **Serial Number**: 2053592237 (timestamp: 2025-08-08)
-- **Refresh**: 10000 seconds (2 hours 46 minutes)
-- **Retry**: 2400 seconds (40 minutes)
-- **Expire**: 604800 seconds (7 days)
-- **Minimum TTL**: 3600 seconds (1 hour)
-
-### NS Records (Name Servers)
-
-```
-djjessejay.ch. 86400 IN NS aarav.ns.cloudflare.com.
-djjessejay.ch. 86400 IN NS rosalyn.ns.cloudflare.com.
-```
-
-Both name servers must be configured in your domain registrar's settings to point to Cloudflare.
-
-### A Record (Address Record for Apex Domain, IPv4)
-
-This A record points the root domain to the custom server's IPv4 address. It is **proxied** through Cloudflare (orange cloud):
-
-```
-djjessejay.ch. 3600 IN A 185.101.158.113   ; Proxied (orange cloud)
+```text
+Visitor -> Cloudflare proxy -> Hosttech HTTPS origin
+Mail    -> Hosttech MX (unchanged during DNS migration)
+PGP     -> Cloudflare Worker preview -> custom domain after validation
 ```
 
-**Note**: Only the single server IPv4 address is required. Cloudflare proxying provides DDoS protection, caching, and SSL termination. The origin server must accept traffic from [Cloudflare's IP ranges](https://www.cloudflare.com/ips/).
+The website and mail migrations are deliberately separated. This keeps a web
+proxy change from becoming an email outage.
 
-### AAAA Record (Address Record for Apex Domain, IPv6)
+## 3. Cloudflare zone staging
 
-This AAAA record points the root domain to the custom server's IPv6 address. It must remain **DNS only** (gray cloud) due to Cloudflare limitations on proxied AAAA records at the apex:
+Create the Cloudflare zone before touching the registrar. Import the complete
+Hosttech zone and then reconcile it against this minimum set.
 
-```
-djjessejay.ch. 3600 IN AAAA 2001:1680:101:8bd::1   ; DNS only (gray cloud)
-```
+| Type | Name | Target | Proxy | Migration rule |
+|---|---|---|---|---|
+| A | `@` | `185.101.158.113` | Proxied | Enable only after the origin passes Full (strict) TLS. |
+| AAAA | `@` | `2001:1680:101:8bd::1` | Proxied | Cloudflare supports proxying web AAAA records. |
+| CNAME | `www` | `djjessejay.ch` | Proxied | Replace reliance on the wildcard with an explicit record. |
+| MX | `@` | `mail1.hosttech.eu` (10) | DNS only | Preserve during the DNS-provider migration. |
+| MX | `@` | `mail2.hosttech.eu` (10) | DNS only | Preserve during the DNS-provider migration. |
+| TXT | `@` | Current Hosttech SPF value | DNS only | Do not change until outbound mail alignment is verified. |
+| TXT | `_dmarc` | Current DMARC value | DNS only | Preserve enforcement during the initial migration. |
+| A/AAAA | `*` | none by default | — | Do not recreate without an approved inventory. |
 
-**Note**: Because the A record is proxied, Cloudflare automatically serves IPv6 visitors through its own IPv6 network. The DNS-only AAAA record ensures direct IPv6 reachability to the origin as a fallback.
+Before cutover, also export and compare all SRV, DKIM, verification, ACME,
+autoconfig and other provider-specific records from Hosttech. A resolver lookup
+cannot prove that every low-traffic record has been discovered.
 
-### CNAME Record (Subdomain)
+## 4. DNSSEC-safe nameserver migration
 
-The www subdomain points to the apex domain (proxied):
+The current zone is signed. Use one of these paths.
 
-```
-www.djjessejay.ch. 3600 IN CNAME djjessejay.ch.   ; Proxied (orange cloud)
-```
+### Preferred: multi-signer migration
 
-This ensures that visitors accessing `www.djjessejay.ch` are served the same content as `djjessejay.ch`, with Cloudflare protection applied.
+Use this only if Hosttech supports importing an external ZSK and exporting its
+current ZSK.
 
----
+1. Add the zone and all records to Cloudflare.
+2. Enable the Cloudflare multi-signer migration flow.
+3. Cross-import the Hosttech and Cloudflare ZSKs.
+4. Verify both providers publish the combined DNSKEY set.
+5. Add the Cloudflare DS record and assigned nameservers at the registrar.
+6. Remove the old Hosttech DS and nameservers only after validation succeeds.
+7. Wait at least 1.5 times the old DS TTL before removing the old ZSK.
 
-## Server Configuration
+### Fallback: temporary unsigned migration
 
-### Origin Server (Custom Server)
+1. Remove or disable the current Hosttech DS record at the registrar.
+2. Wait for the full parent DS TTL to expire and verify that no DS is returned.
+3. Change the registrar to the exact Cloudflare-assigned nameservers.
+4. Wait for the old NS TTL to expire and verify Cloudflare is authoritative.
+5. Enable DNSSEC in Cloudflare and confirm the new DS is published.
+6. Verify A, AAAA, MX, TXT, DMARC and DNSSEC from independent resolvers.
 
-The origin server hosts the static files for djjessejay.ch and must be reachable on both IPv4 (`185.101.158.113`) and IPv6 (`2001:1680:101:8bd::1`).
+Never switch nameservers first and “fix DNSSEC later.”
 
-- **Web server**: nginx or equivalent serving the static site from the deployment root
-- **TLS**: A valid certificate is required for Cloudflare's **Full (Strict)** SSL mode. Use Let's Encrypt (or an equivalent CA) for the origin certificate, covering both `djjessejay.ch` and `www.djjessejay.ch`.
-- **Firewall**: Restrict HTTP/HTTPS inbound to Cloudflare's IP ranges (IPv4 and IPv6) plus your own administrative access. Direct origin access by other clients should be blocked.
-- **Deploy**: See `deploy.sh` for the deployment workflow to this server.
+## 5. SSL/TLS and origin controls
 
-### Verification Steps
+Set these only after the origin presents a complete, trusted certificate chain
+for both `djjessejay.ch` and `www.djjessejay.ch`.
 
-1. Add the DNS records above to your Cloudflare DNS settings
-2. Ensure the A record is **proxied** (orange cloud) and the AAAA record is **DNS only** (gray cloud)
-3. Wait for DNS propagation (typically 1–4 hours with Cloudflare)
-4. Confirm the origin server is serving the site over HTTPS with a valid certificate
-5. Verify `https://djjessejay.ch` loads through Cloudflare and the SSL/TLS mode is **Full (Strict)**
+- SSL/TLS encryption mode: **Full (strict)**
+- Always Use HTTPS: **On**
+- Minimum TLS version: **1.2**
+- TLS 1.3: **On**
+- HTTP/2 and HTTP/3: **On**
+- Authenticated Origin Pulls: stage and test before enforcing
+- Origin firewall: allow ports 80/443 only from current Cloudflare IP ranges
+  after proxy cutover; keep a separately scoped administrative path
+- HSTS: enable only after every required subdomain is HTTPS-clean; add
+  `includeSubDomains` and `preload` only after an explicit inventory
 
----
+Do not use Flexible SSL. Do not enable HSTS preload as a connectivity test.
 
-## Cloudflare Configuration
+## 6. WAF and rate limits
 
-### DNS Settings
+Apply zone rules only after traffic is actually proxied.
 
-1. Log in to Cloudflare dashboard
-2. Select the `djjessejay.ch` domain
-3. Navigate to **DNS → Records**
-4. Add all records from the zone file above
-5. Set the A record proxy to **Proxied** (orange cloud)
-6. Set the AAAA record proxy to **DNS only** (gray cloud)
+1. Enable the Cloudflare managed ruleset appropriate to the account plan.
+2. Add a rate-limiting rule for
+   `POST /api/contact`, keyed by source IP. Start in log/challenge mode and
+   tune the threshold from real traffic before blocking.
+3. Add a method rule for the PGP custom hostname that permits only `GET` and
+   `HEAD`.
+4. Keep the PGP Worker's native `PUBLIC_RATE_LIMITER` binding at 60 requests
+   per minute per client key.
+5. Review false positives before raising sensitivity or enabling broad bot
+   challenges.
 
-### SSL/TLS Settings
+API Shield becomes useful when the public API has a stable schema,
+authentication model and endpoint inventory. It should not be enabled as a
+substitute for defining those boundaries.
 
-- **SSL/TLS encryption mode**: Full (Strict)
-- **Always Use HTTPS**: On
-- **HTTP/2**: On
-- **HTTP/3 (QUIC)**: On
-- **TLS 1.3**: Enabled
-- **Minimum TLS Version**: 1.2
+## 7. Email decision
 
-### Caching Settings
+The two mail paths are mutually exclusive at the apex.
 
-- **Caching Level**: Standard
-- **Browser Cache TTL**: 1 year (recommended for static assets)
-- **Always Online**: On (serves cached content if the origin is unreachable)
+### A. Preserve Hosttech mail (safe default)
 
-### Origin Server (for Full Strict SSL)
+Keep the two Hosttech MX records, current SPF and DMARC. Verify the actual DKIM
+selector from a recently delivered message before changing any mail record.
 
-- Install a valid origin certificate (e.g., Let's Encrypt) covering `djjessejay.ch` and `www.djjessejay.ch`
-- Alternatively, use a Cloudflare Origin CA certificate (valid only for Cloudflare-proxied traffic)
+### B. Move inbound mail to Cloudflare Email Routing
 
----
+Do this as a separate change window:
 
-## Troubleshooting
+1. Create and verify every destination address in Cloudflare.
+2. Reproduce all required custom addresses and routing rules.
+3. Replace the Hosttech MX/SPF records only with the exact values generated by
+   the Cloudflare dashboard.
+4. Send inbound tests to every address and verify forwarding.
+5. Configure a separate outbound provider and DKIM alignment; Email Routing is
+   not a general outbound SMTP service.
+6. Keep `p=reject` only when SPF/DKIM alignment is proven for every legitimate
+   sender.
 
-### DNS Not Propagating
+Never publish Hosttech and Cloudflare routing MX sets together as a trial.
 
-- Check DNS propagation status using: [https://dnschecker.org/](https://dnschecker.org/)
-- Verify all records are correctly entered in Cloudflare
-- Ensure name servers at registrar point to Cloudflare
+## 8. Pages, Workers and storage
 
-### Site Not Loading Through Cloudflare
+- Use a `*.pages.dev` or Workers Static Assets deployment as a preview first.
+- Do not map the production custom domain until the current Express contact API
+  has a tested replacement or remains deliberately routed to the origin.
+- Deploy `workers/pgp-directory` to `workers.dev` first, set only the public
+  PGP key as a Worker secret, validate rollback, and then add a custom domain.
+- Provision storage only with a named consumer and retention model:
+  - D1: structured contact/audit records only after privacy and deletion rules
+    are defined.
+  - KV: non-secret edge configuration or cache metadata.
+  - R2: media/provenance objects with private-by-default access.
+- Do not create unused D1, KV or R2 resources merely to satisfy an inventory
+  checkbox.
 
-1. Confirm the A record is **proxied** (orange cloud) in Cloudflare
-2. Verify the origin server is reachable on `185.101.158.113` (IPv4) and `2001:1680:101:8bd::1` (IPv6)
-3. Check the origin firewall allows Cloudflare's IP ranges
-4. Confirm the origin TLS certificate is valid (required for Full Strict SSL)
-5. Review Cloudflare analytics for error responses (5xx) from the origin
+## 9. Verification
 
-### Mixed Content Warnings
-
-- Ensure all links in your HTML use HTTPS
-- Check that no resources are loaded over HTTP
-- Use protocol-relative URLs (`//example.com`) or absolute HTTPS URLs
-
-### SSL Certificate Issues
-
-- Cloudflare Universal SSL is provisioned automatically for proxied records
-- If the origin certificate is invalid, Cloudflare will return a 525/526 error — renew the origin certificate
-- For Full (Strict) SSL, the origin certificate must be issued by a recognized CA or Cloudflare Origin CA
-
-### IPv6 Connectivity Issues
-
-- Confirm the AAAA record (`2001:1680:101:8bd::1`) is present and **DNS only**
-- IPv6 visitors are primarily served by Cloudflare's IPv6 network when the A record is proxied
-- If direct IPv6 origin access fails, verify the origin server listens on IPv6 and the firewall permits it
-
----
-
-## Testing Your Configuration
-
-### Verify DNS Records
+Run the repository verifier before and after each stage:
 
 ```bash
-# Check A record (proxied — returns Cloudflare IPs)
-dig djjessejay.ch A +short
+./verify_dns.sh current
 
-# Check AAAA record (DNS only — returns origin IPv6)
-dig djjessejay.ch AAAA +short
-
-# Check CNAME record
-dig www.djjessejay.ch CNAME +short
-
-# Check NS records
-dig djjessejay.ch NS +short
+# After Cloudflare cutover, pass the exact assigned nameservers:
+CLOUDFLARE_NAMESERVERS="name1.ns.cloudflare.com name2.ns.cloudflare.com" \
+  ./verify_dns.sh cloudflare
 ```
 
-### Expected Results
+The cutover is complete only when:
 
-```
-# A record (proxied) returns Cloudflare IPv4 ranges, e.g.:
-104.21.x.x
-172.67.x.x
-
-# AAAA record (DNS only) returns the origin IPv6:
-2001:1680:101:8bd::1
-
-# CNAME should return:
-djjessejay.ch.
-
-# NS should return:
-aarav.ns.cloudflare.com.
-rosalyn.ns.cloudflare.com.
-```
-
-### Verify Origin Reachability
-
-```bash
-# Direct IPv4 origin (bypass Cloudflare)
-curl -k --resolve djjessejay.ch:443:185.101.158.113 https://djjessejay.ch/
-
-# Direct IPv6 origin (bypass Cloudflare)
-curl -k --resolve djjessejay.ch:443:[2001:1680:101:8bd::1] https://djjessejay.ch/
-```
-
-### Verify Cloudflare Proxying
-
-```bash
-# Should return Cloudflare headers (cf-ray, server: cloudflare)
-curl -I https://djjessejay.ch/
-```
-
----
-
-## References
-
-- [Cloudflare DNS Documentation](https://developers.cloudflare.com/dns/)
-- [Cloudflare Proxy / Orange Cloud](https://developers.cloudflare.com/fundamentals/get-started/concepts/proxy/)
-- [Cloudflare SSL/TLS Modes](https://developers.cloudflare.com/ssl/origin-configuration/ssl-modes/)
-- [Cloudflare IP Ranges](https://www.cloudflare.com/ips/)
-- [Let's Encrypt](https://letsencrypt.org/)
-
----
-
-*This file was generated on 2025-08-08 and should be updated whenever DNS changes are made.*
+- the parent delegates exclusively to the assigned Cloudflare nameservers;
+- DNSSEC validates with the new Cloudflare chain;
+- apex and `www` return Cloudflare anycast addresses, not origin addresses;
+- HTTPS succeeds in Full (strict) mode;
+- Hosttech mail still receives mail, or the separately approved Email Routing
+  migration has passed end-to-end tests;
+- the origin rejects untrusted direct web traffic after the rollback window.
