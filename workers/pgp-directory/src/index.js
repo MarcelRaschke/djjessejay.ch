@@ -118,7 +118,10 @@ function checkHealthAuth(request, env) {
     return { ok: false };
   }
 
-  return { ok: provided === expected };
+  // Use timing-safe comparison to prevent timing attacks
+  const expectedBuf = new TextEncoder().encode(expected);
+  const providedBuf = new TextEncoder().encode(provided);
+  return { ok: crypto.subtle.timingSafeEqual(expectedBuf, providedBuf) };
 }
 
 export default {
