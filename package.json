@@ -1,7 +1,7 @@
 {
   "name": "djjessejay.ch",
   "version": "1.0.0",
-  "description": "DJ Jesse Jay website — Express.js backend, canonical provenance metadata and reCAPTCHA-protected contact form.",
+  "description": "DJ Jesse Jay website \u2014 Express.js backend, canonical provenance metadata and reCAPTCHA-protected contact form.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -9,13 +9,26 @@
     "watch:css": "tailwindcss -i ./src/input.css -o ./tailwind.css --watch",
     "sync:metadata": "node scripts/sync-canonical-metadata.mjs index.html",
     "test": "node --check render-farm/render-farm-master.js && node --check scripts/sync-canonical-metadata.mjs && python3 -m py_compile render-farm/render-worker.py",
-    "render:master": "node render-farm/render-farm-master.js"
+    "render:master": "node render-farm/render-farm-master.js",
+    "build:html": "node scripts/replace-recaptcha-key.mjs"
   },
-  "keywords": ["dj","vanilla","javascript","tailwind","express","provenance"],
+  "keywords": [
+    "dj",
+    "vanilla",
+    "javascript",
+    "tailwind",
+    "express",
+    "provenance"
+  ],
   "author": "Marcel Raschke",
   "license": "Apache-2.0",
-  "repository": {"type":"git","url":"https://github.com/MarcelRaschke/djjessejay.ch.git"},
-  "engines": {"node": ">=24.0.0"},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MarcelRaschke/djjessejay.ch.git"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "dependencies": {
     "cors": "^2.8.6",
     "express": "^5.2.1",
@@ -23,6 +36,12 @@
     "nodemailer": "^9.0.1",
     "ws": "^8.21.0"
   },
-  "overrides": {"http-proxy-middleware":"^3.0.7","uuid":"^11.1.1"},
-  "devDependencies": {"@tailwindcss/cli":"^4.2.2","tailwindcss":"^4.2.2"}
+  "overrides": {
+    "http-proxy-middleware": "^3.0.7",
+    "uuid": "^11.1.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.2.2",
+    "tailwindcss": "^4.2.2"
+  }
 }
