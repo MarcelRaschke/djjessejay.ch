@@ -30,8 +30,8 @@ ehthumbs.db
 Thumbs.db
 
 # Editor files
-.vscode/settings.json
-.vscode/*.json
+.vscode/
+.vs/
 *.swp
 *.swo
 *~

@@ -110,8 +110,8 @@ async function sendContactEmail({ name, email, message }) {
       pass: process.env.SMTP_PASS 
     },
     tls: {
-      // Do not fail on invalid certs
-      rejectUnauthorized: process.env.NODE_ENV === 'production'
+      // Always verify certificates; set SMTP_REJECT_UNAUTHORIZED=false to disable for self-signed certs
+      rejectUnauthorized: process.env.SMTP_REJECT_UNAUTHORIZED !== 'false'
     }
   });
   
@@ -210,7 +210,11 @@ app.get('/api/health', (req, res) => {
 
 // SPA fallback - serve index.html for any non-API GET
 app.use((req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  if (req.method === 'GET') {
+    res.sendFile(path.join(__dirname, 'index.html'));
+  } else {
+    res.status(405).json({ error: 'Method not allowed.' });
+  }
 });
 
 // Error handling middleware
@@ -223,7 +227,7 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server listening on http://localhost:${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`reCAPTCHA enabled: ${!!RECAPTCHA_SECRET}`);

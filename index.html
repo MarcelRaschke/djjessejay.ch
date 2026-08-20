@@ -24,7 +24,7 @@
     <!-- Content Security Policy -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://api.anthropic.com https://www.google.com/recaptcha/; img-src 'self' data:; frame-src https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/">
     <!-- Google reCAPTCHA v3 -->
-    <script src="https://www.google.com/recaptcha/api.js?render=YOUR_RECAPTCHA_SITE_KEY" async defer></script>
+    <script src="https://www.google.com/recaptcha/api.js?render=RECAPTCHA_SITE_KEY" async defer></script>
     <!-- Tailwind CSS (local build) -->
     <link rel="stylesheet" href="tailwind.css" integrity="sha384-qxsTu5eQzvwilYNPZ++HmqcRTSFm08jjw4P3MIdEMeyOyGnCi4m1Wx9AlPchJD7n" crossorigin="anonymous">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -545,7 +545,7 @@
                         <h2 class="text-3xl font-bold mb-4 text-white" data-translate="download-title">Downloads</h2>
                         <p class="mb-8 text-slate-300" data-translate="download-p1">Hier finden Sie Materialien für Presse und Veranstalter.</p>
                         <div class="flex flex-col sm:flex-row justify-center gap-4">
-                             <a href="presskit.zip" download class="px-6 py-3 bg-gradient-to-r from-rose-500 to-cyan-500 rounded-full font-semibold text-white no-underline transition-all hover:scale-105 shadow-lg" data-translate="download-presskit">Pressekit (.zip)</a>
+                             <span class="px-6 py-3 bg-slate-700/30 rounded-full font-semibold text-slate-400 cursor-not-allowed" data-translate="download-presskit-soon" aria-disabled="true">Pressekit (.zip - bald verfügbar)</span>
                              <span class="px-6 py-3 bg-slate-700/30 rounded-full font-semibold text-slate-400 cursor-not-allowed" data-translate="download-logos-soon" aria-disabled="true">Logos & Bilder (bald verfügbar)</span>
                         </div>
                     </div>
@@ -949,7 +949,7 @@
         function acceptCookies() { localStorage.setItem('cookies-accepted', 'true'); document.getElementById('cookie-banner').classList.remove('show'); }
         function declineCookies() { localStorage.setItem('cookies-accepted', 'false'); document.getElementById('cookie-banner').classList.remove('show'); }
         
-        const RECAPTCHA_SITE_KEY = 'YOUR_RECAPTCHA_SITE_KEY';
+        const RECAPTCHA_SITE_KEY = 'RECAPTCHA_SITE_KEY';
 
         async function handleFormSubmit(event) {
             event.preventDefault();
