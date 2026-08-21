@@ -1,0 +1,44 @@
+name: Security report
+description: Triage a security issue without exposing exploit details.
+title: "security: "
+labels:
+  - security
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not paste secrets, private keys or weaponized exploit details into a public issue. Use a private security advisory for sensitive reports.
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Critical
+        - High
+        - Medium
+        - Low
+        - Unknown
+    validations:
+      required: true
+  - type: textarea
+    id: affected_surface
+    attributes:
+      label: Affected surface
+      description: File, endpoint, workflow, dependency or metadata object.
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence summary
+      description: Keep it non-sensitive if this is public.
+  - type: textarea
+    id: mitigation
+    attributes:
+      label: Suggested mitigation
