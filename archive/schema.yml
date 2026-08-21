@@ -1,0 +1,134 @@
+schema_version: "1.0.0"
+project:
+  id: "project:dj-jesse-jay-provenance"
+  name: "DJ Jesse Jay Provenance Repository"
+  repository_role:
+    - software_project
+    - digital_archive
+    - osint_knowledge_graph
+
+artist:
+  id: "artist:dj-jesse-jay"
+  name: "DJ Jesse Jay"
+  origin:
+    city: "Zürich"
+    country: "Switzerland"
+  active_since: 1997
+  identity_claim: "Zürich Underground Electronic Sound since 1997"
+
+object_types:
+  - Set
+  - RadioShow
+  - Broadcast
+  - Event
+  - Venue
+  - Flyer
+  - Tracklist
+  - Recording
+  - PlatformProfile
+  - Interview
+  - PressReference
+  - Source
+  - Assertion
+
+status_values:
+  - unreviewed
+  - possible
+  - probable
+  - supported
+  - verified
+  - contradicted
+  - deprecated
+
+confidence_scale:
+  min: 0.0
+  max: 1.0
+  interpretation:
+    weak: "0.00-0.39"
+    partial: "0.40-0.59"
+    credible: "0.60-0.79"
+    strong: "0.80-0.89"
+    comprehensive: "0.90-1.00"
+
+source_classes:
+  P0: "independently archived evidence"
+  P1: "versioned first-party repository evidence"
+  P2: "first-party external publication"
+  P3: "credible third-party reference"
+  P4: "unverified claim"
+
+required_archive_fields:
+  common:
+    - id
+    - type
+    - title
+    - status
+    - confidence
+    - sources
+    - observed_time
+    - review_state
+  temporal:
+    - valid_time
+  public_metadata:
+    - slug
+    - canonical_url
+
+set_template:
+  id: "set:yyyy-mm-dd-slug"
+  type: "Set"
+  title: null
+  artist: "artist:dj-jesse-jay"
+  series: null
+  date: null
+  duration: null
+  genres: []
+  platform: null
+  source_url: null
+  archive_type: "longform_dj_set"
+  cue_grid_verified: false
+  tracklist_verified: false
+  artwork_verified: false
+  copyright_status: "unknown"
+  ai_generated_material: "unknown"
+  confidence: 0.0
+  status: "unreviewed"
+  sources: []
+  review_state: "human_review_required"
+
+assertion_template:
+  assertion_id: "assertion:slug"
+  subject: null
+  predicate: null
+  object: null
+  value: null
+  valid_time:
+    start: null
+    end: null
+    precision: null
+  observed_time: null
+  confidence: 0.0
+  status: "unreviewed"
+  sources: []
+  review_state: "human_review_required"
+
+relations:
+  - USES_ALIAS
+  - OPERATES_PROFILE
+  - MEMBER_OF
+  - PRESENTS
+  - BROADCAST_ON
+  - PERFORMED_AT
+  - CO_BILLED_WITH
+  - COLLABORATED_WITH
+  - UPLOADED_TO
+  - RECORDED_AT
+  - LOCATED_IN
+  - SUPPORTED_BY
+  - CONTRADICTED_BY
+
+governance_rules:
+  - "No archive entry without date or valid_time."
+  - "No archive entry without source and confidence."
+  - "Generated content is not evidence."
+  - "Do not upgrade claim status without new evidence."
+  - "Preserve valid_time and observed_time as separate fields."
