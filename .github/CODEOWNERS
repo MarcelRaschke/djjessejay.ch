@@ -1,0 +1,29 @@
+# Repository ownership
+
+# Default owner for all files.
+* @MarcelRaschke
+
+# Governance and automation.
+.github/ @MarcelRaschke
+.github/workflows/ @MarcelRaschke
+.github/ISSUE_TEMPLATE/ @MarcelRaschke
+AGENTS.md @MarcelRaschke
+SECURITY.md @MarcelRaschke
+INCIDENT_RESPONSE.md @MarcelRaschke
+
+# Archive and provenance controls.
+archive/ @MarcelRaschke
+website/provenance.json @MarcelRaschke
+website/archive.json @MarcelRaschke
+ARCHIVE_CITATION_APPENDIX.md @MarcelRaschke
+
+# Application and dependency surface.
+server.js @MarcelRaschke
+package.json @MarcelRaschke
+package-lock.json @MarcelRaschke
+scripts/ @MarcelRaschke
+
+# Public site content and canonical metadata.
+index.html @MarcelRaschke
+src/ @MarcelRaschke
+website/ @MarcelRaschke
