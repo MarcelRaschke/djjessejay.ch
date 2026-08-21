@@ -1,0 +1,137 @@
+name: Security and Provenance Gate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - agent-governance
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+concurrency:
+  group: security-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Tests and syntax checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run project tests
+        run: npm test
+
+  dependency-audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: npm audit high+
+        run: npm audit --audit-level=high
+
+  secret-scan:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  license-check:
+    name: License summary
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check production dependency licenses
+        run: npx --yes license-checker --production --summary
+
+  provenance:
+    name: Provenance metadata validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate public provenance JSON
+        run: python3 -m json.tool website/provenance.json > /tmp/provenance.json
+
+      - name: Validate archive YAML schema syntax
+        run: ruby -e "require 'yaml'; YAML.load_file('archive/schema.yml'); puts 'archive/schema.yml OK'"
+
+      - name: Check required governance files
+        run: |
+          test -f AGENTS.md
+          test -f .github/CODEOWNERS
+          test -f SECURITY.md
+          test -f INCIDENT_RESPONSE.md
+          test -f .github/PULL_REQUEST_TEMPLATE.md
+          test -f docs/BRANCH_PROTECTION.md
+
+  coverage-policy:
+    name: Coverage policy guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Coverage policy notice
+        run: |
+          echo "Coverage merge protection is documented in docs/BRANCH_PROTECTION.md."
+          echo "Current npm test script performs syntax checks and Python compilation."
+          echo "When a coverage-producing test runner is added, require its status check under branch protection."
