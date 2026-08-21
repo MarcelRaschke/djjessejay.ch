@@ -1,0 +1,64 @@
+name: Provenance update
+description: Add or correct a source-backed claim, archive object or graph assertion.
+title: "provenance: "
+labels:
+  - provenance
+body:
+  - type: input
+    id: object_id
+    attributes:
+      label: Object or assertion ID
+      placeholder: "set:2026-01-01-example or assertion:jesse-jay-radio-001"
+    validations:
+      required: true
+  - type: dropdown
+    id: update_type
+    attributes:
+      label: Update type
+      options:
+        - New claim
+        - Correct claim
+        - Downgrade confidence
+        - Upgrade confidence
+        - Add source
+        - Remove invalid source
+        - Document conflict
+    validations:
+      required: true
+  - type: textarea
+    id: claim
+    attributes:
+      label: Claim or metadata change
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Sources
+      description: URLs, archive paths, screenshots, flyers or repository references.
+    validations:
+      required: true
+  - type: input
+    id: valid_time
+    attributes:
+      label: Valid time
+      placeholder: "1997, 2026-08-21, or 1998-2026"
+  - type: input
+    id: observed_time
+    attributes:
+      label: Observed time
+      placeholder: "YYYY-MM-DD"
+    validations:
+      required: true
+  - type: dropdown
+    id: confidence
+    attributes:
+      label: Confidence
+      options:
+        - "0.00-0.39 weak"
+        - "0.40-0.59 partial"
+        - "0.60-0.79 credible"
+        - "0.80-0.89 strong"
+        - "0.90-1.00 comprehensive"
+    validations:
+      required: true
