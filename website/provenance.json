@@ -1,22 +1,207 @@
 {
-  "schemaVersion":"1.0.1",
-  "subject":{"id":"https://djjessejay.ch/#dj-jesse-jay","name":"DJ Jesse Jay"},
-  "generatedAt":"2026-08-09T21:04:00+02:00",
-  "policy":{"classes":{"P0":"independently archived evidence","P1":"versioned first-party repository evidence","P2":"first-party external publication","P3":"credible third-party reference","P4":"unverified claim"},"generatedContentIsEvidence":false},
-  "claims":[
-    {"id":"artist-name","value":"DJ Jesse Jay","status":"verified","sources":["repo:index.html","repo:CLAUDE.md","soundcloud:jessejay"]},
-    {"id":"civil-name","value":"Michael Fellner","status":"first-party-public","sources":["repo:index.html","repo:CLAUDE.md"]},
-    {"id":"location","value":"Zürich, Switzerland","status":"corroborated","sources":["repo:index.html","soundcloud:jessejay"]},
-    {"id":"active-since","value":1997,"status":"corroborated-first-party","sources":["repo:index.html","soundcloud:jessejay"]},
-    {"id":"radio-association","value":"Radio LoRa","status":"corroborated-historical-and-recording","sources":["repo:index.html","soundcloud:jessejay","soundcloud:blue-dimension-2026"]},
-    {"id":"galaxy-space-night","value":true,"status":"corroborated","sources":["soundcloud:galaxy-space-night","residentadvisor:event-896816"]},
-    {"id":"blue-dimension","value":true,"status":"contemporary-project-recording-identity","sources":["repo:index.html","soundcloud:blue-dimension-2026"]},
-    {"id":"radio-since-2001","value":2001,"status":"historical-first-party-claim","sources":["repo:historical-biography","soundcloud:jessejay"]},
-    {"id":"current-radio-schedule","value":null,"status":"not-verified","sources":["radio-lora:blue-dimension-url-404-2026-08-09"]}
+  "schemaVersion": "1.1.0",
+  "subject": {
+    "id": "https://djjessejay.ch/#dj-jesse-jay",
+    "name": "DJ Jesse Jay"
+  },
+  "generatedAt": "2026-08-21T13:04:00+02:00",
+  "repositoryRole": [
+    "software_project",
+    "digital_archive",
+    "osint_knowledge_graph"
   ],
-  "knownConflicts":[
-    {"id":"architecture","status":"repaired-on-provenance-branch","description":"CLAUDE.md was stale relative to package.json; canonical branch updates it."},
-    {"id":"license","status":"repaired-on-provenance-branch","description":"LICENSE is Apache-2.0; package metadata is synchronized to Apache-2.0."},
-    {"id":"radio-schedule","status":"open","description":"No current primary station page was found; do not publish a present-day cadence as fact."}
+  "identity": {
+    "artist": "DJ Jesse Jay",
+    "city": "Zürich",
+    "country": "Switzerland",
+    "activeSince": 1997,
+    "positioning": "long-term regional underground electronic DJ, radio-linked archive node and provenance-oriented cultural identity",
+    "claimLine": "DJ Jesse Jay — Zürich Underground Electronic Sound since 1997",
+    "extendedLine": "Club memory. Radio signal. Cyber provenance. Since 1997."
+  },
+  "policy": {
+    "classes": {
+      "P0": "independently archived evidence",
+      "P1": "versioned first-party repository evidence",
+      "P2": "first-party external publication",
+      "P3": "credible third-party reference",
+      "P4": "unverified claim"
+    },
+    "generatedContentIsEvidence": false,
+    "claimPrinciples": [
+      "Claim is not evidence",
+      "Evidence is not verification",
+      "Verification is not official certification",
+      "valid_time and observed_time must remain separate"
+    ]
+  },
+  "governance": {
+    "softwareProject": {
+      "controls": [
+        "pull_request_review",
+        "CODEOWNERS",
+        "AGENTS.md",
+        "security_gate_workflow",
+        "dependency_audit",
+        "secret_scan",
+        "provenance_validation",
+        "branch_protection"
+      ]
+    },
+    "digitalArchive": {
+      "objectTypes": [
+        "Set",
+        "RadioShow",
+        "Broadcast",
+        "Event",
+        "Venue",
+        "Flyer",
+        "Tracklist",
+        "Recording",
+        "PlatformProfile",
+        "Interview",
+        "PressReference"
+      ],
+      "minimumEntryFields": [
+        "id",
+        "type",
+        "date_or_valid_time",
+        "source",
+        "status",
+        "confidence",
+        "review_state"
+      ]
+    },
+    "osintKnowledgeGraph": {
+      "model": "G_T = (V,E,tau,omega,chi)",
+      "nodeClasses": [
+        "Artist",
+        "RadioStation",
+        "RadioShow",
+        "Platform",
+        "Collaborator",
+        "Location",
+        "Venue",
+        "MediaObject",
+        "Source"
+      ],
+      "assertionTemplate": {
+        "assertion_id": "assertion:slug",
+        "subject": null,
+        "predicate": null,
+        "object": null,
+        "valid_time": {
+          "start": null,
+          "end": null,
+          "precision": null
+        },
+        "observed_time": null,
+        "confidence": 0,
+        "status": "unreviewed",
+        "sources": [],
+        "review_state": "human_review_required"
+      }
+    }
+  },
+  "claims": [
+    {
+      "id": "artist-name",
+      "value": "DJ Jesse Jay",
+      "status": "verified",
+      "sources": [
+        "repo:index.html",
+        "repo:CLAUDE.md",
+        "soundcloud:jessejay"
+      ]
+    },
+    {
+      "id": "civil-name",
+      "value": "Michael Fellner",
+      "status": "first-party-public",
+      "sources": [
+        "repo:index.html",
+        "repo:CLAUDE.md"
+      ]
+    },
+    {
+      "id": "location",
+      "value": "Zürich, Switzerland",
+      "status": "corroborated",
+      "sources": [
+        "repo:index.html",
+        "soundcloud:jessejay"
+      ]
+    },
+    {
+      "id": "active-since",
+      "value": 1997,
+      "status": "corroborated-first-party",
+      "sources": [
+        "repo:index.html",
+        "soundcloud:jessejay"
+      ]
+    },
+    {
+      "id": "radio-association",
+      "value": "Radio LoRa",
+      "status": "corroborated-historical-and-recording",
+      "sources": [
+        "repo:index.html",
+        "soundcloud:jessejay",
+        "soundcloud:blue-dimension-2026"
+      ]
+    },
+    {
+      "id": "galaxy-space-night",
+      "value": true,
+      "status": "corroborated",
+      "sources": [
+        "soundcloud:galaxy-space-night",
+        "residentadvisor:event-896816"
+      ]
+    },
+    {
+      "id": "blue-dimension",
+      "value": true,
+      "status": "contemporary-project-recording-identity",
+      "sources": [
+        "repo:index.html",
+        "soundcloud:blue-dimension-2026"
+      ]
+    },
+    {
+      "id": "radio-since-2001",
+      "value": 2001,
+      "status": "historical-first-party-claim",
+      "sources": [
+        "repo:historical-biography",
+        "soundcloud:jessejay"
+      ]
+    },
+    {
+      "id": "current-radio-schedule",
+      "value": null,
+      "status": "not-verified",
+      "sources": [
+        "radio-lora:blue-dimension-url-404-2026-08-09"
+      ]
+    }
+  ],
+  "knownConflicts": [
+    {
+      "id": "architecture",
+      "status": "repaired-on-provenance-branch",
+      "description": "CLAUDE.md was stale relative to package.json; canonical branch updates it."
+    },
+    {
+      "id": "license",
+      "status": "repaired-on-provenance-branch",
+      "description": "LICENSE is Apache-2.0; package metadata is synchronized to Apache-2.0."
+    },
+    {
+      "id": "radio-schedule",
+      "status": "open",
+      "description": "No current primary station page was found; do not publish a present-day cadence as fact."
+    }
   ]
 }

@@ -1,0 +1,48 @@
+name: Bug report
+description: Report a reproducible defect in the website, tooling or archive pipeline.
+title: "bug: "
+labels:
+  - bug
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What is broken?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Exact steps, commands or URLs.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or evidence
+      render: shell
+  - type: dropdown
+    id: affected_role
+    attributes:
+      label: Affected project role
+      options:
+        - Software project
+        - Digital archive
+        - OSINT knowledge graph
+        - Multiple
+    validations:
+      required: true
