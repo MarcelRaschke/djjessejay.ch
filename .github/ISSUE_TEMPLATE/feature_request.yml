@@ -1,0 +1,36 @@
+name: Feature request
+description: Propose a new feature, archive function or governance capability.
+title: "feature: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: Why is this needed?
+    validations:
+      required: true
+  - type: textarea
+    id: design
+    attributes:
+      label: Proposed design
+      description: Describe the implementation or user-facing behavior.
+    validations:
+      required: true
+  - type: checkboxes
+    id: project_roles
+    attributes:
+      label: Project roles affected
+      options:
+        - label: Software project
+        - label: Digital archive
+        - label: OSINT knowledge graph
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks and mitigations
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation plan
