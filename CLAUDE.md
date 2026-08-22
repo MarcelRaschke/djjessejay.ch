@@ -14,17 +14,28 @@ Generated content is never evidence.
 
 ## Current project architecture
 
-This repository is **not accurately described as static/no-build only**. Current `package.json` defines Node.js >=24, Express 5, CORS, rate limiting, Nodemailer, WebSocket support, Tailwind CLI and render-farm tests. Historical GitHub Pages/static files remain in the repository and must be treated as legacy/current-component context rather than the sole architecture.
+This repository is a **hybrid deployment**: GitHub Pages for static assets + Express.js backend for API/WebSocket, routed via Cloudflare Worker.
+
+- **Static hosting**: GitHub Pages (auto-deployed from `main` via `.github/workflows/static.yml`)
+- **Dynamic backend**: Express 5 server on custom origin (185.101.158.113) — API endpoints, CORS, rate limiting, Nodemailer, WebSocket
+- **Routing**: Cloudflare Worker (`djjessejay-router`) — routes `/api/*` and `/ws` to custom server, all other requests to GitHub Pages
+- **DNS**: Single CNAME `djjessejay.ch` → `marcelraschke.github.io` (proxied by Cloudflare)
+
+Backend deployment is separate from static deployment and requires manual coordination or a dedicated CI/CD process.
 
 ### Commands
 
 ```bash
-npm install
-npm run build:css
-npm run sync:metadata
-npm test
-npm start
+npm install               # Install dependencies
+npm run build:css        # Compile Tailwind CSS
+npm run sync:metadata    # Sync metadata (if configured)
+npm test                 # Run syntax checks
+npm start                # Start Express.js backend locally
 ```
+
+**Static deployment**: Automatic via `.github/workflows/static.yml` on push to `main` (no manual deployment script required).
+
+**Backend deployment**: Manual (deploy.sh was removed; use SSH or custom CI/CD to deploy Express server changes to 185.101.158.113).
 
 ## Canonical artist facts
 

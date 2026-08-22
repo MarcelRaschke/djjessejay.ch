@@ -1,24 +1,42 @@
 # DNS Configuration for djjessejay.ch
 
-This document contains the authoritative DNS zone configuration for the djjessejay.ch domain, configured for **Cloudflare Proxy with custom server** (IPv4 + IPv6 support).
+This document contains the authoritative DNS zone configuration for the djjessejay.ch domain, configured for **Hybrid deployment: GitHub Pages (static) + Custom Server (API/WebSocket) via Cloudflare Worker routing**.
 
 ## Domain Overview
 
 - **Domain**: djjessejay.ch
 - **DNS Provider**: Cloudflare
-- **Hosting**: Custom Server (IPv4: `185.101.158.113`, IPv6: `2001:1680:101:8bd::1`)
+- **Static Hosting**: GitHub Pages (`marcelraschke.github.io`)
+- **API/WebSocket**: Custom Server (IPv4: `185.101.158.113`)
+- **Routing Layer**: Cloudflare Worker (`djjessejay-router`)
 - **CDN/Proxy**: Cloudflare (DDoS protection, caching, SSL termination)
-- **Last Updated**: 08.08.2025
+- **Last Updated**: 22.08.2026
+
+## Architecture Overview
+
+```
+Visitor Request
+     ↓
+Cloudflare (djjessejay.ch, proxied)
+     ↓
+Cloudflare Worker (djjessejay-router)
+     ├─ /api/* → Routes to Custom Server (185.101.158.113)
+     ├─ /ws    → Routes to Custom Server (185.101.158.113)
+     └─ /*     → Routes to GitHub Pages (marcelraschke.github.io)
+```
 
 ## Important Notes
 
-1. **Cloudflare Proxy**: The A record (IPv4) is **proxied** (orange cloud) for DDoS protection, caching, and SSL termination. The AAAA record (IPv6) must remain **DNS only** (gray cloud) due to Cloudflare limitations.
+1. **GitHub Pages**: Now **enabled** and active for static site deployment. Automatically deployed from `main` branch via `.github/workflows/static.yml`.
 
-2. **IPv6 Support**: Cloudflare automatically routes IPv6 traffic through its own IPv6 network when the A record is proxied, even if the AAAA record is DNS only. Visitors on IPv6 will still benefit from Cloudflare's infrastructure.
+2. **Cloudflare Worker**: Acts as intelligent router/reverse proxy:
+   - API endpoints (`/api/*`) routed to custom server for Express.js backend
+   - WebSocket connections (`/ws`) routed to custom server
+   - All other requests routed to GitHub Pages for static assets
 
-3. **SSL**: Cloudflare Universal SSL is used for all proxied records (automatically provisioned).
+3. **Custom Server**: Remains active for API and WebSocket functionality. Not directly exposed to internet; all traffic flows through Cloudflare Worker.
 
-4. **GitHub Pages**: **Disabled** for this domain. Static files are served directly from the custom server.
+4. **SSL**: Cloudflare Universal SSL for all domains (automatically provisioned).
 
 ---
 
@@ -47,56 +65,71 @@ djjessejay.ch. 86400 IN NS rosalyn.ns.cloudflare.com.
 
 Both name servers must be configured in your domain registrar's settings to point to Cloudflare.
 
-### A Record (Address Record for Apex Domain, IPv4)
+### CNAME Record (Apex Domain)
 
-This A record points the root domain to the custom server's IPv4 address. It is **proxied** through Cloudflare (orange cloud):
-
-```
-djjessejay.ch. 3600 IN A 185.101.158.113   ; Proxied (orange cloud)
-```
-
-**Note**: Only the single server IPv4 address is required. Cloudflare proxying provides DDoS protection, caching, and SSL termination. The origin server must accept traffic from [Cloudflare's IP ranges](https://www.cloudflare.com/ips/).
-
-### AAAA Record (Address Record for Apex Domain, IPv6)
-
-This AAAA record points the root domain to the custom server's IPv6 address. It must remain **DNS only** (gray cloud) due to Cloudflare limitations on proxied AAAA records at the apex:
+The root domain now points to GitHub Pages:
 
 ```
-djjessejay.ch. 3600 IN AAAA 2001:1680:101:8bd::1   ; DNS only (gray cloud)
+djjessejay.ch. 3600 IN CNAME marcelraschke.github.io.   ; Proxied (orange cloud)
 ```
 
-**Note**: Because the A record is proxied, Cloudflare automatically serves IPv6 visitors through its own IPv6 network. The DNS-only AAAA record ensures direct IPv6 reachability to the origin as a fallback.
+**Note**: CNAME replaces the previous A record (185.101.158.113). Cloudflare Worker intercepts requests and routes:
+- `/api/*` and `/ws` → Custom Server (185.101.158.113)
+- All other requests → GitHub Pages (marcelraschke.github.io)
 
-### CNAME Record (Subdomain)
+This provides a single unified entry point with intelligent routing via Worker.
 
-The www subdomain points to the apex domain (proxied):
+### CNAME Record (www subdomain)
+
+The www subdomain also points to GitHub Pages (optional redirect):
 
 ```
-www.djjessejay.ch. 3600 IN CNAME djjessejay.ch.   ; Proxied (orange cloud)
+www.djjessejay.ch. 3600 IN CNAME marcelraschke.github.io.   ; Proxied (orange cloud)
 ```
 
-This ensures that visitors accessing `www.djjessejay.ch` are served the same content as `djjessejay.ch`, with Cloudflare protection applied.
+Alternatively, set a permanent redirect in Cloudflare Page Rules: `www.djjessejay.ch/*` → `https://djjessejay.ch/$1`
 
 ---
 
 ## Server Configuration
 
-### Origin Server (Custom Server)
+### Custom Origin Server (API/WebSocket Only)
 
-The origin server hosts the static files for djjessejay.ch and must be reachable on both IPv4 (`185.101.158.113`) and IPv6 (`2001:1680:101:8bd::1`).
+The origin server at `185.101.158.113` now hosts only API endpoints and WebSocket connections. Static files are served by GitHub Pages.
 
-- **Web server**: nginx or equivalent serving the static site from the deployment root
-- **TLS**: A valid certificate is required for Cloudflare's **Full (Strict)** SSL mode. Use Let's Encrypt (or an equivalent CA) for the origin certificate, covering both `djjessejay.ch` and `www.djjessejay.ch`.
-- **Firewall**: Restrict HTTP/HTTPS inbound to Cloudflare's IP ranges (IPv4 and IPv6) plus your own administrative access. Direct origin access by other clients should be blocked.
-- **Deploy**: See `deploy.sh` for the deployment workflow to this server.
+- **Application**: Express.js backend (Node.js >=24)
+- **Endpoints**:
+  - `/api/*` — REST API endpoints
+  - `/ws` — WebSocket server for real-time communication
+- **TLS**: A valid certificate is required for Cloudflare's **Full (Strict)** SSL mode. Use Let's Encrypt or equivalent CA.
+- **Firewall**: Restrict HTTP/HTTPS inbound to Cloudflare Worker IP ranges (ask Cloudflare for current ranges) plus administrative access. The server should NOT be directly accessible to internet clients — all traffic must flow through Cloudflare Worker.
+- **Not Used**: `deploy.sh` has been removed. Static deployment is now handled by GitHub Pages workflow (`.github/workflows/static.yml`).
+
+### GitHub Pages (Static Hosting)
+
+- Deployed from `main` branch via `.github/workflows/static.yml`
+- Hosted at `marcelraschke.github.io`
+- Automatically served through Cloudflare proxy when visitor requests root domain
+- No configuration needed beyond enabling Pages in repository settings
+
+### Cloudflare Worker (Routing Layer)
+
+- Worker name: `djjessejay-router`
+- Routes `/api/*` and `/ws` to custom server
+- Routes all other requests to GitHub Pages
+- Deployed in Cloudflare dashboard under Workers & Pages
 
 ### Verification Steps
 
-1. Add the DNS records above to your Cloudflare DNS settings
-2. Ensure the A record is **proxied** (orange cloud) and the AAAA record is **DNS only** (gray cloud)
-3. Wait for DNS propagation (typically 1–4 hours with Cloudflare)
-4. Confirm the origin server is serving the site over HTTPS with a valid certificate
-5. Verify `https://djjessejay.ch` loads through Cloudflare and the SSL/TLS mode is **Full (Strict)**
+1. Add the CNAME records above to your Cloudflare DNS settings
+2. Ensure the apex CNAME is **proxied** (orange cloud)
+3. Create and deploy the Cloudflare Worker (`djjessejay-router`) with routing rules
+4. Bind Worker to domain: Add route `djjessejay.ch/*` → Worker
+5. Wait for DNS propagation (typically 1–4 hours with Cloudflare)
+6. Enable GitHub Pages in repository settings (Deploy from branch `main`)
+7. Verify `https://djjessejay.ch` loads (should show GitHub Pages content)
+8. Verify `https://djjessejay.ch/api/*` routes to custom server correctly
+9. Confirm SSL/TLS mode is **Full (Strict)** in Cloudflare
 
 ---
 
@@ -174,14 +207,8 @@ The origin server hosts the static files for djjessejay.ch and must be reachable
 ### Verify DNS Records
 
 ```bash
-# Check A record (proxied — returns Cloudflare IPs)
-dig djjessejay.ch A +short
-
-# Check AAAA record (DNS only — returns origin IPv6)
-dig djjessejay.ch AAAA +short
-
-# Check CNAME record
-dig www.djjessejay.ch CNAME +short
+# Check CNAME record (should point to GitHub Pages)
+dig djjessejay.ch CNAME +short
 
 # Check NS records
 dig djjessejay.ch NS +short
@@ -190,29 +217,28 @@ dig djjessejay.ch NS +short
 ### Expected Results
 
 ```
-# A record (proxied) returns Cloudflare IPv4 ranges, e.g.:
-104.21.x.x
-172.67.x.x
-
-# AAAA record (DNS only) returns the origin IPv6:
-2001:1680:101:8bd::1
-
-# CNAME should return:
-djjessejay.ch.
+# CNAME record should return:
+marcelraschke.github.io.
 
 # NS should return:
 aarav.ns.cloudflare.com.
 rosalyn.ns.cloudflare.com.
 ```
 
-### Verify Origin Reachability
+### Verify Cloudflare Worker Routing
 
 ```bash
-# Direct IPv4 origin (bypass Cloudflare)
-curl -k --resolve djjessejay.ch:443:185.101.158.113 https://djjessejay.ch/
+# Static content (should be served by GitHub Pages)
+curl -I https://djjessejay.ch/
+# Expected: 200, headers should show GitHub Pages + Cloudflare
 
-# Direct IPv6 origin (bypass Cloudflare)
-curl -k --resolve djjessejay.ch:443:[2001:1680:101:8bd::1] https://djjessejay.ch/
+# API endpoint (should route to custom server)
+curl -I https://djjessejay.ch/api/status
+# Expected: 200 from custom server (or 404 if endpoint doesn't exist)
+
+# WebSocket endpoint (should route to custom server)
+curl -I https://djjessejay.ch/ws
+# Expected: 101 Switching Protocols from custom server
 ```
 
 ### Verify Cloudflare Proxying
@@ -220,6 +246,19 @@ curl -k --resolve djjessejay.ch:443:[2001:1680:101:8bd::1] https://djjessejay.ch
 ```bash
 # Should return Cloudflare headers (cf-ray, server: cloudflare)
 curl -I https://djjessejay.ch/
+
+# Should show Worker is processing requests
+# Check Cloudflare dashboard → Workers & Pages → djjessejay-router → Analytics
+```
+
+### Verify GitHub Pages Deployment
+
+```bash
+# Check that GitHub Pages is serving content
+curl -I https://marcelraschke.github.io/
+
+# Confirm via GitHub repository → Settings → Pages
+# Status should show "Your site is live at https://marcelraschke.github.io"
 ```
 
 ---
