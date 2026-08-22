@@ -1,3 +1,5 @@
+import { timingSafeEqual } from "node:crypto";
+
 const KEY_PATHS = new Set([
   "/pgp.txt",
   "/cy8er.djjessejay.ch.asc",
@@ -119,9 +121,13 @@ function checkHealthAuth(request, env) {
   }
 
   // Use timing-safe comparison to prevent timing attacks
-  const expectedBuf = new TextEncoder().encode(expected);
-  const providedBuf = new TextEncoder().encode(provided);
-  return { ok: crypto.subtle.timingSafeEqual(expectedBuf, providedBuf) };
+  const expectedBuf = Buffer.from(expected, "utf-8");
+  const providedBuf = Buffer.from(provided, "utf-8");
+  try {
+    return { ok: timingSafeEqual(expectedBuf, providedBuf) };
+  } catch {
+    return { ok: false };
+  }
 }
 
 export default {
