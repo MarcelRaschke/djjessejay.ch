@@ -1,38 +1,44 @@
 {
-  "schemaVersion": "1.1.0",
+  "schemaVersion": "1.2.0",
   "subject": {
     "id": "https://djjessejay.ch/#dj-jesse-jay",
     "name": "DJ Jesse Jay"
   },
-  "generatedAt": "2026-08-21T13:04:00+02:00",
+  "generatedAt": "2026-08-23T21:33:00+02:00",
   "repositoryRole": [
     "software_project",
     "digital_archive",
     "osint_knowledge_graph"
   ],
   "identity": {
-    "artist": "DJ Jesse Jay",
-    "city": "Zürich",
-    "country": "Switzerland",
-    "activeSince": 1997,
-    "positioning": "long-term regional underground electronic DJ, radio-linked archive node and provenance-oriented cultural identity",
-    "claimLine": "DJ Jesse Jay — Zürich Underground Electronic Sound since 1997",
-    "extendedLine": "Club memory. Radio signal. Cyber provenance. Since 1997."
+    "claimRefs": {
+      "artistName": "claim:artist-name",
+      "location": "claim:location",
+      "activeSince": "claim:active-since",
+      "positioning": "claim:identity-positioning",
+      "claimLine": "claim:identity-line",
+      "extendedLine": "claim:extended-identity-line"
+    }
   },
   "policy": {
     "classes": {
-      "P0": "independently archived evidence",
-      "P1": "versioned first-party repository evidence",
-      "P2": "first-party external publication",
-      "P3": "credible third-party reference",
-      "P4": "unverified claim"
+      "P0": "independently archived third-party evidence",
+      "P1": "institutional primary source",
+      "P2": "venue or organizer archive",
+      "P3": "established event database",
+      "P4": "verified platform profile",
+      "P5": "first-party external publication",
+      "P6": "versioned first-party repository evidence",
+      "P7": "social post or unverified platform post",
+      "P8": "search snippet or unverified claim"
     },
     "generatedContentIsEvidence": false,
     "claimPrinciples": [
       "Claim is not evidence",
       "Evidence is not verification",
       "Verification is not official certification",
-      "valid_time and observed_time must remain separate"
+      "valid_time and observed_time must remain separate",
+      "claim status and evidence source class are separate fields"
     ]
   },
   "governance": {
@@ -44,7 +50,7 @@
         "security_gate_workflow",
         "dependency_audit",
         "secret_scan",
-        "provenance_validation",
+        "semantic_provenance_validation",
         "branch_protection"
       ]
     },
@@ -65,8 +71,11 @@
       "minimumEntryFields": [
         "id",
         "type",
-        "date_or_valid_time",
-        "source",
+        "title",
+        "valid_time",
+        "observed_time",
+        "sources",
+        "sourceClass",
         "status",
         "confidence",
         "review_state"
@@ -85,106 +94,253 @@
         "MediaObject",
         "Source"
       ],
-      "assertionTemplate": {
-        "assertion_id": "assertion:slug",
-        "subject": null,
-        "predicate": null,
-        "object": null,
-        "valid_time": {
-          "start": null,
-          "end": null,
-          "precision": null
-        },
-        "observed_time": null,
-        "confidence": 0,
-        "status": "unreviewed",
-        "sources": [],
-        "review_state": "human_review_required"
-      }
+      "assertionTemplateRef": "archive/schema.yml#assertion_template"
     }
   },
   "claims": [
     {
-      "id": "artist-name",
+      "id": "claim:artist-name",
+      "subject": "artist:dj-jesse-jay",
+      "predicate": "USES_ALIAS",
       "value": "DJ Jesse Jay",
+      "valid_time": {
+        "start": null,
+        "end": null,
+        "precision": "unknown"
+      },
+      "observed_time": "2026-08-23",
+      "confidence": 0.95,
       "status": "verified",
+      "sourceClass": "P4",
       "sources": [
         "repo:index.html",
         "repo:CLAUDE.md",
         "soundcloud:jessejay"
-      ]
+      ],
+      "review_state": "reviewed"
     },
     {
-      "id": "civil-name",
+      "id": "claim:civil-name",
+      "subject": "artist:dj-jesse-jay",
+      "predicate": "HAS_PUBLIC_CIVIL_NAME_REFERENCE",
       "value": "Michael Fellner",
-      "status": "first-party-public",
+      "valid_time": {
+        "start": null,
+        "end": null,
+        "precision": "unknown"
+      },
+      "observed_time": "2026-08-23",
+      "confidence": 0.7,
+      "status": "supported",
+      "sourceClass": "P6",
       "sources": [
         "repo:index.html",
         "repo:CLAUDE.md"
-      ]
+      ],
+      "review_state": "human_review_recommended"
     },
     {
-      "id": "location",
+      "id": "claim:location",
+      "subject": "artist:dj-jesse-jay",
+      "predicate": "LOCATED_IN",
       "value": "Zürich, Switzerland",
-      "status": "corroborated",
+      "valid_time": {
+        "start": null,
+        "end": null,
+        "precision": "unknown"
+      },
+      "observed_time": "2026-08-23",
+      "confidence": 0.8,
+      "status": "supported",
+      "sourceClass": "P4",
       "sources": [
         "repo:index.html",
         "soundcloud:jessejay"
-      ]
+      ],
+      "review_state": "reviewed"
     },
     {
-      "id": "active-since",
+      "id": "claim:active-since",
+      "subject": "artist:dj-jesse-jay",
+      "predicate": "ACTIVE_SINCE",
       "value": 1997,
-      "status": "corroborated-first-party",
+      "valid_time": {
+        "start": "1997",
+        "end": null,
+        "precision": "year"
+      },
+      "observed_time": "2026-08-23",
+      "confidence": 0.78,
+      "status": "supported",
+      "sourceClass": "P5",
       "sources": [
         "repo:index.html",
         "soundcloud:jessejay"
-      ]
+      ],
+      "review_state": "human_review_recommended"
     },
     {
-      "id": "radio-association",
+      "id": "claim:radio-association",
+      "subject": "artist:dj-jesse-jay",
+      "predicate": "ASSOCIATED_WITH",
       "value": "Radio LoRa",
-      "status": "corroborated-historical-and-recording",
+      "valid_time": {
+        "start": null,
+        "end": null,
+        "precision": "unknown"
+      },
+      "observed_time": "2026-08-23",
+      "confidence": 0.74,
+      "status": "supported",
+      "sourceClass": "P5",
       "sources": [
         "repo:index.html",
         "soundcloud:jessejay",
         "soundcloud:blue-dimension-2026"
-      ]
+      ],
+      "review_state": "human_review_recommended"
     },
     {
-      "id": "galaxy-space-night",
-      "value": true,
-      "status": "corroborated",
+      "id": "claim:galaxy-space-night",
+      "subject": "artist:dj-jesse-jay",
+      "predicate": "ASSOCIATED_WITH",
+      "value": "Galaxy Space Night",
+      "valid_time": {
+        "start": null,
+        "end": null,
+        "precision": "unknown"
+      },
+      "observed_time": "2026-08-23",
+      "confidence": 0.82,
+      "status": "supported",
+      "sourceClass": "P3",
       "sources": [
         "soundcloud:galaxy-space-night",
         "residentadvisor:event-896816"
-      ]
+      ],
+      "review_state": "reviewed"
     },
     {
-      "id": "blue-dimension",
-      "value": true,
-      "status": "contemporary-project-recording-identity",
+      "id": "claim:blue-dimension",
+      "subject": "artist:dj-jesse-jay",
+      "predicate": "PRESENTS",
+      "value": "Blue Dimension",
+      "valid_time": {
+        "start": null,
+        "end": null,
+        "precision": "unknown"
+      },
+      "observed_time": "2026-08-23",
+      "confidence": 0.76,
+      "status": "supported",
+      "sourceClass": "P5",
       "sources": [
         "repo:index.html",
         "soundcloud:blue-dimension-2026"
-      ]
+      ],
+      "review_state": "human_review_recommended"
     },
     {
-      "id": "radio-since-2001",
+      "id": "claim:radio-since-2001",
+      "subject": "artist:dj-jesse-jay",
+      "predicate": "RADIO_ACTIVITY_SINCE",
       "value": 2001,
-      "status": "historical-first-party-claim",
+      "valid_time": {
+        "start": "2001",
+        "end": null,
+        "precision": "year"
+      },
+      "observed_time": "2026-08-23",
+      "confidence": 0.55,
+      "status": "probable",
+      "sourceClass": "P5",
       "sources": [
         "repo:historical-biography",
         "soundcloud:jessejay"
-      ]
+      ],
+      "review_state": "human_review_required"
     },
     {
-      "id": "current-radio-schedule",
+      "id": "claim:current-radio-schedule",
+      "subject": "show:blue-dimension",
+      "predicate": "HAS_CURRENT_PUBLIC_SCHEDULE",
       "value": null,
-      "status": "not-verified",
+      "valid_time": {
+        "start": "2026-08-09",
+        "end": null,
+        "precision": "day"
+      },
+      "observed_time": "2026-08-23",
+      "confidence": 0.0,
+      "status": "unreviewed",
+      "sourceClass": "P8",
       "sources": [
         "radio-lora:blue-dimension-url-404-2026-08-09"
-      ]
+      ],
+      "review_state": "human_review_required"
+    },
+    {
+      "id": "claim:identity-positioning",
+      "subject": "artist:dj-jesse-jay",
+      "predicate": "HAS_POSITIONING_STATEMENT",
+      "value": "long-term regional underground electronic DJ, radio-linked archive node and provenance-oriented cultural identity",
+      "valid_time": {
+        "start": "2026-08-21",
+        "end": null,
+        "precision": "day"
+      },
+      "observed_time": "2026-08-23",
+      "confidence": 0.72,
+      "status": "supported",
+      "sourceClass": "P6",
+      "sources": [
+        "repo:AGENTS.md",
+        "repo:docs/GOVERNANCE.md",
+        "repo:website/provenance.json"
+      ],
+      "review_state": "human_review_recommended"
+    },
+    {
+      "id": "claim:identity-line",
+      "subject": "artist:dj-jesse-jay",
+      "predicate": "HAS_PUBLIC_IDENTITY_LINE",
+      "value": "DJ Jesse Jay — Zürich Underground Electronic Sound since 1997",
+      "valid_time": {
+        "start": "2026-08-21",
+        "end": null,
+        "precision": "day"
+      },
+      "observed_time": "2026-08-23",
+      "confidence": 0.72,
+      "status": "supported",
+      "sourceClass": "P6",
+      "sources": [
+        "repo:AGENTS.md",
+        "repo:docs/GOVERNANCE.md",
+        "repo:website/provenance.json"
+      ],
+      "review_state": "human_review_recommended"
+    },
+    {
+      "id": "claim:extended-identity-line",
+      "subject": "artist:dj-jesse-jay",
+      "predicate": "HAS_PUBLIC_IDENTITY_LINE",
+      "value": "Club memory. Radio signal. Cyber provenance. Since 1997.",
+      "valid_time": {
+        "start": "2026-08-21",
+        "end": null,
+        "precision": "day"
+      },
+      "observed_time": "2026-08-23",
+      "confidence": 0.72,
+      "status": "supported",
+      "sourceClass": "P6",
+      "sources": [
+        "repo:AGENTS.md",
+        "repo:docs/GOVERNANCE.md",
+        "repo:website/provenance.json"
+      ],
+      "review_state": "human_review_recommended"
     }
   ],
   "knownConflicts": [
