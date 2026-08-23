@@ -1,4 +1,4 @@
-schema_version: "1.0.0"
+schema_version: "1.1.0"
 project:
   id: "project:dj-jesse-jay-provenance"
   name: "DJ Jesse Jay Provenance Repository"
@@ -14,7 +14,7 @@ artist:
     city: "Zürich"
     country: "Switzerland"
   active_since: 1997
-  identity_claim: "Zürich Underground Electronic Sound since 1997"
+  identity_claim: "DJ Jesse Jay — Zürich Underground Electronic Sound since 1997"
 
 object_types:
   - Set
@@ -51,11 +51,15 @@ confidence_scale:
     comprehensive: "0.90-1.00"
 
 source_classes:
-  P0: "independently archived evidence"
-  P1: "versioned first-party repository evidence"
-  P2: "first-party external publication"
-  P3: "credible third-party reference"
-  P4: "unverified claim"
+  P0: "independently archived third-party evidence"
+  P1: "institutional primary source"
+  P2: "venue or organizer archive"
+  P3: "established event database"
+  P4: "verified platform profile"
+  P5: "first-party external publication"
+  P6: "versioned first-party repository evidence"
+  P7: "social post or unverified platform post"
+  P8: "search snippet or unverified claim"
 
 required_archive_fields:
   common:
@@ -80,6 +84,11 @@ set_template:
   artist: "artist:dj-jesse-jay"
   series: null
   date: null
+  valid_time:
+    start: null
+    end: null
+    precision: null
+  observed_time: null
   duration: null
   genres: []
   platform: null
@@ -92,10 +101,14 @@ set_template:
   ai_generated_material: "unknown"
   confidence: 0.0
   status: "unreviewed"
+  sourceClass: "P8"
   sources: []
   review_state: "human_review_required"
 
 assertion_template:
+  id: "assertion:slug"
+  type: "Assertion"
+  title: null
   assertion_id: "assertion:slug"
   subject: null
   predicate: null
@@ -108,6 +121,7 @@ assertion_template:
   observed_time: null
   confidence: 0.0
   status: "unreviewed"
+  sourceClass: "P8"
   sources: []
   review_state: "human_review_required"
 
@@ -125,10 +139,13 @@ relations:
   - LOCATED_IN
   - SUPPORTED_BY
   - CONTRADICTED_BY
+  - HAS_PUBLIC_IDENTITY_LINE
+  - HAS_POSITIONING_STATEMENT
 
 governance_rules:
-  - "No archive entry without date or valid_time."
-  - "No archive entry without source and confidence."
+  - "No archive entry without valid_time and observed_time."
+  - "No archive entry without source, sourceClass and confidence."
   - "Generated content is not evidence."
   - "Do not upgrade claim status without new evidence."
   - "Preserve valid_time and observed_time as separate fields."
+  - "Use status_values for claim status and source_classes for evidence class; do not combine both in one field."
