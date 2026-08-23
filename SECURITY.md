@@ -97,6 +97,18 @@ Archive and identity claims must not be silently upgraded. Claim status changes 
 
 Generated text, generated images and model outputs are not evidence. They may only be used as presentation or transformation layers.
 
+## Embargoed Fixes
+
+A protected branch is not confidential. Branch protection limits who can mutate the branch, but it does not restrict read access in a public repository.
+
+Before coordinated disclosure, sensitive fixes must be developed through a genuinely confidential path such as:
+
+- a private GitHub security advisory workspace,
+- a private temporary fork or private repository,
+- or another access-controlled channel approved by the maintainer.
+
+Do not push embargoed exploit fixes, exploit regression tests, vulnerable-code diffs or reusable patch details to public branches before disclosure.
+
 ## Disclosure
 
-Accepted vulnerabilities should be fixed on a private or protected branch first, then merged after validation. Public disclosure should avoid exposing operational secrets or reusable exploit details.
+Accepted vulnerabilities should be fixed through a confidential path when the patch reveals exploit mechanics or sensitive operational details. After validation and coordinated disclosure, publish the fix through the normal pull-request process with reusable exploit details redacted where appropriate.
