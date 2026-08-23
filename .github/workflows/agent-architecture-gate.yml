@@ -1,0 +1,29 @@
+name: Agent Architecture Gate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agent-architecture-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mcp-boundary:
+    name: MCP boundary, retry and reconnect
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # releases/v4
+
+      - name: Run Agent/MCP boundary gate
+        shell: bash
+        run: ./scripts/check-mcp-boundary.sh

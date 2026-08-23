@@ -21,6 +21,19 @@ Select all affected roles:
 
 Details:
 
+## Agent / MCP / Termux Boundary
+
+- [ ] N/A — this PR does not change an Agent, MCP or Termux tool path
+- [ ] `InternalToolRequest` carries `effect` and `operationId`
+- [ ] `assertToolRequestIsSafe()` runs before every tool dispatch
+- [ ] Tool and effect allowlists remain least-privilege and fail closed
+- [ ] Denied requests are tested to prove that transport is never reached
+- [ ] Retry and reconnect behavior is covered by tests
+- [ ] Mutating operations are not replayed automatically
+- [ ] Filesystem, shell, network and secret scopes are documented for Termux changes
+
+Details:
+
 ## Provenance Impact
 
 - [ ] No provenance impact
@@ -40,6 +53,7 @@ List sources, archive paths or screenshots used by this PR.
 ## Validation
 
 - [ ] `npm test`
+- [ ] `./scripts/check-mcp-boundary.sh`
 - [ ] `npm audit --audit-level=high`
 - [ ] `python3 -m json.tool website/provenance.json`
 - [ ] `ruby -e "require 'yaml'; YAML.load_file('archive/schema.yml')"`

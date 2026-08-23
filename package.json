@@ -1,14 +1,17 @@
 {
   "name": "djjessejay.ch",
   "version": "1.0.0",
-  "description": "DJ Jesse Jay website \u2014 Express.js backend, canonical provenance metadata and reCAPTCHA-protected contact form.",
+  "description": "DJ Jesse Jay website — Express.js backend, canonical provenance metadata and reCAPTCHA-protected contact form.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "build:css": "tailwindcss -i ./src/input.css -o ./tailwind.css --minify",
     "watch:css": "tailwindcss -i ./src/input.css -o ./tailwind.css --watch",
     "sync:metadata": "node scripts/sync-canonical-metadata.mjs index.html",
-    "test": "node --check render-farm/render-farm-master.js && node --check scripts/sync-canonical-metadata.mjs && python3 -m py_compile render-farm/render-worker.py",
+    "lint": "node --check server.js && node --check render-farm/render-farm-master.js && node --check scripts/sync-canonical-metadata.mjs && node --check src/agent/mcp-boundary.mjs && node --check test/agent-mcp-boundary.test.mjs",
+    "test": "node --test test/agent-mcp-boundary.test.mjs && node --check render-farm/render-farm-master.js && node --check scripts/sync-canonical-metadata.mjs && python3 -m py_compile render-farm/render-worker.py",
+    "test:agent-boundary": "node --test test/agent-mcp-boundary.test.mjs",
+    "check:agent-boundary": "bash scripts/check-mcp-boundary.sh",
     "render:master": "node render-farm/render-farm-master.js",
     "build:html": "node scripts/replace-recaptcha-key.mjs"
   },
