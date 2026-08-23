@@ -11,6 +11,12 @@ AGENTS.md @MarcelRaschke
 SECURITY.md @MarcelRaschke
 INCIDENT_RESPONSE.md @MarcelRaschke
 
+# Agent / MCP / Termux authority boundary.
+/src/agent/ @MarcelRaschke
+/test/agent-mcp-boundary.test.mjs @MarcelRaschke
+/scripts/check-mcp-boundary.sh @MarcelRaschke
+/.github/workflows/agent-architecture-gate.yml @MarcelRaschke
+
 # Archive and provenance controls.
 archive/ @MarcelRaschke
 website/provenance.json @MarcelRaschke
