@@ -10,7 +10,7 @@ reviewed DJ Jesse Jay — Blue Dimension Sites deployment.
 3. Select the reviewed feature branch or merge commit.
 4. Choose **Manuell** for deployment.
 5. Deploy this directory into a dedicated release path first.
-6. Verify `index.html`, `/assets/`, `og.png`, navigation and the 97.5 tuner.
+6. Verify `index.html`, `/assets/`, `og.jpg`, navigation and the 97.5 tuner.
 7. Switch the document root only after validation.
 
 Do not store the Plesk SSH password, Cloudflare token or any private key in Git.
