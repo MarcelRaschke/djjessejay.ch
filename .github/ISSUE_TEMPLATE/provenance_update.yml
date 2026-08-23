@@ -42,7 +42,10 @@ body:
     id: valid_time
     attributes:
       label: Valid time
-      placeholder: "1997, 2026-08-21, or 1998-2026"
+      description: Required for all new or corrected claims. Use explicit unknown/open interval when the real period is not known.
+      placeholder: "1997, 2026-08-21, 1998-2026, or unknown/open"
+    validations:
+      required: true
   - type: input
     id: observed_time
     attributes:
