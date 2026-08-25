@@ -79,15 +79,27 @@ djjessejay.ch. 3600 IN CNAME marcelraschke.github.io.   ; Proxied (orange cloud)
 
 This provides a single unified entry point with intelligent routing via Worker.
 
-### CNAME Record (www subdomain)
+### CNAME Record (www subdomain) — IMPORTANT: Choose ONE approach
 
-The www subdomain also points to GitHub Pages (optional redirect):
+**Option A: Redirect www to apex (recommended)**
+
+Set a permanent redirect in Cloudflare Page Rules:
+- **URL**: `www.djjessejay.ch/*`
+- **Forward URL**: `https://djjessejay.ch/$1` (with code 301)
+
+This avoids CORS issues and keeps all traffic on `djjessejay.ch`.
+
+**Option B: www as separate CNAME (if needed)**
 
 ```
 www.djjessejay.ch. 3600 IN CNAME marcelraschke.github.io.   ; Proxied (orange cloud)
 ```
 
-Alternatively, set a permanent redirect in Cloudflare Page Rules: `www.djjessejay.ch/*` → `https://djjessejay.ch/$1`
+⚠️ **CORS Warning**: If using Option B, you must update `server.js` allowedOrigins:
+```javascript
+allowedOrigins: ['https://djjessejay.ch', 'https://www.djjessejay.ch'],
+```
+Otherwise contact form and API requests from `www.` will fail with CORS errors.
 
 ---
 
@@ -107,10 +119,19 @@ The origin server at `185.101.158.113` now hosts only API endpoints and WebSocke
 
 ### GitHub Pages (Static Hosting)
 
-- Deployed from `main` branch via `.github/workflows/static.yml`
-- Hosted at `marcelraschke.github.io`
-- Automatically served through Cloudflare proxy when visitor requests root domain
-- No configuration needed beyond enabling Pages in repository settings
+**Critical**: GitHub Pages must be configured with a custom domain, otherwise static requests go to the project-site path (`/djjessejay.ch/`) not the root.
+
+Configuration:
+1. Repository → Settings → Pages
+2. **Source**: GitHub Actions (set via `.github/workflows/static.yml`)
+3. **Custom domain**: Enter `djjessejay.ch`
+4. GitHub automatically creates/updates `.github/CNAME` file
+5. Check the box: "Enforce HTTPS"
+6. Verify: "Your site is live at https://djjessejay.ch"
+
+Once configured:
+- Static assets deploy via `.github/workflows/static.yml` on every `main` push
+- Cloudflare Worker proxies requests to this origin
 
 ### Cloudflare Worker (Routing Layer)
 
@@ -119,17 +140,34 @@ The origin server at `185.101.158.113` now hosts only API endpoints and WebSocke
 - Routes all other requests to GitHub Pages
 - Deployed in Cloudflare dashboard under Workers & Pages
 
-### Verification Steps
+### Verification Steps (Pre-deployment Checklist)
 
-1. Add the CNAME records above to your Cloudflare DNS settings
-2. Ensure the apex CNAME is **proxied** (orange cloud)
-3. Create and deploy the Cloudflare Worker (`djjessejay-router`) with routing rules
-4. Bind Worker to domain: Add route `djjessejay.ch/*` → Worker
-5. Wait for DNS propagation (typically 1–4 hours with Cloudflare)
-6. Enable GitHub Pages in repository settings (Deploy from branch `main`)
-7. Verify `https://djjessejay.ch` loads (should show GitHub Pages content)
-8. Verify `https://djjessejay.ch/api/*` routes to custom server correctly
-9. Confirm SSL/TLS mode is **Full (Strict)** in Cloudflare
+1. **GitHub Pages Setup** (Repository Settings → Pages)
+   - Enable GitHub Pages
+   - **Publishing source**: GitHub Actions (NOT "Deploy from branch")
+   - **Custom domain**: `djjessejay.ch`
+   - Check `.github/CNAME` file exists with `djjessejay.ch`
+   - Verify status shows "Your site is live"
+
+2. **DNS Configuration** (Cloudflare Dashboard)
+   - Add apex CNAME: `djjessejay.ch` → `marcelraschke.github.io` (Proxied)
+   - Remove any existing A/AAAA records at apex
+   - Wait for DNS propagation (typically 1–4 hours)
+   - Test: `dig djjessejay.ch CNAME +short` → should return `marcelraschke.github.io.`
+
+3. **Cloudflare Worker Deployment**
+   - Create Worker `djjessejay-router` with routing logic (see docs/DEPLOYMENT.md)
+   - Bind route: `djjessejay.ch/*` → Worker
+   - Deploy and test
+
+4. **SSL/TLS Configuration** (Cloudflare Dashboard)
+   - Set SSL/TLS mode to **Full (Strict)**
+   - Ensure origin cert is valid on custom server
+
+5. **Final Testing**
+   - `curl -I https://djjessejay.ch/` → GitHub Pages (200)
+   - `curl https://djjessejay.ch/api/health` → Express.js health check
+   - Confirm Cloudflare headers in response (`cf-ray`, `server: cloudflare`)
 
 ---
 
@@ -140,9 +178,12 @@ The origin server at `185.101.158.113` now hosts only API endpoints and WebSocke
 1. Log in to Cloudflare dashboard
 2. Select the `djjessejay.ch` domain
 3. Navigate to **DNS → Records**
-4. Add all records from the zone file above
-5. Set the A record proxy to **Proxied** (orange cloud)
-6. Set the AAAA record proxy to **DNS only** (gray cloud)
+4. **Remove** any existing A or AAAA records at apex (these conflict with CNAME)
+5. Ensure the CNAME record is present and correct:
+   - **Name**: `djjessejay.ch` (apex)
+   - **Target**: `marcelraschke.github.io`
+   - **Proxy**: **Proxied** (orange cloud)
+6. ✅ **CNAME only at apex** — do not mix with A/AAAA records
 
 ### SSL/TLS Settings
 
@@ -176,11 +217,14 @@ The origin server at `185.101.158.113` now hosts only API endpoints and WebSocke
 
 ### Site Not Loading Through Cloudflare
 
-1. Confirm the A record is **proxied** (orange cloud) in Cloudflare
-2. Verify the origin server is reachable on `185.101.158.113` (IPv4) and `2001:1680:101:8bd::1` (IPv6)
-3. Check the origin firewall allows Cloudflare's IP ranges
-4. Confirm the origin TLS certificate is valid (required for Full Strict SSL)
-5. Review Cloudflare analytics for error responses (5xx) from the origin
+1. Verify the CNAME record is **proxied** (orange cloud) in Cloudflare — NOT A records
+2. Confirm Cloudflare Worker (`djjessejay-router`) is deployed and routes are bound
+3. Test the Worker routing:
+   - `curl -I https://djjessejay.ch/` → should route to GitHub Pages (200 with GitHub Pages headers)
+   - `curl -I https://djjessejay.ch/api/health` → should route to custom server (200 from Express)
+4. Check the custom server is reachable at `185.101.158.113` and Cloudflare's IP ranges are whitelisted
+5. Confirm the origin TLS certificate is valid (required for Full Strict SSL)
+6. Review Cloudflare Worker analytics for routing errors or timeouts
 
 ### Mixed Content Warnings
 
@@ -196,9 +240,9 @@ The origin server at `185.101.158.113` now hosts only API endpoints and WebSocke
 
 ### IPv6 Connectivity Issues
 
-- Confirm the AAAA record (`2001:1680:101:8bd::1`) is present and **DNS only**
-- IPv6 visitors are primarily served by Cloudflare's IPv6 network when the A record is proxied
-- If direct IPv6 origin access fails, verify the origin server listens on IPv6 and the firewall permits it
+- No direct IPv6 configuration needed — Cloudflare handles IPv6 proxy via their network
+- IPv6 visitors access the site through Cloudflare's IPv6-capable anycast
+- If issues arise, check that Cloudflare's IPv6 proxying is enabled in SSL/TLS settings
 
 ---
 
@@ -232,14 +276,16 @@ rosalyn.ns.cloudflare.com.
 curl -I https://djjessejay.ch/
 # Expected: 200, headers should show GitHub Pages + Cloudflare
 
-# API endpoint (should route to custom server)
-curl -I https://djjessejay.ch/api/status
-# Expected: 200 from custom server (or 404 if endpoint doesn't exist)
+# API health endpoint (should route to custom server)
+curl https://djjessejay.ch/api/health
+# Expected: 200 with JSON response from Express.js (e.g., {"status":"ok"})
 
-# WebSocket endpoint (should route to custom server)
-curl -I https://djjessejay.ch/ws
-# Expected: 101 Switching Protocols from custom server
+# Contact form API (if implemented)
+curl -I https://djjessejay.ch/api/contact
+# Expected: 405 METHOD NOT ALLOWED (GET not allowed, POST is) if endpoint exists
 ```
+
+⚠️ **Note**: WebSocket (`/ws`) routing is documented but not yet implemented in `server.js` — if needed, implement the WebSocket server first or remove this route from Worker code.
 
 ### Verify Cloudflare Proxying
 
