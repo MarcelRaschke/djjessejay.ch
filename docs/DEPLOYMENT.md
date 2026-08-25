@@ -25,7 +25,7 @@ djjessejay.ch uses a **hybrid deployment model** combining GitHub Pages for stat
    │ Pages       │                    │  185.101.158.113     │
    │             │                    │                      │
    │ Static Site │                    │  Express.js API      │
-   │ Hosting     │                    │  WebSocket Server    │
+   │ Hosting     │                    │  (WebSocket: planned)│
    └─────────────┘                    └──────────────────────┘
         ↑                                      ↑
    marcelraschke.                        /api/*
@@ -49,26 +49,29 @@ djjessejay.ch uses a **hybrid deployment model** combining GitHub Pages for stat
 - Generated files: Compiled CSS (Tailwind), cleaned-up HTML, asset files
 - Domain: `marcelraschke.github.io` (proxied by Cloudflare)
 
-**Configuration**:
-- Repository → Settings → Pages
-- Source: Deploy from branch `main`, folder `/`
+**Configuration** (Repository → Settings → Pages):
+- **Source**: GitHub Actions (via `.github/workflows/static.yml`)
+- **Custom domain**: `djjessejay.ch` (required; otherwise static serves under `/djjessejay.ch/` path)
+- **Enforce HTTPS**: Checked
+- **CNAME file**: `.github/CNAME` (auto-managed by Pages)
 
 **No longer used**: `deploy.sh` script (removed; static files no longer rsync'd to custom server)
 
 ### 2. Custom Express.js Server (185.101.158.113) — API & WebSocket
 
-**Purpose**: Provides REST API endpoints and WebSocket real-time communication.
+**Purpose**: Provides REST API endpoints.
 
 **Current Functionality**:
 - Express.js application (`server.js`)
-- CORS and rate limiting (`@express-rate-limit`, `cors`)
-- Email support (Nodemailer integration)
-- WebSocket server (`ws` package)
+- REST API endpoints: `/api/health`, `/api/contact`, etc.
+- CORS configuration (must include both `https://djjessejay.ch` and `https://www.djjessejay.ch` if www redirect not used)
+- Rate limiting via `@express-rate-limit`
+- Email support via Nodemailer
 - Node.js >=24.0.0 required
 
 **Endpoints** (routed via Cloudflare Worker):
-- `/api/*` — REST API calls
-- `/ws` — WebSocket upgrades
+- `/api/*` — REST API calls (implemented and working)
+- `/ws` — WebSocket (⚠️ NOT YET IMPLEMENTED — remove from Worker routing or implement handler first)
 
 **Deployment**: Manual (via SSH or separate deployment mechanism). This server is NOT automatically deployed by GitHub Actions. Changes to backend code require manual deployment or a separate CI/CD process.
 
@@ -79,14 +82,18 @@ djjessejay.ch uses a **hybrid deployment model** combining GitHub Pages for stat
 **Purpose**: Provides single entry point with intelligent path-based routing.
 
 **Behavior**:
-```javascript
-if (pathname.startsWith('/api/') || pathname.startsWith('/ws'))
-  → Route to custom server (185.101.158.113)
-else
-  → Route to GitHub Pages (marcelraschke.github.io)
-```
+- `/api/*` → Routes to custom server (185.101.158.113)
+- `/ws` → WebSocket (currently returns 501 Not Implemented)
+- `/*` → Routes to GitHub Pages (marcelraschke.github.io)
 
-**Deployment**: Cloudflare dashboard → Workers & Pages → djjessejay-router
+**Implementation**: See `docs/cloudflare-worker-router.js` for deployable code.
+
+**Deployment Steps**:
+1. Cloudflare Dashboard → Workers & Pages → Create Application → Copy Paste
+2. Copy code from `docs/cloudflare-worker-router.js`
+3. Name the worker: `djjessejay-router`
+4. Save and Deploy
+5. Go to Routes and bind: `djjessejay.ch/*` → `djjessejay-router` (Cloudflare Worker)
 
 **Advantages**:
 - Single domain (`djjessejay.ch`) for all functionality
@@ -164,16 +171,50 @@ npm test               # Verify syntax
 
 ### Manual Custom Server Deployment
 
+Deploy backend code via SSH (not automated by GitHub Actions):
+
 ```bash
-# SSH to server and update code
+# SSH to server
 ssh user@185.101.158.113
 cd /path/to/app
+
+# Update code and dependencies
 git pull origin main
 npm install
-npm restart             # or systemctl restart your-service
+
+# Restart service via systemd (NOT npm restart)
+sudo systemctl restart djjessejay
+# or if using PM2:
+pm2 restart server.js
 ```
 
-(This process is manual and should be documented in server admin notes, not here.)
+⚠️ **Critical**: `npm restart` starts `node server.js` in the foreground and will fail if port 3000 is already in use. Always use systemd (`systemctl`) or PM2 for production deployments.
+
+**Setup (one-time)**:
+- If using systemd, create `/etc/systemd/system/djjessejay.service`:
+  ```ini
+  [Unit]
+  Description=djjessejay.ch Express Server
+  After=network.target
+
+  [Service]
+  Type=simple
+  User=nodejs
+  WorkingDirectory=/path/to/app
+  ExecStart=/usr/bin/node server.js
+  Restart=on-failure
+
+  [Install]
+  WantedBy=multi-user.target
+  ```
+  Then: `sudo systemctl enable djjessejay && sudo systemctl start djjessejay`
+
+- If using PM2:
+  ```bash
+  pm2 start server.js --name djjessejay
+  pm2 startup
+  pm2 save
+  ```
 
 ## Maintenance and Troubleshooting
 
@@ -202,7 +243,49 @@ npm restart             # or systemctl restart your-service
 
 1. Verify CNAME record points to `marcelraschke.github.io`: `dig djjessejay.ch CNAME +short`
 2. Verify Cloudflare Worker is bound to domain: Cloudflare → Workers & Pages → Routes
-3. Test routing: `curl -I https://djjessejay.ch/` (should be GitHub Pages) and `curl -I https://djjessejay.ch/api/test` (should be custom server)
+3. Test routing: `curl -I https://djjessejay.ch/` (should be GitHub Pages) and `curl -I https://djjessejay.ch/api/health` (should be custom server)
+
+### WebSocket Not Implemented
+
+⚠️ Current limitation: WebSocket support (`/ws`) is documented for future use but not yet implemented in `server.js`.
+
+**If needed**:
+1. Add `ws` package import and HTTP upgrade handler to `server.js`
+2. Implement WebSocket server logic
+3. Test locally before deploying to `185.101.158.113`
+4. Then Worker routing `/ws` → custom server will function
+
+**Until implemented**: Remove `/ws` from Cloudflare Worker routing or return 501 Not Implemented.
+
+## Rollback Plan
+
+If the hybrid GitHub Pages + Cloudflare Worker deployment fails and you need to restore the prior custom-server-only deployment:
+
+### Rollback Steps
+
+1. **DNS Revert** (Cloudflare Dashboard → DNS → Records)
+   - Delete the CNAME record for `djjessejay.ch`
+   - Restore the original A record: `djjessejay.ch` → `185.101.158.113` (Proxied)
+   - DNS propagation: ~10-30 minutes
+
+2. **Cloudflare Worker Disable**
+   - Cloudflare Dashboard → Workers & Pages
+   - Delete or disable the `djjessejay-router` Worker
+   - Remove route binding: `djjessejay.ch/*`
+
+3. **Custom Server Verification**
+   - Ensure application is running on `185.101.158.113` (ports 80/443)
+   - Verify SSL certificate is valid
+   - Test: `curl -k https://djjessejay.ch/` (should load the static site from custom server)
+
+4. **GitHub Pages Disable** (optional)
+   - Repository → Settings → Pages
+   - Disable GitHub Pages
+   - This prevents confusion if DNS resolves to both sources
+
+### Rollback Timing
+- Full rollback should be complete within 30-45 minutes (DNS propagation + verification)
+- If encountering timeouts or 502 errors after rollback, clear Cloudflare cache or wait for TTL expiry
 
 ## Security Considerations
 
