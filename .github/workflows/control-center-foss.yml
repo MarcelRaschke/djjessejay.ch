@@ -1,0 +1,42 @@
+name: Control Center FOSS
+
+on:
+  pull_request:
+    paths:
+      - 'control-center/foss/**'
+      - '.github/workflows/control-center-foss.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'control-center/foss/**'
+
+permissions:
+  contents: read
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: control-center/foss/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: control-center/foss/api/package.json
+      - run: npm install --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npm run build
+
+  compose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Compose model
+        working-directory: control-center/foss
+        run: |
+          cp .env.example .env
+          sed -i 's/CHANGE_ME/ci-only-placeholder/g' .env
+          docker compose config --quiet
