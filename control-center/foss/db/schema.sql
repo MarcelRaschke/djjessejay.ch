@@ -1,8 +1,19 @@
 create extension if not exists pgcrypto;
 
-create type evidence_class as enum ('P0','P1','P2','P3','P4');
-create type verification_status as enum ('verified','qualified','unverified','rejected');
-create type publication_status as enum ('draft','review','published','archived');
+do $$ begin
+  create type evidence_class as enum ('P0','P1','P2','P3','P4');
+exception when duplicate_object then null;
+end $$;
+
+do $$ begin
+  create type verification_status as enum ('verified','qualified','unverified','rejected');
+exception when duplicate_object then null;
+end $$;
+
+do $$ begin
+  create type publication_status as enum ('draft','review','published','archived');
+exception when duplicate_object then null;
+end $$;
 
 create table if not exists source_records (
   id uuid primary key default gen_random_uuid(),
@@ -14,9 +25,11 @@ create table if not exists source_records (
   fetched_at timestamptz not null default now(),
   verified_at timestamptz,
   content_sha256 text,
-  metadata jsonb not null default '{}'::jsonb,
-  unique (source_type, source_uri, coalesce(source_revision, ''))
+  metadata jsonb not null default '{}'::jsonb
 );
+
+create unique index if not exists uq_source_records_identity
+  on source_records(source_type, source_uri, coalesce(source_revision, ''));
 
 create table if not exists cms_pages (
   id uuid primary key default gen_random_uuid(),
