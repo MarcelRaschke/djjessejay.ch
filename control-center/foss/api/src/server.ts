@@ -7,7 +7,7 @@ const app = Fastify({ logger: true, bodyLimit: 64 * 1024 });
 
 await app.register(cors, {
   origin: env.CORS_ORIGIN.split(',').map((origin) => origin.trim()),
-  methods: ['GET'],
+  methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization']
 });
 
