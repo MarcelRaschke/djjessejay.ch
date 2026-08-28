@@ -3,6 +3,7 @@ import { date, integer, jsonb, numeric, pgEnum, pgTable, text, timestamp, unique
 export const evidenceClass = pgEnum('evidence_class', ['P0', 'P1', 'P2', 'P3', 'P4']);
 export const verificationStatus = pgEnum('verification_status', ['verified', 'qualified', 'unverified', 'rejected']);
 export const publicationStatus = pgEnum('publication_status', ['draft', 'review', 'published', 'archived']);
+export const stagingStatus = pgEnum('staging_status', ['pending', 'approved', 'rejected']);
 
 export const sourceRecords = pgTable('source_records', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -17,6 +18,21 @@ export const sourceRecords = pgTable('source_records', {
   metadata: jsonb('metadata').notNull().default({})
 }, (table) => ({
   identity: uniqueIndex('uq_source_records_identity').on(table.sourceType, table.sourceUri, table.sourceRevision)
+}));
+
+export const importStaging = pgTable('import_staging', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  sourceRecordId: uuid('source_record_id').notNull().references(() => sourceRecords.id, { onDelete: 'cascade' }),
+  entityType: text('entity_type').notNull(),
+  externalKey: text('external_key').notNull(),
+  payload: jsonb('payload').notNull(),
+  status: stagingStatus('status').notNull().default('pending'),
+  reviewNote: text('review_note'),
+  reviewedBy: text('reviewed_by'),
+  reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
+}, (table) => ({
+  sourceEntity: uniqueIndex('uq_import_staging_source_entity').on(table.sourceRecordId, table.entityType, table.externalKey)
 }));
 
 export const cmsPages = pgTable('cms_pages', {
