@@ -24,8 +24,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-          cache: npm
-          cache-dependency-path: control-center/foss/api/package.json
       - run: npm install --no-audit --no-fund
       - run: npm run typecheck
       - run: npm run build
