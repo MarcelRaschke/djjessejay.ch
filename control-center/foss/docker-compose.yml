@@ -8,11 +8,31 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/001-control-center.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  control-center-api:
+    build:
+      context: ./api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      HOST: 0.0.0.0
+      PORT: 3100
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      CANONICAL_PROFILE_PATH: /repo/artist-profile.json
+      SOURCE_REVISION: ${SOURCE_REVISION:-main}
+    volumes:
+      - ../../:/repo:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    expose:
+      - "3100"
 
   keycloak-db:
     image: postgres:17-alpine
@@ -77,12 +97,13 @@ services:
     image: caddy:2-alpine
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
+      - "8088:8088"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
+    depends_on:
+      - control-center-api
 
 # AzuraCast/Icecast is intentionally not embedded here yet.
 # Add it only after a verified Blue Dimension stream/metadata endpoint exists.
