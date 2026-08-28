@@ -5,8 +5,13 @@
 :8088 {
   encode zstd gzip
 
-  @api path /api/*
-  handle @api {
+  @controlCenterApi path /api/control-center/*
+  handle @controlCenterApi {
+    reverse_proxy control-center-api:3100
+  }
+
+  @legacyApi path /api/*
+  handle @legacyApi {
     reverse_proxy host.docker.internal:3000
   }
 
@@ -22,4 +27,5 @@
 }
 
 # Production: replace :8088 with the intended control-center hostname,
-# remove `auto_https off`, and route API/web to dedicated containers.
+# enable automatic HTTPS, and containerize the website frontend instead of
+# using host.docker.internal for the legacy site process.
