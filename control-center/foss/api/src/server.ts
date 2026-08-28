@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import { env } from './env.js';
 import { controlCenterRoutes } from './routes/control-center.js';
+import { importRoutes } from './routes/imports.js';
 
 const app = Fastify({ logger: true, bodyLimit: 64 * 1024 });
 
@@ -12,6 +13,7 @@ await app.register(cors, {
 });
 
 await app.register(controlCenterRoutes, { prefix: '/api/control-center' });
+await app.register(importRoutes, { prefix: '/api/control-center' });
 
 app.setNotFoundHandler((_request, reply) => {
   reply.code(404).send({ error: 'not_found' });
