@@ -47,3 +47,16 @@ export const analyticsDaily = pgTable('analytics_daily', {
   id: uuid('id').defaultRandom().primaryKey(), metricDate: date('metric_date').notNull(), source: text('source').notNull(),
   metric: text('metric').notNull(), value: numeric('value').notNull(), sourceRecordId: uuid('source_record_id').references(() => sourceRecords.id)
 });
+
+export const auditLog = pgTable('audit_log', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  actorSubject: text('actor_subject').notNull(),
+  action: text('action').notNull(),
+  resourceType: text('resource_type').notNull(),
+  resourceId: text('resource_id'),
+  operationId: uuid('operation_id').notNull(),
+  effect: text('effect').notNull(),
+  beforeState: jsonb('before_state'),
+  afterState: jsonb('after_state'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
+});
