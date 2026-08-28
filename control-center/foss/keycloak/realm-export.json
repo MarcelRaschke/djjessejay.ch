@@ -1,0 +1,40 @@
+{
+  "realm": "djjessejay",
+  "enabled": true,
+  "displayName": "DJ Jesse Jay Control Center",
+  "registrationAllowed": false,
+  "resetPasswordAllowed": true,
+  "roles": {
+    "realm": [
+      { "name": "viewer", "description": "Read curated control-center data" },
+      { "name": "editor", "description": "Review and curate control-center data" },
+      { "name": "admin", "description": "Administrative control-center operations" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "djjessejay-control-center",
+      "name": "DJ Jesse Jay Control Center",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["http://localhost:8088/*", "https://djjessejay.ch/control-center/*"],
+      "webOrigins": ["http://localhost:8088", "https://djjessejay.ch"],
+      "protocol": "openid-connect",
+      "protocolMappers": [
+        {
+          "name": "control-center-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "djjessejay-control-center",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ]
+}
