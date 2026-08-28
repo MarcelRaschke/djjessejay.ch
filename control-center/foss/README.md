@@ -30,7 +30,7 @@ This directory defines the self-hosted FOSS control-plane architecture for the D
 
 `api/src/db/schema.ts` is the typed schema authority. Migration SQL exists only under `api/drizzle/` and is applied by `drizzle-kit migrate`.
 
-The former hand-maintained `db/schema.sql` bootstrap was removed. Docker Compose now runs the one-shot `control-center-migrate` service before the Fastify API starts. CI also provisions a clean PostgreSQL 17 instance and applies the checked-in Drizzle migration set.
+The former hand-maintained `db/schema.sql` bootstrap was removed. Docker Compose now runs the one-shot `control-center-migrate` service before the Fastify API starts. CI provisions a clean PostgreSQL 17 instance and applies the checked-in Drizzle migration set.
 
 Schema workflow:
 
@@ -87,7 +87,7 @@ Setting `status: "published"` requires `admin`. Editors can create and maintain 
 
 The original Express source module is retained temporarily as a rollback/legacy path. In the FOSS Compose topology, Caddy routes `/api/control-center/*` directly to `control-center-api:3100`.
 
-External SoundCloud, Resident Advisor, Umami and AzuraCast adapters remain outside this slice. They should only be added after the CRUD/audit plane is stable and each source has an evidence and verification policy.
+External SoundCloud, Resident Advisor, Umami and AzuraCast adapters remain outside this slice. They are intentionally gated behind the audited CRUD plane: importer output must enter as provenance-bearing source records first, then be reviewed before curated/public state is mutated.
 
 ## Local bring-up
 
