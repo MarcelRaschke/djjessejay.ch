@@ -26,11 +26,16 @@ services:
       CORS_ORIGIN: ${CORS_ORIGIN}
       CANONICAL_PROFILE_PATH: /repo/artist-profile.json
       SOURCE_REVISION: ${SOURCE_REVISION:-main}
+      KEYCLOAK_ISSUER: ${KEYCLOAK_ISSUER}
+      KEYCLOAK_JWKS_URL: http://keycloak:8080/realms/djjessejay/protocol/openid-connect/certs
+      KEYCLOAK_AUDIENCE: ${KEYCLOAK_AUDIENCE}
     volumes:
       - ../../:/repo:ro
     depends_on:
       postgres:
         condition: service_healthy
+      keycloak:
+        condition: service_started
     expose:
       - "3100"
 
@@ -47,7 +52,7 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.3
     restart: unless-stopped
-    command: start-dev
+    command: start-dev --import-realm
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://keycloak-db:5432/${KEYCLOAK_DB}
@@ -55,6 +60,10 @@ services:
       KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
     depends_on:
       - keycloak-db
 
