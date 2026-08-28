@@ -3,6 +3,7 @@ WORKDIR /app
 COPY package.json ./
 RUN npm install
 COPY tsconfig.json drizzle.config.ts ./
+COPY drizzle ./drizzle
 COPY src ./src
 RUN npm run build
 
