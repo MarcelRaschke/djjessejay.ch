@@ -5,6 +5,7 @@ const nodemailer = require('nodemailer');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
 const cors = require('cors');
+const controlCenterRouter = require('./control-center/data-sources');
 
 const app = express();
 
@@ -40,6 +41,10 @@ const apiLimiter = rateLimit({
 
 // Apply rate limiting to API routes
 app.use('/api/', apiLimiter);
+
+// Read-only DJ Jesse Jay Control Center source APIs.
+// These routes expose repository-backed truth and explicit connection state only.
+app.use('/api/control-center', controlCenterRouter);
 
 // Static files
 app.use(express.static(__dirname, { dotfiles: 'ignore', index: false }));
