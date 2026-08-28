@@ -138,9 +138,13 @@ CREATE TABLE IF NOT EXISTS "audit_log" (
   "effect" text NOT NULL,
   "before_state" jsonb,
   "after_state" jsonb,
-  "created_at" timestamp with time zone DEFAULT now() NOT NULL,
-  CONSTRAINT "audit_log_operation_id_unique" UNIQUE("operation_id")
+  "created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "audit_log" ADD CONSTRAINT "audit_log_operation_id_unique" UNIQUE("operation_id");
+EXCEPTION WHEN duplicate_object THEN null;
+END $$;
 --> statement-breakpoint
 
 DO $$ BEGIN
