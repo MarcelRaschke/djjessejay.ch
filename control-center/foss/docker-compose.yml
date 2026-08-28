@@ -8,12 +8,23 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./db/schema.sql:/docker-entrypoint-initdb.d/001-control-center.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  control-center-migrate:
+    build:
+      context: ./api
+      target: build
+    restart: "no"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+    command: npm run db:migrate
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   control-center-api:
     build:
@@ -32,8 +43,8 @@ services:
     volumes:
       - ../../:/repo:ro
     depends_on:
-      postgres:
-        condition: service_healthy
+      control-center-migrate:
+        condition: service_completed_successfully
       keycloak:
         condition: service_started
     expose:
