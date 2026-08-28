@@ -1,0 +1,25 @@
+{
+  auto_https off
+}
+
+:8088 {
+  encode zstd gzip
+
+  @api path /api/*
+  handle @api {
+    reverse_proxy host.docker.internal:3000
+  }
+
+  handle {
+    reverse_proxy host.docker.internal:3000
+  }
+
+  header {
+    X-Content-Type-Options nosniff
+    Referrer-Policy strict-origin-when-cross-origin
+    X-Frame-Options DENY
+  }
+}
+
+# Production: replace :8088 with the intended control-center hostname,
+# remove `auto_https off`, and route API/web to dedicated containers.
