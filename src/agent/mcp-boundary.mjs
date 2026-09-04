@@ -1,6 +1,21 @@
 const TOOL_EFFECTS = new Set(['read', 'write', 'execute', 'delete']);
 const OPERATION_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]{7,127}$/;
 const FORBIDDEN_INPUT_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+const FORBIDDEN_SECRET_KEYS = new Set([
+  'api_key',
+  'apikey',
+  'api-key',
+  'access_token',
+  'access-token',
+  'auth_token',
+  'auth-token',
+  'client_secret',
+  'client-secret',
+  'private_key',
+  'private-key',
+  'secret_key',
+  'secret-key'
+]);
 const DEFAULT_RETRYABLE_CODES = new Set([
   'ECONNRESET',
   'EPIPE',
@@ -75,6 +90,9 @@ function assertJsonSafe(value, path = 'input', seen = new Set(), depth = 0) {
   for (const [key, nestedValue] of Object.entries(value)) {
     if (FORBIDDEN_INPUT_KEYS.has(key)) {
       deny(`${path} contains forbidden key ${key}`);
+    }
+    if (FORBIDDEN_SECRET_KEYS.has(key.toLowerCase())) {
+      deny(`${path} contains a credential-shaped key; secrets must not enter tool context`);
     }
     assertJsonSafe(nestedValue, `${path}.${key}`, seen, depth + 1);
   }
