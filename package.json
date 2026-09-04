@@ -8,10 +8,11 @@
     "build:css": "tailwindcss -i ./src/input.css -o ./tailwind.css --minify",
     "watch:css": "tailwindcss -i ./src/input.css -o ./tailwind.css --watch",
     "sync:metadata": "node scripts/sync-canonical-metadata.mjs index.html",
-    "lint": "node --check server.js && node --check control-center/data-sources.js && node --check control-center/app.js && node --check render-farm/render-farm-master.js && node --check scripts/sync-canonical-metadata.mjs && node --check src/agent/mcp-boundary.mjs && node --check test/agent-mcp-boundary.test.mjs",
-    "test": "node --test test/agent-mcp-boundary.test.mjs && node --check control-center/data-sources.js && node --check control-center/app.js && node --check render-farm/render-farm-master.js && node --check scripts/sync-canonical-metadata.mjs && python3 -m py_compile render-farm/render-worker.py",
+    "lint": "node --check server.js && node --check control-center/data-sources.js && node --check control-center/app.js && node --check render-farm/render-farm-master.js && node --check scripts/sync-canonical-metadata.mjs && node --check src/agent/mcp-boundary.mjs && node --check test/agent-mcp-boundary.test.mjs && node --check test/agent-security-boundary.test.mjs",
+    "test": "node --test test/agent-mcp-boundary.test.mjs test/agent-security-boundary.test.mjs && node --check control-center/data-sources.js && node --check control-center/app.js && node --check render-farm/render-farm-master.js && node --check scripts/sync-canonical-metadata.mjs && python3 -m py_compile render-farm/render-worker.py",
     "test:agent-boundary": "node --test test/agent-mcp-boundary.test.mjs",
     "check:agent-boundary": "bash scripts/check-mcp-boundary.sh",
+    "check:agent-security": "bash scripts/check-agent-security-boundary.sh",
     "render:master": "node render-farm/render-farm-master.js",
     "build:html": "node scripts/replace-recaptcha-key.mjs"
   },
