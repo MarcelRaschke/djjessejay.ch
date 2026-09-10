@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "boundaries": {
+    "B0": "human",
+    "B1": "github",
+    "B2": "ci-cd",
+    "B3": "cloudflare-control-plane",
+    "B4": "edge-runtime",
+    "B5": "state-plane"
+  },
+  "rules": {
+    "unknown_identity": "deny",
+    "unknown_operation": "deny",
+    "invalid_input": "deny",
+    "missing_policy": "deny",
+    "insufficient_capability": "deny",
+    "telemetry_authorization": "deny"
+  }
+}

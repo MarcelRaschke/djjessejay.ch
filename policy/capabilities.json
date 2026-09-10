@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "capabilities": [
+    "state.music.read",
+    "state.music.write",
+    "state.media.read",
+    "state.media.write"
+  ]
+}

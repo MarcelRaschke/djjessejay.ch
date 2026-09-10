@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "operations": {
+    "music.read": {"capability": "state.music.read", "resources": ["D1"], "effect": "allow"},
+    "music.publish": {"capability": "state.music.write", "resources": ["D1", "R2"], "effect": "allow"},
+    "media.read": {"capability": "state.media.read", "resources": ["R2"], "effect": "allow"},
+    "media.publish": {"capability": "state.media.write", "resources": ["R2"], "effect": "allow"}
+  }
+}
