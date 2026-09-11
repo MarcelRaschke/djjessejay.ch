@@ -1,0 +1,7 @@
+# Issue template configuration
+
+blank_issues_enabled: false
+contact_links:
+  - name: Security report
+    about: Please report sensitive security issues privately using the repository security policy.
+    url: https://github.com/MarcelRaschke/djjessejay.ch/security/policy
