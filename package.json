@@ -13,12 +13,12 @@
     "test:agent-boundary": "node --test test/agent-mcp-boundary.test.mjs",
     "check:agent-boundary": "bash scripts/check-mcp-boundary.sh",
     "check:agent-security": "bash scripts/check-agent-security-boundary.sh",
+    "check:fauli-boundary": "bash scripts/check-fauli-boundary.sh",
     "render:master": "node render-farm/render-farm-master.js",
     "build:html": "node scripts/replace-recaptcha-key.mjs"
   },
   "keywords": [
     "dj",
-    "vanilla",
     "javascript",
     "tailwind",
     "express",
