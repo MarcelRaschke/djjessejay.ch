@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BLUE DIMENSION — 21,600s Visualizer</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#02030b;color:#dfeaff;font-family:system-ui,sans-serif}
+canvas{position:fixed;inset:0;width:100%;height:100%}
+#ui{position:fixed;left:18px;right:18px;bottom:18px;padding:12px 14px;border:1px solid #2452a0;background:rgba(2,7,22,.72);backdrop-filter:blur(12px);border-radius:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:12px}
+button,input{accent-color:#168cff}
+button{background:#07142b;color:#dfeaff;border:1px solid #2b65ba;border-radius:7px;padding:7px 11px}
+#time{margin-left:auto;font-variant-numeric:tabular-nums}
+#bar{flex:1;min-width:160px}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="ui">
+  <button id="play">START</button>
+  <button id="reset">RESET</button>
+  <label>Audio <input id="audio" type="file" accept="audio/*"></label>
+  <input id="bar" type="range" min="0" max="21600" step="0.1" value="0">
+  <span id="time">00:00:00 / 06:00:00</span>
+</div>
+<script>
+const DURATION=21600;
+const canvas=document.getElementById('c'), ctx=canvas.getContext('2d');
+let W,H,dpr=1,playing=false,t0=0,elapsed=0,last=performance.now(),audioCtx=null,analyser=null,data=null;
+const audio=document.getElementById('audio'), play=document.getElementById('play'), reset=document.getElementById('reset'), bar=document.getElementById('bar'), time=document.getElementById('time');
+
+function resize(){dpr=Math.min(devicePixelRatio||1,2); W=innerWidth; H=innerHeight; canvas.width=W*dpr; canvas.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0)}
+addEventListener('resize',resize); resize();
+
+function fmt(s){s=Math.max(0,Math.floor(s));let h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return [h,m,x].map(v=>String(v).padStart(2,'0')).join(':')}
+function amp(){
+  if(!analyser||!data)return 0;
+  analyser.getByteFrequencyData(data);
+  let sum=0; for(let i=0;i<data.length;i++) sum+=data[i];
+  return sum/data.length/255;
+}
+async function setupAudio(file){
+  if(audioCtx) audioCtx.close();
+  const el=new Audio(URL.createObjectURL(file)); el.loop=true; el.crossOrigin="anonymous";
+  audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  const src=audioCtx.createMediaElementSource(el);
+  analyser=audioCtx.createAnalyser(); analyser.fftSize=1024; data=new Uint8Array(analyser.frequencyBinCount);
+  src.connect(analyser); analyser.connect(audioCtx.destination); await el.play(); return el;
+}
+let audioEl=null;
+audio.onchange=async()=>{ if(audio.files[0]) audioEl=await setupAudio(audio.files[0]); };
+
+play.onclick=()=>{
+  playing=!playing; play.textContent=playing?"PAUSE":"START";
+  if(playing){t0=performance.now()-elapsed*1000; if(audioEl) audioEl.play();}
+  else if(audioEl) audioEl.pause();
+};
+reset.onclick=()=>{elapsed=0; t0=performance.now(); bar.value=0; if(audioEl) audioEl.currentTime=0;};
+bar.oninput=()=>{elapsed=+bar.value; t0=performance.now()-elapsed*1000; if(audioEl) audioEl.currentTime=elapsed%Math.max(1,audioEl.duration||1)};
+
+function draw(now){
+  if(playing){
+    elapsed=(now-t0)/1000;
+    if(elapsed>=DURATION){elapsed=DURATION;playing=false;play.textContent="START";}
+  }
+  const p=elapsed/DURATION, A=amp();
+  const cx=W/2, cy=H/2;
+  ctx.fillStyle="rgba(2,3,11,0.12)"; ctx.fillRect(0,0,W,H);
+
+  const base=150+Math.min(W,H)*0.12;
+  const r=base*(0.82+0.18*Math.sin(p*Math.PI*12));
+  ctx.save(); ctx.translate(cx,cy); ctx.globalCompositeOperation="screen";
+  for(let i=0;i<10;i++){
+    const a=p*Math.PI*2*(0.25+i*0.017)+i*0.63;
+    const rr=r*(0.35+i*0.09)+A*120;
+    const x=Math.cos(a)*rr, y=Math.sin(a)*rr*0.62;
+    const g=ctx.createRadialGradient(x,y,0,x,y,rr*.55);
+    g.addColorStop(0,"rgba(30,150,255,"+(0.08+A*.16)+")");
+    g.addColorStop(.55,"rgba(80,90,255,0.025)");
+    g.addColorStop(1,"rgba(0,0,0,0)");
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,rr*.55,0,Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+
+  const pulse=1+A*.35+0.04*Math.sin(now*.0008);
+  const size=Math.min(W,H)*.18*pulse;
+  ctx.save(); ctx.translate(cx,cy); ctx.rotate(p*Math.PI*2);
+  const grad=ctx.createLinearGradient(-size,-size,size,size);
+  grad.addColorStop(0,"#0b8cff"); grad.addColorStop(.55,"#228dff"); grad.addColorStop(1,"#9a7cff");
+  ctx.fillStyle=grad;
+  ctx.shadowBlur=30+70*A; ctx.shadowColor="rgba(45,135,255,.65)";
+  ctx.beginPath();
+  const k=.78;
+  ctx.moveTo(0,-size);
+  ctx.bezierCurveTo(size*k,-size*k,size*k,-size*k,size,0);
+  ctx.bezierCurveTo(size*k,size*k,size*k,size*k,0,size);
+  ctx.bezierCurveTo(-size*k,size*k,-size*k,size*k,-size,0);
+  ctx.bezierCurveTo(-size*k,-size*k,-size*k,-size*k,0,-size);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.strokeStyle="rgba(100,190,255,"+(0.12+A*.2)+")"; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.arc(cx,cy,size*(1.65+A*.15),0,Math.PI*2); ctx.stroke();
+
+  ctx.font="11px system-ui,sans-serif"; ctx.fillStyle="rgba(205,225,255,.62)";
+  ctx.fillText("BLUE DIMENSION  //  SIGNAL VISUALIZER",18,25);
+  ctx.fillText("21,600 s  ·  06:00:00  ·  "+(A>0.01?"AUDIO REACTIVE":"GENERATIVE MODE"),18,43);
+  ctx.fillText(fmt(elapsed)+"  /  "+fmt(DURATION),18,H-54);
+
+  bar.value=elapsed; time.textContent=fmt(elapsed)+" / 06:00:00";
+  last=now; requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+</script>
+</body>
+</html>
