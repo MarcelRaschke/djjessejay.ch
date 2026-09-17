@@ -16,6 +16,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Worker syntax
+        run: node --check infra/cloudflare/wdjjj.js
+
       - name: Health endpoint
         run: |
           set -euo pipefail
