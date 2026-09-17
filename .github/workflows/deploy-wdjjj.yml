@@ -1,0 +1,75 @@
+name: Deploy wdjjj
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "infra/cloudflare/**"
+      - ".github/workflows/deploy-wdjjj.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-wdjjj
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy Cloudflare Worker
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Worker syntax
+        run: node --check infra/cloudflare/wdjjj.js
+
+      - name: Deploy wdjjj
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: infra/cloudflare
+          command: deploy
+
+      - name: Verify Worker health
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4 5 6; do
+            body="$(curl -fsS https://djjessejay.ch/__wdjjj/health)" && {
+              echo "$body"
+              echo "$body" | grep -q '"ok":true'
+              echo "$body" | grep -q '"proxy":"wdjjj"'
+              exit 0
+            }
+            sleep 10
+          done
+          echo "Cloudflare Worker health check failed" >&2
+          exit 1
+
+      - name: Verify apex
+        run: |
+          set -euo pipefail
+          code="$(curl -sS -L --retry 5 --retry-delay 3 -o /dev/null -w '%{http_code}' https://djjessejay.ch/)"
+          echo "Apex HTTP status: $code"
+          test "$code" = "200"
+
+      - name: Verify security headers
+        run: |
+          set -euo pipefail
+          headers="$(curl -sS --retry 5 --retry-delay 3 -D - -o /dev/null https://djjessejay.ch/)"
+          echo "$headers"
+          echo "$headers" | grep -qi '^strict-transport-security:'
+          echo "$headers" | grep -qi '^content-security-policy:'
+          echo "$headers" | grep -qi '^x-content-type-options: nosniff'
+          echo "$headers" | grep -qi '^referrer-policy:'
+
+      - name: Verify POST rejection
+        run: |
+          set -euo pipefail
+          code="$(curl -sS --retry 5 --retry-delay 3 -o /dev/null -w '%{http_code}' -X POST https://djjessejay.ch/)"
+          echo "POST HTTP status: $code"
+          test "$code" = "405"
