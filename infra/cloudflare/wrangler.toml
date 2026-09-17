@@ -1,5 +1,5 @@
 # wdjjj — Cloudflare Worker Reverse-Proxy für djjessejay.ch
-# Spiegelt https://marcelraschke.github.io/djjessejay/ auf djjessejay.ch
+# Canonical GitHub Pages project site for this repository.
 name = "wdjjj"
 main = "wdjjj.js"
 compatibility_date = "2026-09-01"
@@ -14,5 +14,5 @@ routes = [
 enabled = true
 
 [vars]
-# Override für Staging (z. B. anderer Pages-Mirror); Default im Code:
-# ORIGIN_HOST = "marcelraschke.github.io"
+ORIGIN_HOST = "marcelraschke.github.io"
+ORIGIN_PREFIX = "/djjessejay.ch"
