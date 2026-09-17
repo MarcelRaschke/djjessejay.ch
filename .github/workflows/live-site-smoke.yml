@@ -1,0 +1,53 @@
+name: Live Site Smoke
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Live edge smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Health endpoint
+        run: |
+          set -euo pipefail
+          body="$(curl -fsS --retry 3 --retry-delay 2 https://djjessejay.ch/__wdjjj/health)"
+          echo "$body"
+          echo "$body" | grep -q '"ok":true'
+          echo "$body" | grep -q '"proxy":"wdjjj"'
+
+      - name: Apex returns a successful response
+        run: |
+          set -euo pipefail
+          code="$(curl -sS -L --retry 3 --retry-delay 2 -o /dev/null -w '%{http_code}' https://djjessejay.ch/)"
+          test "$code" = "200"
+
+      - name: WWW redirects to apex
+        run: |
+          set -euo pipefail
+          location="$(curl -sS --retry 3 --retry-delay 2 -D - -o /dev/null https://www.djjessejay.ch/ | awk 'tolower($1)=="location:" {print $2}' | tr -d '\r')"
+          test "$location" = "https://djjessejay.ch/"
+
+      - name: Mutating request is rejected
+        run: |
+          set -euo pipefail
+          code="$(curl -sS --retry 3 --retry-delay 2 -o /dev/null -w '%{http_code}' -X POST https://djjessejay.ch/)"
+          test "$code" = "405"
+
+      - name: Security headers are present
+        run: |
+          set -euo pipefail
+          headers="$(curl -sS --retry 3 --retry-delay 2 -D - -o /dev/null https://djjessejay.ch/)"
+          echo "$headers"
+          echo "$headers" | grep -qi '^strict-transport-security:'
+          echo "$headers" | grep -qi '^content-security-policy:'
+          echo "$headers" | grep -qi '^x-content-type-options: nosniff'
+          echo "$headers" | grep -qi '^referrer-policy:'
