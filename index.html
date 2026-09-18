@@ -22,7 +22,7 @@
     <meta name="twitter:image" content="https://djjessejay.ch/DJ-Jesse-Jay.jpg">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <!-- Content Security Policy -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://api.anthropic.com https://www.google.com/recaptcha/; img-src 'self' data:; frame-src https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://api.anthropic.com https://www.google.com/recaptcha/; img-src 'self' data:; frame-src https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/">
     <!-- Google reCAPTCHA v3 -->
     <script src="https://www.google.com/recaptcha/api.js?render=YOUR_RECAPTCHA_SITE_KEY" async defer></script>
     <!-- Tailwind CSS (local build) -->
@@ -726,6 +726,11 @@
             }
         };
 
+        // Optional client-side Anthropic API key. When the server-side AI proxy
+        // is unavailable, the client falls back to a direct Anthropic call using
+        // this key (collaboration/fallback path). Leave empty in production to
+        // rely solely on the secure server proxy; the CSP blocks the direct
+        // call unless this key is intentionally provided.
         const apiKey = ""; // Provided by environment
 
         function safeHTML(text) {
@@ -736,6 +741,35 @@
                 .replace(/\n\n/g, '</p><p class="mt-4">')
                 .replace(/\n/g, '<br>');
         }
+
+        // Maps each AI system instruction to the server-side feature id. The
+        // server owns the actual system prompts; the client only sends these ids.
+        const FEATURE_BIO = 'bio';
+        const FEATURE_REFINE = 'refine';
+        const FEATURE_RECOMMENDATION = 'recommendation';
+        const FEATURE_PRESS = 'press';
+        const FEATURE_SETLIST = 'setlist';
+        const FEATURE_CHAT = 'chat';
+        const FEATURE_FOR_INSTRUCTION = {
+            [FEATURE_BIO]: FEATURE_BIO,
+            [FEATURE_REFINE]: FEATURE_REFINE,
+            [FEATURE_RECOMMENDATION]: FEATURE_RECOMMENDATION,
+            [FEATURE_PRESS]: FEATURE_PRESS,
+            [FEATURE_SETLIST]: FEATURE_SETLIST,
+            [FEATURE_CHAT]: FEATURE_CHAT
+        };
+
+        // Real system instructions, used only by the direct Anthropic fallback
+        // path. The secure server proxy holds its own authoritative copy and the
+        // client never sends these as a prompt to the proxy.
+        const SYSTEM_INSTRUCTIONS = {
+            [FEATURE_BIO]: "You are a creative music journalist with a passion for electronic music. Write an engaging and slightly poetic alternative biography for DJ Jesse Jay, based on his existing bio. Highlight the 'soul-bearing journeys' and his deep connection to the Zurich club scene. Keep it to three paragraphs. Respond in German.",
+            [FEATURE_REFINE]: "You are a helpful AI assistant. Your task is to refine a user's message into a more professional and clear booking or contact request. Correct any grammar or spelling mistakes and structure it politely, but retain the original intent and key information. Respond in the same language as the user's message.",
+            [FEATURE_RECOMMENDATION]: "You are a knowledgeable and enthusiastic music curator for DJ Jesse Jay. Based on a user's described mood or event, you recommend one of three categories of his mixes: 'Latest Mixes' for modern, cutting-edge sounds; 'Radio Show' for deep, long-form journeys; or 'Classic Sets' for timeless, nostalgic vibes. Your response should first state the recommended category in bold, surrounded by asterisks (e.g., **Latest Mixes**), followed by a creative, short paragraph explaining why it's the perfect fit. Respond in the same language as the user's prompt.",
+            [FEATURE_PRESS]: "You are a professional PR agent specializing in electronic music. Your task is to write a short, exciting press release or social media announcement (around 100-150 words) for a gig by DJ Jesse Jay. The tone should be professional yet energetic. Use the provided event details. The output should be ready to copy and paste. Respond in the language of the user's details.",
+            [FEATURE_SETLIST]: "You are an expert AI music curator with deep knowledge of Progressive House, Techno, and Deep House from the 90s to today. Your task is to create a hypothetical 5-track setlist that DJ Jesse Jay might play, based on a user's description of a mood or theme. You must adhere to his known style: soulful, deep, journey-like, and sometimes sexy. The setlist should have a logical flow. RULES: 1. Generate a list of exactly 5 tracks. 2. Format the output as a numbered list. 3. Each item must follow this format: `Artist Name - Track Title (Remix if applicable)`. 4. Choose plausible, real tracks from the appropriate genres. 5. After the list, add one short, creative sentence describing the overall vibe of the generated set. 6. Respond in the same language as the user's prompt.",
+            [FEATURE_CHAT]: "You are a friendly and knowledgeable AI assistant for the website of DJ Jesse Jay, a techno and progressive house DJ from Zurich, Switzerland. Your name is JJ-AI. Your knowledge is based on the following information: - DJ Name: Jesse Jay (real name: Michael Fellner) - Active Since: 1997 - Location: Zurich, Switzerland - Music Styles: Progressive House, Techno, Deep House, Melodic Tech. His music is described as 'soul-bearing journeys' and 'deep, timeless musical experiences'. - Radio Show: 'The Blue Dimension' on Radio LoRa (lora.ch & DAB+). It runs every Thursday from midnight to 6 AM. He has been hosting a show since 2001. - Career Highlights: He grew up in the scene of legendary Zurich clubs like Aera, Labyrinth, SpiderGalaxy, and Dachkantine. - Official Links: Soundcloud (soundcloud.com/jessejay) and Radio LoRa (lora.ch/radio/sendungen/blue-dimension). - Personality: Answer in a helpful and slightly enthusiastic tone, reflecting the passion for electronic music. Keep answers concise and to the point. - Language: Always respond in the language of the user's question. - Limitations: You CANNOT handle bookings, personal requests, or provide personal contact details. If a user asks about bookings, you MUST direct them to the contact form on the website. - Your Goal: To answer questions about DJ Jesse Jay's music, career, and radio show based ONLY on the information provided."
+        };
 
         function sanitizePromptInput(input) {
             if (typeof input !== 'string') return '';
@@ -770,15 +804,63 @@
         }
 
         // --- Claude API Call Function ---
+        // Collaboration path: the secure server-side proxy (/api/ai/generate)
+        // is preferred because it keeps any API key off the client. If the proxy
+        // reports it is not configured (HTTP 503) and a client-side key is
+        // available, the call falls back to a direct Anthropic request so the
+        // feature keeps working in local/development setups.
         async function callClaudeAPI(prompt, systemInstruction, maxRetries = 3) {
+            const feature = FEATURE_FOR_INSTRUCTION[systemInstruction];
+            if (!feature) {
+                console.error('Unknown AI feature for instruction:', systemInstruction);
+                return null;
+            }
+            const proxyPayload = { feature, input: prompt };
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch('/api/ai/generate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(proxyPayload)
+                    });
+                    if (response.status === 503 && apiKey) {
+                        return await callClaudeDirect(prompt, systemInstruction, maxRetries);
+                    }
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const result = await response.json();
+                    if (result && result.text) {
+                        return result.text;
+                    } else {
+                        throw new Error("Invalid API response structure");
+                    }
+                } catch (error) {
+                    console.error(`Proxy attempt ${i + 1} failed:`, error);
+                    if (i === maxRetries - 1) {
+                        if (apiKey) {
+                            return await callClaudeDirect(prompt, systemInstruction, maxRetries);
+                        }
+                        return null;
+                    }
+                    await new Promise(res => setTimeout(res, Math.pow(2, i) * 1000)); // Exponential backoff
+                }
+            }
+            return null;
+        }
+
+        // Direct browser-to-Anthropic fallback. Used only when the server proxy
+        // is unavailable and a client-side key is present (e.g. local dev).
+        async function callClaudeDirect(prompt, systemInstruction, maxRetries = 3) {
             const apiUrl = "https://api.anthropic.com/v1/messages";
+            const resolvedSystem = SYSTEM_INSTRUCTIONS[systemInstruction];
             const payload = {
                 model: "claude-sonnet-4-6",
                 max_tokens: 1024,
                 messages: [{ role: "user", content: prompt }]
             };
-            if (systemInstruction) {
-                payload.system = systemInstruction;
+            if (resolvedSystem) {
+                payload.system = resolvedSystem;
             }
             for (let i = 0; i < maxRetries; i++) {
                 try {
@@ -802,7 +884,7 @@
                         throw new Error("Invalid API response structure");
                     }
                 } catch (error) {
-                    console.error(`API call attempt ${i + 1} failed:`, error);
+                    console.error(`Direct API call attempt ${i + 1} failed:`, error);
                     if (i === maxRetries - 1) {
                         return null; // Return null after the last retry
                     }
@@ -825,7 +907,7 @@
             bioLoading.classList.remove('hidden');
             generateBtn.disabled = true;
 
-            const systemInstruction = "You are a creative music journalist with a passion for electronic music. Write an engaging and slightly poetic alternative biography for DJ Jesse Jay, based on his existing bio. Highlight the 'soul-bearing journeys' and his deep connection to the Zurich club scene. Keep it to three paragraphs. Respond in German.";
+            const systemInstruction = FEATURE_BIO;
             const userPrompt = "Write a creative biography for DJ Jesse Jay. Key elements: active since 1997, from Zurich, plays Progressive House and Techno, hosts 'The Blue Dimension' on Radio LoRa, grew up in legendary clubs like Dachkantine.";
 
             const aiResponse = await callClaudeAPI(userPrompt, systemInstruction);
@@ -852,7 +934,7 @@
             const refineBtn = document.getElementById('refine-message-btn');
             if (!messageTextarea.value.trim()) return;
             const loadingText = translations[localStorage.getItem('preferred-language') || 'de']['ai-refine-btn-loading'] || 'Refining...';
-            const systemInstruction = "You are a helpful AI assistant. Your task is to refine a user's message into a more professional and clear booking or contact request. Correct any grammar or spelling mistakes and structure it politely, but retain the original intent and key information. Respond in the same language as the user's message.";
+            const systemInstruction = FEATURE_REFINE;
             const userPrompt = `Refine the following message into a professional inquiry: "${sanitizePromptInput(messageTextarea.value)}"`;
             await withBtnLoading(refineBtn, async () => {
                 const aiResponse = await callClaudeAPI(userPrompt, systemInstruction);
@@ -865,7 +947,7 @@
             const getRecoBtn = document.getElementById('get-recommendation-btn');
             const resultDiv = document.getElementById('recommendation-result');
             if (!vibeInput.value.trim()) return;
-            const systemInstruction = "You are a knowledgeable and enthusiastic music curator for DJ Jesse Jay. Based on a user's described mood or event, you recommend one of three categories of his mixes: 'Latest Mixes' for modern, cutting-edge sounds; 'Radio Show' for deep, long-form journeys; or 'Classic Sets' for timeless, nostalgic vibes. Your response should first state the recommended category in bold, surrounded by asterisks (e.g., **Latest Mixes**), followed by a creative, short paragraph explaining why it's the perfect fit. Respond in the same language as the user's prompt.";
+            const systemInstruction = FEATURE_RECOMMENDATION;
             const userPrompt = `The mood I'm looking for is: "${sanitizePromptInput(vibeInput.value)}". Which mix category should I listen to? Respond in the language of the prompt.`;
             await withBtnLoading(getRecoBtn, async () => {
                 showResultLoading(resultDiv);
@@ -884,7 +966,7 @@
             const genBtn = document.getElementById('generate-press-btn');
             const resultContainer = document.getElementById('press-result-container');
             const resultDiv = document.getElementById('press-result');
-            const systemInstruction = "You are a professional PR agent specializing in electronic music. Your task is to write a short, exciting press release or social media announcement (around 100-150 words) for a gig by DJ Jesse Jay. The tone should be professional yet energetic. Use the provided event details. The output should be ready to copy and paste. Respond in the language of the user's details.";
+            const systemInstruction = FEATURE_PRESS;
             const userPrompt = `Create a press release for an event with DJ Jesse Jay. Details: Date: ${date}, Venue: ${venue}, Special Notes: ${notes}.`;
             await withBtnLoading(genBtn, async () => {
                 resultContainer.classList.remove('hidden');
@@ -910,7 +992,7 @@
             const genBtn = document.getElementById('generate-setlist-btn');
             const resultDiv = document.getElementById('dream-setlist-result');
             if (!vibeInput.value.trim()) return;
-            const systemInstruction = "You are an expert AI music curator with deep knowledge of Progressive House, Techno, and Deep House from the 90s to today. Your task is to create a hypothetical 5-track setlist that DJ Jesse Jay might play, based on a user's description of a mood or theme. You must adhere to his known style: soulful, deep, journey-like, and sometimes sexy. The setlist should have a logical flow. RULES: 1. Generate a list of exactly 5 tracks. 2. Format the output as a numbered list. 3. Each item must follow this format: `Artist Name - Track Title (Remix if applicable)`. 4. Choose plausible, real tracks from the appropriate genres. 5. After the list, add one short, creative sentence describing the overall vibe of the generated set. 6. Respond in the same language as the user's prompt.";
+            const systemInstruction = FEATURE_SETLIST;
             const userPrompt = `Create a 5-track setlist for the following vibe: "${sanitizePromptInput(vibeInput.value)}"`;
             await withBtnLoading(genBtn, async () => {
                 showResultLoading(resultDiv);
@@ -950,7 +1032,7 @@
             chatWindow.appendChild(thinkingBubble);
             chatWindow.scrollTop = chatWindow.scrollHeight;
             
-            const systemInstruction = "You are a friendly and knowledgeable AI assistant for the website of DJ Jesse Jay, a techno and progressive house DJ from Zurich, Switzerland. Your name is JJ-AI. Your knowledge is based on the following information: - DJ Name: Jesse Jay (real name: Michael Fellner) - Active Since: 1997 - Location: Zurich, Switzerland - Music Styles: Progressive House, Techno, Deep House, Melodic Tech. His music is described as 'soul-bearing journeys' and 'deep, timeless musical experiences'. - Radio Show: 'The Blue Dimension' on Radio LoRa (lora.ch & DAB+). It runs every Thursday from midnight to 6 AM. He has been hosting a show since 2001. - Career Highlights: He grew up in the scene of legendary Zurich clubs like Aera, Labyrinth, SpiderGalaxy, and Dachkantine. - Official Links: Soundcloud (soundcloud.com/jessejay) and Radio LoRa (lora.ch/radio/sendungen/blue-dimension). - Personality: Answer in a helpful and slightly enthusiastic tone, reflecting the passion for electronic music. Keep answers concise and to the point. - Language: Always respond in the language of the user's question. - Limitations: You CANNOT handle bookings, personal requests, or provide personal contact details. If a user asks about bookings, you MUST direct them to the contact form on the website. - Your Goal: To answer questions about DJ Jesse Jay's music, career, and radio show based ONLY on the information provided.";
+            const systemInstruction = FEATURE_CHAT;
             const aiResponse = await callClaudeAPI(userMessage, systemInstruction);
 
             chatWindow.removeChild(thinkingBubble);

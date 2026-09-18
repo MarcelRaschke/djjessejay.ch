@@ -9,6 +9,7 @@
 const CANONICAL_HOST = "djjessejay.ch";
 const ORIGIN_HOST_DEFAULT = "marcelraschke.github.io";
 const ORIGIN_PREFIX_DEFAULT = "/djjessejay.ch";
+const API_TIMEOUT_MS = 30000;
 const UPSTREAM_TIMEOUT_MS = 8000;
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 
@@ -107,6 +108,40 @@ function withSecurityHeaders(response, upstream, originHost, originPrefix) {
   return new Response(upstream.body, { status: upstream.status, headers });
 }
 
+function proxyToApiOrigin(request, url, apiOriginHost, env) {
+  const apiScheme = (env && env.API_ORIGIN_SCHEME) || "https";
+  const apiOriginPort = (env && env.API_ORIGIN_PORT) || "";
+  const target = new URL(`${apiScheme}://${apiOriginHost}${apiOriginPort ? ":" + apiOriginPort : ""}${url.pathname}${url.search}`);
+  const headers = new Headers(request.headers);
+  headers.set("host", apiOriginHost);
+  headers.delete("cf-");
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+  return fetch(target.toString(), {
+    method: request.method,
+    headers,
+    body: request.method === "POST" ? request.body : undefined,
+    redirect: "manual",
+    signal: controller.signal,
+  })
+    .then((upstream) => withApiSecurityHeaders(upstream))
+    .catch(() => errorPage(504, "Gateway Timeout", apiOriginHost, "/api"))
+    .finally(() => clearTimeout(timer));
+}
+
+function withApiSecurityHeaders(upstream) {
+  const headers = new Headers();
+  for (const [key, value] of upstream.headers) {
+    const lower = key.toLowerCase();
+    if (STRIP_RESPONSE_HEADERS.has(lower)) continue;
+    if (lower === "content-length" || lower === "transfer-encoding") continue;
+    headers.set(key, value);
+  }
+  for (const [key, value] of Object.entries(OWN_HEADERS)) headers.set(key, value);
+  headers.set("cache-control", "no-store");
+  return new Response(upstream.body, { status: upstream.status, headers });
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -122,6 +157,20 @@ export default {
         status: 200,
         headers: { ...OWN_HEADERS, "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
       });
+    }
+
+    // API routes (/api and /api/*) are proxied to the Express backend origin.
+    // Only the methods the backend uses are allowed; everything else is 405.
+    const apiOriginHost = (env && env.API_ORIGIN_HOST) || "";
+    const isApiPath = url.pathname === "/api" || url.pathname.startsWith("/api/");
+    if (isApiPath) {
+      if (!apiOriginHost) {
+        return new Response("API origin not configured", { status: 502, headers: { ...OWN_HEADERS, "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
+      }
+      if (request.method !== "GET" && request.method !== "HEAD" && request.method !== "POST") {
+        return new Response("Method Not Allowed", { status: 405, headers: { ...OWN_HEADERS, allow: "GET, HEAD, POST", "cache-control": "no-store" } });
+      }
+      return proxyToApiOrigin(request, url, apiOriginHost, env);
     }
 
     if (request.method !== "GET" && request.method !== "HEAD") {

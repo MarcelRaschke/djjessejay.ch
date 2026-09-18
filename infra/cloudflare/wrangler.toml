@@ -16,3 +16,8 @@ enabled = true
 [vars]
 ORIGIN_HOST = "marcelraschke.github.io"
 ORIGIN_PREFIX = "/djjessejay.ch"
+# API backend origin for /api/* routing. Set API_ORIGIN_HOST to the Express
+# server host (e.g. origin.djjessejay.ch) via Wrangler secret or dashboard.
+# Leave empty to disable API routing (returns 502 for /api/*).
+API_ORIGIN_HOST = ""
+API_ORIGIN_SCHEME = "https"

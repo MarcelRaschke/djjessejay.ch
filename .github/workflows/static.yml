@@ -44,6 +44,12 @@ jobs:
       - name: Build CSS with Tailwind
         run: npm run build:css
 
+      - name: Inject reCAPTCHA site key
+        if: ${{ vars.RECAPTCHA_SITE_KEY != '' }}
+        env:
+          RECAPTCHA_SITE_KEY: ${{ vars.RECAPTCHA_SITE_KEY }}
+        run: npm run build:html
+
       - name: Remove large/unnecessary files before upload
         run: |
           # Remove database dumps (SQL/XML archives)
