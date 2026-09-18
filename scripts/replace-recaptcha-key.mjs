@@ -9,8 +9,14 @@ import { readFileSync, writeFileSync } from 'node:fs';
 const inputFile = new URL('../index.html', import.meta.url);
 const content = readFileSync(inputFile, 'utf8');
 
-const siteKey = process.env.RECAPTCHA_SITE_KEY || 'RECAPTCHA_SITE_KEY';
-const updatedContent = content.replace(/RECAPTCHA_SITE_KEY/g, siteKey);
+const PLACEHOLDER = 'YOUR_RECAPTCHA_SITE_KEY';
+const siteKey = process.env.RECAPTCHA_SITE_KEY || '';
 
+if (!siteKey) {
+  console.log('reCAPTCHA site key not provided (set RECAPTCHA_SITE_KEY env var); index.html unchanged');
+  process.exit(0);
+}
+
+const updatedContent = content.replaceAll(PLACEHOLDER, siteKey);
 writeFileSync(inputFile, updatedContent, 'utf8');
-console.log(`reCAPTCHA site key replaced with: ${siteKey === 'RECAPTCHA_SITE_KEY' ? 'placeholder (set RECAPTCHA_SITE_KEY env var)' : siteKey}`);
+console.log(`reCAPTCHA site key replaced in index.html`);

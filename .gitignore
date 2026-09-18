@@ -20,6 +20,10 @@ npm-debug.log*
 *.backup
 *.cache
 
+# Python bytecode
+__pycache__/
+*.pyc
+
 # OS generated files
 .DS_Store
 .DS_Store?
