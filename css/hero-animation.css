@@ -39,8 +39,8 @@ nav { backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px); }
 .hero-subtitle { max-width:720px!important;margin-top:1.2rem;color:var(--bd-muted)!important;font-size:clamp(.85rem,1.7vw,1.05rem)!important;letter-spacing:.14em;text-transform:uppercase; }
 .hero-frequency { top:1.5rem;right:1.5rem;padding:.6rem .85rem;border:1px solid var(--bd-line);border-radius:999px;background:rgba(3,7,17,.62);color:var(--bd-cyan)!important;font:700 .7rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.18em;backdrop-filter:blur(14px); }
 .hero-controls { bottom:1.4rem;gap:.7rem; }
-.hero-controls button { min-width:8.5rem;padding:.7rem 1rem;border:1px solid var(--bd-line-strong);border-radius:999px;background:rgba(5,14,30,.68);color:var(--bd-silver);font:700 .68rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em;text-transform:uppercase;box-shadow:none; }
-.hero-controls button:hover,.hero-controls button:focus-visible { background:rgba(34,211,238,.10);color:var(--bd-cyan);border-color:var(--bd-cyan);box-shadow:0 0 28px rgba(34,211,238,.12);transform:translateY(-1px); }
+.hero-controls button,.hero-controls a { min-width:8.5rem;padding:.7rem 1rem;border:1px solid var(--bd-line-strong);border-radius:999px;background:rgba(5,14,30,.68);color:var(--bd-silver);font:700 .68rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em;text-transform:uppercase;box-shadow:none;text-decoration:none;display:inline-flex;align-items:center;justify-content:center; }
+.hero-controls button:hover,.hero-controls button:focus-visible,.hero-controls a:hover,.hero-controls a:focus-visible { background:rgba(34,211,238,.10);color:var(--bd-cyan);border-color:var(--bd-cyan);box-shadow:0 0 28px rgba(34,211,238,.12);transform:translateY(-1px); }
 #radio-live-badge { border:1px solid var(--bd-line);background:rgba(3,7,17,.72)!important;color:var(--bd-muted)!important;border-radius:999px;box-shadow:var(--bd-glow); }
 #radio-live-badge.live { border-color:rgba(244,63,94,.45); }
 section:not(.hero-section) { position:relative; }
