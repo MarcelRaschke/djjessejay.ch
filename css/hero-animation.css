@@ -112,7 +112,7 @@ body::after { content:"97.5 MHz  •  BLUE DIMENSION  •  ZÜRICH  •  EST. 19
   opacity:.98;
 }
 .hero-content::after {
-  content:"PROGRESSIVE MUSIC ATTACK\\A J•Ր  ·  cy8er c0wc0d3  ·  ⚜️{.:*M3•0N*:.)⚜️ @®†\\A\\A DJJESSEJAY.CH  ·  ZÜRICH, CH  ·  RADIO LORA 97.5\\A AUTHORIZED  ·  EST. 1997  ·  BLUE DIMENSION";
+  content:"PROGRESSIVE MUSIC ATTACK\A J•Ր  ·  cy8er c0wc0d3  ·  ⚜️{.:*M3•0N*:.)⚜️ @®†\A\A DJJESSEJAY.CH  ·  ZÜRICH, CH  ·  RADIO LORA 97.5\A AUTHORIZED  ·  EST. 1997  ·  BLUE DIMENSION";
   white-space:pre;
   position:absolute;
   left:50%;
@@ -222,4 +222,114 @@ footer::before {
     transition:none!important;
     animation:none!important;
   }
+}
+
+/* ============================================
+   REFERENCE VISUALIZATION LAYER — 08.2026
+   Derived from the supplied visual references:
+   neon express tunnel, Zürich cyber-grid, vinyl signal,
+   sunrise/cymatic waveform, chrome wordmark, DJ silhouette.
+   This is a visual language layer; it does not replace canonical identity assets.
+   ============================================ */
+.hero-section,#hero-animation {
+  background-image:
+    linear-gradient(180deg,rgba(2,5,13,.72),rgba(2,5,13,.28) 46%,rgba(2,5,13,.82)),
+    url("../assets/blue-dimension-reference-visual.svg"),
+    radial-gradient(circle at 50% 46%,rgba(22,140,255,.18),transparent 34%),
+    linear-gradient(180deg,#02050c 0%,#061226 54%,#02050d 100%) !important;
+  background-position:center,center,center,center;
+  background-size:cover,cover,auto,auto;
+  background-repeat:no-repeat;
+}
+#hero-animation canvas {
+  mix-blend-mode:screen;
+  opacity:.82;
+}
+.hero-content {
+  background:
+    linear-gradient(180deg,rgba(2,5,13,.16),rgba(2,5,13,.68)),
+    radial-gradient(circle at 50% 40%,rgba(34,211,238,.10),transparent 42%),
+    url("../assets/blue-dimension-reference-visual.svg") center/cover no-repeat;
+  border-color:rgba(34,211,238,.24);
+}
+.hero-content::after {
+  text-shadow:0 0 14px rgba(22,140,255,.42);
+}
+#media {
+  isolation:isolate;
+  overflow:hidden;
+}
+#media::before {
+  content:"";
+  position:absolute;
+  inset:8% 0 8%;
+  z-index:-2;
+  background:
+    linear-gradient(180deg,rgba(2,5,13,.90),rgba(2,5,13,.56)),
+    url("../assets/blue-dimension-reference-visual.svg") center/cover no-repeat;
+  border-top:1px solid rgba(34,211,238,.18);
+  border-bottom:1px solid rgba(34,211,238,.18);
+  opacity:.72;
+}
+#media::after {
+  content:"97.5 // SIGNAL FIELD";
+  position:absolute;
+  top:10%;
+  right:3vw;
+  z-index:-1;
+  color:rgba(34,211,238,.30);
+  font:700 .58rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.24em;
+  writing-mode:vertical-rl;
+  text-transform:uppercase;
+}
+#media > .container {
+  position:relative;
+}
+#media > .container::before {
+  content:"REFERENCE SET / EXPRESS · CITY · VINYL · WAVE · DJ";
+  display:block;
+  width:max-content;
+  max-width:100%;
+  margin:0 auto 1.25rem;
+  padding:.45rem .7rem;
+  border:1px solid rgba(34,211,238,.24);
+  background:rgba(2,5,13,.64);
+  color:rgba(130,147,168,.92);
+  font:700 .56rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.18em;
+  text-align:center;
+}
+#media .media-image-frame,
+#media .media-card-studio {
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+#media .media-image-frame:nth-child(1),
+#media .media-card-studio:nth-child(1) {
+  box-shadow:var(--bd-shadow),0 0 42px rgba(34,211,238,.10)!important;
+}
+#media .media-image-frame:nth-child(2),
+#media .media-card-studio:nth-child(2) {
+  box-shadow:var(--bd-shadow),0 0 42px rgba(168,85,247,.10)!important;
+}
+#media .media-image-frame:nth-child(3),
+#media .media-card-studio:nth-child(3) {
+  box-shadow:var(--bd-shadow),0 0 42px rgba(236,72,153,.10)!important;
+}
+@media (max-width:768px) {
+  .hero-section,#hero-animation {
+    background-position:center,58% center,center,center;
+    background-size:auto,auto 100%,auto,auto;
+  }
+  #hero-animation canvas { opacity:.64; }
+  #media::after { display:none; }
+  #media > .container::before {
+    width:auto;
+    text-align:center;
+    line-height:1.5;
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  #hero-animation canvas { mix-blend-mode:normal;opacity:.45; }
 }
