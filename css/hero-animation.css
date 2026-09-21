@@ -1,4 +1,4 @@
-/**
+/** 
  * DJ Jesse Jay — Blue Dimension V2
  * Visual system / signal layer + runtime shell presentation.
  */
@@ -83,4 +83,143 @@ body::after { content:"97.5 MHz  •  BLUE DIMENSION  •  ZÜRICH  •  EST. 19
 }
 @media print {
   body::before,body::after,.hero-section::before,#hero-animation::before,.hero-section::after,#hero-animation::after { display:none!important; }
+}
+
+/* ============================================
+   BLUE DIMENSION IDENTITY LAYER — J•Ր MAIN SEAL
+   ============================================ */
+.hero-content {
+  position:relative;
+  width:min(92vw,980px);
+  padding:clamp(5.5rem,11vw,8rem) clamp(1.25rem,4vw,3rem) clamp(6rem,12vw,8rem);
+  border:1px solid rgba(72,185,255,.14);
+  background:
+    linear-gradient(180deg,rgba(2,5,13,.08),rgba(2,5,13,.42)),
+    radial-gradient(circle at 50% 45%,rgba(22,140,255,.12),transparent 52%);
+  box-shadow:inset 0 0 80px rgba(0,0,0,.26),0 24px 100px rgba(0,0,0,.34);
+  overflow:hidden;
+}
+.hero-content::before {
+  content:"";
+  position:absolute;
+  top:clamp(1rem,3vw,2rem);
+  left:50%;
+  width:clamp(74px,10vw,118px);
+  height:clamp(32px,5vw,52px);
+  transform:translateX(-50%);
+  background:url("../assets/j-main-seal.svg") center/contain no-repeat;
+  filter:drop-shadow(0 0 12px rgba(246,196,83,.26));
+  opacity:.98;
+}
+.hero-content::after {
+  content:"PROGRESSIVE MUSIC ATTACK\\A J•Ր  ·  cy8er c0wc0d3  ·  ⚜️{.:*M3•0N*:.)⚜️ @®†\\A\\A DJJESSEJAY.CH  ·  ZÜRICH, CH  ·  RADIO LORA 97.5\\A AUTHORIZED  ·  EST. 1997  ·  BLUE DIMENSION";
+  white-space:pre;
+  position:absolute;
+  left:50%;
+  bottom:1.25rem;
+  transform:translateX(-50%);
+  width:min(88%,760px);
+  padding:.8rem 1rem;
+  border:1px solid rgba(22,140,255,.48);
+  color:#168cff;
+  background:rgba(2,5,13,.62);
+  font:700 clamp(.42rem,1vw,.62rem)/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.13em;
+  text-align:center;
+  text-transform:uppercase;
+  box-shadow:inset 0 0 30px rgba(22,140,255,.05),0 0 26px rgba(22,140,255,.08);
+}
+.hero-title {
+  font-family:Inter,ui-sans-serif,system-ui,sans-serif;
+  font-weight:900!important;
+  background:linear-gradient(180deg,#ffffff 0%,#d7e1eb 48%,#7f8b98 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent!important;
+  filter:drop-shadow(0 4px 0 rgba(0,0,0,.38)) drop-shadow(0 0 24px rgba(72,185,255,.18));
+}
+.hero-title::before {
+  content:"DJ";
+  display:block;
+  color:#b9c7d4;
+  font-size:.22em;
+  letter-spacing:.34em;
+  margin-bottom:.45rem;
+  -webkit-text-fill-color:#b9c7d4;
+}
+.hero-title::after {
+  -webkit-text-fill-color:var(--bd-cyan);
+}
+.hero-frequency {
+  z-index:25;
+  border-color:rgba(246,196,83,.48);
+  color:var(--bd-gold)!important;
+  box-shadow:0 0 22px rgba(246,196,83,.10);
+}
+.hero-section .hero-controls { z-index:25; }
+.hero-section .hero-controls a:last-child {
+  border-color:rgba(246,196,83,.36);
+}
+.hero-section .hero-controls a:last-child:hover,
+.hero-section .hero-controls a:last-child:focus-visible {
+  color:var(--bd-gold);
+  border-color:var(--bd-gold);
+  background:rgba(246,196,83,.08);
+}
+#about, #events, #music, #media, #chatbot, #contact {
+  background-image:
+    radial-gradient(circle at 10% 10%,rgba(22,140,255,.08),transparent 28%),
+    radial-gradient(circle at 90% 70%,rgba(34,211,238,.05),transparent 28%);
+}
+#media .media-image-frame,
+#media .media-card-studio {
+  position:relative;
+  overflow:hidden;
+}
+#media .media-image-frame::after,
+#media .media-card-studio::after {
+  content:"C Y M A T I C   S I G N A L   /   0 9 7 . 5";
+  position:absolute;
+  right:.8rem;
+  bottom:.7rem;
+  color:rgba(34,211,238,.58);
+  font:600 .48rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.16em;
+  pointer-events:none;
+}
+.music-card-rose { --legacy-rose:rgba(244,63,94,.3); }
+.music-card-rose:hover { box-shadow:var(--bd-shadow),0 0 40px rgba(22,140,255,.12)!important; }
+.event-card-booking:hover { box-shadow:var(--bd-shadow),0 0 40px rgba(22,140,255,.12)!important; }
+footer::before {
+  content:"J•Ր";
+  display:block;
+  width:78px;
+  height:34px;
+  margin:0 auto 1.2rem;
+  background:url("../assets/j-main-seal.svg") center/contain no-repeat;
+  filter:drop-shadow(0 0 10px rgba(246,196,83,.22));
+}
+@media (max-width:768px) {
+  .hero-content {
+    width:94vw;
+    padding:5.5rem 1rem 8rem;
+  }
+  .hero-content::after {
+    width:88%;
+    letter-spacing:.07em;
+    line-height:1.55;
+  }
+  .hero-content::before {
+    width:78px;
+    height:34px;
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  .hero-content,
+  .hero-title,
+  .hero-content::before,
+  .hero-content::after {
+    transition:none!important;
+    animation:none!important;
+  }
 }
