@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 420" role="img" aria-labelledby="title desc">
+<title id="title">J•Ր Main Seal</title>
+<desc id="desc">Golden yellow geometric J, central dot, and mirrored J emblem on transparent background.</desc>
+<g fill="#FFD400">
+  <path d="M90 250h105v55c0 31 17 46 47 46 31 0 47-17 47-49V55h105v251c0 72-48 114-150 114-99 0-154-42-154-125v-45z"/>
+  <circle cx="500" cy="210" r="48"/>
+  <path d="M910 55H735c-83 0-137 49-137 125 0 76 54 125 137 125h70v-94h-70c-27 0-43-12-43-31 0-20 16-32 43-32h175V55z"/>
+</g>
+</svg>
