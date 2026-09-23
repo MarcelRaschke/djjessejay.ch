@@ -280,6 +280,367 @@
         button:disabled:hover {
             transform: scale(1);
         }
+    
+        /* Blue Dimension UI cleanup — 2026 */
+        :root {
+            --bd-bg: #020812;
+            --bd-surface: rgba(5, 18, 31, 0.78);
+            --bd-surface-strong: rgba(7, 24, 39, 0.94);
+            --bd-line: rgba(0, 217, 255, 0.16);
+            --bd-cyan: #00d9ff;
+            --bd-blue: #087cff;
+            --bd-signal: #ffd21a;
+            --bd-text: #edfaff;
+            --bd-muted: #7894a8;
+        }
+
+        html { scroll-behavior: smooth; }
+        body {
+            background:
+                radial-gradient(circle at 50% -10%, rgba(0, 124, 255, 0.18), transparent 38%),
+                radial-gradient(circle at 10% 35%, rgba(0, 217, 255, 0.05), transparent 28%),
+                var(--bd-bg) !important;
+            color: var(--bd-text);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: -1;
+            opacity: .18;
+            background-image:
+                linear-gradient(rgba(0,217,255,.045) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,217,255,.045) 1px, transparent 1px);
+            background-size: 48px 48px;
+            mask-image: linear-gradient(to bottom, black, transparent 75%);
+        }
+
+        header {
+            background: rgba(2, 8, 18, .82) !important;
+            border-color: var(--bd-line) !important;
+            box-shadow: 0 12px 40px rgba(0,0,0,.28);
+            backdrop-filter: blur(18px);
+        }
+
+        header nav {
+            max-width: 1180px;
+            min-height: 64px;
+            margin: 0 auto;
+        }
+
+        header nav::before {
+            content: "J•Ր";
+            color: var(--bd-signal);
+            font-weight: 900;
+            letter-spacing: .04em;
+            font-size: 1.05rem;
+            margin-right: auto;
+            text-shadow: 0 0 18px rgba(255,210,26,.18);
+        }
+
+        .language-selector {
+            top: 78px !important;
+            right: max(16px, calc((100vw - 1180px) / 2)) !important;
+            background: rgba(2,8,18,.72) !important;
+            border: 1px solid var(--bd-line);
+            box-shadow: 0 10px 30px rgba(0,0,0,.25);
+        }
+
+        .language-selector a.active {
+            color: var(--bd-signal) !important;
+            background: rgba(255,210,26,.08);
+        }
+
+        .nav-link { color: #a9c1cf !important; }
+        .nav-link::after { background: var(--bd-cyan) !important; }
+        .nav-link:hover { color: #fff !important; }
+
+        main {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding-top: 88px !important;
+        }
+
+        #hero-animation {
+            min-height: min(760px, calc(100vh - 88px)) !important;
+            padding: 72px 24px 96px !important;
+            border-bottom: 1px solid var(--bd-line);
+            background:
+                radial-gradient(circle at 50% 46%, rgba(0,217,255,.09), transparent 30%),
+                linear-gradient(180deg, rgba(4,18,31,.2), rgba(2,8,18,.7));
+            overflow: hidden;
+        }
+
+        #hero-animation .hero-title {
+            font-size: clamp(3rem, 9vw, 7rem) !important;
+            line-height: .92;
+            letter-spacing: -.045em;
+            text-transform: uppercase;
+            text-shadow: 0 0 50px rgba(0,217,255,.13);
+        }
+
+        #hero-animation .hero-subtitle {
+            margin-top: 1.25rem;
+            color: #8da8b8;
+            font-size: clamp(.78rem, 1.5vw, 1rem);
+            letter-spacing: .16em;
+            text-transform: uppercase;
+        }
+
+        #hero-animation .hero-frequency {
+            color: var(--bd-signal) !important;
+            letter-spacing: .16em;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: .8rem;
+        }
+
+        .hero-controls button,
+        .hero-controls a {
+            border: 1px solid rgba(0,217,255,.42);
+            background: rgba(0,217,255,.08);
+            color: #dffaff;
+            border-radius: 999px;
+            padding: .7rem 1.15rem;
+            text-decoration: none;
+            font-weight: 700;
+            letter-spacing: .04em;
+            transition: .2s ease;
+        }
+
+        .hero-controls button:hover,
+        .hero-controls a:hover {
+            background: rgba(0,217,255,.16);
+            border-color: var(--bd-cyan);
+            transform: translateY(-1px);
+        }
+
+        #about,
+        #events,
+        #music,
+        #media,
+        #chatbot,
+        #contact {
+            min-height: 0 !important;
+        }
+
+        #about {
+            padding: 96px 24px !important;
+        }
+
+        #about .container,
+        #events .container,
+        #music .container,
+        #media .container {
+            width: min(1180px, 100%);
+        }
+
+        .biography-text,
+        #events .event-card-radio,
+        #events .event-card-booking,
+        #music .music-card-rose,
+        #music .music-card-cyan,
+        #media .media-card-studio,
+        #media > div > div > div,
+        #chatbot > div,
+        #contact-form {
+            background: var(--bd-surface) !important;
+            border: 1px solid var(--bd-line) !important;
+            box-shadow: 0 18px 60px rgba(0,0,0,.18) !important;
+            backdrop-filter: blur(14px);
+        }
+
+        .biography-text {
+            border-radius: 18px !important;
+            padding: clamp(24px, 4vw, 44px) !important;
+            color: #b9cbd5 !important;
+            font-size: 1rem !important;
+        }
+
+        .profile-image {
+            border: 1px solid rgba(0,217,255,.22);
+            box-shadow: 0 0 0 10px rgba(0,217,255,.025), 0 25px 80px rgba(0,0,0,.42) !important;
+        }
+
+        .social-icons a {
+            width: 46px !important;
+            height: 46px !important;
+            font-size: 1.05rem !important;
+            background: rgba(6,24,39,.78) !important;
+            border: 1px solid var(--bd-line);
+            box-shadow: none !important;
+        }
+
+        #events,
+        #music,
+        #media,
+        #contact {
+            padding-top: 88px !important;
+            padding-bottom: 88px !important;
+        }
+
+        #events h2,
+        #media h2,
+        #contact h2 {
+            font-size: clamp(1.8rem, 4vw, 2.8rem) !important;
+            letter-spacing: -.025em;
+            margin-bottom: 2.25rem !important;
+        }
+
+        #events .grid,
+        #music > .container > .grid:first-child,
+        #media .grid {
+            gap: 16px !important;
+        }
+
+        #events .event-card-radio,
+        #events .event-card-booking,
+        #music .music-card-rose,
+        #music .music-card-cyan,
+        #media .media-card-studio,
+        #media > div > div > div {
+            border-radius: 14px !important;
+            padding: 24px !important;
+            transform: none !important;
+        }
+
+        #events .event-card-radio:hover,
+        #events .event-card-booking:hover,
+        #music .music-card-rose:hover,
+        #music .music-card-cyan:hover,
+        #media .media-card-studio:hover,
+        #media > div > div > div:hover {
+            transform: translateY(-3px) !important;
+            border-color: rgba(0,217,255,.34) !important;
+            box-shadow: 0 24px 70px rgba(0,0,0,.28) !important;
+        }
+
+        /* One visual language: remove the previous cyan/pink/red card split. */
+        .music-card-rose:hover,
+        .event-card-booking:hover { box-shadow: 0 24px 70px rgba(0,0,0,.28) !important; }
+
+        .btn-primary,
+        #events a,
+        #music a,
+        #media a,
+        #contact button[type="submit"] {
+            background: rgba(0,217,255,.10) !important;
+            border: 1px solid rgba(0,217,255,.42) !important;
+            color: #dffaff !important;
+            box-shadow: none !important;
+        }
+
+        .btn-primary:hover,
+        #events a:hover,
+        #music a:hover,
+        #media a:hover,
+        #contact button[type="submit"]:hover {
+            background: rgba(0,217,255,.18) !important;
+            border-color: var(--bd-cyan) !important;
+            box-shadow: 0 0 24px rgba(0,217,255,.12) !important;
+        }
+
+        #music {
+            background: rgba(4,16,28,.38) !important;
+            border-top: 1px solid rgba(0,217,255,.06);
+            border-bottom: 1px solid rgba(0,217,255,.06);
+        }
+
+        #music .bg-slate-900\/50,
+        #media .bg-slate-900\/50,
+        #chatbot .bg-slate-900\/50 {
+            background: var(--bd-surface) !important;
+        }
+
+        #music > .container > div:not(:first-child) {
+            border-radius: 16px !important;
+            border-color: var(--bd-line) !important;
+        }
+
+        #media .media-image-frame {
+            border: 1px solid rgba(0,217,255,.22) !important;
+            background: #03101c !important;
+            padding: 3px !important;
+        }
+
+        #chatbot {
+            padding: 88px 24px !important;
+        }
+
+        #chatbot > div {
+            width: min(900px, 100%);
+            height: min(620px, 72vh) !important;
+            min-height: 420px;
+            border-radius: 18px !important;
+            overflow: hidden;
+        }
+
+        #chatbot h2 {
+            font-size: 1.1rem !important;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: #b9d5df !important;
+        }
+
+        #chat-window {
+            background: rgba(1,7,14,.24);
+        }
+
+        .chat-bubble-user { background: rgba(0,217,255,.15) !important; border: 1px solid rgba(0,217,255,.24); }
+        .chat-bubble-ai { background: rgba(120,148,168,.10) !important; border: 1px solid rgba(120,148,168,.12); }
+
+        #contact-form {
+            width: min(900px, 100%);
+            border-radius: 18px !important;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        textarea {
+            background: rgba(2,10,19,.72) !important;
+            border-color: rgba(120,148,168,.22) !important;
+        }
+
+        input[type="text"]:focus-visible,
+        input[type="email"]:focus-visible,
+        textarea:focus-visible {
+            border-color: var(--bd-cyan) !important;
+            box-shadow: 0 0 0 3px rgba(0,217,255,.08) !important;
+            background: rgba(2,12,22,.9) !important;
+        }
+
+        footer {
+            background: #01060d !important;
+            border-top: 1px solid var(--bd-line);
+        }
+
+        @media (max-width: 760px) {
+            header nav {
+                justify-content: center;
+                gap: .15rem .35rem !important;
+                padding: .65rem .75rem !important;
+            }
+            header nav::before { width: 100%; text-align: center; margin: 0 0 .15rem; }
+            .language-selector { top: 108px !important; }
+            main { padding-top: 116px !important; }
+            #hero-animation { min-height: 620px !important; padding-top: 70px !important; }
+            #hero-animation .hero-title { font-size: clamp(2.6rem, 15vw, 4.8rem) !important; }
+            #about, #events, #music, #media, #chatbot, #contact { padding-left: 16px !important; padding-right: 16px !important; }
+            #about .container { gap: 28px !important; }
+            #about .profile-image { width: 190px !important; height: 190px !important; }
+            #chatbot > div { height: 520px !important; min-height: 0; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+                transition-duration: .01ms !important;
+            }
+        }
+
     </style>
 
     <!-- Canonical structured identity; generated from website/schema.org.jsonld -->
