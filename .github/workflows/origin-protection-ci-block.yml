@@ -1,0 +1,60 @@
+name: Origin Protection CI Block
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/cloudflare-tunnel-setup.js'
+      - 'scripts/verify-origin-protection.js'
+      - 'scripts/deployment-checklist.sh'
+      - '.github/workflows/origin-protection-ci-block.yml'
+      - 'ORIGIN-PROTECTION-DEPLOYMENT.md'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/cloudflare-tunnel-setup.js'
+      - 'scripts/verify-origin-protection.js'
+      - 'scripts/deployment-checklist.sh'
+      - '.github/workflows/origin-protection-ci-block.yml'
+      - 'ORIGIN-PROTECTION-DEPLOYMENT.md'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: origin-protection-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate origin protection
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require Node.js 22+
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+      - name: Syntax and security checklist
+        run: bash scripts/deployment-checklist.sh
+      - name: Verify repository scripts remain non-mutating in CI
+        run: |
+          node --check scripts/cloudflare-tunnel-setup.js
+          node --check scripts/verify-origin-protection.js
+
+  block-deploy:
+    name: Block deployment on validation failure
+    needs: validate
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enforce gate
+        env:
+          VALIDATION_RESULT: ${{ needs.validate.result }}
+        run: |
+          if [ "$VALIDATION_RESULT" != "success" ]; then
+            echo 'Origin protection validation failed; deployment is prohibited.' >&2
+            exit 1
+          fi
+          echo 'Origin protection validation passed.'
