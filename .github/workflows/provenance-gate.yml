@@ -30,4 +30,4 @@ jobs:
       - name: Verify release provenance
         env:
           GH_TOKEN: ${{ github.token }}
-        run: ./scripts/verify-release-attestation.sh
+        run: bash scripts/verify-release-attestation.sh
