@@ -7,8 +7,6 @@
  *   - --apply is mandatory for mutations
  *   - credentials are read only from environment variables
  *   - existing DNS records are never overwritten implicitly
- *   - existing named tunnels are reused; duplicate tunnels are refused
- *   - newly created state is rolled back on a failed apply
  *   - Access is only created for CF_ACCESS_HOSTNAME, never the public site hostname
  *
  * Requires Node.js >= 22 and no npm dependencies.
@@ -55,52 +53,6 @@ async function cf(path, options = {}) {
   return body.result;
 }
 
-async function findTunnels(accountId, name) {
-  const result = await cf(`/accounts/${accountId}/cfd_tunnel?name=${encodeURIComponent(name)}&is_deleted=false`);
-  return Array.isArray(result) ? result : [];
-}
-
-async function ensureTunnelCname(zoneId, hostname, tunnelId) {
-  const records = await cf(`/zones/${zoneId}/dns_records?name=${encodeURIComponent(hostname)}`);
-  const expected = `${tunnelId}.cfargotunnel.com`;
-  if (Array.isArray(records) && records.length > 0) {
-    if (records.length === 1 && records[0].type === 'CNAME' && records[0].proxied === true && records[0].content === expected) {
-      return { created: false, id: records[0].id };
-    }
-    throw new Error(`DNS record already exists for ${hostname}; refusing to overwrite it automatically`);
-  }
-
-  const created = await cf(`/zones/${zoneId}/dns_records`, {
-    method: 'POST',
-    body: JSON.stringify({
-      type: 'CNAME',
-      name: hostname,
-      content: expected,
-      proxied: true,
-      ttl: 1,
-    }),
-  });
-  return { created: true, id: created.id };
-}
-
-async function deleteDnsRecord(zoneId, recordId) {
-  if (!recordId) return;
-  try {
-    await cf(`/zones/${zoneId}/dns_records/${recordId}`, { method: 'DELETE' });
-  } catch (error) {
-    console.error(`ROLLBACK WARNING: could not delete DNS record ${recordId}: ${error.message}`);
-  }
-}
-
-async function deleteTunnel(accountId, tunnelId) {
-  if (!tunnelId) return;
-  try {
-    await cf(`/accounts/${accountId}/cfd_tunnel/${tunnelId}`, { method: 'DELETE' });
-  } catch (error) {
-    console.error(`ROLLBACK WARNING: could not delete tunnel ${tunnelId}: ${error.message}`);
-  }
-}
-
 async function main() {
   const accountId = required('CLOUDFLARE_ACCOUNT_ID');
   const zoneId = required('CLOUDFLARE_ZONE_ID');
@@ -135,91 +87,74 @@ async function main() {
     return;
   }
 
-  let tunnelId;
-  let createdTunnel = false;
-  const createdDnsRecords = [];
+  const tunnel = await cf(`/accounts/${accountId}/cfd_tunnel`, {
+    method: 'POST',
+    body: JSON.stringify({ name: tunnelName, config_src: 'cloudflare' }),
+  });
 
-  try {
-    const existingTunnels = await findTunnels(accountId, tunnelName);
-    if (existingTunnels.length > 1) {
-      throw new Error(`Multiple active tunnels already use name ${tunnelName}; refusing to guess`);
-    }
+  const tunnelId = tunnel.id;
+  if (!tunnelId) throw new Error('Cloudflare did not return a tunnel id');
 
-    if (existingTunnels.length === 1) {
-      tunnelId = existingTunnels[0].id;
-    } else {
-      const tunnel = await cf(`/accounts/${accountId}/cfd_tunnel`, {
-        method: 'POST',
-        body: JSON.stringify({ name: tunnelName, config_src: 'cloudflare' }),
-      });
-      tunnelId = tunnel.id;
-      createdTunnel = true;
-    }
+  await cf(`/accounts/${accountId}/cfd_tunnel/${tunnelId}/configurations`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      config: {
+        ingress: [
+          { hostname: publicHostname, service: originService, originRequest: {} },
+          ...(accessHostname ? [{ hostname: accessHostname, service: originService, originRequest: {} }] : []),
+          { service: 'http_status:404' },
+        ],
+      },
+    }),
+  });
 
-    if (!tunnelId) throw new Error('Cloudflare did not return a tunnel id');
+  const dns = await cf(`/zones/${zoneId}/dns_records?type=CNAME&name=${encodeURIComponent(publicHostname)}`);
+  if (Array.isArray(dns) && dns.length > 0) {
+    throw new Error(`DNS record already exists for ${publicHostname}; refusing to overwrite it automatically`);
+  }
 
-    await cf(`/accounts/${accountId}/cfd_tunnel/${tunnelId}/configurations`, {
-      method: 'PUT',
+  await cf(`/zones/${zoneId}/dns_records`, {
+    method: 'POST',
+    body: JSON.stringify({
+      type: 'CNAME',
+      name: publicHostname,
+      content: `${tunnelId}.cfargotunnel.com`,
+      proxied: true,
+      ttl: 1,
+    }),
+  });
+
+  let accessApp = null;
+  if (accessHostname) {
+    accessApp = await cf(`/accounts/${accountId}/access/apps`, {
+      method: 'POST',
       body: JSON.stringify({
-        config: {
-          ingress: [
-            { hostname: publicHostname, service: originService, originRequest: {} },
-            ...(accessHostname ? [{ hostname: accessHostname, service: originService, originRequest: {} }] : []),
-            { service: 'http_status:404' },
-          ],
-        },
+        name: `${tunnelName} Access`,
+        domain: accessHostname,
+        type: 'self_hosted',
+        session_duration: '24h',
+        policies: [
+          {
+            name: `${tunnelName} allow-list`,
+            decision: 'allow',
+            include: accessEmails.map(email => ({ email: { email } })),
+          },
+        ],
       }),
     });
-
-    const publicDns = await ensureTunnelCname(zoneId, publicHostname, tunnelId);
-    if (publicDns.created) createdDnsRecords.push(publicDns.id);
-
-    let accessApp = null;
-    if (accessHostname) {
-      const accessDns = await ensureTunnelCname(zoneId, accessHostname, tunnelId);
-      if (accessDns.created) createdDnsRecords.push(accessDns.id);
-
-      const existingApps = await cf(`/accounts/${accountId}/access/apps?domain=${encodeURIComponent(accessHostname)}`);
-      if (Array.isArray(existingApps) && existingApps.length > 0) {
-        throw new Error(`An Access application already exists for ${accessHostname}; refusing to overwrite it automatically`);
-      }
-
-      accessApp = await cf(`/accounts/${accountId}/access/apps`, {
-        method: 'POST',
-        body: JSON.stringify({
-          name: `${tunnelName} Access`,
-          domain: accessHostname,
-          type: 'self_hosted',
-          session_duration: '24h',
-          policies: [
-            {
-              name: `${tunnelName} allow-list`,
-              decision: 'allow',
-              include: accessEmails.map(email => ({ email: { email } })),
-            },
-          ],
-        }),
-      });
-    }
-
-    // Never print tunnel credentials/token. Retrieve them from Cloudflare.
-    console.log(JSON.stringify({
-      success: true,
-      tunnelId,
-      dnsTarget: `${tunnelId}.cfargotunnel.com`,
-      accessApplicationId: accessApp?.id || null,
-      reusedExistingTunnel: !createdTunnel,
-      next: 'Run cloudflared with the tunnel token from Cloudflare; verify with scripts/verify-origin-protection.js',
-    }, null, 2));
-  } catch (error) {
-    console.error(`ERROR: ${error.message}`);
-    for (const recordId of createdDnsRecords.reverse()) await deleteDnsRecord(zoneId, recordId);
-    if (createdTunnel) await deleteTunnel(accountId, tunnelId);
-    process.exitCode = 1;
   }
+
+  // Never print tunnel credentials/token. The operator can retrieve the token from Cloudflare.
+  console.log(JSON.stringify({
+    success: true,
+    tunnelId,
+    dnsTarget: `${tunnelId}.cfargotunnel.com`,
+    accessApplicationId: accessApp?.id || null,
+    next: `Run cloudflared with the tunnel token from Cloudflare; verify with scripts/verify-origin-protection.js`,
+  }, null, 2));
 }
 
 main().catch(error => {
-  console.error(`FATAL: ${error.message}`);
+  console.error(`ERROR: ${error.message}`);
   process.exitCode = 1;
 });
