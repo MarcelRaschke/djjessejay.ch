@@ -1,0 +1,33 @@
+name: Provenance Gate
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: provenance-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-v7-release-provenance:
+    name: Verify v7.0.0 Sigstore provenance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
+
+      - name: Verify release provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/verify-release-attestation.sh
