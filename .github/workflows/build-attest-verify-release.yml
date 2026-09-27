@@ -68,18 +68,11 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout source
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Download exact build artifact
+        uses: actions/download-artifact@v4
         with:
-          ref: ${{ inputs.source_ref }}
-          persist-credentials: false
-
-      - name: Rebuild release artifact
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p dist
-          tar --exclude=.git --exclude=dist -czf "dist/djjessejay.ch-${{ inputs.release_tag }}.tar.gz" .
+          name: djjessejay.ch-${{ inputs.release_tag }}
+          path: dist
 
       - name: Generate artifact attestation
         uses: actions/attest@v4
@@ -91,18 +84,11 @@ jobs:
     needs: attest
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout source
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Download exact build artifact
+        uses: actions/download-artifact@v4
         with:
-          ref: ${{ inputs.source_ref }}
-          persist-credentials: false
-
-      - name: Rebuild release artifact
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p dist
-          tar --exclude=.git --exclude=dist -czf "dist/djjessejay.ch-${{ inputs.release_tag }}.tar.gz" .
+          name: djjessejay.ch-${{ inputs.release_tag }}
+          path: dist
 
       - name: Verify GitHub Artifact Attestation
         env:
@@ -125,12 +111,11 @@ jobs:
     needs: verify
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout source
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Download exact build artifact
+        uses: actions/download-artifact@v4
         with:
-          ref: ${{ inputs.source_ref }}
-          fetch-depth: 0
-          persist-credentials: false
+          name: djjessejay.ch-${{ inputs.release_tag }}
+          path: dist
 
       - name: Create release tag
         env:
@@ -145,7 +130,9 @@ jobs:
           gh release create "${{ inputs.release_tag }}" \
             --target "${{ inputs.source_ref }}" \
             --title "${{ inputs.release_tag }}" \
-            --generate-notes
+            --generate-notes \
+            "dist/djjessejay.ch-${{ inputs.release_tag }}.tar.gz" \
+            "dist/SHA256SUMS"
 
       - name: Release gate passed
         run: echo "RELEASE PROVENANCE: PASS"
