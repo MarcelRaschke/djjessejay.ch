@@ -11,13 +11,6 @@ const { createHoneypotMonitor } = require('./honeypot/honeypot-monitor');
 
 const app = express();
 
-// Middleware - capture raw body for honeypot payload analysis
-app.use((req, res, next) => {
-  let rawBody = '';
-  req.on('data', chunk => { rawBody += chunk; });
-  req.on('end', () => { req.rawBody = rawBody; next(); });
-});
-
 // Honeypot middleware (early in stack to catch probing)
 app.use(createHoneypotMiddleware());
 

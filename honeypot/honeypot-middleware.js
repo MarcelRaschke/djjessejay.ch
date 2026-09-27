@@ -138,8 +138,8 @@ function createHoneypotMiddleware() {
       return next(); // Not a honeypot path, continue normally
     }
 
-    // Calculate payload size
-    const payloadSize = req.rawBody?.length || 0;
+    // Get payload size from Content-Length header (don't consume the stream)
+    const payloadSize = Number(req.get('content-length')) || 0;
 
     // Log the hit
     const logEntry = logHit({
