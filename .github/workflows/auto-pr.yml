@@ -29,10 +29,10 @@ permissions:
 
 jobs:
   open-draft-pr:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5.1.0
         with:
           fetch-depth: 0
 
@@ -79,10 +79,13 @@ jobs:
           body="$(printf 'Auto-generated draft PR for \`%s\`.\n\n## Commits\n%s\n\n🤖 Opened automatically by the auto-pr workflow.' \
             "$BRANCH" "$(git log --pretty='- %s' "origin/$BASE..HEAD")")"
 
-          gh pr create \
-            --draft \
-            --base "$BASE" \
-            --head "$BRANCH" \
-            --title "$title" \
-            --body "$body"
-          echo "Draft PR created for $BRANCH."
+          # Use the REST API instead of `gh pr create`'s GraphQL mutation.
+          # This makes same-repository branch ownership explicit.
+          gh api --method POST \
+            "repos/$GITHUB_REPOSITORY/pulls" \
+            -f "title=$title" \
+            -f "head=$GITHUB_REPOSITORY_OWNER:$BRANCH" \
+            -f "base=$BASE" \
+            -f "body=$body" \
+            -F "draft=true" \
+            --jq '"Draft PR created: #\(.number) \(.html_url)"'
