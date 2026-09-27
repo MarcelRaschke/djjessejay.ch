@@ -6,10 +6,22 @@ const path = require('path');
 const rateLimit = require('express-rate-limit');
 const cors = require('cors');
 const controlCenterRouter = require('./control-center/data-sources');
+const { createHoneypotMiddleware } = require('./honeypot/honeypot-middleware');
+const { createHoneypotMonitor } = require('./honeypot/honeypot-monitor');
 
 const app = express();
 
-// Middleware
+// Middleware - capture raw body for honeypot payload analysis
+app.use((req, res, next) => {
+  let rawBody = '';
+  req.on('data', chunk => { rawBody += chunk; });
+  req.on('end', () => { req.rawBody = rawBody; next(); });
+});
+
+// Honeypot middleware (early in stack to catch probing)
+app.use(createHoneypotMiddleware());
+
+// Regular body parsers
 app.use(express.json({ limit: '64kb' }));
 app.use(express.urlencoded({ extended: true, limit: '16kb' }));
 
@@ -50,6 +62,9 @@ const aiLimiter = rateLimit({
 
 // Apply rate limiting to API routes
 app.use('/api/', apiLimiter);
+
+// Honeypot monitoring (requires HONEYPOT_MONITOR_TOKEN env var)
+app.use('/api', createHoneypotMonitor());
 
 // Read-only DJ Jesse Jay Control Center source APIs.
 // These routes expose repository-backed truth and explicit connection state only.
