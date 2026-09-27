@@ -1,0 +1,151 @@
+name: Build Attest Verify Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag to create, e.g. v7.1.0"
+        required: true
+        type: string
+      source_ref:
+        description: "Git ref to build"
+        required: true
+        default: "main"
+        type: string
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+concurrency:
+  group: release-${{ inputs.release_tag }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build release artifact
+    runs-on: ubuntu-latest
+    outputs:
+      artifact_path: ${{ steps.meta.outputs.artifact_path }}
+      artifact_sha256: ${{ steps.digest.outputs.sha256 }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ inputs.source_ref }}
+          persist-credentials: false
+
+      - name: Build immutable site bundle
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          tar --exclude=.git --exclude=dist -czf "dist/djjessejay.ch-${{ inputs.release_tag }}.tar.gz" .
+          echo "artifact_path=dist/djjessejay.ch-${{ inputs.release_tag }}.tar.gz" >> "$GITHUB_OUTPUT"
+
+      - name: Compute SHA-256
+        id: digest
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum "${{ steps.meta.outputs.artifact_path }}" | tee dist/SHA256SUMS
+          digest="$(sha256sum "${{ steps.meta.outputs.artifact_path }}" | awk '{print $1}')"
+          echo "sha256=$digest" >> "$GITHUB_OUTPUT"
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: djjessejay.ch-${{ inputs.release_tag }}
+          path: |
+            ${{ steps.meta.outputs.artifact_path }}
+            dist/SHA256SUMS
+          if-no-files-found: error
+
+  attest:
+    name: Generate GitHub Artifact Attestation
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ inputs.source_ref }}
+          persist-credentials: false
+
+      - name: Rebuild release artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          tar --exclude=.git --exclude=dist -czf "dist/djjessejay.ch-${{ inputs.release_tag }}.tar.gz" .
+
+      - name: Generate artifact attestation
+        uses: actions/attest@v4
+        with:
+          subject-path: "dist/djjessejay.ch-${{ inputs.release_tag }}.tar.gz"
+
+  verify:
+    name: Verify Provenance
+    needs: attest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ inputs.source_ref }}
+          persist-credentials: false
+
+      - name: Rebuild release artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          tar --exclude=.git --exclude=dist -czf "dist/djjessejay.ch-${{ inputs.release_tag }}.tar.gz" .
+
+      - name: Verify GitHub Artifact Attestation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh attestation verify \
+            "dist/djjessejay.ch-${{ inputs.release_tag }}.tar.gz" \
+            --repo "${{ github.repository }}" \
+            --signer-repo "${{ github.repository }}"
+
+      - name: Verify artifact digest
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum "dist/djjessejay.ch-${{ inputs.release_tag }}.tar.gz"
+
+  release:
+    name: Publish Release
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ inputs.source_ref }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Create release tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git fetch --tags --force
+          if git rev-parse "${{ inputs.release_tag }}" >/dev/null 2>&1; then
+            echo "ERROR: release tag already exists: ${{ inputs.release_tag }}" >&2
+            exit 1
+          fi
+          gh release create "${{ inputs.release_tag }}" \
+            --target "${{ inputs.source_ref }}" \
+            --title "${{ inputs.release_tag }}" \
+            --generate-notes
+
+      - name: Release gate passed
+        run: echo "RELEASE PROVENANCE: PASS"
