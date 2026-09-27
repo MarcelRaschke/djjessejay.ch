@@ -7,11 +7,6 @@ on:
         description: "Release tag to create, e.g. v7.1.0"
         required: true
         type: string
-      source_ref:
-        description: "Git ref to build"
-        required: true
-        default: "main"
-        type: string
 
 permissions:
   contents: write
@@ -33,7 +28,7 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ inputs.source_ref }}
+          ref: main
           persist-credentials: false
 
       - name: Build immutable site bundle
@@ -90,7 +85,34 @@ jobs:
           name: djjessejay.ch-${{ inputs.release_tag }}
           path: dist
 
-      - name: Verify GitHub Artifact Attestation
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
+
+      - name: Download attestation bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh attestation download \
+            "dist/djjessejay.ch-${{ inputs.release_tag }}.tar.gz" \
+            --repo "${{ github.repository }}"
+
+      - name: Verify GitHub Artifact Attestation with Cosign
+        shell: bash
+        run: |
+          set -euo pipefail
+          artifact="dist/djjessejay.ch-${{ inputs.release_tag }}.tar.gz"
+          digest="$(sha256sum "$artifact" | awk '{print $1}')"
+          bundle="sha256:${digest}.jsonl"
+          test -s "$bundle"
+          cosign verify-blob-attestation \
+            --bundle "$bundle" \
+            --new-bundle-format \
+            --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
+            --certificate-identity="https://github.com/${{ github.repository }}/.github/workflows/build-attest-verify-release.yml@refs/heads/main" \
+            "$artifact"
+
+      - name: Verify artifact provenance with GitHub CLI
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -98,7 +120,9 @@ jobs:
           gh attestation verify \
             "dist/djjessejay.ch-${{ inputs.release_tag }}.tar.gz" \
             --repo "${{ github.repository }}" \
-            --signer-repo "${{ github.repository }}"
+            --signer-repo "${{ github.repository }}" \
+            --signer-workflow "${{ github.repository }}/.github/workflows/build-attest-verify-release.yml" \
+            --source-ref refs/heads/main
 
       - name: Verify artifact digest
         shell: bash
@@ -122,13 +146,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          git fetch --tags --force
-          if git rev-parse "${{ inputs.release_tag }}" >/dev/null 2>&1; then
-            echo "ERROR: release tag already exists: ${{ inputs.release_tag }}" >&2
+          if gh release view "${{ inputs.release_tag }}" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            echo "ERROR: release already exists: ${{ inputs.release_tag }}" >&2
             exit 1
           fi
           gh release create "${{ inputs.release_tag }}" \
-            --target "${{ inputs.source_ref }}" \
+            --target main \
             --title "${{ inputs.release_tag }}" \
             --generate-notes \
             "dist/djjessejay.ch-${{ inputs.release_tag }}.tar.gz" \
