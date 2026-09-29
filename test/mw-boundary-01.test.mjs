@@ -61,6 +61,8 @@ test('MW-BOUNDARY-01: capability cannot grant authorization', async () => {
   await assert.rejects(
     dispatchToolRequest({
       ...READ_REQUEST,
+      effect: 'execute',
+      tool: 'mcp.unlisted.tool',
       capability: ['can_execute'],
       permission: ['execute']
     }, {
@@ -128,28 +130,46 @@ test('MW-BOUNDARY-01: authorization denial cannot reach execution', async () => 
   assert.equal(dispatches, 0);
 });
 
-test('MW-BOUNDARY-01: only governance, eligibility and authorization gates can permit execution', async () => {
+test('MW-BOUNDARY-01: complete authorization gates permit execution', async () => {
   const dispatches = [];
+  let governance = 'PASS';
+  let eligibility = 'PASS';
+  let authorization = 'ALLOW';
 
   const policy = {
     tools: POLICY.tools,
-    authorize(request) {
-      return request.governance === 'PASS'
-        && request.eligibility === 'PASS'
-        && request.authorization === 'ALLOW';
+    authorize() {
+      return governance === 'PASS'
+        && eligibility === 'PASS'
+        && authorization === 'ALLOW';
     }
   };
 
-  await dispatchToolRequest({
-    ...READ_REQUEST,
-    governance: 'PASS',
-    eligibility: 'PASS',
-    authorization: 'ALLOW'
-  }, {
+  await dispatchToolRequest(READ_REQUEST, {
     policy,
     transport: makeTransport((event) => dispatches.push(event)),
     sleep: NO_SLEEP
   });
+
+  assert.equal(dispatches.length, 1);
+
+  for (const gate of ['governance', 'eligibility', 'authorization']) {
+    governance = 'PASS';
+    eligibility = 'PASS';
+    authorization = 'ALLOW';
+    if (gate === 'governance') governance = 'FAIL';
+    if (gate === 'eligibility') eligibility = 'FAIL';
+    if (gate === 'authorization') authorization = 'DENY';
+
+    await assert.rejects(
+      dispatchToolRequest(READ_REQUEST, {
+        policy,
+        transport: makeTransport(() => dispatches.push('unexpected')),
+        sleep: NO_SLEEP
+      }),
+      ToolRequestDeniedError
+    );
+  }
 
   assert.equal(dispatches.length, 1);
 });
