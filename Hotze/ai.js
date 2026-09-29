@@ -157,7 +157,7 @@ export function agentLog(t) {
   if (G) G.msg('\u{1F916} ' + t, 3000);
 }
 
-const AGENT_DECISION_INTERVAL_MS = 500;
+const AGENT_DECISION_INTERVAL_MS = 2000;
 
 export function agentTick(dt) {
   if (!agent.enabled || !G) return;
