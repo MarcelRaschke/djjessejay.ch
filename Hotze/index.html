@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hotze City — 3D Open World</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #101018; font-family: 'Arial', sans-serif; }
+  #game { position: fixed; inset: 0; }
+  #hud {
+    position: fixed; top: 16px; left: 16px; z-index: 10;
+    color: #fff; display: flex; flex-direction: column; gap: 6px;
+    text-shadow: 0 2px 4px #000; pointer-events: none;
+  }
+  .hud-line { background: rgba(0,0,0,.55); padding: 6px 12px; border-radius: 8px; border-left: 3px solid #ffd700; font-weight: bold; font-size: .95rem; }
+  #stars { color: #ff5555; font-size: 1.1rem; letter-spacing: 2px; }
+  #mission {
+    position: fixed; top: 16px; right: 16px; z-index: 10; color: #ffd700;
+    background: rgba(0,0,0,.6); padding: 10px 16px; border-radius: 10px;
+    font-weight: bold; max-width: 320px; text-shadow: 0 2px 4px #000;
+    border-right: 3px solid #ffd700; pointer-events: none;
+  }
+  #mission small { color: #fff; font-weight: normal; }
+  #controls {
+    position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+    z-index: 10; color: #ccc; background: rgba(0,0,0,.55); padding: 8px 18px;
+    border-radius: 10px; font-size: .85rem; white-space: nowrap;
+  }
+  #controls b { color: #ffd700; }
+  /* ---------- Touch-Steuerung ---------- */
+  #touch-ui { position: fixed; inset: 0; z-index: 20; pointer-events: none; display: none; }
+  body.touch #touch-ui { display: block; }
+  body.touch #controls { display: none; }
+  #joystick {
+    position: absolute; bottom: 90px; left: 28px; width: 130px; height: 130px;
+    border-radius: 50%; background: rgba(255,255,255,.08);
+    border: 2px solid rgba(255,215,0,.5); pointer-events: auto; touch-action: none;
+  }
+  #stick {
+    position: absolute; left: 50%; top: 50%; width: 54px; height: 54px;
+    margin: -27px 0 0 -27px; border-radius: 50%;
+    background: rgba(255,215,0,.55); border: 2px solid #ffd700;
+  }
+  #btns {
+    position: absolute; bottom: 80px; right: 24px;
+    display: grid; grid-template-columns: repeat(2, 74px); gap: 14px;
+    pointer-events: none;
+  }
+  .tbtn {
+    pointer-events: auto; width: 74px; height: 74px; border-radius: 50%;
+    border: 2px solid #ffd700; background: rgba(0,0,0,.55); color: #ffd700;
+    font-weight: bold; font-size: .8rem; user-select: none; -webkit-user-select: none;
+    display: flex; align-items: center; justify-content: center;
+    touch-action: none;
+  }
+  .tbtn:active, .tbtn.on { background: rgba(255,215,0,.45); color: #fff; }
+  #btnE { grid-column: 2; }
+  /* ---------- Musikstudio ---------- */
+  #studio {
+    position: fixed; inset: 0; z-index: 30; display: none;
+    background: rgba(8,4,20,.85); backdrop-filter: blur(6px);
+    align-items: center; justify-content: center;
+  }
+  #studio.open { display: flex; }
+  #studio-panel {
+    background: linear-gradient(180deg, #2a1a4a, #1a0a2e);
+    border: 2px solid #ff69b4; border-radius: 16px;
+    padding: 20px 24px; max-width: min(640px, 94vw); max-height: 92vh; overflow: auto;
+    box-shadow: 0 0 40px rgba(255,105,180,.4); color: #fff;
+  }
+  #studio-panel h2 { color: #ff69b4; margin-bottom: 2px; }
+  #studio-panel .sub { color: #aaa; font-size: .85rem; margin-bottom: 12px; }
+  #trackname {
+    background: #12081f; color: #ffd700; border: 1px solid #ff69b4;
+    border-radius: 8px; padding: 8px 10px; font-size: 1rem; width: 100%;
+    margin-bottom: 12px;
+  }
+  #genre-router { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .gbtn {
+    flex: 1; min-width: 120px; padding: 9px 10px; border-radius: 10px; cursor: pointer;
+    border: 2px solid #444; background: #1a1030; color: #ccc; font-weight: bold; font-size: .8rem;
+    text-align: center; user-select: none; -webkit-user-select: none;
+  }
+  .gbtn.sel { border-color: #ffd700; color: #ffd700; background: #33240a; }
+  .gbtn small { display: block; font-weight: normal; opacity: .7; }
+  #seq { display: grid; gap: 4px; margin-bottom: 14px; }
+  .rowlabel { font-size: .72rem; color: #aaa; align-self: center; }
+  .cell {
+    height: 24px; border-radius: 5px; border: 1px solid #3a2a5a; background: #150b28;
+    cursor: pointer; user-select: none; -webkit-user-select: none;
+  }
+  .cell.on { background: #ffd700; border-color: #ffd700; box-shadow: 0 0 6px rgba(255,215,0,.6); }
+  .cell.beat { border-color: #7a5aa0; }
+  #studio-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  #studio-actions button {
+    flex: 1; min-width: 130px; padding: 11px 14px; border-radius: 10px; cursor: pointer;
+    font-weight: bold; border: 2px solid #ffd700; background: #ff4444; color: #fff; font-size: .85rem;
+  }
+  #btnPreview { background: #3355dd; }
+  #btnCloseStudio { background: #555; border-color: #999; }
+  #studio-note { color: #ffd700; font-size: .85rem; margin-top: 10px; min-height: 1.2em; }
+  /* ---------- Jesse Jay SoundCloud-Player ---------- */
+  /* ---------- LoRa Livestream Player ---------- */
+  #lora-panel {
+    position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+    z-index: 25; width: min(520px, 92vw); display: none;
+    background: rgba(10,5,25,.92); border: 2px solid #ff5500; border-radius: 14px;
+    padding: 14px; box-shadow: 0 0 30px rgba(255,85,0,.4); color: #fff; text-align: center;
+  }
+  #lora-panel.open { display: block; }
+  #lora-panel h3 { color: #ff5500; margin: 0 0 4px; text-shadow: 0 0 8px rgba(255,85,0,.6); }
+  #lora-panel .sub { color: #aaa; font-size: .8rem; margin-bottom: 10px; }
+  #lora-audio { width: 100%; margin-bottom: 10px; }
+  #lora-status { font-size: .85rem; color: #ffd700; min-height: 1.2em; margin-bottom: 10px; }
+  #lora-actions { display: flex; gap: 8px; justify-content: center; }
+  #lora-actions button {
+    cursor: pointer; border-radius: 8px; padding: 8px 18px; font-weight: bold;
+    border: 1px solid #999; background: #555; color: #fff; font-size: .85rem;
+  }
+  #lora-close { border-color: #ff5500; }
+  /* ---------- Jesse Jay SoundCloud (außer Do-Nacht) ---------- */
+  #sc-panel {
+    position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+    z-index: 25; width: min(560px, 92vw); display: none;
+    background: rgba(10,5,25,.92); border: 2px solid #ff5500; border-radius: 14px;
+    padding: 10px; box-shadow: 0 0 30px rgba(255,85,0,.4);
+  }
+  #sc-panel.open { display: block; }
+  #sc-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  #sc-head b { color: #ff5500; font-size: .9rem; text-shadow: 0 0 6px rgba(255,85,0,.5); }
+  #sc-close { cursor: pointer; color: #fff; background: #555; border: 1px solid #999;
+    border-radius: 8px; padding: 4px 12px; font-weight: bold; font-size: .8rem; }
+  #sc-player iframe { width: 100%; height: 320px; border: 0; border-radius: 8px; }
+  /* ---------- Blue Dimension Banner ---------- */
+  #blue-banner {
+    position: fixed; top: 70px; left: 50%; transform: translateX(-50%) translateY(-20px);
+    z-index: 15; opacity: 0; pointer-events: none; transition: opacity .6s, transform .6s;
+    background: linear-gradient(90deg, transparent, rgba(10,20,80,.9), transparent);
+    color: #66ccff; padding: 10px 40px; font-weight: bold; font-size: 1rem;
+    text-shadow: 0 0 12px rgba(102,204,255,.9); letter-spacing: 2px; white-space: nowrap;
+  }
+  #blue-banner.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  body.blue-dim #hud .hud-line { border-left-color: #2266ff !important; }
+  body.blue-dim #mission { border-right-color: #2266ff; color: #66ccff; }
+  /* ---------- DJJJCOIN Börse ---------- */
+  #djjj-panel {
+    position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+    z-index: 25; width: min(480px, 92vw); display: none;
+    background: rgba(12,6,24,.94); border: 2px solid #ff7700; border-radius: 14px;
+    padding: 16px; box-shadow: 0 0 30px rgba(255,119,0,.4); color: #fff;
+  }
+  #djjj-panel.open { display: block; }
+  #djjj-panel h3 { color: #ff7700; margin: 0 0 2px; text-shadow: 0 0 8px rgba(255,119,0,.6); }
+  #djjj-panel .sub { color: #aaa; font-size: .8rem; margin-bottom: 10px; }
+  #djjj-chart { width: 100%; height: 90px; background: #12081f; border-radius: 8px; margin-bottom: 10px; }
+  #djjj-info { display: flex; justify-content: space-between; font-size: .85rem; margin-bottom: 12px; color: #ffd700; }
+  #djjj-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  #djjj-actions button {
+    flex: 1; min-width: 100px; padding: 10px 8px; border-radius: 10px; cursor: pointer;
+    font-weight: bold; border: 2px solid #ff7700; background: #2a1500; color: #ff7700; font-size: .85rem;
+  }
+  #djjj-actions button:active { background: #ff7700; color: #fff; }
+  #djjj-close { background: #555 !important; border-color: #999 !important; color: #fff !important; }
+  #djjj-note { color: #ffd700; font-size: .8rem; margin-top: 10px; min-height: 1.1em; }
+  /* ---------- NFT & Projekte Panels ---------- */
+  .ai-panel {
+    position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+    z-index: 25; width: min(500px, 92vw); display: none;
+    background: rgba(12,6,24,.94); border-radius: 14px;
+    padding: 16px; color: #fff; max-height: 70vh; overflow: auto;
+  }
+  .ai-panel.open { display: block; }
+  .ai-panel h3 { margin: 0 0 2px; text-shadow: 0 0 8px currentColor; }
+  .ai-panel .sub { color: #aaa; font-size: .8rem; margin-bottom: 10px; }
+  #nft-panel { border: 2px solid #00ffcc; box-shadow: 0 0 30px rgba(0,255,204,.35); }
+  #nft-panel h3 { color: #00ffcc; }
+  #proj-panel { border: 2px solid #c5f0ff; box-shadow: 0 0 30px rgba(120,200,255,.35); }
+  #proj-panel h3 { color: #7fd4ff; }
+  .nft-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .nft-card {
+    background: #12081f; border: 1px solid #3a2a5a; border-radius: 10px;
+    padding: 10px; font-size: .8rem;
+  }
+  .nft-card b { display: block; font-size: .85rem; margin-bottom: 2px; }
+  .nft-card .rare { font-size: .7rem; font-weight: bold; }
+  .nft-card button {
+    margin-top: 6px; width: 100%; padding: 6px; border-radius: 8px; cursor: pointer;
+    border: 1px solid #00ffcc; background: #062a24; color: #00ffcc; font-weight: bold; font-size: .75rem;
+  }
+  .proj-row {
+    background: #12081f; border: 1px solid #3a2a5a; border-radius: 10px;
+    padding: 10px 12px; margin-bottom: 8px; font-size: .85rem;
+  }
+  .proj-bar { height: 8px; background: #2a1a3a; border-radius: 4px; margin-top: 6px; overflow: hidden; }
+  .proj-bar div { height: 100%; background: linear-gradient(90deg, #7fd4ff, #00ffcc); }
+  .proj-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .proj-actions button {
+    flex: 1; min-width: 110px; padding: 9px 8px; border-radius: 10px; cursor: pointer;
+    font-weight: bold; border: 2px solid #7fd4ff; background: #0a1a2a; color: #7fd4ff; font-size: .8rem;
+  }
+  #task-line { color: #ffd700; font-size: .85rem; margin-top: 10px; }
+  .close-x { float: right; cursor: pointer; color: #fff; background: #555; border: 1px solid #999;
+    border-radius: 8px; padding: 3px 12px; font-weight: bold; font-size: .8rem; }
+  #minimap {
+    position: fixed; bottom: 16px; right: 16px; z-index: 10;
+    border: 2px solid #ffd700; border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.5);
+  }
+  #msg {
+    position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+    color: #fff; font-size: 1.2rem; font-weight: bold; z-index: 11;
+    text-shadow: 0 2px 6px #000; pointer-events: none; opacity: 0;
+    transition: opacity .4s; background: rgba(0,0,0,.5); padding: 8px 20px; border-radius: 10px;
+  }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div id="game"></div>
+<div id="hud">
+  <div class="hud-line">💰 Taler: <span id="money">0</span></div>
+  <div class="hud-line">🚗 Missionen: <span id="missions">0</span></div>
+  <div class="hud-line">Fahndung: <span id="stars"></span></div>
+  <div class="hud-line" style="border-left-color:#ff69b4">📻 <span id="radio-display">RADIO AUS</span></div>
+  <div class="hud-line" style="border-left-color:#ff7700">🪙 DJJJCOIN: <span id="djjj-balance">0</span> · <span id="djjj-price">?</span> T.</div>
+  <div class="hud-line" style="border-left-color:#33ff77">🖥️ KI-TOKENS: <span id="ki-tokens">0</span></div>
+</div>
+<div id="mission">WILKOMMEN IN HOTZE CITY<br><small>Aufträge folgen dem goldnen Marker!</small></div>
+<div id="msg"></div>
+<canvas id="minimap" width="180" height="180"></canvas>
+<a href="diagrams.html" style="position:fixed; top:16px; right:16px; z-index:12; color:#7fd4ff; background:rgba(0,0,0,.6); padding:8px 14px; border-radius:10px; text-decoration:none; font-size:.8rem; border:1px solid #3a6a9a">📊 Diagramme</a>
+<div id="controls"><b>WASD</b> laufen/fahren · <b>Shift</b> sprinten · <b>F</b> ein/aus Auto · <b>R</b> Radio schalten · <b>Space</b> Handbremse · <b>E</b> interagieren · <b>N</b> NFT-Tower · <b>P</b> Projekte · <b>T</b> KI-Agent · <b>J</b> KI-Token-Pakete buchen</div>
+
+<div id="studio">
+  <div id="studio-panel">
+    <h2>🎛️ HOTZE'S MUSIKSTUDIO</h2>
+    <div class="sub">Bau deinen eigenen Track — der Genre-Router stellt Sounds &amp; BPM, du legst die Steps!</div>
+    <input id="trackname" type="text" maxlength="24" placeholder="Trackname... (z.B. PLATTENBAU FUNK)">
+    <div id="genre-router">
+      <div class="gbtn sel" data-g="techno">OST-TECHNO<small>139 BPM</small></div>
+      <div class="gbtn" data-g="house">WILD-LIFE-HOUSE<small>124 BPM</small></div>
+      <div class="gbtn" data-g="funk">HOTZE-FUNK<small>100 BPM</small></div>
+    </div>
+    <div id="seq"></div>
+    <div id="studio-actions">
+      <button id="btnPreview">▶ VORSCHAU</button>
+      <button id="btnProduce">🎧 TRACK PRODUZIEREN (+1000)</button>
+      <button id="btnCloseStudio">SCHLIESSEN</button>
+    </div>
+    <div id="studio-note"></div>
+  </div>
+</div>
+
+<div id="blue-banner">🌊 BLUE DIMENSION NIGHT · DO 24–06 UHR · JESSE JAY LIVE AUF LORA 97,5 · PSY-NIGHT IN DER DISCO</div>
+
+<div id="sc-panel">
+  <div id="sc-head">
+    <b>🎧 JESSE JAY FM — DJ Jesse Jay (Zürich) · SoundCloud</b>
+    <button id="sc-close">Radio aus</button>
+  </div>
+  <div id="sc-player">
+    <iframe loading="lazy" allow="autoplay"
+      src="https://w.soundcloud.com/player/?url=https%3A%2F%2Fsoundcloud.com%2Fjessejay&color=%23ff5500&auto_play=true&hide_related=false&show_comments=false&show_user=true&show_reposts=false&visual=false"></iframe>
+  </div>
+</div>
+
+<div id="lora-panel">
+  <h3>📡 RADIO LORA 97,5 — LIVE AUS ZÜRICH</h3>
+  <div class="sub">livestream.lora.ch — Donnerstagnacht: Blue Dimension mit Jesse Jay</div>
+  <audio id="lora-audio" controls preload="none">
+    <source src="https://livestream.lora.ch/lora.mp3" type="audio/mpeg">
+    Dein Browser unterstützt kein Audio-Element.
+  </audio>
+  <div id="lora-status">Bereit — Play drücken!</div>
+  <div id="lora-actions">
+    <button id="lora-retry">↻ Neu verbinden</button>
+    <button id="lora-close">Radio aus</button>
+  </div>
+</div>
+
+<div id="djjj-panel">
+  <h3>🪙 DJJJCOIN BÖRSE — HOTZE EXCHANGE</h3>
+  <div class="sub">Kurs lebt! Kaufe billig, verkaufe hoch — Mining-Rig am Kraftwerk schürft für dich.</div>
+  <canvas id="djjj-chart" width="440" height="90"></canvas>
+  <div id="djjj-info">
+    <span>Kurs: <b id="djjj-cur">?</b> T.</span>
+    <span>Trend: <b id="djjj-trend">—</b></span>
+    <span>Depotwert: <b id="djjj-value">0</b> T.</span>
+  </div>
+  <div id="djjj-actions">
+    <button id="djjj-buy">KAUFEN (10)</button>
+    <button id="djjj-sell">VERKAUFEN (10)</button>
+    <button id="djjj-buyall">ALLES KAUFEN</button>
+    <button id="djjj-close">SCHLIESSEN</button>
+  </div>
+  <div id="djjj-note"></div>
+</div>
+
+<div id="nft-panel" class="ai-panel">
+  <button class="close-x" onclick="document.getElementById('nft-panel').classList.remove('open')">X</button>
+  <h3>🧩 AST NFT-VERTRAGS-TOWER</h3>
+  <div class="sub">Minte Verträge für 300 Taler — Rarität entscheidet über den Wert in DJJJCOIN! NFTs steigen im Wert, je länger du sie hältst.</div>
+  <button id="nft-mint" style="width:100%; padding:12px; border-radius:10px; cursor:pointer; font-weight:bold; border:2px solid #00ffcc; background:#062a24; color:#00ffcc; font-size:.9rem;">⚡ VERTRAG MINTEN (300 Taler)</button>
+  <div class="nft-grid" id="nft-list"></div>
+</div>
+
+<div id="proj-panel" class="ai-panel">
+  <button class="close-x" onclick="document.getElementById('proj-panel').classList.remove('open')">X</button>
+  <h3>📁 EIGENE PROJEKTE &amp; AUFGABEN</h3>
+  <div class="sub">Laufende Vorhaben mit Fortschrittsbalken — Finish zahlt Taler aus. (Taste P)</div>
+  <div id="proj-list"></div>
+  <div class="proj-actions" id="proj-buttons"></div>
+  <div id="task-line"></div>
+</div>
+
+<div id="ki-panel" class="ai-panel" style="border-color:#33ff77; box-shadow:0 0 30px rgba(51,255,119,.35)">
+  <button class="close-x" onclick="document.getElementById('ki-panel').classList.remove('open')">X</button>
+  <h3 style="color:#33ff77">🖥️ KI-ANBIETER — TOKEN-KONTO</h3>
+  <div class="sub">Der Agent zahlt mit echten Inferenz-Tokens. Jede Aktion = ein API-Call. (Taste T startet Agent)</div>
+  <div style="font-size:.9rem; margin-bottom:12px">
+    <b style="color:#33ff77">Guthaben: <span id="ki-balance">0</span> TOKENS</b><br>
+    <span style="color:#aaa">Verbrauch/Aktion: Fahrt 120 · Pickup 450 · Mint 800 · Projekt 1.200 · Quest 600</span>
+  </div>
+  <div class="proj-actions" style="margin-top:6px">
+    <button id="ki-dep-micro">MICRO<br><small style="font-weight:normal">5.000 Tokens · 1,20 €</small></button>
+    <button id="ki-dep-standard">STANDARD<br><small style="font-weight:normal">50.000 Tokens · 9,90 €</small></button>
+    <button id="ki-dep-pro">PRO<br><small style="font-weight:normal">500.000 Tokens · 79,00 €</small></button>
+  </div>
+  <div id="ki-note" style="color:#ffd700; font-size:.8rem; margin-top:10px; min-height:1.1em"></div>
+  <div id="ki-log" style="margin-top:8px"></div>
+</div>
+
+<div id="touch-ui">
+  <div id="joystick"><div id="stick"></div></div>
+  <div id="btns">
+    <div class="tbtn" id="btnF">CAR</div>
+    <div class="tbtn" id="btnE">PAKET</div>
+    <div class="tbtn" id="btnR">📻</div>
+    <div class="tbtn" id="btnBrake">BREMSE</div>
+  </div>
+</div>
+
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" } }
+</script>
+<script type="module" src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Hotze City — Architektur-Diagramme</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  body { background: #12081f; color: #eee; font-family: Arial, sans-serif; max-width: 1100px; margin: 0 auto; padding: 24px; }
+  h1 { color: #ffd700; text-shadow: 0 0 12px rgba(255,215,0,.5); }
+  h2 { color: #ff69b4; margin-top: 40px; }
+  .mermaid { background: #1a0f2e; border-radius: 12px; padding: 16px; border: 1px solid #3a2a5a; }
+  .back { color: #7fd4ff; }
+</style>
+</head>
+<body>
+<h1>🌆 HOTZE CITY — Systemarchitektur</h1>
+<p><a class="back" href="index.html">← Zurück zum Spiel</a></p>
+
+<h2>1. 🖥️ KI-Anbieter-Modell (Token-Abrechnung)</h2>
+<pre class="mermaid">
+flowchart LR
+    subgraph ANBIETER["KI-ANBIETER (Provider)"]
+        PKG["Token-Pakete verkaufen<br/>MICRO: 5.000 · 1,20 EUR<br/>STANDARD: 50.000 · 9,90 EUR<br/>PRO: 500.000 · 79,00 EUR"]
+        KONTO["Token-Konto<br/>(Guthaben, Calls, Log)"]
+    end
+    subgraph AGENT["KI-AGENT (Autopilot, Taste T)"]
+        INF["Inference-Engine<br/>Jede Aktion = 1 API-Call"]
+    end
+    subgraph SPIEL["HOTZE CITY (Spielwelt)"]
+        QUEST["Story-Auftraege<br/>Platten, Kumpels, Chill,<br/>Radio, Anlage, Party"]
+        WELT["Stadt, Autos, Disco,<br/>Studio, Boerse, NFT-Tower"]
+    end
+    Spieler["Spieler"] -->|"bucht Paket<br/>kiProvider.sellPackage()"| PKG
+    PKG -->|"+Tokens"| KONTO
+    KONTO -->|"Guthaben"| INF
+    INF -->|"verbraucht Tokens<br/>Fahrt 120, Pickup 450,<br/>Mint 800, Projekt 1200"| KONTO
+    INF -->|"steuert WASD"| WELT
+    INF -->|"arbeitet ab"| QUEST
+    Spieler -->|"Taste T"| AGENT
+    Spieler -->|"spielt manuell"| WELT
+    style ANBIETER fill:#0a2a1a,stroke:#33ff77,color:#fff
+    style AGENT fill:#1a1a3e,stroke:#7fd4ff,color:#fff
+    style SPIEL fill:#2a1a0a,stroke:#ffd700,color:#fff
+</pre>
+
+<h2>2. 💰 Wirtschaftskreislauf</h2>
+<pre class="mermaid">
+flowchart TD
+    AUFG["Auftraege & Projekte"] -->|"+ Taler"| TALER["Taler"]
+    TALER -->|"Kauf 300 T"| NFT["AST NFT<br/>Common bis Legendary"]
+    NFT -->|"HODL: Wert steigt"| NFT
+    NFT -->|"Verkauf"| DJJJ["DJJJCOIN"]
+    TALER -->|"Kauf an Boerse"| DJJJ
+    DJJJ -->|"Kurs-Tick 3s<br/>Pump +25% / Crash -25%"| DJJJ
+    DJJJ -->|"Verkauf"| TALER
+    MINE["Mining-Rig<br/>+0.1 Coin / 30s"] --> DJJJ
+    style TALER fill:#4a3a0a,stroke:#ffd700,color:#fff
+    style DJJJ fill:#3a2a0a,stroke:#ff7700,color:#fff
+    style NFT fill:#0a2a2a,stroke:#00ffcc,color:#fff
+</pre>
+
+<h2>3. 🎧 Musik- & Radio-System</h2>
+<pre class="mermaid">
+flowchart LR
+    STUDIO["Musikstudio<br/>16-Step-Sequencer"] -->|"produziert"| S4["Station 4:<br/>Eigener Track"]
+    SEQ["Prozeduraler WebAudio-Sequencer"] --> S1["OST-TECHNO"] & S2["WILD-LIFE-HOUSE"] & S3["HOTZE-FUNK"] & S4
+    S5["Station 5: JESSE JAY FM"] -->|"Donnerstagnacht<br/>Blue Dimension"| LORA["LORA 97,5 LIVE<br/>livestream.lora.ch"]
+    S5 -->|"alle anderen Tage"| SC["Jesse Jays SoundCloud"]
+    SEQ -->|"Beat-Sync"| PULS["Pulsierende Stadt<br/>Disco-Strobo, Fans tanzen"]
+    LORA --> PULS
+    SC --> PULS
+    style SEQ fill:#2a0a2a,stroke:#ff69b4,color:#fff
+    style LORA fill:#0a1a3a,stroke:#66ccff,color:#fff
+    style SC fill:#3a1a0a,stroke:#ff5500,color:#fff
+</pre>
+
+<h2>4. 🌊 Blue Dimension Weekly Special</h2>
+<pre class="mermaid">
+flowchart TD
+    CLOCK["Echtzeit-Pruefung alle 10 s"] -->|"Do 24:00 bis Fr 06:00"| BLUE["BLUE DIMENSION MODE"]
+    CLOCK -->|"sonst"| NORMAL["Normalmodus"]
+    BLUE -->|"Himmel + Nebel blau"| STADT["Stadt"]
+    BLUE -->|"Psy-blaue Lichter,<br/>Fans tanzen"| DISCO["Disco"]
+    BLUE -->|"Radio schaltet auto<br/>auf LoRa-Livestream"| RADIO["LoRa Live"]
+    BLUE -->|"Neon-Banner"| HUD["HUD"]
+    style BLUE fill:#0a1435,stroke:#66ccff,color:#fff
+</pre>
+
+<script>mermaid.initialize({ startOnLoad: true, theme: 'dark' });</script>
+</body>
+</html>
