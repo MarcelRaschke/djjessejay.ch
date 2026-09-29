@@ -73,7 +73,7 @@ module.exports = {
     // Minimum time between alerts for the same IP
     cooldownMs: 10 * 60 * 1000,
     alertThresholds: {
-      uniquePathsPerIP: 10,  // Alert if one IP probes 10+ distinct fake endpoints within 1 minute
+      uniquePathsPerIP: 10,  // Alert if one IP requests 10+ distinct decoy paths (case-sensitive, full path) within 1 minute
       payloadSize: 5000      // Alert if Content-Length > 5KB
     }
   },
