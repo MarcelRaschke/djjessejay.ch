@@ -1374,7 +1374,7 @@ function tick() {
 }
 
 /* ---------- NFT- & Projekt-Panels ---------- */
-function openNftPanel() {
+function escapeHTML(value) {\n  return String(value)\n    .replaceAll('&', '&amp;')\n    .replaceAll('<', '&lt;')\n    .replaceAll('>', '&gt;')\n    .replaceAll('\\"', '&quot;')\n    .replaceAll("'", '&#39;');\n}\n\nfunction openNftPanel() {
   document.getElementById('nft-panel').classList.add('open');
   refreshNftPanel();
 }
@@ -1385,9 +1385,9 @@ function refreshNftPanel() {
   if (!nfts.length) { list.innerHTML = '<div style="color:#888;grid-column:1/-1">Noch keine Verträge. Minte deinen ersten AST!</div>'; return; }
   list.innerHTML = nfts.map(n => `
     <div class="nft-card">
-      <b>${n.name}</b>
-      <span class="rare" style="color:${n.col}">${n.rarity}</span><br>
-      <span style="color:#aaa">${n.hash}</span><br>
+      <b>${escapeHTML(n.name)}</b>
+      <span class="rare" style="color:${escapeHTML(n.col)}">${escapeHTML(n.rarity)}</span><br>
+      <span style="color:#aaa">${escapeHTML(n.hash)}</span><br>
       <span style="color:#ffd700">Wert: ${n.valueDJJJ} DJJJ</span>
       <button data-sell="${n.id}">VERKAUFEN</button>
     </div>`).join('');
@@ -1410,7 +1410,7 @@ function refreshProjectsPanel() {
   if (!listEl) return;
   const act = getProjects();
   listEl.innerHTML = act.length
-    ? act.map(p => `<div class="proj-row"><b>${p.name}</b><div class="proj-bar"><div style="width:${p.progress}%"></div></div><span style="color:#aaa;font-size:.75rem">${p.progress}%</span></div>`).join('')
+    ? act.map(p => `<div class="proj-row"><b>${escapeHTML(p.name)}</b><div class="proj-bar"><div style="width:${p.progress}%"></div></div><span style="color:#aaa;font-size:.75rem">${p.progress}%</span></div>`).join('')
     : '<div style="color:#888">Keine aktiven Projekte. Starte eines!</div>';
   const { PROJECT_TYPES } = PROJECTS_UI;
   btnsEl.innerHTML = PROJECT_TYPES.map(t =>
@@ -1438,7 +1438,7 @@ function refreshJessePanel() {
   const bal = document.getElementById('ki-balance');
   if (bal) bal.textContent = info.tokens.toLocaleString('de-CH');
   const logEl = document.getElementById('ki-log');
-  if (logEl) logEl.innerHTML = info.log.slice(-8).map(l => `<div style="color:${l.startsWith('+') ? '#55ff55' : '#ff8888'};font-size:.72rem">${l}</div>`).join('');
+  if (logEl) logEl.innerHTML = info.log.slice(-8).map(l => `<div style="color:${l.startsWith('+') ? '#55ff55' : '#ff8888'};font-size:.72rem">${escapeHTML(l)}</div>`).join('');
   updateProviderHUD();
 }
 document.getElementById('ki-dep-micro').addEventListener('pointerdown', e => {
