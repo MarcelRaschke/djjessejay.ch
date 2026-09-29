@@ -4,73 +4,110 @@ const fs = require('fs');
 const path = require('path');
 const config = require('./honeypot-config');
 
-// Ensure logs directory exists
-const logsDir = path.dirname(config.logFile);
-if (!fs.existsSync(logsDir)) {
-  fs.mkdirSync(logsDir, { recursive: true });
-}
+const WINDOW_MS = 60 * 1000;
+const MAX_TRACKED_IPS = 10000;
+const MAX_LOGGED_FIELD = 512;
+const ERROR_LOG_INTERVAL_MS = 60 * 1000;
 
-// Track IP-based hit counts for alert thresholds
+const decoyPrefixes = config.fakeEndpoints.map(endpoint => endpoint.toLowerCase());
+
+// Track per-IP probing to decide when to alert
 const ipTracking = new Map();
 
-// Log a honeypot hit to JSONL file
+let lastLogErrorAt = 0;
+
+// The honeypot must never take the site down: report storage problems, at most
+// once a minute, and keep serving.
+function reportLogError(err) {
+  const now = Date.now();
+  if (now - lastLogErrorAt < ERROR_LOG_INTERVAL_MS) return;
+  lastLogErrorAt = now;
+  console.error('[HONEYPOT] log write failed:', err.message);
+}
+
+try {
+  fs.mkdirSync(path.dirname(config.logFile), { recursive: true });
+} catch (err) {
+  reportLogError(err);
+}
+
+function clip(value, max = MAX_LOGGED_FIELD) {
+  if (value === null || value === undefined) return null;
+  return String(value).slice(0, max);
+}
+
+// Append a honeypot hit to the JSONL log (asynchronous, never throws)
 function logHit(data) {
   const logEntry = {
     timestamp: new Date().toISOString(),
     ip: data.ip,
-    userAgent: data.userAgent,
-    path: data.path,
+    // Untrusted client-supplied header values (Cloudflare or a spoofing client)
+    forwardedFor: clip(data.forwardedFor),
+    userAgent: clip(data.userAgent),
+    path: clip(data.path),
     method: data.method,
     query: data.query || null,
     payloadSize: data.payloadSize || 0,
     headers: {
-      referer: data.referer || null,
-      accept: data.accept || null,
-      'accept-language': data.acceptLanguage || null
+      referer: clip(data.referer),
+      accept: clip(data.accept),
+      'accept-language': clip(data.acceptLanguage)
     }
   };
 
-  const jsonl = JSON.stringify(logEntry) + '\n';
-  fs.appendFileSync(config.logFile, jsonl, { flag: 'a' });
+  fs.appendFile(config.logFile, JSON.stringify(logEntry) + '\n', err => {
+    if (err) reportLogError(err);
+  });
 
   return logEntry;
 }
 
-// Check if alert should be triggered
-function shouldAlert(ip, path, payloadSize) {
+function pruneTracking(now) {
+  for (const [key, data] of ipTracking) {
+    if (now - data.hitTime > WINDOW_MS && now - data.lastAlertAt > config.alerts.cooldownMs) {
+      ipTracking.delete(key);
+    }
+  }
+  if (ipTracking.size >= MAX_TRACKED_IPS) ipTracking.clear();
+}
+
+// Decide whether this hit should raise an alert. At most one alert per IP per
+// cooldown period.
+function shouldAlert(ip, requestPath, payloadSize) {
   const threshold = config.alerts.alertThresholds;
+  const now = Date.now();
 
-  // Check payload size
-  if (payloadSize > threshold.payloadSize) {
-    return { type: 'oversized_payload', message: `Payload ${payloadSize} bytes exceeds ${threshold.payloadSize}` };
+  if (ipTracking.size >= MAX_TRACKED_IPS) pruneTracking(now);
+
+  let ipData = ipTracking.get(ip);
+  if (!ipData) {
+    ipData = { paths: new Set(), hitTime: now, lastAlertAt: 0 };
+    ipTracking.set(ip, ipData);
   }
 
-  // Track IP hits
-  if (!ipTracking.has(ip)) {
-    ipTracking.set(ip, { paths: new Set(), hitTime: Date.now() });
-  }
-
-  const ipData = ipTracking.get(ip);
-  ipData.paths.add(path);
-
-  // Reset counter if older than 1 minute
-  if (Date.now() - ipData.hitTime > 60000) {
+  if (now - ipData.hitTime > WINDOW_MS) {
     ipData.paths.clear();
-    ipData.hitTime = Date.now();
+    ipData.hitTime = now;
   }
+  if (ipData.paths.size < threshold.uniquePathsPerIP) ipData.paths.add(requestPath);
 
-  // Alert if too many paths probed
-  if (ipData.paths.size >= threshold.uniquePathsPerIP) {
-    return {
+  if (now - ipData.lastAlertAt < config.alerts.cooldownMs) return null;
+
+  let alert = null;
+  if (payloadSize > threshold.payloadSize) {
+    alert = { type: 'oversized_payload', message: `Payload ${payloadSize} bytes exceeds ${threshold.payloadSize}` };
+  } else if (ipData.paths.size >= threshold.uniquePathsPerIP) {
+    alert = {
       type: 'scanning_behavior',
       message: `IP ${ip} probed ${ipData.paths.size} fake endpoints in 1 minute`
     };
   }
 
-  return null;
+  if (alert) ipData.lastAlertAt = now;
+  return alert;
 }
 
-// Send alert (email or webhook)
+// Send alert (webhook and/or email)
 async function sendAlert(alertData, logEntry) {
   if (!config.alerts.enableAlerts) return;
 
@@ -83,6 +120,7 @@ async function sendAlert(alertData, logEntry) {
       await fetch(config.alerts.webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(5000),
         body: JSON.stringify({
           alert_type: alertData.type,
           message: alertData.message,
@@ -103,6 +141,7 @@ async function sendAlert(alertData, logEntry) {
       host: process.env.SMTP_HOST,
       port: Number(process.env.SMTP_PORT) || 587,
       secure: process.env.SMTP_SECURE === 'true',
+      connectionTimeout: 10000,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS
@@ -126,67 +165,72 @@ async function sendAlert(alertData, logEntry) {
 function createHoneypotMiddleware() {
   return (req, res, next) => {
     const requestPath = req.path;
-    const method = req.method;
-    const ip = req.ip || req.connection.remoteAddress || 'unknown';
+    const lowerPath = requestPath.toLowerCase();
 
-    // Check if this is a fake endpoint
-    const isFakeEndpoint = config.fakeEndpoints.some(endpoint =>
-      requestPath.toLowerCase().startsWith(endpoint.toLowerCase())
-    );
-
-    if (!isFakeEndpoint) {
+    if (!decoyPrefixes.some(prefix => lowerPath.startsWith(prefix))) {
       return next(); // Not a honeypot path, continue normally
     }
 
-    // Get payload size from Content-Length header (don't consume the stream)
-    const payloadSize = Number(req.get('content-length')) || 0;
+    try {
+      const ip = req.ip || req.socket.remoteAddress || 'unknown';
 
-    // Log the hit
-    const logEntry = logHit({
-      ip,
-      userAgent: req.get('user-agent') || 'unknown',
-      path: requestPath,
-      method,
-      query: Object.keys(req.query).length > 0 ? req.query : null,
-      payloadSize,
-      referer: req.get('referer'),
-      accept: req.get('accept'),
-      acceptLanguage: req.get('accept-language')
-    });
+      // Payload size from Content-Length (never consume the request stream)
+      const payloadSize = Number(req.get('content-length')) || 0;
 
-    // Check for alerts
-    const alert = shouldAlert(ip, requestPath, payloadSize);
-    if (alert) {
-      sendAlert(alert, logEntry).catch(console.error);
+      const logEntry = logHit({
+        ip,
+        forwardedFor: req.get('cf-connecting-ip') || req.get('x-forwarded-for'),
+        userAgent: req.get('user-agent') || 'unknown',
+        path: requestPath,
+        method: req.method,
+        query: Object.keys(req.query).length > 0 ? req.query : null,
+        payloadSize,
+        referer: req.get('referer'),
+        accept: req.get('accept'),
+        acceptLanguage: req.get('accept-language')
+      });
+
+      const alert = shouldAlert(ip, requestPath, payloadSize);
+      if (alert) {
+        sendAlert(alert, logEntry).catch(console.error);
+      }
+    } catch (err) {
+      reportLogError(err);
     }
 
     // Determine response based on endpoint type
     let response = config.responses.default;
-    if (requestPath.includes('wp-') || requestPath.includes('admin')) {
+    if (lowerPath.includes('wp-') || lowerPath.includes('admin')) {
       response = config.responses.admin;
-    } else if (requestPath.includes('api')) {
+    } else if (lowerPath.includes('api')) {
       response = config.responses.api;
     }
 
-    // Send fake response
     res.status(response.status).json(response.body);
   };
 }
 
-// Export utility to query honeypot logs
+// Read recent hits from the JSONL log (skips unparseable lines)
 function getRecentHits(minutes = 60, ipFilter = null) {
   if (!fs.existsSync(config.logFile)) return [];
 
-  const logs = fs.readFileSync(config.logFile, 'utf-8')
-    .split('\n')
-    .filter(line => line.trim())
-    .map(line => JSON.parse(line));
-
   const cutoff = Date.now() - (minutes * 60 * 1000);
-  return logs.filter(log => {
-    const logTime = new Date(log.timestamp).getTime();
-    return logTime > cutoff && (!ipFilter || log.ip === ipFilter);
-  });
+  const hits = [];
+
+  for (const line of fs.readFileSync(config.logFile, 'utf-8').split('\n')) {
+    if (!line.trim()) continue;
+    let entry;
+    try {
+      entry = JSON.parse(line);
+    } catch {
+      continue;
+    }
+    if (new Date(entry.timestamp).getTime() > cutoff && (!ipFilter || entry.ip === ipFilter)) {
+      hits.push(entry);
+    }
+  }
+
+  return hits;
 }
 
 module.exports = {

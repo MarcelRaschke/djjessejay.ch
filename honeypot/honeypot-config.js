@@ -1,8 +1,12 @@
 'use strict';
 
+const path = require('path');
+
 // Honeypot configuration — low-interaction decoy endpoints
 module.exports = {
-  // Fake endpoints that bots commonly probe
+  // Fake endpoints that bots commonly probe (prefix match, case-insensitive).
+  // Behind the Cloudflare Worker only /api/* reaches this server, so the
+  // /api/* decoys are the ones public traffic can trigger.
   fakeEndpoints: [
     // WordPress/CMS
     '/wp-admin',
@@ -55,36 +59,29 @@ module.exports = {
     '/info.php'
   ],
 
-  // HTTP methods to trap
-  trapMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
+  // JSONL log file. Anchored to this directory so it does not depend on the
+  // process working directory; override with HONEYPOT_LOG_FILE. The default lives
+  // in a dot-directory because server.js serves the repo root statically with
+  // dotfiles:'ignore' — a custom path must stay outside the repo root or in a
+  // dot-directory, or the log becomes downloadable.
+  logFile: process.env.HONEYPOT_LOG_FILE || path.join(__dirname, '.logs', 'honeypot.jsonl'),
 
-  // Log file location
-  logFile: './honeypot/logs/honeypot.jsonl',
-
-  // Alert thresholds
   alerts: {
     enableAlerts: process.env.HONEYPOT_ALERTS === 'true',
     emailTo: process.env.HONEYPOT_ALERT_EMAIL || '',
     webhookUrl: process.env.HONEYPOT_WEBHOOK_URL || '',
+    // Minimum time between alerts for the same IP
+    cooldownMs: 10 * 60 * 1000,
     alertThresholds: {
-      hitsPerMinute: 5,      // Alert if same IP hits 5+ honeypots per minute
-      uniquePathsPerIP: 10,  // Alert if IP probes 10+ fake endpoints
-      payloadSize: 5000      // Alert if payload > 5KB
+      uniquePathsPerIP: 10,  // Alert if one IP probes 10+ distinct fake endpoints within 1 minute
+      payloadSize: 5000      // Alert if Content-Length > 5KB
     }
   },
 
   // Response strategy
   responses: {
     default: { status: 404, body: { error: 'Not Found' } },
-    wordpress: { status: 200, body: '<!-- WordPress -->' },
     admin: { status: 401, body: { error: 'Unauthorized' } },
     api: { status: 403, body: { error: 'Forbidden' } }
-  },
-
-  // Exclude legitimate user-agents from logging
-  excludeUserAgents: [
-    'Mozilla/5.0',  // Real browsers
-    'Googlebot',
-    'bingbot'
-  ]
+  }
 };

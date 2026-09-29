@@ -1,7 +1,20 @@
 'use strict';
 
+const crypto = require('crypto');
 const express = require('express');
 const { getRecentHits } = require('./honeypot-middleware');
+
+// Token via `x-honeypot-token` header (preferred: query strings end up in access
+// logs) or `?token=`. Disabled entirely when HONEYPOT_MONITOR_TOKEN is unset.
+function isAuthorized(req) {
+  const expected = process.env.HONEYPOT_MONITOR_TOKEN;
+  const supplied = req.get('x-honeypot-token') || req.query.token;
+  if (!expected || typeof supplied !== 'string') return false;
+
+  const a = crypto.createHash('sha256').update(supplied).digest();
+  const b = crypto.createHash('sha256').update(expected).digest();
+  return crypto.timingSafeEqual(a, b);
+}
 
 // Create honeypot monitoring router
 function createHoneypotMonitor() {
@@ -9,11 +22,7 @@ function createHoneypotMonitor() {
 
   // List recent honeypot hits (requires auth token)
   router.get('/honeypot/hits', (req, res) => {
-    // Simple token-based auth for monitoring endpoint
-    const authToken = req.query.token || req.get('x-honeypot-token');
-    const expectedToken = process.env.HONEYPOT_MONITOR_TOKEN;
-
-    if (!expectedToken || authToken !== expectedToken) {
+    if (!isAuthorized(req)) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
@@ -57,10 +66,7 @@ function createHoneypotMonitor() {
 
   // Export honeypot logs as CSV
   router.get('/honeypot/export', (req, res) => {
-    const authToken = req.query.token || req.get('x-honeypot-token');
-    const expectedToken = process.env.HONEYPOT_MONITOR_TOKEN;
-
-    if (!expectedToken || authToken !== expectedToken) {
+    if (!isAuthorized(req)) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
