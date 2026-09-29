@@ -14,6 +14,7 @@ INCIDENT_RESPONSE.md @MarcelRaschke
 # Agent / MCP / Termux authority boundary.
 /src/agent/ @MarcelRaschke
 /test/agent-mcp-boundary.test.mjs @MarcelRaschke
+/test/mw-boundary-01.test.mjs @MarcelRaschke
 /scripts/check-mcp-boundary.sh @MarcelRaschke
 /.github/workflows/agent-architecture-gate.yml @MarcelRaschke
 
