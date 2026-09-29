@@ -149,7 +149,7 @@ export function getTask() {
 }
 
 /* ---------- KI-Agent (Autopilot) ---------- */
-export const agent = { enabled: false, mode: 'idle', target: null, log: [] };
+export const agent = { enabled: false, mode: 'idle', target: null, log: [], nextDecisionAt: 0 };
 
 export function agentLog(t) {
   agent.log.push(`[${new Date().toLocaleTimeString()}] ${t}`);
@@ -157,8 +157,13 @@ export function agentLog(t) {
   if (G) G.msg('\u{1F916} ' + t, 3000);
 }
 
+const AGENT_DECISION_INTERVAL_MS = 500;
+
 export function agentTick(dt) {
   if (!agent.enabled || !G) return;
+  const now = performance.now();
+  if (now < agent.nextDecisionAt) return;
+  agent.nextDecisionAt = now + AGENT_DECISION_INTERVAL_MS;
   const q = G.quests[G.questIdx];
   if (!q) { agent.mode = 'idle'; return; }
 
@@ -241,11 +246,11 @@ export function sellPackage(id) {
   if (!pkg) return { ok: false, error: 'Unbekanntes Paket' };
   provider.tokens += pkg.tokens;
   provider.totalPurchased += pkg.tokens;
-  const entry = '+' + pkg.tokens.toLocaleString('de-CH') + ' Tokens (' + pkg.name + ', ' + pkg.price + ' EUR)';
+  const entry = '+DEMO ' + pkg.tokens.toLocaleString('de-CH') + ' Tokens (' + pkg.name + ', ' + pkg.price + ' EUR — Demo)';
   provider.log.push(entry);
   if (provider.log.length > 15) provider.log.shift();
   if (G) {
-    G.msg('🖥️ KI-Anbieter: ' + pkg.name + '-Paket verkauft — +' + pkg.tokens.toLocaleString('de-CH') + ' Tokens (' + pkg.price + ' EUR)', 4000);
+    G.msg('🖥️ KI-DEMO: ' + pkg.name + '-Paket aktiviert — +' + pkg.tokens.toLocaleString('de-CH') + ' Demo-Tokens', 4000);
     G.blip(880, 0.12, 'triangle', 0.12);
   }
   updateProviderHUD();
@@ -288,8 +293,9 @@ export function updateProviderHUD() {
 }
 
 export function installAPI() {
-  window.HotzeAPI = {
-    /* Zustand abfragen */
+  // Explicit capability boundary for external agents.
+  const clampInt = (value, min, max) => Number.isInteger(value) && value >= min && value <= max;
+  const api = {
     getState: () => ({
       money: G.state.money,
       missions: G.state.missions,
@@ -305,34 +311,50 @@ export function installAPI() {
       station: G.state.radio,
       blueDimension: G.blueDim.active,
     }),
-    /* Bewegung */
-    keys: G.keys,
-    moveTo: (x, z) => { agent.enabled = false; agent.target = { x, z }; },
-    toggleCar: () => G.tryToggleCar(),
-    pickup: () => G.tryPickup(),
-    /* Radio */
-    setRadio: i => { G.state.inCar ? (G.state.radio = i, G.setStationSafe(i)) : null; },
-    cycleRadio: () => G.state.inCar && G.cycleRadio(),
-    /* Wirtschaft */
-    buyDjjj: n => G.djjjBuy(n),
-    sellDjjj: n => G.djjjSell(n),
-    /* KI-PROVIDER: echte Inferenz-Tokens, Pakete & Abrechnung */
-    kiProvider: {
+    movement: {
+      moveTo: (x, z) => {
+        if (!Number.isFinite(x) || !Number.isFinite(z)) return { ok: false, error: 'invalid coordinates' };
+        agent.enabled = false;
+        agent.target = { x: Math.max(-1000, Math.min(1000, x)), z: Math.max(-1000, Math.min(1000, z)) };
+        return { ok: true };
+      },
+      toggleCar: () => G.tryToggleCar(),
+      pickup: () => G.tryPickup(),
+    },
+    radio: {
+      setStation: i => clampInt(i, 0, 3) && G.state.inCar
+        ? (G.state.radio = i, G.setStationSafe(i), { ok: true })
+        : { ok: false, error: 'station unavailable' },
+      cycle: () => G.state.inCar ? G.cycleRadio() : { ok: false, error: 'not in car' },
+    },
+    economy: {
+      buyDjjj: n => Number.isInteger(n) && n > 0 ? G.djjjBuy(n) : { ok: false, error: 'invalid amount' },
+      sellDjjj: n => Number.isInteger(n) && n > 0 ? G.djjjSell(n) : { ok: false, error: 'invalid amount' },
+      mintNFT,
+      sellNFT: id => typeof id === 'string' ? sellNFT(id) : { ok: false, error: 'invalid NFT id' },
+      listNFTs,
+    },
+    projects: {
+      start: typeId => typeof typeId === 'string' ? startProject(typeId) : { ok: false, error: 'invalid project id' },
+      list: getProjects,
+      task: getTask,
+      newTask,
+    },
+    agent: {
+      toggle: toggleAgent,
+      status: () => ({ enabled: agent.enabled, mode: agent.mode, target: agent.target ? { ...agent.target } : null, log: agent.log.slice() }),
+    },
+    kiDemo: {
       info: providerInfo,
-      sellPackage,
-      consume,
       costs: () => ({ ...provider.costs }),
       packages: () => provider.packages.map(p => ({ ...p })),
     },
-    mintNFT,
-    sellNFT,
-    listNFTs,
-    /* Projekte & Aufgaben */
-    startProject,
-    getProjects,
-    getTask,
-    newTask,
-    /* KI-Agent */
-    agent: { toggle: toggleAgent, status: () => ({ enabled: agent.enabled, mode: agent.mode, log: agent.log }) },
   };
+  Object.freeze(api.kiDemo);
+  Object.freeze(api.projects);
+  Object.freeze(api.radio);
+  Object.freeze(api.movement);
+  Object.freeze(api.economy);
+  Object.freeze(api.agent);
+  window.HotzeAPI = Object.freeze(api);
 }
