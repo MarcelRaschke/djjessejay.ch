@@ -1,0 +1,13 @@
+{
+  "name": "hotzes-ravemaschiene",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "3D Slot Machine Spiel - Hotze's Ravemaschiene",
+  "scripts": {
+    "start": "npx serve . -l 8123"
+  },
+  "dependencies": {
+    "three": "^0.170.0"
+  }
+}
