@@ -1,5 +1,6 @@
 'use strict';
 
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const config = require('./honeypot-config');
@@ -29,6 +30,12 @@ try {
   fs.mkdirSync(path.dirname(config.logFile), { recursive: true });
 } catch (err) {
   reportLogError(err);
+}
+
+// Earlier versions logged to honeypot/logs/, which express.static serves from the repo root.
+const legacyLog = path.join(__dirname, 'logs', 'honeypot.jsonl');
+if (fs.existsSync(legacyLog)) {
+  console.warn(`[HONEYPOT] legacy log ${legacyLog} is publicly downloadable; move or delete it (the default is now honeypot/.logs/).`);
 }
 
 function clip(value, max = MAX_LOGGED_FIELD) {
@@ -89,7 +96,10 @@ function shouldAlert(ip, requestPath, payloadSize) {
     ipData.paths.clear();
     ipData.hitTime = now;
   }
-  if (ipData.paths.size < threshold.uniquePathsPerIP) ipData.paths.add(requestPath);
+  // Fixed-size fingerprint: keeps "distinct full path" semantics without retaining attacker-sized strings
+  if (ipData.paths.size < threshold.uniquePathsPerIP) {
+    ipData.paths.add(crypto.createHash('sha1').update(requestPath).digest('base64'));
+  }
 
   if (now - ipData.lastAlertAt < config.alerts.cooldownMs) return null;
 
@@ -99,7 +109,7 @@ function shouldAlert(ip, requestPath, payloadSize) {
   } else if (ipData.paths.size >= threshold.uniquePathsPerIP) {
     alert = {
       type: 'scanning_behavior',
-      message: `IP ${ip} probed ${ipData.paths.size} fake endpoints in 1 minute`
+      message: `IP ${ip} requested ${ipData.paths.size} distinct decoy paths in 1 minute`
     };
   }
 

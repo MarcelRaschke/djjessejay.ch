@@ -54,7 +54,8 @@ All honeypot hits are logged to `honeypot/.logs/honeypot.jsonl` (JSONL format):
 ### Alert Triggers
 
 Alerts fire on:
-1. **Scanning behavior**: same IP probes 10+ distinct fake endpoints within 1 minute
+1. **Scanning behavior**: same IP requests 10+ distinct decoy paths within 1 minute. Paths are
+   compared case-sensitively and in full, so `/api/users/1` ... `/api/users/10` counts as ten
 2. **Oversized payload**: `Content-Length` > 5000 bytes on a decoy request
 
 At most one alert per IP every 10 minutes (`alerts.cooldownMs`). Alerts are only sent
@@ -188,8 +189,24 @@ API) wins over the default.
 
 - **Overhead on normal traffic**: one prefix scan over the decoy list per request
 - **Async I/O**: log appends and email/webhook alerts do not block the event loop
-- **Memory**: per-IP tracking is capped at 10,000 entries (pruned when full)
-- **Disk**: roughly 0.3-1KB per hit; the log is never rotated automatically
+- **Memory**: per-IP tracking holds at most 10 fixed-size path fingerprints for at most 10,000
+  IPs (a few MB worst case); it is pruned when full
+- **Disk**: roughly 0.3-1KB per hit, more when a request carries a long query string (`query` is
+  logged unclipped); the log is never rotated automatically
+
+## Upgrading from the earlier `honeypot/logs/` default
+
+Versions before this change wrote to `honeypot/logs/honeypot.jsonl`. That directory is inside the
+statically served repo root, so an old log file stays downloadable after you pull the new code
+(the server prints a `[HONEYPOT] legacy log ...` warning at startup if it exists). Move it out of
+the repo, or delete it, when you deploy:
+
+```bash
+mv honeypot/logs/honeypot.jsonl /root/honeypot-legacy.jsonl && rmdir honeypot/logs   # or rm -rf honeypot/logs
+```
+
+The old default was relative to the process working directory, so also check any other directory
+the app was started from for a stray `honeypot/logs/`.
 
 ## Security Notes
 
