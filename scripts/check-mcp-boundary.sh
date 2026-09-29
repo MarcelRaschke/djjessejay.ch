@@ -13,6 +13,7 @@ required_files=(
   'src/agent/mcp-boundary.mjs'
   'src/agent/mcp-boundary.d.ts'
   'test/agent-mcp-boundary.test.mjs'
+  'test/mw-boundary-01.test.mjs'
   '.github/CODEOWNERS'
   '.github/PULL_REQUEST_TEMPLATE.md'
   '.github/workflows/agent-architecture-gate.yml'
@@ -91,6 +92,6 @@ grep -Fq -- '- [ ] Retry and reconnect behavior is covered by tests' \
   || fail 'PR template is missing the retry/reconnect checkbox'
 
 node --check src/agent/mcp-boundary.mjs
-node --test test/agent-mcp-boundary.test.mjs
+node --test test/mw-boundary-01.test.mjs test/agent-mcp-boundary.test.mjs
 
 printf 'Agent/MCP boundary gate passed.\n'
