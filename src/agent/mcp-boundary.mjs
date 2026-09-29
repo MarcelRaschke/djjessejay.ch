@@ -238,11 +238,12 @@ export async function dispatchToolRequest(request, options) {
     assertToolRequestIsSafe(request, policy);
 
     try {
-      return await transport.call(request.tool, request.input, Object.freeze({
+      const dispatch = transport.call(request.tool, request.input, Object.freeze({
         operationId: request.operationId,
         effect: request.effect,
         attempt
       }));
+      return await dispatch;
     } catch (error) {
       const mayReplay = request.effect === 'read';
       const attemptsRemain = attempt < retry.maxAttempts;
