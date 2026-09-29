@@ -86,3 +86,7 @@ coverage/
 # package-lock.json
 # pnpm-lock.yaml
 # yarn.lock
+
+# Honeypot logs (attacker IPs/user-agents; never commit)
+honeypot/.logs/
+honeypot/logs/
