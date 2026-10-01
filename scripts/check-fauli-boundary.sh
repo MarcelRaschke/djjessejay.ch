@@ -49,7 +49,7 @@ for (const pattern of forbidden) {
 const apiMatch = executable.match(/window\.FAULI\s*=\s*Object\.freeze\(\{([\s\S]*?)\}\);/);
 if (!apiMatch) throw new Error('public FAULI API declaration not found');
 
-const api = [...apiMatch[1].matchAll(/\b([A-Za-z_$][\w$]*)\s*:/g)].map((m) => m[1]);
+const api = [...apiMatch[1].matchAll(/^\s*([A-Za-z_$][\w$]*)\s*(?::|,|$)/gm)].map((m) => m[1]).filter((name) => name);
 const expected = ['STATES', 'getSnapshot', 'getState', 'render', 'setState'].sort();
 if (JSON.stringify(api.sort()) !== JSON.stringify(expected)) {
   throw new Error(`unexpected public API surface: ${api.join(', ')}`);
