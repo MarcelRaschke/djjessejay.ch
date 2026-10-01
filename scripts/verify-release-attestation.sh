@@ -22,9 +22,9 @@ echo "::group::Download GitHub source tarball"
 gh api "repos/${REPO}/tarball/${TAG}" > "$artifact"
 echo "::endgroup::"
 
-actual_digest="$(sha256sum "$artifact" | awk '{print $1}')"
-echo "expected sha256: $EXPECTED_DIGEST"
-echo "actual   sha256: $actual_digest"
+actual_digest="$(sha1sum "$artifact" | awk '{print $1}')"
+echo "expected sha1: $EXPECTED_DIGEST"
+echo "actual   sha1: $actual_digest"
 
 if [[ "$actual_digest" != "$EXPECTED_DIGEST" ]]; then
   echo "ERROR: source tarball digest does not match the archived attestation subject." >&2
