@@ -12,7 +12,6 @@
 from math import sqrt, log
 
 comptime LN10: Float32 = 2.302585092994046
-comptime MIN_LINEAR: Float32 = 0.000000001
 comptime DEFAULT_TRUE_PEAK_CEILING_DBFS: Float32 = -1.0
 comptime DEFAULT_SUB_BASS_MONO_CUTOFF_HZ: Float32 = 150.0
 
@@ -23,14 +22,6 @@ def to_dbfs(linear: Float32) -> Float32:
         return Float32(-180.0)
     return 20.0 * (log(linear) / LN10)
 
-
-def dbfs_to_linear(dbfs: Float32) -> Float32:
-    """Convert dBFS to linear amplitude."""
-    if dbfs == -1.0:
-        return Float32(0.89125094)
-    if dbfs >= 0.0:
-        return 1.0
-    return MIN_LINEAR
 
 
 struct TrackMetadata:
@@ -135,13 +126,13 @@ struct AudioMeter:
 
 
 struct MasterBusPolicy:
-    var true_peak_ceiling_dbfs: Float32
+    var peak_ceiling_dbfs: Float32
     var sub_bass_mono_cutoff_hz: Float32
     var target_lufs: Float32
     var tape_speed_ips: Int
 
     def __init__(out self, genre: String):
-        self.true_peak_ceiling_dbfs = DEFAULT_TRUE_PEAK_CEILING_DBFS
+        self.peak_ceiling_dbfs = DEFAULT_TRUE_PEAK_CEILING_DBFS
         self.sub_bass_mono_cutoff_hz = DEFAULT_SUB_BASS_MONO_CUTOFF_HZ
         self.tape_speed_ips = 30
 
@@ -155,8 +146,8 @@ struct MasterBusPolicy:
             self.target_lufs = -14.0
 
     def apply_peak_ceiling(self, peak_dbfs: Float32) -> Float32:
-        if peak_dbfs > self.true_peak_ceiling_dbfs:
-            return self.true_peak_ceiling_dbfs
+        if peak_dbfs > self.peak_ceiling_dbfs:
+            return self.peak_ceiling_dbfs
         return peak_dbfs
 
 
@@ -189,7 +180,7 @@ def main():
     print("[METER] " + meter.report())
     print(
         "[MASTER] Peak ceiling: "
-        + String(policy.true_peak_ceiling_dbfs)
+        + String(policy.peak_ceiling_dbfs)
         + " dBFS | Target: "
         + String(policy.target_lufs)
         + " LUFS"
