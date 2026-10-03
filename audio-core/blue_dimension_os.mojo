@@ -1,18 +1,36 @@
 # Blue Dimension OS (Zürich, Est. 1997)
-# Fine-Tuned & Optimized Audio-Core & Sound-Kurator Engine in Mojo.
-# Author: DJ Jesse Jay / Blue Dimension
+# Audio analysis and master-bus policy core.
+#
+# Scope:
+#   - deterministic track classification metadata
+#   - sample-peak / RMS measurement
+#   - master-bus ceiling policy
+#
+# This module intentionally does NOT implement TouchDesigner, OSC, NDI,
+# broadcast scheduling, or GPU rendering. Those are separate pipeline layers.
 
 from math import sqrt, log
 
-# Natural log of 10: lets us do log10(x) = ln(x) / ln(10) without needing
-# a dedicated log10 export from the math module.
-const LN10: Float32 = 2.302585092994046
+comptime LN10: Float32 = 2.302585092994046
+comptime MIN_LINEAR: Float32 = 0.000000001
+comptime DEFAULT_TRUE_PEAK_CEILING_DBFS: Float32 = -1.0
+comptime DEFAULT_SUB_BASS_MONO_CUTOFF_HZ: Float32 = 150.0
 
-fn to_dbfs(linear: Float32) -> Float32:
-    # 20 * log10(x); floor -inf at zero/negative input (silence).
+
+def to_dbfs(linear: Float32) -> Float32:
+    """Convert linear amplitude to dBFS with a finite silence floor."""
     if linear <= 0.0:
-        return Float32(-999.0)
+        return Float32(-180.0)
     return 20.0 * (log(linear) / LN10)
+
+
+def dbfs_to_linear(dbfs: Float32) -> Float32:
+    """Convert dBFS to linear amplitude."""
+    if dbfs == -1.0:
+        return Float32(0.89125094)
+    if dbfs >= 0.0:
+        return 1.0
+    return MIN_LINEAR
 
 
 struct TrackMetadata:
@@ -24,7 +42,16 @@ struct TrackMetadata:
     var is_commercial_edm: Bool
     var is_sterile_idm: Bool
 
-    fn __init__(inout self, title: String, bpm: Float32, four_on_floor: Bool, squelch_303: Bool, vsolar: Bool, edm: Bool, idm: Bool):
+    def __init__(
+        out self,
+        title: String,
+        bpm: Float32,
+        four_on_floor: Bool,
+        squelch_303: Bool,
+        vsolar: Bool,
+        edm: Bool,
+        idm: Bool,
+    ):
         self.title = title
         self.bpm = bpm
         self.has_four_on_floor = four_on_floor
@@ -35,14 +62,17 @@ struct TrackMetadata:
 
 
 struct SoundKurator:
-    fn evaluate_track(self, track: TrackMetadata) -> String:
-        # Anti-EDM & Anti-IDM Filter (Negative Results Protocol)
+    """Deterministic metadata router; no audio mutation occurs here."""
+
+    def evaluate_track(self, track: TrackMetadata) -> String:
         if track.is_commercial_edm or track.is_sterile_idm:
-            print("[SOUND-KURATOR] WARNING: Track flagged as negative result (EDM/IDM polish detected). Forcing analog tape-saturation & re-grooving loop.")
             return "rejected-reprocessed"
 
-        # Fine-Tuned Algorithmic Decision Tree (Zürich Underground Standard)
-        if track.bpm >= 120.0 and track.bpm <= 140.0 and track.has_four_on_floor:
+        if (
+            track.bpm >= 120.0
+            and track.bpm <= 140.0
+            and track.has_four_on_floor
+        ):
             if track.has_303_squelch:
                 return "acid-techno"
             elif track.has_vsolar_detune:
@@ -57,102 +87,110 @@ struct SoundKurator:
             return "progressive-techno"
 
 
-struct TruePeakMeter:
+struct AudioMeter:
+    """Streaming RMS and sample-peak meter.
+
+    The previous RMS-times-sqrt(2) calculation was removed because it is not
+    a true-peak measurement. True peak requires an oversampling/interpolation
+    stage and is deliberately a separate DSP task.
+    """
+
     var sum_of_squares: Float32
-    var window_size: Int
+    var sample_count: Int
+    var sample_peak: Float32
 
-    fn __init__(inout self, window_size: Int):
+    def __init__(out self):
         self.sum_of_squares = 0.0
-        self.window_size = window_size
+        self.sample_count = 0
+        self.sample_peak = 0.0
 
-    fn push(inout self, sample: Float32):
-        # Accumulate x² like a 4x-oversampled metering window
+    def push(mut self, sample: Float32):
         self.sum_of_squares += sample * sample
+        self.sample_count += 1
 
-    fn compute_rms(self) -> Float32:
-        return sqrt(self.sum_of_squares / Float32(self.window_size))
+        var magnitude = sample
+        if magnitude < 0.0:
+            magnitude = -magnitude
+        if magnitude > self.sample_peak:
+            self.sample_peak = magnitude
 
-    fn estimate_true_peak(self) -> Float32:
-        # Sine crest factor: peak = RMS * √2
-        var crest: Float32 = sqrt(Float32(2.0))
-        return self.compute_rms() * crest
+    def compute_rms(self) -> Float32:
+        if self.sample_count <= 0:
+            return 0.0
+        return sqrt(self.sum_of_squares / Float32(self.sample_count))
 
-    fn report(self) -> String:
-        # Full readout in both linear and dBFS domains.
-        var rms: Float32 = self.compute_rms()
-        var tp: Float32 = self.estimate_true_peak()
-        return "RMS: " + String(rms) + " (" + String(to_dbfs(rms)) + " dBFS) | Est. True Peak: " + String(tp) + " (" + String(to_dbfs(tp)) + " dBFS)"
+    def report(self) -> String:
+        var rms = self.compute_rms()
+        return (
+            "RMS: "
+            + String(rms)
+            + " ("
+            + String(to_dbfs(rms))
+            + " dBFS) | Sample Peak: "
+            + String(self.sample_peak)
+            + " ("
+            + String(to_dbfs(self.sample_peak))
+            + " dBFS)"
+        )
 
 
-struct HardwareEmulation:
+struct MasterBusPolicy:
+    var true_peak_ceiling_dbfs: Float32
+    var sub_bass_mono_cutoff_hz: Float32
     var target_lufs: Float32
-    var true_peak_ceiling: Float32
-    var sub_bass_mono_cutoff: Float32
     var tape_speed_ips: Int
 
-    fn __init__(inout self, genre: String):
-        self.true_peak_ceiling = -1.0  # Strict True Peak Ceiling (-1.0 dBFS)
-        self.sub_bass_mono_cutoff = 150.0  # Sub frequencies below 150Hz strictly mono
-        self.tape_speed_ips = 30  # Professional studio speed for maximum transient retention
+    def __init__(out self, genre: String):
+        self.true_peak_ceiling_dbfs = DEFAULT_TRUE_PEAK_CEILING_DBFS
+        self.sub_bass_mono_cutoff_hz = DEFAULT_SUB_BASS_MONO_CUTOFF_HZ
+        self.tape_speed_ips = 30
 
-        if genre == "acid-techno" or genre == "club-edm-house-trance" or genre == "trance-progressive":
-            self.target_lufs = -10.0  # High club pressure
+        if (
+            genre == "acid-techno"
+            or genre == "club-edm-house-trance"
+            or genre == "trance-progressive"
+        ):
+            self.target_lufs = -10.0
         else:
-            self.target_lufs = -14.0  # Dynamic acoustic / cinematic range
+            self.target_lufs = -14.0
 
-    fn process_master_bus(self, peak_db: Float32) -> Float32:
-        print("[MASTER-BUS] Applying " + String(self.tape_speed_ips) + " ips Analog Tape Saturation & Multiband Imaging...")
-        print("[MASTER-BUS] Enforcing Sub-Bass Mono Summing below: " + String(self.sub_bass_mono_cutoff) + " Hz")
-        print("[MASTER-BUS] Enforcing True Peak Ceiling at: " + String(self.true_peak_ceiling) + " dBFS")
-        print("[MASTER-BUS] Target Integrated Loudness: " + String(self.target_lufs) + " LUFS")
-
-        if peak_db > self.true_peak_ceiling:
-            return self.true_peak_ceiling
-        return peak_db
+    def apply_peak_ceiling(self, peak_dbfs: Float32) -> Float32:
+        if peak_dbfs > self.true_peak_ceiling_dbfs:
+            return self.true_peak_ceiling_dbfs
+        return peak_dbfs
 
 
-fn main():
-    print("==================================================================")
-    print("  BLUE DIMENSION OS (Zürich, Est. 1997) - FINE-TUNED MOJO CORE")
-    print("==================================================================")
+def main():
+    print("BLUE DIMENSION OS // AUDIO CORE")
+    print("Signal 97.5 MHz // Zürich // Est. 1997")
 
     var kurator = SoundKurator()
-    var ceiling_linear: Float32 = 0.89125  # -1.0 dBFS expressed as linear amplitude
-    var ceiling_dbfs: Float32 = to_dbfs(ceiling_linear)
 
-    # Test Track 1: Underground Acid Weapon
-    var track1 = TrackMetadata("Zürich Untergrund 303", 135.0, True, True, False, False, False)
-    var genre1 = kurator.evaluate_track(track1)
-    var hw1 = HardwareEmulation(genre1)
-    print("Track: '" + track1.title + "' -> Routed Genre: " + genre1)
-    var final1 = hw1.process_master_bus(-0.2)
-    print("Final Master Output: " + String(final1) + " dBFS")
+    var track = TrackMetadata(
+        "Zürich Untergrund 303",
+        135.0,
+        True,
+        True,
+        False,
+        False,
+        False,
+    )
 
-    # True-peak / RMS verification pass on the rendered 303 loop
-    var meter1 = TruePeakMeter(4)
-    meter1.push(0.79)
-    meter1.push(-0.83)
-    meter1.push(0.65)
-    meter1.push(-0.58)
-    print("[METER] " + meter1.report())
-    if meter1.estimate_true_peak() > ceiling_linear:
-        print("[METER] WARNING: Inter-sample true peak exceeds " + String(ceiling_dbfs) + " dBFS ceiling (" + String(ceiling_linear) + " linear). Re-limiting required.")
-    print("------------------------------------------------------------------")
+    var genre = kurator.evaluate_track(track)
+    var policy = MasterBusPolicy(genre)
 
-    # Test Track 2: Progressive Trance Anthem with VSolar Detune
-    var track2 = TrackMetadata("Solaris Waveform 97", 138.0, True, False, True, False, False)
-    var genre2 = kurator.evaluate_track(track2)
-    var hw2 = HardwareEmulation(genre2)
-    print("Track: '" + track2.title + "' -> Routed Genre: " + genre2)
-    var final2 = hw2.process_master_bus(-0.7)
-    print("Final Master Output: " + String(final2) + " dBFS")
+    var meter = AudioMeter()
+    meter.push(0.79)
+    meter.push(-0.83)
+    meter.push(0.65)
+    meter.push(-0.58)
 
-    var meter2 = TruePeakMeter(4)
-    meter2.push(0.55)
-    meter2.push(-0.60)
-    meter2.push(0.48)
-    meter2.push(-0.52)
-    print("[METER] " + meter2.report())
-    if meter2.estimate_true_peak() <= ceiling_linear:
-        print("[METER] PASS: True peak within " + String(ceiling_dbfs) + " dBFS ceiling (" + String(ceiling_linear) + " linear). Master approved.")
-    print("==================================================================")
+    print("Track: '" + track.title + "' -> " + genre)
+    print("[METER] " + meter.report())
+    print(
+        "[MASTER] Peak ceiling: "
+        + String(policy.true_peak_ceiling_dbfs)
+        + " dBFS | Target: "
+        + String(policy.target_lufs)
+        + " LUFS"
+    )
