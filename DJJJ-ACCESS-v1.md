@@ -1,0 +1,7 @@
+# DJJJ-ACCESS-v1
+
+Frozen implementation baseline.
+
+RESOURCE_ACCESS => VERIFIED_FACT && PDP_ALLOW && AUTHORIZATION_VALID && SESSION_VALID && RESOURCE_BOUND && RESOURCE_PEP_ENFORCED.
+
+No alternative authorization path.
