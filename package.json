@@ -38,7 +38,7 @@
     "express": "^5.2.1",
     "express-rate-limit": "^8.7.0",
     "nodemailer": "^10.0.3",
-    "ws": "^8.21.0"
+    "ws": "^8.22.0"
   },
   "overrides": {
     "http-proxy-middleware": "^3.0.7",
