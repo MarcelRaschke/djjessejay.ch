@@ -374,11 +374,10 @@ These require access to the domain registrar, the active DNS provider
 (hosttech), and GitHub repository settings — none of which can be performed from
 this repository.
 
-1. Re-delegate the domain back to Cloudflare (or keep hosttech and recreate the
-   GitHub Pages records there). NS must match `aarav.ns.cloudflare.com.` /
-   `rosalyn.ns.cloudflare.com.`.
-2. Set apex A records to the four GitHub Pages IPs:
-   `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`.
+1. Re-delegate the domain back to Cloudflare. NS must match
+   `aarav.ns.cloudflare.com.` / `rosalyn.ns.cloudflare.com.`.
+2. Replace apex A/AAAA records with a proxied CNAME from `djjessejay.ch` to
+   `marcelraschke.github.io`.
 3. Set `www.djjessejay.ch.` CNAME -> `djjessejay.ch.` (not an A record).
 4. Restore the verification TXT:
    `_github-pages-challenge-marcelraschke.djjessejay.ch. TXT "60e5f988c1da04523b99e4208c1726"`.
