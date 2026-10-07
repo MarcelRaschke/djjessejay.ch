@@ -346,7 +346,7 @@ renew — the underlying DNS delegation is wrong.
 | SOA mname | `aarav.ns.cloudflare.com.` | `ns1.hosttech.ch.` | **DRIFT** |
 | SOA rname | `dns.cloudflare.com.` | `dns.hosttech.eu.` | **DRIFT** |
 | SOA serial | `2053592236` | `2026040135` | **DRIFT** |
-| Apex A records | `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153` | `185.101.158.113` (single record) | **DRIFT** |
+| Apex DNS | Proxied CNAME to `marcelraschke.github.io.` | `185.101.158.113` (single A record) | **DRIFT** |
 | Apex AAAA record | not documented | `2001:1680:101:8bd::1` (hosttech) | undocumented / hosttech |
 | `www` CNAME | `www.djjessejay.ch. -> djjessejay.ch.` | no CNAME; `www` resolves to `185.101.158.113` via A | **DRIFT** |
 | `_github-pages-challenge-marcelraschke` TXT | `"60e5f988c1da04523b99e4208c1726"` | not present (resolves to hosttech apex via wildcard, no TXT) | **DRIFT / missing** |
