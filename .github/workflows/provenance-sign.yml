@@ -1,0 +1,45 @@
+name: Provenance sign
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to attest (e.g. v7.0.0)'
+        required: true
+        default: 'v7.0.0'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: provenance-sign-${{ inputs.tag }}
+
+jobs:
+  attest-release:
+    name: Create Sigstore attestation for ${{ inputs.tag }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
+
+      - name: Sign release tag object
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: bash scripts/sign-release-attestation.sh
+
+      - name: Commit attestation bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "provenance/attestations/${TAG}.sigstore.json" "provenance/attestations/${TAG}.identity"
+          git commit -m "security: archive ${TAG} Sigstore attestation [provenance-finalize]"
+          git push
