@@ -11,8 +11,8 @@ permissions:
   contents: read
 
 jobs:
-  smoke:
-    name: Live edge smoke test
+  validate-worker:
+    name: Validate Worker syntax
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -21,6 +21,18 @@ jobs:
 
       - name: Validate Worker syntax
         run: node --check infra/cloudflare/wdjjj.js
+
+  smoke:
+    name: Live edge smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # The live edge is served by the wdjjj Cloudflare Worker, which is only
+    # deployed from main. Pull requests cannot influence the live Worker, so
+    # live-edge assertions only run on main pushes and manual dispatches.
+    if: github.event_name != 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Health endpoint
         run: |
