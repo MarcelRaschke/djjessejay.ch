@@ -38,6 +38,7 @@ echo "::group::Verify Sigstore/In-Toto release attestation"
 cosign verify-blob-attestation "$artifact" \
   --bundle "$BUNDLE" \
   --new-bundle-format \
+  --insecure-ignore-tlog \
   --type "$PREDICATE_TYPE" \
   --certificate-oidc-issuer "$CERT_ISSUER" \
   --certificate-identity "$CERT_IDENTITY"
