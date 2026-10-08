@@ -19,5 +19,6 @@ All notable changes to this project will be documented in this file.
 - reCAPTCHA key injection now replaces only the canonical `YOUR_RECAPTCHA_SITE_KEY` placeholder (no partial substring replacement of the JS constant name).
 
 ### Changed
+- Pull request template now asks for a changelog entry.
 - Live-site smoke test now also rejects disallowed methods (DELETE) on `/api/*`.
 - `.gitignore` excludes Python bytecode (`__pycache__/`, `*.pyc`).

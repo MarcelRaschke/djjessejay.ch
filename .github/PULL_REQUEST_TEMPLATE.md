@@ -2,6 +2,21 @@
 
 <!-- What changed? -->
 
+## Release Notes
+
+<!--
+Entry for CHANGELOG.md under [Unreleased], using its Keep a Changelog category
+(Added, Changed, Deprecated, Removed, Fixed, Security).
+One line per user-facing change. Write "N/A" if the change is not changelog-worthy.
+-->
+
+- [ ] N/A — not changelog-worthy
+- [ ] `CHANGELOG.md` updated
+
+Category:
+
+Entry:
+
 ## Project Role
 
 Select all affected roles:
