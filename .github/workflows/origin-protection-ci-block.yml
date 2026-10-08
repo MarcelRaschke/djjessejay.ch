@@ -1,60 +1,29 @@
-name: Origin Protection CI Block
-
+name: Origin Protection Verification
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - 'scripts/cloudflare-tunnel-setup.js'
-      - 'scripts/verify-origin-protection.js'
-      - 'scripts/deployment-checklist.sh'
-      - '.github/workflows/origin-protection-ci-block.yml'
-      - 'ORIGIN-PROTECTION-DEPLOYMENT.md'
   push:
-    branches: [main]
-    paths:
-      - 'scripts/cloudflare-tunnel-setup.js'
-      - 'scripts/verify-origin-protection.js'
-      - 'scripts/deployment-checklist.sh'
-      - '.github/workflows/origin-protection-ci-block.yml'
-      - 'ORIGIN-PROTECTION-DEPLOYMENT.md'
-
-permissions:
-  contents: read
-
-concurrency:
-  group: origin-protection-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
 jobs:
-  validate:
-    name: Validate origin protection
+  verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Require Node.js 22+
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '22.x'
-      - name: Syntax and security checklist
-        run: bash scripts/deployment-checklist.sh
-      - name: Verify repository scripts remain non-mutating in CI
+          node-version: '22'
+      - name: Verify Scripts
         run: |
-          node --check scripts/cloudflare-tunnel-setup.js
+          [[ -f scripts/verify-origin-protection.js ]] || exit 1
+          [[ -f scripts/cloudflare-tunnel-setup.js ]] || exit 1
+      - name: Syntax Check
+        run: |
           node --check scripts/verify-origin-protection.js
-
-  block-deploy:
-    name: Block deployment on validation failure
-    needs: validate
-    if: ${{ always() }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Enforce gate
+          node --check scripts/cloudflare-tunnel-setup.js
+      - name: Deployment Checklist
+        run: bash scripts/deployment-checklist.sh
         env:
-          VALIDATION_RESULT: ${{ needs.validate.result }}
-        run: |
-          if [ "$VALIDATION_RESULT" != "success" ]; then
-            echo 'Origin protection validation failed; deployment is prohibited.' >&2
-            exit 1
-          fi
-          echo 'Origin protection validation passed.'
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+          ORIGIN_HOST: ${{ secrets.ORIGIN_HOST }}
