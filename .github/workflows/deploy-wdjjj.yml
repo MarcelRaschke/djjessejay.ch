@@ -27,11 +27,31 @@ jobs:
       - name: Validate Worker syntax
         run: node --check infra/cloudflare/wdjjj.js
 
+      - name: Verify deployment credentials are configured
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          test -n "$CF_API_TOKEN" || {
+            echo "::error::CLOUDFLARE_API_TOKEN is not configured for this workflow context"
+            exit 1
+          }
+          test -n "$CF_ACCOUNT_ID" || {
+            echo "::error::CLOUDFLARE_ACCOUNT_ID is not configured for this workflow context"
+            exit 1
+          }
+          echo "Cloudflare deployment credentials are configured."
+
       - name: Deploy wdjjj
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@v4
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.145.0"
           workingDirectory: infra/cloudflare
           command: deploy
 
@@ -39,7 +59,7 @@ jobs:
         run: |
           set -euo pipefail
           for attempt in 1 2 3 4 5 6; do
-            body="$(curl -fsS https://djjessejay.ch/__wdjjj/health)" && {
+            body="$(curl -fsS -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36" https://djjessejay.ch/__wdjjj/health)" && {
               echo "$body"
               echo "$body" | grep -q '"ok":true'
               echo "$body" | grep -q '"proxy":"wdjjj"'
@@ -53,14 +73,14 @@ jobs:
       - name: Verify apex
         run: |
           set -euo pipefail
-          code="$(curl -sS -L --retry 5 --retry-delay 3 -o /dev/null -w '%{http_code}' https://djjessejay.ch/)"
+          code="$(curl -sS -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36" -L --retry 5 --retry-delay 3 -o /dev/null -w '%{http_code}' https://djjessejay.ch/)"
           echo "Apex HTTP status: $code"
           test "$code" = "200"
 
       - name: Verify security headers
         run: |
           set -euo pipefail
-          headers="$(curl -sS --retry 5 --retry-delay 3 -D - -o /dev/null https://djjessejay.ch/)"
+          headers="$(curl -sS -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36" --retry 5 --retry-delay 3 -D - -o /dev/null https://djjessejay.ch/)"
           echo "$headers"
           echo "$headers" | grep -qi '^strict-transport-security:'
           echo "$headers" | grep -qi '^content-security-policy:'
@@ -70,6 +90,6 @@ jobs:
       - name: Verify POST rejection
         run: |
           set -euo pipefail
-          code="$(curl -sS --retry 5 --retry-delay 3 -o /dev/null -w '%{http_code}' -X POST https://djjessejay.ch/)"
+          code="$(curl -sS -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36" --retry 5 --retry-delay 3 -o /dev/null -w '%{http_code}' -X POST https://djjessejay.ch/)"
           echo "POST HTTP status: $code"
           test "$code" = "405"
