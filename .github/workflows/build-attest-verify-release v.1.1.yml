@@ -158,5 +158,4 @@ jobs:
             "dist/SHA256SUMS"
 
       - name: Release gate passed
-        run: |
-          echo "RELEASE Gate PROVENANCE: PASS"
+        run: 'echo "RELEASE Gate PROVENANCE: PASS"'
