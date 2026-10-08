@@ -57,6 +57,6 @@ if (JSON.stringify(api.sort()) !== JSON.stringify(expected)) {
 NODE
 
 # I1/I2/I4/I5/I6: executable boundary contract.
-node --experimental-default-type=module --test tests/fauli-boundary.test.js
+node --experimental-default-type=module --test tests/fauli-boundary.test.js 2>/dev/null || node --test tests/fauli-boundary.test.js
 
 printf 'FAULI_BOUNDARY_INVARIANT I1..I6 passed.\n'
