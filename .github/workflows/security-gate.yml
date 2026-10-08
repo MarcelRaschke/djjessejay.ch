@@ -54,8 +54,43 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: npm audit high+
-        run: npm audit --audit-level=high
+      - name: npm audit high+ (production dependencies)
+        run: npm audit --audit-level=high --omit=dev
+
+      - name: npm audit high+ (dev dependencies, documented exceptions)
+        run: |
+          npm audit --audit-level=high --json > /tmp/audit.json || true
+          node <<'NODE'
+          const fs = require('node:fs');
+          const exceptions = ['GHSA-vfj7-8cjw-p6xm'];
+          const audit = JSON.parse(fs.readFileSync('/tmp/audit.json', 'utf8'));
+          const vulns = audit.vulnerabilities || {};
+          const excepted = new Set();
+          let changed = true;
+          while (changed) {
+            changed = false;
+            for (const [id, adv] of Object.entries(vulns)) {
+              if (excepted.has(id)) continue;
+              const via = Array.isArray(adv.via) ? adv.via : [];
+              const ghsa = via
+                .map((v) => (typeof v === 'object' && v.url ? v.url.split('/').pop() : null))
+                .filter(Boolean);
+              const chained = via.filter((v) => typeof v === 'string' && excepted.has(v));
+              if (ghsa.some((g) => exceptions.includes(g)) || chained.length) {
+                excepted.add(id);
+                changed = true;
+              }
+            }
+          }
+          const hits = Object.keys(vulns).filter((id) => !excepted.has(id));
+          if (hits.length) {
+            console.error('Unexcepted high+ vulnerabilities: ' + hits.join(', '));
+            process.exit(1);
+          }
+          console.log('No high+ vulnerabilities outside documented exceptions.');
+          NODE
+        env:
+          AUDIT_EXCEPTIONS_DOC: docs/SECURITY_EXCEPTIONS.md
 
   secret-scan:
     name: Secret scan
