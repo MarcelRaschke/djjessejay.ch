@@ -3,9 +3,9 @@ set -euo pipefail
 
 REPO="${REPO:-MarcelRaschke/djjessejay.ch}"
 TAG="${TAG:-v7.0.0}"
-BUNDLE="${BUNDLE:-provenance/attestations/v7.0.0.sigstore.json}"
+BUNDLE="${BUNDLE:-provenance/attestations/${TAG}.sigstore.json}"
+IDENTITY_FILE="${BUNDLE%.sigstore.json}.identity"
 EXPECTED_DIGEST="${EXPECTED_DIGEST:-7670724a806910fcdc2c9ffb6401e6f2c65a5ff6}"
-CERT_IDENTITY="${CERT_IDENTITY:-https://dotcom.releases.github.com}"
 CERT_ISSUER="${CERT_ISSUER:-https://token.actions.githubusercontent.com}"
 PREDICATE_TYPE="https://in-toto.io/attestation/release/v0.2"
 
@@ -34,11 +34,17 @@ if [[ "$actual_digest" != "$EXPECTED_DIGEST" ]]; then
   exit 1
 fi
 
+if [[ -s "$IDENTITY_FILE" ]]; then
+  CERT_IDENTITY="$(head -n1 "$IDENTITY_FILE")"
+  echo "using pinned signer identity: $CERT_IDENTITY"
+else
+  CERT_IDENTITY="${CERT_IDENTITY:-https://dotcom.releases.github.com}"
+  echo "WARN: no identity file for $TAG; falling back to $CERT_IDENTITY" >&2
+fi
+
 echo "::group::Verify Sigstore/In-Toto release attestation"
 cosign verify-blob-attestation "$artifact" \
   --bundle "$BUNDLE" \
-  --new-bundle-format \
-  --insecure-ignore-tlog \
   --type "$PREDICATE_TYPE" \
   --certificate-oidc-issuer "$CERT_ISSUER" \
   --certificate-identity "$CERT_IDENTITY"
