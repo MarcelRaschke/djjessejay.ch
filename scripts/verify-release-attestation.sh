@@ -16,15 +16,18 @@ test -s "$BUNDLE" || { echo "ERROR: missing attestation bundle: $BUNDLE" >&2; ex
 workdir="$(mktemp -d)"
 trap 'rm -rf "$workdir"' EXIT
 
-artifact="$workdir/source-${TAG}.tar.gz"
+artifact="$workdir/tag-${TAG}.gitobj"
 
-echo "::group::Download GitHub source tarball"
-gh api "repos/${REPO}/tarball/${TAG}" > "$artifact"
+echo "::group::Reconstruct signed git tag object"
+git fetch --no-tags origin "refs/tags/${TAG}:refs/tags/${TAG}" >/dev/null 2>&1
+git cat-file tag "${TAG}" > "$artifact.body"
+tag_size="$(wc -c < "$artifact.body")"
+{ printf 'tag %s\0' "$tag_size"; cat "$artifact.body"; } > "$artifact"
 echo "::endgroup::"
 
-actual_digest="$(sha256sum "$artifact" | awk '{print $1}')"
-echo "expected sha256: $EXPECTED_DIGEST"
-echo "actual   sha256: $actual_digest"
+actual_digest="$(sha1sum "$artifact" | awk '{print $1}')"
+echo "expected sha1:  $EXPECTED_DIGEST"
+echo "actual   sha1:  $actual_digest"
 
 if [[ "$actual_digest" != "$EXPECTED_DIGEST" ]]; then
   echo "ERROR: source tarball digest does not match the archived attestation subject." >&2

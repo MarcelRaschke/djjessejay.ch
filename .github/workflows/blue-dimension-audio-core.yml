@@ -1,0 +1,56 @@
+name: Blue Dimension Audio Core
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "audio-core/**"
+      - ".github/workflows/blue-dimension-audio-core.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "audio-core/**"
+      - ".github/workflows/blue-dimension-audio-core.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  mojo-audio-core:
+    name: Mojo 1.1 Audio Core Gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Install Mojo 1.1.0
+        run: |
+          uv venv --python 3.13
+          uv pip install --python .venv/bin/python "mojo==1.1.0"
+
+      - name: Verify Mojo version
+        run: |
+          .venv/bin/mojo --version
+          test "$(.venv/bin/mojo --version | grep -o "1\\.1\\.0" | head -n1)" = "1.1.0"
+
+      - name: Format check
+        run: |
+          .venv/bin/mojo format audio-core/blue_dimension_os.mojo
+          .venv/bin/mojo format audio-core/blue_dimension_os_test.mojo
+          git diff --exit-code -- audio-core/*.mojo
+
+      - name: Compile audio core
+        run: |
+          .venv/bin/mojo build --Werror             -o /tmp/blue_dimension_os             audio-core/blue_dimension_os.mojo
+
+      - name: Run audio core tests
+        run: |
+          .venv/bin/mojo run --Werror -D ASSERT=all             -I audio-core             audio-core/blue_dimension_os_test.mojo
+
+      - name: Runtime smoke test
+        run: |
+          /tmp/blue_dimension_os
