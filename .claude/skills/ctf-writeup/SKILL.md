@@ -1,6 +1,6 @@
 ---
 name: ctf-writeup
-description: Strukturierte CTF-Writeups generieren — Challenge-Details, Lösungsweg, Code-Snippets und Learnings in professionellem Format. Unterstützt alle gängigen Kategorien (Network, Web, Crypto, Forensics, Pwn, Reverse). Trigger: "ctf writeup", "writeup schreiben", "challenge dokumentieren", "ctf lösung dokumentieren", "writeup erstellen", "flag dokumentieren".
+description: 'Strukturierte CTF-Writeups generieren — Challenge-Details, Lösungsweg, Code-Snippets und Learnings in professionellem Format. Unterstützt alle gängigen Kategorien (Network, Web, Crypto, Forensics, Pwn, Reverse). Trigger: "ctf writeup", "writeup schreiben", "challenge dokumentieren", "ctf lösung dokumentieren", "writeup erstellen", "flag dokumentieren".'
 argument-hint: <challenge-name> <category>
 allowed-tools: Read, Write, Bash
 ---

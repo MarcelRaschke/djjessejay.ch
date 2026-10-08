@@ -1,6 +1,6 @@
 ---
 name: deep-research
-description: Tiefe Codebase-Recherche in isoliertem Subagenten-Kontext für djjessejay.ch. Nutzen wenn der User etwas untersuchen, analysieren oder verstehen möchte ohne den Haupt-Kontext zu belasten. Trigger: "recherchiere", "analysiere den Code", "wie funktioniert", "finde alle Stellen", "untersuche".
+description: 'Tiefe Codebase-Recherche in isoliertem Subagenten-Kontext für djjessejay.ch. Nutzen wenn der User etwas untersuchen, analysieren oder verstehen möchte ohne den Haupt-Kontext zu belasten. Trigger: "recherchiere", "analysiere den Code", "wie funktioniert", "finde alle Stellen", "untersuche".'
 context: fork
 agent: Explore
 effort: high

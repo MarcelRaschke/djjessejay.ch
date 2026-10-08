@@ -1,7 +1,7 @@
 ---
 name: wizard-architect
-description: Booking-Wizard und interaktive Formulare für djjessejay.ch entwerfen und implementieren — mehrstufiges Booking-Formular, FAQ-Chatbot, Set-Konfigurationsassistent, Event-Typ-Auswahl. Trigger: "wizard erstellen", "booking wizard", "mehrstufiges formular", "interaktiver assistent", "chatbot für website", "booking assistent".
-argument-hint: <wizard-typ: booking | faq | set-konfigurator | event-typ>
+description: 'Booking-Wizard und interaktive Formulare für djjessejay.ch entwerfen und implementieren — mehrstufiges Booking-Formular, FAQ-Chatbot, Set-Konfigurationsassistent, Event-Typ-Auswahl. Trigger: "wizard erstellen", "booking wizard", "mehrstufiges formular", "interaktiver assistent", "chatbot für website", "booking assistent".'
+argument-hint: '<wizard-typ: booking | faq | set-konfigurator | event-typ>'
 allowed-tools: Read, Edit, Bash(grep -n "form\|contact\|submit\|wizard" /home/user/djjessejay.ch/index.html), Bash(grep -c "function" /home/user/djjessejay.ch/index.html)
 ---
 

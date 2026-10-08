@@ -1,7 +1,7 @@
 ---
 name: skool-community
-description: Fan- und Community-Management für DJ Jesse Jay — Kommentare beantworten, Community-Updates schreiben, Fan-Interaktion auf Social Media fördern, Gästebuch moderieren, Community-Events planen. Trigger: "community", "fans", "social media antworten", "kommentare beantworten", "community post", "fan engagement".
-argument-hint: <aktion: post | antwort | event | gaestebuch>
+description: 'Fan- und Community-Management für DJ Jesse Jay — Kommentare beantworten, Community-Updates schreiben, Fan-Interaktion auf Social Media fördern, Gästebuch moderieren, Community-Events planen. Trigger: "community", "fans", "social media antworten", "kommentare beantworten", "community post", "fan engagement".'
+argument-hint: '<aktion: post | antwort | event | gaestebuch>'
 allowed-tools: Read, Bash(cat /home/user/djjessejay.ch/guestbook.sql 2>/dev/null | tail -20), Bash(grep -c "INSERT INTO" /home/user/djjessejay.ch/guestbook.sql 2>/dev/null)
 ---
 

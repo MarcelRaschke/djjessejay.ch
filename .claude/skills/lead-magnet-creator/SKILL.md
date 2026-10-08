@@ -1,7 +1,7 @@
 ---
 name: lead-magnet-creator
-description: Booking-Lead-Magnets für DJ Jesse Jay erstellen — Promo-Mix-Beschreibungen, Pressekit-Texte, EPK (Electronic Press Kit), Booking-Seite optimieren, Kontaktformular-Texte verbessern. Trigger: "lead magnet", "epk erstellen", "pressekit schreiben", "booking seite verbessern", "promo text", "dj profil schreiben".
-argument-hint: <typ: epk | promo-mix | booking-text | bio-kurz | bio-lang>
+description: 'Booking-Lead-Magnets für DJ Jesse Jay erstellen — Promo-Mix-Beschreibungen, Pressekit-Texte, EPK (Electronic Press Kit), Booking-Seite optimieren, Kontaktformular-Texte verbessern. Trigger: "lead magnet", "epk erstellen", "pressekit schreiben", "booking seite verbessern", "promo text", "dj profil schreiben".'
+argument-hint: '<typ: epk | promo-mix | booking-text | bio-kurz | bio-lang>'
 allowed-tools: Read, Edit, Bash(grep -n "about\|bio\|booking\|contact" /home/user/djjessejay.ch/index.html), Bash(grep -n "biography\|biografie" /home/user/djjessejay.ch/index.html)
 ---
 

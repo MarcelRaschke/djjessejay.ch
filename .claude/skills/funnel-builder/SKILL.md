@@ -1,6 +1,6 @@
 ---
 name: funnel-builder
-description: Event- und Booking-Promotion-Funnel für DJ Jesse Jay erstellen — Landing-Page-Texte, Social-Media-Posts, Email-Sequenzen für Gig-Promotion, Radioshows und neue Mixes. Trigger: "funnel erstellen", "event promoten", "promotion plan", "gig bewerben", "marketing funnel", "mix veröffentlichen promoten".
+description: 'Event- und Booking-Promotion-Funnel für DJ Jesse Jay erstellen — Landing-Page-Texte, Social-Media-Posts, Email-Sequenzen für Gig-Promotion, Radioshows und neue Mixes. Trigger: "funnel erstellen", "event promoten", "promotion plan", "gig bewerben", "marketing funnel", "mix veröffentlichen promoten".'
 argument-hint: <event-name | mix-titel | "radio-show">
 allowed-tools: Read, Bash(cat /home/user/djjessejay.ch/events.sql), Bash(grep -n "news\|event\|gig" /home/user/djjessejay.ch/index.html)
 ---

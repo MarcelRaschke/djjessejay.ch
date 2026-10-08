@@ -1,7 +1,7 @@
 ---
 name: thumbnail-ideas
-description: Thumbnail- und Artwork-Ideen für DJ Jesse Jay generieren — YouTube-Thumbnails für Mixes, Event-Flyer-Konzepte, Social-Media-Grafiken, Profilbild-Ideen. Mit konkreten Midjourney/DALL-E Prompts. Trigger: "thumbnail idee", "artwork erstellen", "cover art", "flyer idee", "youtube thumbnail", "social media grafik", "cover design".
-argument-hint: <typ: youtube-thumbnail | event-flyer | social-cover | mix-artwork | profilbild>
+description: 'Thumbnail- und Artwork-Ideen für DJ Jesse Jay generieren — YouTube-Thumbnails für Mixes, Event-Flyer-Konzepte, Social-Media-Grafiken, Profilbild-Ideen. Mit konkreten Midjourney/DALL-E Prompts. Trigger: "thumbnail idee", "artwork erstellen", "cover art", "flyer idee", "youtube thumbnail", "social media grafik", "cover design".'
+argument-hint: '<typ: youtube-thumbnail | event-flyer | social-cover | mix-artwork | profilbild>'
 allowed-tools: Read, Bash(ls /home/user/djjessejay.ch/img/ 2>/dev/null | head -20)
 ---
 

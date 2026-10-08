@@ -1,6 +1,6 @@
 ---
 name: skillcreator
-description: Erstellt eine neue SKILL.md von Grund auf — interaktiv oder mit Beschreibung. Fragt nach Skill-Name, Zweck, benötigten Tools und Auslösern. Generiert vollständige SKILL.md nach Qualitäts-Rubrik (100/100 ready). Trigger: "neuen skill erstellen", "skill anlegen", "skillcreator", "erstelle skill für", "neuen slash command".
+description: 'Erstellt eine neue SKILL.md von Grund auf — interaktiv oder mit Beschreibung. Fragt nach Skill-Name, Zweck, benötigten Tools und Auslösern. Generiert vollständige SKILL.md nach Qualitäts-Rubrik (100/100 ready). Trigger: "neuen skill erstellen", "skill anlegen", "skillcreator", "erstelle skill für", "neuen slash command".'
 argument-hint: <skill-name> [kurze Beschreibung]
 allowed-tools: Read, Write, Bash(ls /root/.claude/skills/), Bash(mkdir -p /root/.claude/skills/), Bash(mkdir -p /home/user/djjessejay.ch/.claude/skills/)
 ---

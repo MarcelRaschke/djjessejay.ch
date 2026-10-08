@@ -1,6 +1,6 @@
 ---
 name: fireflies-import
-description: Meeting-Notizen aus Fireflies.ai importieren und in djjessejay.ch-Datenbank übernehmen — Booking-Gespräche, Venue-Meetings, Pressegespräche strukturieren und als Events oder Kontakte speichern. Trigger: "fireflies importieren", "meeting notizen", "gesprächsnotizen übernehmen", "booking meeting notizen".
+description: 'Meeting-Notizen aus Fireflies.ai importieren und in djjessejay.ch-Datenbank übernehmen — Booking-Gespräche, Venue-Meetings, Pressegespräche strukturieren und als Events oder Kontakte speichern. Trigger: "fireflies importieren", "meeting notizen", "gesprächsnotizen übernehmen", "booking meeting notizen".'
 argument-hint: <meeting-zusammenfassung oder fireflies-export>
 allowed-tools: Read, Edit, Bash(cat /home/user/djjessejay.ch/events.sql), Bash(grep -n "INSERT INTO" /home/user/djjessejay.ch/events.sql)
 ---

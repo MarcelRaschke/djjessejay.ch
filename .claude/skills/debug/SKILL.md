@@ -1,6 +1,6 @@
 ---
 name: debug
-description: Debug-Workflow für djjessejay.ch — analysiert JavaScript-Fehler, CSS-Probleme, API-Fehler und Laufzeitprobleme. Sucht Ursache im Code, erklärt das Problem und implementiert den Fix. Trigger: "debug", "fehler beheben", "js error", "console error", "funktioniert nicht", "kaputt", "broken", "error tracen", "was ist falsch mit".
+description: 'Debug-Workflow für djjessejay.ch — analysiert JavaScript-Fehler, CSS-Probleme, API-Fehler und Laufzeitprobleme. Sucht Ursache im Code, erklärt das Problem und implementiert den Fix. Trigger: "debug", "fehler beheben", "js error", "console error", "funktioniert nicht", "kaputt", "broken", "error tracen", "was ist falsch mit".'
 argument-hint: <fehlermeldung | dateiname | symptom>
 allowed-tools: Read, Edit, Grep, Bash(grep -n), Bash(node --check)
 effort: high

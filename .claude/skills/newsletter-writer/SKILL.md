@@ -1,7 +1,7 @@
 ---
 name: newsletter-writer
-description: Fan-Newsletter für DJ Jesse Jay schreiben — monatliche Updates über Gigs, Radio-Shows, neue Mixes, Musik-Empfehlungen. Verschiedene Formate: kurz (Email), lang (Substack), Social-Media-Variante. Trigger: "newsletter schreiben", "newsletter erstellen", "fan update", "email newsletter", "monatsupdate", "substack post".
-argument-hint: <typ: monatlich | gig-ankuendigung | mix-release | radio-show>
+description: 'Fan-Newsletter für DJ Jesse Jay schreiben — monatliche Updates über Gigs, Radio-Shows, neue Mixes, Musik-Empfehlungen. Verschiedene Formate: kurz (Email), lang (Substack), Social-Media-Variante. Trigger: "newsletter schreiben", "newsletter erstellen", "fan update", "email newsletter", "monatsupdate", "substack post".'
+argument-hint: '<typ: monatlich | gig-ankuendigung | mix-release | radio-show>'
 allowed-tools: Read, Bash(grep -A 5 "$(date +%Y)" /home/user/djjessejay.ch/events.sql), Bash(cat /home/user/djjessejay.ch/.claude/ideas.md 2>/dev/null)
 ---
 

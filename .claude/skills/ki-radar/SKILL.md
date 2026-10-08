@@ -1,6 +1,6 @@
 ---
 name: ki-radar
-description: KI-Radar für DJ Jesse Jay — überwacht KI-Tools und Trends die für DJs relevant sind: KI-Musikgenerierung, Auto-Mastering, Stem-Separation, Smart-Playlisting, KI-gestützte Promotion. Zusammenfassung mit Handlungsempfehlung. Trigger: "ki radar", "ki tools für djs", "neue ki tools", "artificial intelligence musik", "ai music tools", "ki trends musik".
+description: 'KI-Radar für DJ Jesse Jay — überwacht KI-Tools und Trends die für DJs relevant sind: KI-Musikgenerierung, Auto-Mastering, Stem-Separation, Smart-Playlisting, KI-gestützte Promotion. Zusammenfassung mit Handlungsempfehlung. Trigger: "ki radar", "ki tools für djs", "neue ki tools", "artificial intelligence musik", "ai music tools", "ki trends musik".'
 allowed-tools: Read, Bash(date +%Y-%m-%d)
 effort: high
 ---

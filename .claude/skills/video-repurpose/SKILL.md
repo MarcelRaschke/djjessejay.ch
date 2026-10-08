@@ -1,7 +1,7 @@
 ---
 name: video-repurpose
-description: DJ Jesse Jay Videos und Radio-Shows für verschiedene Plattformen aufbereiten — langer Mix zu YouTube, Clips zu Instagram Reels/TikTok, Audio zu Podcast, Radio-Show zu SoundCloud. Erstellt Plattform-spezifische Texte und Posting-Plan. Trigger: "video repurposen", "mix veröffentlichen", "content aufbereiten", "reels erstellen", "tiktok clip", "radio show uploaden", "mix zu podcast".
-argument-hint: <quelle: youtube-mix | radio-show | live-set | interview> [plattformen]
+description: 'DJ Jesse Jay Videos und Radio-Shows für verschiedene Plattformen aufbereiten — langer Mix zu YouTube, Clips zu Instagram Reels/TikTok, Audio zu Podcast, Radio-Show zu SoundCloud. Erstellt Plattform-spezifische Texte und Posting-Plan. Trigger: "video repurposen", "mix veröffentlichen", "content aufbereiten", "reels erstellen", "tiktok clip", "radio show uploaden", "mix zu podcast".'
+argument-hint: '<quelle: youtube-mix | radio-show | live-set | interview> [plattformen]'
 allowed-tools: Read, Bash(date +%Y-%m-%d), Bash(ls /home/user/djjessejay.ch/img/)
 ---
 

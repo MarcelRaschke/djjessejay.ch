@@ -1,6 +1,6 @@
 ---
 name: youtube-description
-description: YouTube-Beschreibungen für DJ Jesse Jay Mixes und Sets schreiben — SEO-optimiert, mit Tracklist, Links, Timestamps und Hashtags. Trigger: "youtube beschreibung", "video beschreibung schreiben", "youtube text", "mix beschreibung", "tracklist formatieren", "youtube upload text".
+description: 'YouTube-Beschreibungen für DJ Jesse Jay Mixes und Sets schreiben — SEO-optimiert, mit Tracklist, Links, Timestamps und Hashtags. Trigger: "youtube beschreibung", "video beschreibung schreiben", "youtube text", "mix beschreibung", "tracklist formatieren", "youtube upload text".'
 argument-hint: <mix-titel> [genre] [dauer]
 allowed-tools: Read, Bash(date +%Y-%m-%d)
 ---

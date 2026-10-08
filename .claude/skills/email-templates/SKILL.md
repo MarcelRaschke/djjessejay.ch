@@ -1,7 +1,7 @@
 ---
 name: email-templates
-description: E-Mail-Vorlagen für DJ Jesse Jay — Booking-Anfragen beantworten, Gig-Bestätigungen, Tech-Rider versenden, Pressekit anfordern, Absagen formulieren. Trigger: "email schreiben", "booking anfrage beantworten", "gig bestätigen", "tech rider email", "absage formulieren", "mail vorlage".
-argument-hint: <typ: booking-anfrage | gig-bestaetigung | absage | tech-rider | pressekit | followup>
+description: 'E-Mail-Vorlagen für DJ Jesse Jay — Booking-Anfragen beantworten, Gig-Bestätigungen, Tech-Rider versenden, Pressekit anfordern, Absagen formulieren. Trigger: "email schreiben", "booking anfrage beantworten", "gig bestätigen", "tech rider email", "absage formulieren", "mail vorlage".'
+argument-hint: '<typ: booking-anfrage | gig-bestaetigung | absage | tech-rider | pressekit | followup>'
 allowed-tools: Read, Bash(cat /home/user/djjessejay.ch/events.sql), Bash(grep -n "contact\|email\|booking" /home/user/djjessejay.ch/index.html)
 ---
 

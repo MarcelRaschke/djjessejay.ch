@@ -1,7 +1,7 @@
 ---
 name: script-writer
-description: Skripte für DJ Jesse Jay schreiben — Radio-Show-Moderation für "The Blue Dimension" auf Radio LoRa 97.5 FM, Intro/Outro-Texte, Ankündigungstexte, Interview-Fragen vorbereiten. Trigger: "skript schreiben", "radio moderation", "show skript", "intro text", "the blue dimension skript", "radio lora moderation", "ankündigungstext".
-argument-hint: <typ: radio-intro | radio-outro | ankuendigung | interview | voller-show-ablauf>
+description: 'Skripte für DJ Jesse Jay schreiben — Radio-Show-Moderation für "The Blue Dimension" auf Radio LoRa 97.5 FM, Intro/Outro-Texte, Ankündigungstexte, Interview-Fragen vorbereiten. Trigger: "skript schreiben", "radio moderation", "show skript", "intro text", "the blue dimension skript", "radio lora moderation", "ankündigungstext".'
+argument-hint: '<typ: radio-intro | radio-outro | ankuendigung | interview | voller-show-ablauf>'
 allowed-tools: Read, Bash(date +%Y-%m-%d), Bash(grep -A 5 "$(date +%Y)" /home/user/djjessejay.ch/events.sql | head -10)
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: issue-manager
-description: GitHub Issues für djjessejay.ch anzeigen, analysieren und fixen — listet offene Issues, zeigt Details, implementiert Fixes und schliesst Issues. Trigger: "issue anzeigen", "issue fixen", "offene issues", "github issue", "bug beheben", "issue #[nummer]", "was sind die offenen issues".
+description: 'GitHub Issues für djjessejay.ch anzeigen, analysieren und fixen — listet offene Issues, zeigt Details, implementiert Fixes und schliesst Issues. Trigger: "issue anzeigen", "issue fixen", "offene issues", "github issue", "bug beheben", "issue #[nummer]", "was sind die offenen issues".'
 argument-hint: [issue-nummer | list | new]
 allowed-tools: Bash(gh issue list), Bash(gh issue view), Bash(gh issue create), Bash(gh issue close), Bash(gh issue comment), Read, Edit, Bash(git add), Bash(git commit), Bash(git push)
 ---

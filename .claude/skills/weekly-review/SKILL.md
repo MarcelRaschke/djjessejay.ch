@@ -1,7 +1,7 @@
 ---
 name: weekly-review
-description: Wöchentlicher Review für DJ Jesse Jay — vergangene Gigs reflektieren, Website-Aktivität prüfen, anstehende Aufgaben priorisieren, Fortschritt zu Zielen messen. Struktuierte Wochenrückschau in 10 Minuten. Trigger: "weekly review", "wochenrückblick", "woche zusammenfassen", "was lief diese woche", "freitags review", "wochenplanung".
-allowed-tools: Read, Bash(date +%Y-%m-%d), Bash(git -C /home/user/djjessejay.ch log --oneline --since="1 week ago"), Bash(grep -A 5 "$(date +%Y)" /home/user/djjessejay.ch/events.sql | head -20), Bash(cat /home/user/djjessejay.ch/.claude/ideas.md 2>/dev/null | grep -c "Status: 💡 Neu")
+description: 'Wöchentlicher Review für DJ Jesse Jay — vergangene Gigs reflektieren, Website-Aktivität prüfen, anstehende Aufgaben priorisieren, Fortschritt zu Zielen messen. Struktuierte Wochenrückschau in 10 Minuten. Trigger: "weekly review", "wochenrückblick", "woche zusammenfassen", "was lief diese woche", "freitags review", "wochenplanung".'
+allowed-tools: 'Read, Bash(date +%Y-%m-%d), Bash(git -C /home/user/djjessejay.ch log --oneline --since="1 week ago"), Bash(grep -A 5 "$(date +%Y)" /home/user/djjessejay.ch/events.sql | head -20), Bash(cat /home/user/djjessejay.ch/.claude/ideas.md 2>/dev/null | grep -c "Status: 💡 Neu")'
 ---
 
 # Weekly Review: Wochenrückblick DJ Jesse Jay

@@ -1,6 +1,6 @@
 ---
 name: morning-briefing
-description: Tägliches Morgen-Briefing für DJ Jesse Jay — anstehende Gigs und Deadlines, offene Booking-Anfragen, Social-Media-To-Dos, aktuelle Musik-News-Highlights. Kompakte Tagesübersicht in 2 Minuten. Trigger: "morning briefing", "tagesübersicht", "was steht heute an", "guten morgen briefing", "daily briefing", "was ist heute wichtig".
+description: 'Tägliches Morgen-Briefing für DJ Jesse Jay — anstehende Gigs und Deadlines, offene Booking-Anfragen, Social-Media-To-Dos, aktuelle Musik-News-Highlights. Kompakte Tagesübersicht in 2 Minuten. Trigger: "morning briefing", "tagesübersicht", "was steht heute an", "guten morgen briefing", "daily briefing", "was ist heute wichtig".'
 allowed-tools: Read, Bash(date +%Y-%m-%d), Bash(grep -A 5 "$(date +%Y)" /home/user/djjessejay.ch/events.sql), Bash(cat /home/user/djjessejay.ch/.claude/ideas.md)
 ---
 

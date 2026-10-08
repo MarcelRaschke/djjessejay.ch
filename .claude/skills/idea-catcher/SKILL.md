@@ -1,6 +1,6 @@
 ---
 name: idea-catcher
-description: Kreative Ideen für DJ Jesse Jay festhalten und organisieren — Set-Konzepte, Show-Themen, Kollaborationsideen, Musik-Entdeckungen, technische Verbesserungen. Ideen werden kategorisiert und in einer Ideen-Datei gespeichert. Trigger: "idee festhalten", "idee notieren", "kreative idee", "set-konzept", "show-thema", "idee speichern".
+description: 'Kreative Ideen für DJ Jesse Jay festhalten und organisieren — Set-Konzepte, Show-Themen, Kollaborationsideen, Musik-Entdeckungen, technische Verbesserungen. Ideen werden kategorisiert und in einer Ideen-Datei gespeichert. Trigger: "idee festhalten", "idee notieren", "kreative idee", "set-konzept", "show-thema", "idee speichern".'
 argument-hint: <idee beschreiben>
 allowed-tools: Read, Edit, Write, Bash(cat /home/user/djjessejay.ch/.claude/ideas.md), Bash(date +%Y-%m-%d)
 ---

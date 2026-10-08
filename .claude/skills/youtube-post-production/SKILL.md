@@ -1,6 +1,6 @@
 ---
 name: youtube-post-production
-description: Post-Production-Workflow für DJ Jesse Jay YouTube-Videos — Checkliste von Rohmaterial bis veröffentlichtes Video: Schnitt, Thumbnails, Beschreibung, Tags, Upload-Einstellungen, Veröffentlichungs-Timing. Trigger: "youtube post production", "video fertigstellen", "mix hochladen", "youtube workflow", "video veröffentlichen", "upload vorbereiten".
+description: 'Post-Production-Workflow für DJ Jesse Jay YouTube-Videos — Checkliste von Rohmaterial bis veröffentlichtes Video: Schnitt, Thumbnails, Beschreibung, Tags, Upload-Einstellungen, Veröffentlichungs-Timing. Trigger: "youtube post production", "video fertigstellen", "mix hochladen", "youtube workflow", "video veröffentlichen", "upload vorbereiten".'
 argument-hint: <mix-titel | "radio-show" | "live-set">
 allowed-tools: Read, Bash(date +%Y-%m-%d), Bash(ls /home/user/djjessejay.ch/img/ 2>/dev/null)
 ---

@@ -1,7 +1,7 @@
 ---
 name: make-connect
-description: Make.com (ehemals Integromat) Automationen für DJ Jesse Jay einrichten — Booking-Anfragen automatisch weiterleiten, Gig-Kalender synchronisieren, Social-Media-Posts automatisieren, Website-Kontaktformular mit Email verbinden. Trigger: "make automation", "make.com", "automatisierung einrichten", "zapier", "booking automatisieren", "workflow automatisieren".
-argument-hint: <automation-typ: booking-email | kalender-sync | social-post | kontaktformular>
+description: 'Make.com (ehemals Integromat) Automationen für DJ Jesse Jay einrichten — Booking-Anfragen automatisch weiterleiten, Gig-Kalender synchronisieren, Social-Media-Posts automatisieren, Website-Kontaktformular mit Email verbinden. Trigger: "make automation", "make.com", "automatisierung einrichten", "zapier", "booking automatisieren", "workflow automatisieren".'
+argument-hint: '<automation-typ: booking-email | kalender-sync | social-post | kontaktformular>'
 allowed-tools: Read, Bash(grep -n "contact\|form\|email\|submit" /home/user/djjessejay.ch/index.html), Bash(grep -n "fetch\|POST\|api" /home/user/djjessejay.ch/index.html)
 ---
 

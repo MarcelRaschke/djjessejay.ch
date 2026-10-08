@@ -1,6 +1,6 @@
 ---
 name: autoloop
-description: Iterativer Skill-Entwicklungs-Loop — liest eine SKILL.md, bewertet sie nach 10 Qualitätskriterien und verbessert sie automatisch bis alle Kriterien erfüllt sind. Trigger: "autoloop [skill-name]", "verbessere den skill bis er fertig ist", "skill fertig machen", "skill iterieren", "polish skill", "skill vervollständigen".
+description: 'Iterativer Skill-Entwicklungs-Loop — liest eine SKILL.md, bewertet sie nach 10 Qualitätskriterien und verbessert sie automatisch bis alle Kriterien erfüllt sind. Trigger: "autoloop [skill-name]", "verbessere den skill bis er fertig ist", "skill fertig machen", "skill iterieren", "polish skill", "skill vervollständigen".'
 argument-hint: <skill-name>
 allowed-tools: Read, Edit, Write, Bash(ls /root/.claude/skills/), Bash(ls /home/user/djjessejay.ch/.claude/skills/)
 effort: high

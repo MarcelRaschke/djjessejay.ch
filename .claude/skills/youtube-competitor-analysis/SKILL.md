@@ -1,6 +1,6 @@
 ---
 name: youtube-competitor-analysis
-description: YouTube-Konkurrenzanalyse für DJ Jesse Jay — analysiert erfolgreiche DJ-Kanäle im Progressive House / Deep House / Techno Segment, findet Content-Lücken und Optimierungspotenzial für djjessejay.ch YouTube-Präsenz. Trigger: "konkurrenzanalyse youtube", "andere djs analysieren", "youtube strategie", "was machen andere djs", "youtube optimierung", "dj youtube analyse".
+description: 'YouTube-Konkurrenzanalyse für DJ Jesse Jay — analysiert erfolgreiche DJ-Kanäle im Progressive House / Deep House / Techno Segment, findet Content-Lücken und Optimierungspotenzial für djjessejay.ch YouTube-Präsenz. Trigger: "konkurrenzanalyse youtube", "andere djs analysieren", "youtube strategie", "was machen andere djs", "youtube optimierung", "dj youtube analyse".'
 argument-hint: [kanal-name oder genre]
 allowed-tools: Read, Bash(date +%Y-%m-%d)
 effort: high

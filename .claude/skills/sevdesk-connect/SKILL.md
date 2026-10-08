@@ -1,7 +1,7 @@
 ---
 name: sevdesk-connect
-description: sevdesk-Buchhaltung für DJ Jesse Jay — Rechnungen für Gigs erstellen, Einnahmen tracken, Ausgaben-Kategorien für Equipment und Fahrtkosten, Jahresübersicht für Steuer. Trigger: "rechnung erstellen", "sevdesk", "buchhaltung", "invoice", "einnahmen tracken", "steuer vorbereiten", "gig abrechnen".
-argument-hint: <aktion: rechnung | ausgabe | jahresuebersicht | export>
+description: 'sevdesk-Buchhaltung für DJ Jesse Jay — Rechnungen für Gigs erstellen, Einnahmen tracken, Ausgaben-Kategorien für Equipment und Fahrtkosten, Jahresübersicht für Steuer. Trigger: "rechnung erstellen", "sevdesk", "buchhaltung", "invoice", "einnahmen tracken", "steuer vorbereiten", "gig abrechnen".'
+argument-hint: '<aktion: rechnung | ausgabe | jahresuebersicht | export>'
 allowed-tools: Read, Bash(date +%Y-%m-%d), Bash(grep -A 5 "$(date +%Y)" /home/user/djjessejay.ch/events.sql | head -20)
 ---
 

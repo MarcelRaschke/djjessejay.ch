@@ -1,7 +1,7 @@
 ---
 name: remotion-broll
-description: B-Roll-Konzepte und Shot-Lists für DJ Jesse Jay Videos erstellen — Set-Videos, Radio-Show-Clips, Behind-the-Scenes, Event-Rückblicke. Beschreibt welche Shots gebraucht werden und wie sie umzusetzen sind. Trigger: "b-roll", "video shots", "shot list", "video konzept", "dj video drehen", "behind the scenes video".
-argument-hint: <video-typ: set-video | radio-show-clip | bts | event-rueckblick | promo>
+description: 'B-Roll-Konzepte und Shot-Lists für DJ Jesse Jay Videos erstellen — Set-Videos, Radio-Show-Clips, Behind-the-Scenes, Event-Rückblicke. Beschreibt welche Shots gebraucht werden und wie sie umzusetzen sind. Trigger: "b-roll", "video shots", "shot list", "video konzept", "dj video drehen", "behind the scenes video".'
+argument-hint: '<video-typ: set-video | radio-show-clip | bts | event-rueckblick | promo>'
 allowed-tools: Read, Bash(cat /home/user/djjessejay.ch/events.sql | grep -A 3 "$(date +%Y)" | head -10)
 ---
 

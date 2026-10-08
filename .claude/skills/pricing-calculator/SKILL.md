@@ -1,6 +1,6 @@
 ---
 name: pricing-calculator
-description: DJ-Honorar berechnen und Angebote kalkulieren für DJ Jesse Jay — Preis basierend auf Dauer, Event-Typ, Equipment-Bedarf, Fahrtkosten. Erstellt transparente Angebots-Aufstellung. Trigger: "preis berechnen", "honorar kalkulieren", "was kostet ein booking", "angebot erstellen", "pricing", "booking kosten".
+description: 'DJ-Honorar berechnen und Angebote kalkulieren für DJ Jesse Jay — Preis basierend auf Dauer, Event-Typ, Equipment-Bedarf, Fahrtkosten. Erstellt transparente Angebots-Aufstellung. Trigger: "preis berechnen", "honorar kalkulieren", "was kostet ein booking", "angebot erstellen", "pricing", "booking kosten".'
 argument-hint: <event-typ> <dauer-stunden> [ort]
 allowed-tools: Read, Bash(date +%Y-%m-%d)
 ---

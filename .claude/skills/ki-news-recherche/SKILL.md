@@ -1,6 +1,6 @@
 ---
 name: ki-news-recherche
-description: KI-gestützte Musik-News-Recherche für DJ Jesse Jay — aktuelle Trends in Electronic Music, Schweizer Club-Szene, Radio LoRa News, neue Releases im Progressive/Deep House/Techno-Bereich recherchieren und zusammenfassen. Trigger: "musik news", "electronic music news", "was ist neu", "zürich szene news", "neue releases recherchieren", "ki news recherche".
+description: 'KI-gestützte Musik-News-Recherche für DJ Jesse Jay — aktuelle Trends in Electronic Music, Schweizer Club-Szene, Radio LoRa News, neue Releases im Progressive/Deep House/Techno-Bereich recherchieren und zusammenfassen. Trigger: "musik news", "electronic music news", "was ist neu", "zürich szene news", "neue releases recherchieren", "ki news recherche".'
 argument-hint: <thema | genre | zeitraum>
 allowed-tools: Read, Bash(date +%Y-%m-%d)
 ---

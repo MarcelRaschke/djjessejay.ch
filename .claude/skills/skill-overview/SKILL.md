@@ -1,6 +1,6 @@
 ---
 name: skill-overview
-description: Übersicht aller installierten Skills mit Qualitäts-Score — listet root- und projektspezifische Skills, bewertet sie kurz nach der autoloop-Rubrik und priorisiert Verbesserungen. Trigger: "skill-overview", "welche skills gibt es", "skills auflisten", "skill status", "skills anzeigen", "was kann ich alles aufrufen".
+description: 'Übersicht aller installierten Skills mit Qualitäts-Score — listet root- und projektspezifische Skills, bewertet sie kurz nach der autoloop-Rubrik und priorisiert Verbesserungen. Trigger: "skill-overview", "welche skills gibt es", "skills auflisten", "skill status", "skills anzeigen", "was kann ich alles aufrufen".'
 allowed-tools: Read, Bash(ls /root/.claude/skills/), Bash(ls /home/user/djjessejay.ch/.claude/skills/)
 ---
 
