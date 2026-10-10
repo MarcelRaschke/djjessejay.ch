@@ -1,3 +1,4 @@
+successfully downloaded text file (SHA: 91c14df7df6b88b8fbb32e8a87443148463412ff)
 name: Deploy wdjjj
 
 on:
@@ -59,7 +60,7 @@ jobs:
         run: |
           set -euo pipefail
           for attempt in 1 2 3 4 5 6; do
-            body="$(curl -fsS -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36" https://djjessejay.ch/__wdjjj/health)" && {
+            body="$(curl -fsS -A "wdjjj-healthcheck/1.0 (+https://github.com/MarcelRaschke/djjessejay.ch ci smoke test)" https://djjessejay.ch/__wdjjj/health)" && {
               echo "$body"
               echo "$body" | grep -q '"ok":true'
               echo "$body" | grep -q '"proxy":"wdjjj"'
