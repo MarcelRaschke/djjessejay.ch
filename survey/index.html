@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DJJJ Coin — Community-Umfrage | DJ Jesse Jay</title>
+  <meta name="description" content="djjjcoin Konzept-Umfrage: 21.000.000 djjj, keine Zentrale — du bestimmst die Use Cases. Anonym, 3 Minuten, kein Tracking.">
+  <meta name="theme-color" content="#020812">
+  <meta name="robots" content="index,follow">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://djjessejay.ch/survey/">
+  <style>
+    :root{
+      --bg:#020812;--panel:#071827;--panel2:rgba(6,17,29,.78);
+      --cyan:#00d9ff;--gold:#ffd21a;--magenta:#ff2ea6;
+      --text:#edfaff;--muted:#7894a8;--line:rgba(0,217,255,.18);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;padding:20px 16px 64px;overflow-x:hidden}
+    body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background:
+      radial-gradient(circle at 50% -10%,rgba(8,124,255,.28),transparent 36%),
+      linear-gradient(rgba(0,217,255,.035) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(0,217,255,.035) 1px,transparent 1px);background-size:auto,40px 40px,40px 40px}
+    .wrap{max-width:680px;margin:0 auto}
+    .brand{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.2em;font-weight:700;text-transform:uppercase}
+    .brand .l{color:var(--magenta)}.brand .r{color:var(--cyan)}
+    h1{font-size:clamp(28px,6vw,44px);line-height:1.05;letter-spacing:-.02em;margin:22px 0 8px;font-weight:900}
+    h1 .n{color:var(--cyan)}h1 .m{color:var(--magenta)}
+    .sub{color:var(--muted);font-size:15px;margin:0 0 4px}
+    .kicker{color:var(--gold);font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.18em;text-transform:uppercase}
+    .rule{height:2px;background:linear-gradient(90deg,var(--cyan),var(--magenta));border:0;margin:18px 0}
+    .panel{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;backdrop-filter:blur(6px)}
+    .qtitle{font-weight:700;font-size:16px;margin-bottom:10px;display:block}
+    .qnum{color:var(--gold);margin-right:6px;font-family:ui-monospace,monospace}
+    .hint{color:var(--muted);font-size:12.5px;margin:4px 0 10px}
+    fieldset{border:0;padding:0;margin:0}
+    .rank-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,217,255,.1)}
+    .rank-row:last-of-type{border-bottom:0}
+    .rank-row label{flex:1;font-size:15px}
+    select,textarea,input[type="text"],input[type="email"]{
+      background:#04121f;color:var(--text);border:1px solid var(--line);border-radius:8px;
+      font-size:15px;padding:10px 12px;width:100%
+    }
+    .rank-row select{width:84px;flex:none;text-align:center}
+    textarea{min-height:96px;resize:vertical}
+    .opts{display:grid;gap:8px}
+    .opt{display:flex;align-items:flex-start;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px;cursor:pointer;font-size:15px}
+    .opt:hover{border-color:var(--cyan)}
+    input[type="radio"],input[type="checkbox"]{accent-color:var(--magenta);width:18px;height:18px;margin-top:1px;flex:none}
+    .dsg{color:var(--muted);font-size:12px;line-height:1.5;margin-top:6px}
+    button{
+      width:100%;margin-top:18px;padding:16px;font-size:16px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+      color:#001018;background:linear-gradient(90deg,var(--cyan),var(--gold));border:0;border-radius:12px;cursor:pointer
+    }
+    button:disabled{opacity:.5;cursor:default}
+    #status{margin-top:14px;font-size:14.5px;line-height:1.5;display:none;padding:14px 16px;border-radius:10px}
+    #status.ok{display:block;background:rgba(0,120,80,.15);border:1px solid var(--cyan);color:#c9fff4}
+    #status.err{display:block;background:rgba(120,10,70,.15);border:1px solid var(--magenta);color:#ffd7ee}
+    footer{margin-top:28px;color:var(--muted);font-size:12px;line-height:1.6}
+    footer a{color:var(--cyan)}
+    .hp{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="brand"><span class="l">DJ Jesse Jay</span><span class="r">Blue Dimension // 97.5</span></div>
+    <div class="kicker">Konzept-Umfrage // Phase 2</div>
+    <h1>DJJJ <span class="n">COIN</span> — <span class="m">COMMUNITY-UMFRAGE</span></h1>
+    <p class="sub">21.000.000 djjj. Nie mehr. Keine Zentrale. Noch ist alles Konzept — und du bestimmst, wofür djjj gut sein muss. Ca. 3 Minuten, anonym, kein Tracking.</p>
+    <hr class="rule">
+
+    <form id="survey" novalidate>
+      <fieldset class="panel">
+        <span class="qtitle"><span class="qnum">1</span>Rangliste: Wie nützlich findest du diese Verwendungen?</span>
+        <p class="hint">1 = top, 5 = am wenigsten. Jede Zahl nur einmal vergeben.</p>
+        <div class="rank-row"><label for="r1">Ticket-Zugang zu Events</label><select id="r1" class="rank"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+        <div class="rank-row"><label for="r2">Merch und Drops auf djjessejay.ch</label><select id="r2" class="rank"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+        <div class="rank-row"><label for="r3">Exklusive Track-Freischaltungen</label><select id="r3" class="rank"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+        <div class="rank-row"><label for="r4">Setlist-Voting für Blue Dimension</label><select id="r4" class="rank"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+        <div class="rank-row"><label for="r5">Etwas anderes, nämlich:</label><select id="r5" class="rank"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+        <input type="text" id="r5text" placeholder="Dein Use Case" style="margin-top:10px;">
+      </fieldset>
+
+      <fieldset class="panel">
+        <span class="qtitle"><span class="qnum">2</span>Würdest du einen DJJJ-Node betreiben?</span>
+        <div class="opts">
+          <label class="opt"><input type="radio" name="q2" value="ja-hardware">Ja, passende Hardware ist vorhanden</label>
+          <label class="opt"><input type="radio" name="q2" value="ja-anleitung">Ja, wenn es eine Anleitung gibt</label>
+          <label class="opt"><input type="radio" name="q2" value="nein">Nein</label>
+        </div>
+      </fieldset>
+
+      <fieldset class="panel">
+        <span class="qtitle"><span class="qnum">3</span>Würdest du mitminen (CPU/GPU)?</span>
+        <div class="opts">
+          <label class="opt"><input type="radio" name="q3" value="ja-regelmaessig">Ja, regelmässig</label>
+          <label class="opt"><input type="radio" name="q3" value="gelegentlich">Gelegentlich</label>
+          <label class="opt"><input type="radio" name="q3" value="nein">Nein</label>
+        </div>
+      </fieldset>
+
+      <fieldset class="panel">
+        <span class="qtitle"><span class="qnum">4</span>Wie würdest du ein Wallet nutzen?</span>
+        <div class="opts">
+          <label class="opt"><input type="radio" name="q4" value="mobil">Mobil</label>
+          <label class="opt"><input type="radio" name="q4" value="browser">Im Browser</label>
+          <label class="opt"><input type="radio" name="q4" value="paper">Paper</label>
+          <label class="opt"><input type="radio" name="q4" value="weiss-nicht">Weiss nicht</label>
+        </div>
+      </fieldset>
+
+      <fieldset class="panel">
+        <span class="qtitle"><span class="qnum">5</span>Wofür würdest du djjj tatsächlich ausgeben?</span>
+        <p class="hint">Mehrfachauswahl möglich.</p>
+        <div class="opts">
+          <label class="opt"><input type="checkbox" name="q5" value="tickets">Tickets</label>
+          <label class="opt"><input type="checkbox" name="q5" value="merch">Merch</label>
+          <label class="opt"><input type="checkbox" name="q5" value="track-unlocks">Track-Freischaltungen</label>
+          <label class="opt"><input type="checkbox" name="q5" value="voting">Voting</label>
+          <label class="opt"><input type="checkbox" name="q5" value="nichts">Nichts</label>
+        </div>
+      </fieldset>
+
+      <fieldset class="panel">
+        <span class="qtitle"><span class="qnum">6</span>Was würde dich von der Nutzung abhalten?</span>
+        <p class="hint">Mehrfachauswahl möglich.</p>
+        <div class="opts">
+          <label class="opt"><input type="checkbox" name="q6" value="zu-kompliziert">Zu kompliziert</label>
+          <label class="opt"><input type="checkbox" name="q6" value="sicherheitsbedenken">Sicherheitsbedenken</label>
+          <label class="opt"><input type="checkbox" name="q6" value="kein-nutzen">Kein erkennbarer Nutzen</label>
+          <label class="opt"><input type="checkbox" name="q6" value="krypto-misstrauen">Misstrauen gegenüber Krypto allgemein</label>
+        </div>
+      </fieldset>
+
+      <fieldset class="panel">
+        <span class="qtitle"><span class="qnum">7</span>Hörst du Blue Dimension?</span>
+        <div class="opts">
+          <label class="opt"><input type="radio" name="q7" value="regelmaessig">Regelmässig</label>
+          <label class="opt"><input type="radio" name="q7" value="gelegentlich">Gelegentlich</label>
+          <label class="opt"><input type="radio" name="q7" value="nein">Nein</label>
+        </div>
+      </fieldset>
+
+      <fieldset class="panel">
+        <span class="qtitle"><span class="qnum">8</span>Wärst du eher bereit, ein Event zu besuchen, wenn es mit djjj einen Vorteil gibt?</span>
+        <div class="opts">
+          <label class="opt"><input type="radio" name="q8" value="ja">Ja</label>
+          <label class="opt"><input type="radio" name="q8" value="egal">Egal</label>
+          <label class="opt"><input type="radio" name="q8" value="nein">Nein</label>
+        </div>
+      </fieldset>
+
+      <fieldset class="panel">
+        <span class="qtitle"><span class="qnum">9</span>Offen: Was müsste djjj können, damit du es nutzt?</span>
+        <textarea id="q9" placeholder="Deine Antwort"></textarea>
+      </fieldset>
+
+      <fieldset class="panel">
+        <span class="qtitle"><span class="qnum">10</span>Freiwillig: Kontakt für die Testnet-Einladung</span>
+        <input type="email" id="q10" placeholder="E-Mail (optional)">
+        <p class="dsg">Nur für die Testnet-Einladung, keine Weitergabe, jederzeit Löschung auf Wunsch. Ohne Angabe bleibt die Umfrage komplett anonym.</p>
+      </fieldset>
+
+      <div class="hp" aria-hidden="true">
+        <label for="website">Bitte leer lassen</label>
+        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+      </div>
+
+      <button type="submit" id="submitBtn">Antworten senden</button>
+      <div id="status" role="status"></div>
+    </form>
+
+    <footer>
+      djjjcoin ist ein Konzept — es existiert noch keine Blockchain, keine Coins, kein Kurs. Diese Umfrage entscheidet über die Use Cases und den Testnet-Start. Keine Kurs- oder Renditeversprechen. <a href="../">DJ Jesse Jay</a> · Blue Dimension · Zürich · Est. 1997
+    </footer>
+  </main>
+
+  <script>
+    // Same-origin API route served by server.js; falls back to a clear
+    // error message when the page runs on a static host without backend.
+    var SURVEY_ENDPOINT = "/api/djjj-survey";
+
+    var form = document.getElementById("survey");
+    var status = document.getElementById("status");
+    var btn = document.getElementById("submitBtn");
+
+    function setStatus(cls, msg) {
+      status.className = cls;
+      status.textContent = msg;
+    }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var ranks = Array.prototype.slice.call(document.querySelectorAll(".rank")).map(function (s) { return s.value; });
+      var filled = ranks.filter(Boolean);
+      var unique = filled.filter(function (v, i, a) { return a.indexOf(v) === i; });
+      if (filled.length < 5 || unique.length !== filled.length) {
+        setStatus("err", "Bitte Frage 1 vollständig ausfüllen: alle fünf Plätze vergeben, jede Zahl nur einmal.");
+        return;
+      }
+      var checked = function (name) {
+        return Array.prototype.slice.call(form.querySelectorAll('input[name="' + name + '"]:checked')).map(function (c) { return c.value; });
+      };
+      var single = function (name) {
+        var el = form.querySelector('input[name="' + name + '"]:checked');
+        return el ? el.value : null;
+      };
+      var payload = {
+        q1: {
+          tickets: ranks[0],
+          merch: ranks[1],
+          trackUnlocks: ranks[2],
+          setlistVoting: ranks[3],
+          other: { rank: ranks[4], text: document.getElementById("r5text").value.trim() }
+        },
+        q2: single("q2"),
+        q3: single("q3"),
+        q4: single("q4"),
+        q5: checked("q5"),
+        q6: checked("q6"),
+        q7: single("q7"),
+        q8: single("q8"),
+        q9: document.getElementById("q9").value.trim(),
+        q10: document.getElementById("q10").value.trim() || null,
+        website: document.getElementById("website").value
+      };
+      btn.disabled = true;
+      btn.textContent = "Sende ...";
+      fetch(SURVEY_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }).then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (data) {
+          if (!res.ok) {
+            var msg = data && data.error ? data.error : "Übermittlung fehlgeschlagen. Bitte später erneut versuchen.";
+            setStatus("err", msg);
+            return;
+          }
+          setStatus("ok", "Danke. Deine Antwort ist gespeichert. Du entscheidest, wofür djjj gut sein muss — Blue Dimension bleibt deine Frequenz.");
+          form.querySelectorAll("input, select, textarea").forEach(function (el) { el.value = ""; el.checked = false; });
+        });
+      }).catch(function () {
+        setStatus("err", "Übermittlung fehlgeschlagen. Bitte später erneut versuchen.");
+      }).finally(function () {
+        btn.disabled = false;
+        btn.textContent = "Antworten senden";
+      });
+    });
+  </script>
+</body>
+</html>
