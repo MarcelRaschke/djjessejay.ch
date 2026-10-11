@@ -97,6 +97,14 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     markdown = build_markdown(report)
+    if trace:
+        fingerprint = trace.get("config_fingerprint", "n/a")
+        discarded = trace.get("counters", {}).get("discarded", 0)
+        markdown += (
+            "\n---\n"
+            f"\nTrace: fingerprint `{fingerprint}`, "
+            f"verworfen {discarded}.\n"
+        )
     print(markdown)
     step_summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if step_summary:
