@@ -1,6 +1,7 @@
 """Gemeinsame Hilfsmittel fuer den Triage-Loop: Konfiguration, Zeitfenster, GitHub-Client.
 
 Nur Lesend. Kein Schreibzugriff auf Repos, Issues, PRs oder Workflows.
+Ausnahme: post() dient ausschliesslich dem Label-Bootstrap (bootstrap_labels.py).
 """
 from __future__ import annotations
 
@@ -81,7 +82,7 @@ def _next_link(link_header: str) -> str | None:
 
 
 class GitHubClient:
-    """Minimaler, nur lesender GitHub-REST-Client (stdlib, kein Drittanbieter-Paket)."""
+    """Minimaler GitHub-REST-Client (stdlib, kein Drittanbieter-Paket)."""
 
     API = "https://api.github.com"
 
@@ -139,3 +140,26 @@ class GitHubClient:
     def get_one(self, path: str) -> dict[str, Any] | None:
         items = self.get_all(path, max_pages=1)
         return items[0] if items and isinstance(items[0], dict) else None
+
+    def post(self, path: str, payload: dict[str, Any]) -> tuple[int, Any]:
+        """POST, ausschliesslich fuer das Label-Bootstrap (idempotent, HTTP 422 = existiert)."""
+        req = urllib.request.Request(
+            self.API + path,
+            data=json.dumps(payload).encode("utf-8"),
+            method="POST",
+            headers={
+                "Accept": "application/vnd.github+json",
+                "Authorization": f"Bearer {self.token}",
+                "Content-Type": "application/json",
+                "X-GitHub-Api-Version": "2022-11-28",
+                "User-Agent": "ivdj-triage-loop",
+            },
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                return resp.status, json.loads(resp.read().decode("utf-8") or "{}")
+        except urllib.error.HTTPError as exc:
+            body = exc.read().decode("utf-8", errors="replace") if exc.fp else ""
+            return exc.code, body
+        except urllib.error.URLError as exc:
+            raise TriageError(f"Netzwerkfehler bei POST {path}: {exc.reason}") from exc

@@ -19,10 +19,11 @@ Trigger (workflow_dispatch, spaeter Cron + workflow_run)
 | Datei | Aufgabe |
 |---|---|
 | `config.yaml` | Repos, Labels, Grader-Regeln, Caps, Slack-Routing |
-| `common.py` | Konfigurationsloader, Zeitfenster, nur lesender GitHub-Client (stdlib) |
+| `common.py` | Konfigurationsloader, Zeitfenster, GitHub-Client (stdlib) |
 | `collect.py` | Schritt 1: Sammeln im Fenster, fail-closed bei Repo-Fehlern |
 | `grade.py` | Schritt 2: Grader G1-G5, Exit 0/2/3 |
 | `report.py` | Schritt 3: Markdown-Report, Step Summary, Slack |
+| `bootstrap_labels.py` | Einmalig, idempotent: cy8er-Labels anlegen — einziger Schreibvorgang im Paket |
 | `tests/test_grade.py` | Unit-Tests: Stale-Grenze 29/30/31, Label-Pflicht, Schema, Caps, Draft-Skip |
 
 ## Grader (vor Autonomie geschaltet)
@@ -36,10 +37,13 @@ Trigger (workflow_dispatch, spaeter Cron + workflow_run)
 ## Betrieb
 
 ```bash
-# Lokal (Termux oder Workstation), nur lesend:
-export GITHUB_TOKEN=ghp_...
+# Einmalig, Labels (idempotent, Workflow triage-bootstrap oder lokal):
+export GITHUB_TOKEN=ghp_...   # PAT mit repo-Scope (cross-repo) oder Repo-Token (nur Self-Repo)
 cd triage
 pip install pyyaml pytest
+python bootstrap_labels.py
+
+# Triage-Lauf lokal (nur lesend):
 python -m pytest tests -q
 python collect.py --out collect.json
 python grade.py --collect collect.json --report report.json --trace trace.json
@@ -52,14 +56,14 @@ Exit-Codes des Graders: 0 = Report erzeugt, 2 = Budget-Cap, 3 = Strukturfehler.
 
 ## Secrets (Repo-Settings)
 
-- `IVDJ_TRIAGE_TOKEN`: PAT mit `repo` (lesend), `actions:read`, `issues:read`, `pull-requests:read` fuer beide Ziel-Repos inklusive jessejay-ch. Ohne dieses Secret liest der Loop nur das eigene Repo.
+- `IVDJ_TRIAGE_TOKEN`: PAT mit `repo` (fuer Label-Bootstrap cross-repo mit Schreibrecht), `actions:read`, `issues:read`, `pull-requests:read` fuer beide Ziel-Repos inklusive jessejay-ch. Ohne dieses Secret liest der Loop nur das eigene Repo, und das Label-Bootstrap greift nur im Self-Repo.
 - `SLACK_WEBHOOK_GITHUB`: Webhook nach #github.
 - `SLACK_WEBHOOK_CRITICAL`: Webhook nach #critical (Critical-Items mit @here).
 
 ## Runbook
 
 - Repo-Error-Item im Report: Token-Berechtigung oder App-Installation pruefen (G1 fail-closed), nicht ignorieren.
-- Alles verworfen, Discards wegen `Priority-Label fehlt`: cy8er-Labels im Ziel-Repo anlegen (einmalig, manuell), dann erneut laufen lassen.
+- Alles verworfen, Discards wegen `Priority-Label fehlt`: Workflow triage-bootstrap laufen lassen (legt die cy8er-Labels idempotent an), dann erneut laufen lassen.
 - Slack leer trotz Aktivitaet: Webhook-Secrets pruefen; Report bleibt in Step Summary und Trace-Artefakt nachlesbar.
 - Budget-Exit 2: Fenster oder Repos pruefen, Ursache aus trace.json lesen; Caps nur nach Ursachenanalyse anpassen.
 
@@ -74,4 +78,5 @@ Exit-Codes des Graders: 0 = Report erzeugt, 2 = Budget-Cap, 3 = Strukturfehler.
 
 - Kein LLM im Loop in Phase 1-2: Grader sind reine Funktionen, dadurch deterministisch und testbar. Ein Modell faellt erst in Phase 3 als zusammenfassende Instanz hinter die Verifier.
 - stdlib statt SDK: keine Drittanbieter-Abhaengigkeit ausser PyYAML fuer die Konfiguration; minimale Angriffsflaeche.
+- Der Triage-Lauf bleibt lesend. Der einzige Schreibvorgang ist bootstrap_labels.py, manuell getriggert und idempotent (HTTP 422 = Label existiert bereits).
 - Heimat ist MarcelRaschke/djjessejay.ch, weil MarcelRaschke/iVDJ als Repo noch nicht existiert und die GitHub-App kein Repository anlegen darf. Sobald iVDJ existiert, zieht das Verzeichnis als Ganzes um (reines Verschieben, keine Code-Aenderung).

@@ -1,0 +1,28 @@
+name: triage-bootstrap
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  labels:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Abhaengigkeiten
+        run: pip install pyyaml
+      - name: Labels anlegen (idempotent)
+        working-directory: triage
+        run: python bootstrap_labels.py
+        env:
+          # Eigenes Repo: Repo-Token genuegt (issues:write).
+          # Cross-Repo (jessejay-ch/djjessejay.ch): PAT mit repo-Scope als Secret noetig,
+          # sonst schlaegt dieses Repo fail-closed fehl (Exit 3).
+          GITHUB_TOKEN: ${{ secrets.IVDJ_TRIAGE_TOKEN || github.token }}
