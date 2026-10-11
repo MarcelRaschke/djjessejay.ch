@@ -90,3 +90,6 @@ coverage/
 # Honeypot logs (attacker IPs/user-agents; never commit)
 honeypot/.logs/
 honeypot/logs/
+
+# djjj survey responses (community-submitted personal data; never commit)
+.survey-data/
