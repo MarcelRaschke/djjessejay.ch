@@ -11,7 +11,6 @@ Ausfuehrung:
 from __future__ import annotations
 
 import argparse
-from typing import Any
 
 from common import GitHubClient, load_config
 

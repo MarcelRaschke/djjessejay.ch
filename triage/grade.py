@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from common import BudgetError, TriageError, config_fingerprint, load_config, parse_iso
+from common import TriageError, config_fingerprint, load_config, parse_iso
 
 PRIORITY_ORDER = {
     "priority:critical": 0,
@@ -67,6 +67,8 @@ def _run_item(repo: str, run: dict[str, Any], default_branch: str) -> dict[str, 
     branch = run.get("head_branch") or "?"
     conclusion = run.get("conclusion") or "keine Conclusion (fail-closed)"
     item = _base_item(repo, "workflow_run", run)
+    item["number"] = run.get("id")
+    item["title"] = str(run.get("name") or "Workflow")
     item["reason"] = (
         f"Workflow '{run.get('name') or 'Workflow'}' auf Branch '{branch}' fehlgeschlagen "
         f"({conclusion}, Event {run.get('event') or '?'})."
@@ -147,6 +149,16 @@ def grade_items(collect: dict[str, Any], cfg: dict[str, Any], now: datetime | No
         "draft_prs_skipped": 0,
     }
 
+    def _drop(item: dict[str, Any], reason: str) -> dict[str, Any]:
+        counters["discarded"] += 1
+        return {
+            "repo": item.get("repo"),
+            "kind": item.get("kind"),
+            "number": item.get("number"),
+            "title": item.get("title"),
+            "reason": reason,
+        }
+
     def finish(item: dict[str, Any]) -> None:
         key = item.pop("_default_key", "issue_open")
         if key not in DEFAULT_KEYS:
@@ -172,16 +184,6 @@ def grade_items(collect: dict[str, Any], cfg: dict[str, Any], now: datetime | No
             discarded.append(_drop(item, "schema: G4-Feld unvollstaendig"))
             return
         verified.append(item)
-
-    def _drop(item: dict[str, Any], reason: str) -> dict[str, Any]:
-        counters["discarded"] += 1
-        return {
-            "repo": item.get("repo"),
-            "kind": item.get("kind"),
-            "number": item.get("number"),
-            "title": item.get("title"),
-            "reason": reason,
-        }
 
     for repo, data in collect.get("repos", {}).items():
         if not isinstance(data, dict):
