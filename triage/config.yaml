@@ -1,0 +1,58 @@
+version: 1
+
+# iVDJ Triage-Loop — Konfiguration
+# Heimat: MarcelRaschke/djjessejay.ch (Feature-Branch), Ziel-Lage spaeter iVDJ als eigenstaendiges Repo.
+# Alle Werte sind Konfiguration, kein Prompt-Text. Aenderungen nur via PR mit Review.
+
+window_days: 7
+stale_days: 30
+
+repos:
+  - MarcelRaschke/djjessejay.ch
+  - jessejay-ch/djjessejay.ch
+
+labels:
+  priority:
+    - priority:critical
+    - priority:high
+    - priority:medium
+    - priority:low
+  status:
+    - status:ready
+    - status:in-progress
+    - status:in-review
+    - status:blocked
+  domain:
+    - cymatics
+    - dmx
+    - ui
+    - api
+    - audio
+    - webgl
+
+grading:
+  require_priority_label: true
+  require_status_label: true
+  treat_missing_conclusion_as_failure: true
+  skip_draft_prs: true
+  default_priority:
+    workflow_run_default_branch: high
+    workflow_run_feature_branch: medium
+    pull_request_needs_review: high
+    issue_stale: medium
+    issue_open: low
+    repo_error: high
+
+slack:
+  default_channel: "#github"
+  critical_channel: "#critical"
+  critical_mention: "<!here>"
+
+caps:
+  max_iterations: 3
+  timeout_minutes: 10
+  max_items: 50
+  max_failed_runs_per_repo: 20
+
+trace:
+  artifact_retention_days: 90
