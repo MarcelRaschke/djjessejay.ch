@@ -6,6 +6,7 @@ const path = require('path');
 const rateLimit = require('express-rate-limit');
 const cors = require('cors');
 const controlCenterRouter = require('./control-center/data-sources');
+const djjjSurveyRouter = require('./routes/djjj-survey');
 const { createHoneypotMiddleware } = require('./honeypot/honeypot-middleware');
 const { createHoneypotMonitor } = require('./honeypot/honeypot-monitor');
 
@@ -62,6 +63,10 @@ app.use('/api', createHoneypotMonitor());
 // Read-only DJ Jesse Jay Control Center source APIs.
 // These routes expose repository-backed truth and explicit connection state only.
 app.use('/api/control-center', controlCenterRouter);
+
+// djjjcoin community survey (Phase 2 use-case survey) — anonymous submissions,
+// rate-limited by the global /api/ limiter, honeypot-checked in the router.
+app.use('/api/djjj-survey', djjjSurveyRouter);
 
 // Static files
 app.use(express.static(__dirname, { dotfiles: 'ignore', index: false }));
