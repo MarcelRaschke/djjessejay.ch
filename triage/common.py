@@ -1,7 +1,9 @@
-"""Gemeinsame Hilfsmittel fuer den Triage-Loop: Konfiguration, Zeitfenster, GitHub-Client.
+"""Gemeinsame Hilfsmittel fuer den Triage-Loop.
+
+Konfiguration, Zeitfenster, GitHub-Client.
 
 Nur Lesend. Kein Schreibzugriff auf Repos, Issues, PRs oder Workflows.
-Ausnahme: post() dient ausschliesslich dem Label-Bootstrap (bootstrap_labels.py).
+Ausnahme: post() dient nur dem Label-Bootstrap.
 """
 from __future__ import annotations
 
@@ -20,7 +22,15 @@ try:
 except ImportError:  # pragma: no cover - Umgebung ohne PyYAML
     yaml = None  # type: ignore[assignment]
 
-CONFIG_REQUIRED_FIELDS = ("window_days", "stale_days", "repos", "labels", "grading", "slack", "caps")
+CONFIG_REQUIRED_FIELDS = (
+    "window_days",
+    "stale_days",
+    "repos",
+    "labels",
+    "grading",
+    "slack",
+    "caps",
+)
 
 
 class TriageError(RuntimeError):
@@ -32,7 +42,8 @@ class BudgetError(RuntimeError):
 
 
 def default_config_path() -> Path:
-    return Path(os.environ.get("TRIAGE_CONFIG", str(Path(__file__).resolve().parent / "config.yaml")))
+    base = Path(__file__).resolve().parent / "config.yaml"
+    return Path(os.environ.get("TRIAGE_CONFIG", str(base)))
 
 
 def load_config(path: str | os.PathLike[str] | None = None) -> dict[str, Any]:
@@ -56,7 +67,7 @@ def load_config(path: str | os.PathLike[str] | None = None) -> dict[str, Any]:
 
 
 def config_fingerprint(cfg: dict[str, Any]) -> str:
-    """Sha-Kurzfassung der Konfiguration; landet im Trace fuer Reproduzierbarkeit."""
+    """Sha-Kurzfassung der Konfiguration, landet im Trace."""
     blob = json.dumps(cfg, sort_keys=True, ensure_ascii=False).encode("utf-8")
     return hashlib.sha256(blob).hexdigest()[:12]
 
@@ -107,16 +118,26 @@ class GitHubClient:
                 link = resp.headers.get("Link", "")
         except urllib.error.HTTPError as exc:
             if exc.code in (403, 429):
-                raise TriageError(f"Rate-Limit oder Zugriff verweigert ({exc.code}) bei {url}") from exc
+                raise TriageError(
+                    f"Rate-Limit oder Zugriff verweigert "
+                    f"({exc.code}) bei {url}"
+                ) from exc
             if exc.code == 404:
                 return None, None
             raise TriageError(f"HTTP {exc.code} bei {url}") from exc
         except urllib.error.URLError as exc:
-            raise TriageError(f"Netzwerkfehler bei {url}: {exc.reason}") from exc
+            raise TriageError(
+                f"Netzwerkfehler bei {url}: {exc.reason}"
+            ) from exc
         return payload, _next_link(link)
 
-    def get_all(self, path: str, params: dict[str, Any] | None = None, max_pages: int = 5) -> list[Any]:
-        """GET mit Link-Header-Pagination; dicts mit workflow_runs werden entpackt."""
+    def get_all(
+        self,
+        path: str,
+        params: dict[str, Any] | None = None,
+        max_pages: int = 5,
+    ) -> list[Any]:
+        """GET mit Pagination; workflow_runs-dicts entpackt."""
         url = self.API + path
         if params:
             url += "?" + urllib.parse.urlencode(params)
@@ -142,7 +163,7 @@ class GitHubClient:
         return items[0] if items and isinstance(items[0], dict) else None
 
     def post(self, path: str, payload: dict[str, Any]) -> tuple[int, Any]:
-        """POST, ausschliesslich fuer das Label-Bootstrap (idempotent, HTTP 422 = existiert)."""
+        """POST nur fuer Label-Bootstrap (idempotent, 422 = existiert)."""
         req = urllib.request.Request(
             self.API + path,
             data=json.dumps(payload).encode("utf-8"),
@@ -157,9 +178,16 @@ class GitHubClient:
         )
         try:
             with urllib.request.urlopen(req, timeout=30) as resp:
-                return resp.status, json.loads(resp.read().decode("utf-8") or "{}")
+                return (
+                    resp.status,
+                    json.loads(resp.read().decode("utf-8") or "{}"),
+                )
         except urllib.error.HTTPError as exc:
-            body = exc.read().decode("utf-8", errors="replace") if exc.fp else ""
+            body = (
+                exc.read().decode("utf-8", errors="replace") if exc.fp else ""
+            )
             return exc.code, body
         except urllib.error.URLError as exc:
-            raise TriageError(f"Netzwerkfehler bei POST {path}: {exc.reason}") from exc
+            raise TriageError(
+                f"Netzwerkfehler bei POST {path}: {exc.reason}"
+            ) from exc

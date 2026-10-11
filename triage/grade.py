@@ -1,12 +1,16 @@
 """Triage-Loop Schritt 2: Grader G1-G5.
 
 Deterministische Pruefung der gesammelten Items. Kein LLM, kein Schreibzugriff.
-Exit-Codes: 0 = Report erzeugt, 2 = Budget-Cap ueberschritten, 3 = Strukturfehler.
+Exit-Codes: 0 = Report erzeugt, 2 = Budget-Cap,
+3 = Strukturfehler.
 
-G1 CI-Status      : maschinelle conclusion, fehlende conclusion gilt als failure (fail-closed)
-G2 Label-Abdeckung : Priority- und Status-Label Pflicht bei Issues und PRs, sonst Nacharbeit statt Rateschluss
+G1 CI-Status      : maschinelle conclusion, fehlende
+conclusion gilt als failure (fail-closed)
+G2 Label-Abdeckung : Priority- und Status-Label Pflicht bei
+Issues und PRs, sonst Nacharbeit statt Rateschluss
 G3 Stale-Regel     : maschinell am updated_at-Feld gegen stale_days
-G4 Schema          : jedes Item braucht repo, kind, number, html_url, reason, action, priority
+G4 Schema          : jedes Item braucht repo, kind, number,
+html_url, reason, action, priority
 G5 Budget          : Item-Cap und Laufzeit-Cap, Ueberhang nur als Zaehler
 """
 from __future__ import annotations
@@ -27,7 +31,16 @@ PRIORITY_ORDER = {
     "priority:medium": 2,
     "priority:low": 3,
 }
-REQUIRED_FIELDS = ("repo", "kind", "number", "title", "html_url", "reason", "action", "priority")
+REQUIRED_FIELDS = (
+    "repo",
+    "kind",
+    "number",
+    "title",
+    "html_url",
+    "reason",
+    "action",
+    "priority",
+)
 DEFAULT_KEYS = (
     "workflow_run_default_branch",
     "workflow_run_feature_branch",
@@ -44,7 +57,10 @@ def _days_since(iso_value: str, now: datetime) -> int:
     return max((now - parse_iso(iso_value)).days, 0)
 
 
-def _priority_from_labels(labels: list[str], priority_set: set[str]) -> str | None:
+def _priority_from_labels(
+    labels: list[str],
+    priority_set: set[str],
+) -> str | None:
     found = [label for label in labels if label in priority_set]
     if not found:
         return None
@@ -63,19 +79,29 @@ def _base_item(repo: str, kind: str, entry: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _run_item(repo: str, run: dict[str, Any], default_branch: str) -> dict[str, Any]:
+def _run_item(
+    repo: str,
+    run: dict[str, Any],
+    default_branch: str,
+) -> dict[str, Any]:
     branch = run.get("head_branch") or "?"
     conclusion = run.get("conclusion") or "keine Conclusion (fail-closed)"
     item = _base_item(repo, "workflow_run", run)
     item["number"] = run.get("id")
     item["title"] = str(run.get("name") or "Workflow")
     item["reason"] = (
-        f"Workflow '{run.get('name') or 'Workflow'}' auf Branch '{branch}' fehlgeschlagen "
+        f"Workflow '{run.get('name') or 'Workflow'}' "
+        f"auf Branch '{branch}' fehlgeschlagen "
         f"({conclusion}, Event {run.get('event') or '?'})."
     )
-    item["action"] = "Logs pruefen und Fix priorisieren; Pages-Deploy-Aenderungen nur auf dem nextjs-Zweig."
+    item["action"] = (
+        "Logs pruefen und Fix priorisieren; "
+        "Pages-Deploy-Aenderungen nur auf dem nextjs-Zweig."
+    )
     item["_default_key"] = (
-        "workflow_run_default_branch" if branch == default_branch else "workflow_run_feature_branch"
+        "workflow_run_default_branch"
+        if branch == default_branch
+        else "workflow_run_feature_branch"
     )
     return item
 
@@ -85,24 +111,43 @@ def _pr_item(repo: str, pr: dict[str, Any], now: datetime) -> dict[str, Any]:
     reviewers = pr.get("requested_reviewers") or []
     item = _base_item(repo, "pull_request", pr)
     if reviewers:
-        item["reason"] = f"PR mit zugewiesenen Reviewern, letzte Aktivitaet vor {days} Tagen."
+        item["reason"] = (
+            f"PR mit zugewiesenen Reviewern, "
+            f"letzte Aktivitaet vor {days} Tagen."
+        )
     else:
-        item["reason"] = f"PR ohne zugewiesene Reviewer, seit {days} Tagen ohne Review."
+        item["reason"] = (
+            f"PR ohne zugewiesene Reviewer, "
+            f"seit {days} Tagen ohne Review."
+        )
     item["action"] = "Review zuweisen, durchfuehren oder PR schliessen."
     item["_default_key"] = "pull_request_needs_review"
     return item
 
 
-def _issue_item(repo: str, issue: dict[str, Any], cfg: dict[str, Any], now: datetime) -> dict[str, Any]:
+def _issue_item(
+    repo: str,
+    issue: dict[str, Any],
+    cfg: dict[str, Any],
+    now: datetime,
+) -> dict[str, Any]:
     days = _days_since(issue.get("updated_at") or "", now)
     stale_days = int(cfg["stale_days"])
     item = _base_item(repo, "issue", issue)
     if days >= stale_days:
-        item["reason"] = f"Issue ohne Aktivitaet seit {days} Tagen (Grenze {stale_days} Tage)."
-        item["action"] = "Klaeren, bearbeiten oder nach der 30-Tage-Regel schliessen."
+        item["reason"] = (
+            f"Issue ohne Aktivitaet seit {days} Tagen "
+            f"(Grenze {stale_days} Tage)."
+        )
+        item["action"] = (
+            "Klaeren, bearbeiten oder nach der 30-Tage-Regel schliessen."
+        )
         item["_default_key"] = "issue_stale"
     else:
-        item["reason"] = "Offenes Issue im Triage-Fenster, keine Stale-Ueberschreitung."
+        item["reason"] = (
+            "Offenes Issue im Triage-Fenster, "
+            "keine Stale-Ueberschreitung."
+        )
         item["action"] = "Prioritaet und Status pruefen und einordnen."
         item["_default_key"] = "issue_open"
     return item
@@ -118,7 +163,10 @@ def _repo_error_item(repo: str, message: str) -> dict[str, Any]:
         "labels": [],
         "updated_at": "",
         "reason": f"Repo-Zugriff im Collect-Schritt fehlgeschlagen: {message}",
-        "action": "Token-Berechtigung und App-Installation fuer dieses Repo pruefen (G1 fail-closed).",
+        "action": (
+            "Token-Berechtigung und App-Installation pruefen "
+            "(G1 fail-closed)."
+        ),
         "_default_key": "repo_error",
     }
 
@@ -131,8 +179,12 @@ def _schema_ok(item: dict[str, Any]) -> bool:
     return item.get("priority") in PRIORITY_ORDER
 
 
-def grade_items(collect: dict[str, Any], cfg: dict[str, Any], now: datetime | None = None) -> dict[str, Any]:
-    """Fuehrt G1-G5 aus und liefert verifizierte Items, Verwuerfe und Zaehler."""
+def grade_items(
+    collect: dict[str, Any],
+    cfg: dict[str, Any],
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    """Fuehrt G1-G5 aus: verifizierte Items, Verwuerfe, Zaehler."""
     now = now or datetime.now(timezone.utc)
     priority_set = set(cfg["labels"]["priority"])
     status_set = set(cfg["labels"]["status"])
@@ -163,7 +215,9 @@ def grade_items(collect: dict[str, Any], cfg: dict[str, Any], now: datetime | No
         key = item.pop("_default_key", "issue_open")
         if key not in DEFAULT_KEYS:
             key = "issue_open"
-        label_priority = _priority_from_labels(item.get("labels", []), priority_set)
+        label_priority = _priority_from_labels(
+            item.get("labels", []), priority_set
+        )
         if label_priority:
             item["priority"] = label_priority
         else:
@@ -172,13 +226,19 @@ def grade_items(collect: dict[str, Any], cfg: dict[str, Any], now: datetime | No
 
         labels = item.get("labels", [])
         if item["kind"] in ("pull_request", "issue"):
-            has_priority = _priority_from_labels(labels, priority_set) is not None
+            has_priority = (
+                _priority_from_labels(labels, priority_set) is not None
+            )
             has_status = any(label in status_set for label in labels)
             if grading.get("require_priority_label") and not has_priority:
-                discarded.append(_drop(item, "unlabelled: Priority-Label fehlt (G2)"))
+                discarded.append(
+                    _drop(item, "unlabelled: Priority-Label fehlt (G2)")
+                )
                 return
             if grading.get("require_status_label") and not has_status:
-                discarded.append(_drop(item, "unlabelled: Status-Label fehlt (G2)"))
+                discarded.append(
+                    _drop(item, "unlabelled: Status-Label fehlt (G2)")
+                )
                 return
         if not _schema_ok(item):
             discarded.append(_drop(item, "schema: G4-Feld unvollstaendig"))
@@ -195,7 +255,9 @@ def grade_items(collect: dict[str, Any], cfg: dict[str, Any], now: datetime | No
         for run in data.get("failed_runs", []):
             finish(_run_item(repo, run, default_branch))
         if grading.get("skip_draft_prs"):
-            counters["draft_prs_skipped"] += sum(1 for pr in data.get("prs", []) if pr.get("draft"))
+            counters["draft_prs_skipped"] += sum(
+                1 for pr in data.get("prs", []) if pr.get("draft")
+            )
         for pr in data.get("prs", []):
             if pr.get("draft") and grading.get("skip_draft_prs"):
                 continue
@@ -203,7 +265,12 @@ def grade_items(collect: dict[str, Any], cfg: dict[str, Any], now: datetime | No
         for issue in data.get("issues", []):
             finish(_issue_item(repo, issue, cfg, now))
 
-    verified.sort(key=lambda it: (PRIORITY_ORDER.get(it["priority"], 9), it.get("updated_at") or ""))
+    verified.sort(
+        key=lambda it: (
+            PRIORITY_ORDER.get(it["priority"], 9),
+            it.get("updated_at") or "",
+        )
+    )
     max_items = int(cfg["caps"].get("max_items", 50))
     if len(verified) > max_items:
         counters["overflow"] = len(verified) - max_items
@@ -255,15 +322,28 @@ def main(argv: list[str] | None = None) -> int:
         "exit_code": exit_code,
         "counters": result["counters"],
         "discarded": result["discarded"],
-        "grader": ["G1 ci_status", "G2 label_coverage", "G3 stale", "G4 schema", "G5 budget"],
+        "grader": [
+            "G1 ci_status",
+            "G2 label_coverage",
+            "G3 stale",
+            "G4 schema",
+            "G5 budget",
+        ],
     }
-    Path(args.report).write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
-    Path(args.trace).write_text(json.dumps(trace, indent=2, ensure_ascii=False), encoding="utf-8")
+    Path(args.report).write_text(
+        json.dumps(report, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    Path(args.trace).write_text(
+        json.dumps(trace, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
 
     c = result["counters"]
     print(
         f"[grade] verifiziert {c['verified']}, verworfen {c['discarded']}, "
-        f"ueberhang {c['overflow']}, draft-PRs uebersprungen {c['draft_prs_skipped']}, "
+        f"ueberhang {c['overflow']}, "
+        f"draft-PRs uebersprungen {c['draft_prs_skipped']}, "
         f"exit {exit_code}"
     )
     return exit_code

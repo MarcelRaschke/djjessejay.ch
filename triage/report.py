@@ -1,6 +1,7 @@
 """Triage-Loop Schritt 3: Report.
 
-Ausgabe: Markdown in stdout und GITHUB_STEP_SUMMARY, Slack-Routing nach Prioritaet.
+Ausgabe: Markdown in stdout und GITHUB_STEP_SUMMARY,
+Slack-Routing nach Prioritaet.
 Critical-Items gehen an SLACK_WEBHOOK_URL_CRITICAL (mit @here), alles andere an
 SLACK_WEBHOOK_URL_DEFAULT. Ohne Webhook-Umgebungsvariablen laeuft der Report
 still (Ausgabe bleibt stdout/Step Summary).
@@ -48,7 +49,8 @@ def build_markdown(report: dict[str, Any]) -> str:
         for item in section:
             labels = ", ".join(item.get("labels", [])) or "keine Labels"
             lines.append(
-                f"- [{item['repo']} #{item['number']}]({item['html_url']}) — {item['title']}: "
+                f"- [{item['repo']} #{item['number']}]"
+                f"({item['html_url']}) — {item['title']}: "
                 f"{item['reason']} Aktion: {item['action']} ({labels})"
             )
         lines.append("")
@@ -60,7 +62,10 @@ def post_slack(webhook_url: str, text: str) -> bool:
     req = urllib.request.Request(
         webhook_url,
         data=payload,
-        headers={"Content-Type": "application/json", "User-Agent": "ivdj-triage-loop"},
+        headers={
+            "Content-Type": "application/json",
+            "User-Agent": "ivdj-triage-loop",
+        },
     )
     try:
         with urllib.request.urlopen(req, timeout=15):
@@ -78,12 +83,17 @@ def main(argv: list[str] | None = None) -> int:
 
     report_path = Path(args.report)
     if not report_path.exists():
-        print("[report] Kein report.json vorhanden (Collect/Grade fehlgeschlagen) — nur Trace-Info.")
+        print(
+            "[report] Kein report.json vorhanden "
+            "(Collect/Grade fehlgeschlagen) — nur Trace-Info."
+        )
         return 0
     report = json.loads(report_path.read_text(encoding="utf-8"))
     trace_path = Path(args.trace)
     trace = (
-        json.loads(trace_path.read_text(encoding="utf-8")) if trace_path.exists() else {}
+        json.loads(trace_path.read_text(encoding="utf-8"))
+        if trace_path.exists()
+        else {}
     )
 
     markdown = build_markdown(report)
@@ -94,15 +104,23 @@ def main(argv: list[str] | None = None) -> int:
             handle.write(markdown + "\n")
 
     items = report.get("items", [])
-    critical_items = [item for item in items if item.get("priority") == "priority:critical"]
+    critical_items = [
+        item for item in items
+        if item.get("priority") == "priority:critical"
+    ]
     default_hook = os.environ.get("SLACK_WEBHOOK_URL_DEFAULT", "").strip()
     critical_hook = os.environ.get("SLACK_WEBHOOK_URL_CRITICAL", "").strip()
 
     if critical_items:
         mention = "<!here>"
-        text = f"{mention} Triage-Loop: {len(critical_items)} kritische Items.\n" + "\n".join(
-            f"- {item['repo']} #{item['number']} {item['title']}: {item['html_url']}"
-            for item in critical_items
+        text = (
+            f"{mention} Triage-Loop: "
+            f"{len(critical_items)} kritische Items.\n"
+            + "\n".join(
+                f"- {item['repo']} #{item['number']} "
+                f"{item['title']}: {item['html_url']}"
+                for item in critical_items
+            )
         )
         if critical_hook:
             post_slack(critical_hook, text)

@@ -25,16 +25,31 @@ def iso(dt: datetime) -> str:
 
 
 def base_collect() -> dict:
-    return {"generated_at": iso(NOW), "window_since": iso(NOW - timedelta(days=7)), "repos": {}}
+    return {
+        "generated_at": iso(NOW),
+        "window_since": iso(NOW - timedelta(days=7)),
+        "repos": {},
+    }
 
 
 def repo_entry(collect: dict, repo: str = REPO) -> dict:
     return collect["repos"].setdefault(
-        repo, {"default_branch": "main", "failed_runs": [], "prs": [], "issues": []}
+        repo,
+        {
+            "default_branch": "main",
+            "failed_runs": [],
+            "prs": [],
+            "issues": [],
+        },
     )
 
 
-def add_issue(collect: dict, labels: list[str], updated: datetime, repo: str = REPO) -> None:
+def add_issue(
+    collect: dict,
+    labels: list[str],
+    updated: datetime,
+    repo: str = REPO,
+) -> None:
     repo_entry(collect, repo)["issues"].append(
         {
             "number": 42,
@@ -49,14 +64,22 @@ def add_issue(collect: dict, labels: list[str], updated: datetime, repo: str = R
 
 def test_stale_boundary_31_days() -> None:
     collect = base_collect()
-    add_issue(collect, ["priority:low", "status:ready"], NOW - timedelta(days=31))
+    add_issue(
+        collect, ["priority:low", "status:ready"],
+        NOW - timedelta(days=31)
+    )
     result = grade.grade_items(collect, CFG, now=NOW)
-    assert result["items"][0]["reason"].startswith("Issue ohne Aktivitaet seit 31 Tagen")
+    assert result["items"][0]["reason"].startswith(
+        "Issue ohne Aktivitaet seit 31 Tagen"
+    )
 
 
 def test_no_stale_at_29_days() -> None:
     collect = base_collect()
-    add_issue(collect, ["priority:low", "status:ready"], NOW - timedelta(days=29))
+    add_issue(
+        collect, ["priority:low", "status:ready"],
+        NOW - timedelta(days=29)
+    )
     result = grade.grade_items(collect, CFG, now=NOW)
     assert "keine Stale-Ueberschreitung" in result["items"][0]["reason"]
 
@@ -78,7 +101,10 @@ def test_missing_status_label_discarded() -> None:
 
 def test_priority_label_overrides_default() -> None:
     collect = base_collect()
-    add_issue(collect, ["priority:critical", "status:blocked"], NOW - timedelta(days=3))
+    add_issue(
+        collect, ["priority:critical", "status:blocked"],
+        NOW - timedelta(days=3),
+    )
     result = grade.grade_items(collect, CFG, now=NOW)
     assert result["items"][0]["priority"] == "priority:critical"
 
@@ -103,8 +129,14 @@ def test_budget_cap_overflow() -> None:
     cfg = copy.deepcopy(CFG)
     cfg["caps"]["max_items"] = 1
     collect = base_collect()
-    add_issue(collect, ["priority:low", "status:ready"], NOW - timedelta(days=2))
-    add_issue(collect, ["priority:high", "status:ready"], NOW - timedelta(days=3))
+    add_issue(
+        collect, ["priority:low", "status:ready"],
+        NOW - timedelta(days=2)
+    )
+    add_issue(
+        collect, ["priority:high", "status:ready"],
+        NOW - timedelta(days=3)
+    )
     result = grade.grade_items(collect, cfg, now=NOW)
     assert result["counters"]["overflow"] == 1
     assert result["counters"]["verified"] == 1

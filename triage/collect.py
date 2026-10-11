@@ -16,14 +16,26 @@ from common import GitHubClient, TriageError, load_config, since_iso
 FAILURE_CONCLUSIONS = ("failure", "timed_out", "startup_failure", "cancelled")
 
 
-def collect_repo(client: GitHubClient, full_name: str, cfg: dict[str, Any], since: str) -> dict[str, Any]:
-    """Liest einen Repo-Zustand im Fenster. Fehler werden als error-Eintrag fail-closed abgelegt."""
+def collect_repo(
+    client: GitHubClient,
+    full_name: str,
+    cfg: dict[str, Any],
+    since: str,
+) -> dict[str, Any]:
+    """Liest Repo-Zustand im Fenster. Fehler: error-Eintrag (fail-closed)."""
     caps = cfg["caps"]
-    data: dict[str, Any] = {"default_branch": "main", "failed_runs": [], "prs": [], "issues": []}
+    data: dict[str, Any] = {
+        "default_branch": "main",
+        "failed_runs": [],
+        "prs": [],
+        "issues": [],
+    }
     try:
         meta = client.get_one(f"/repos/{full_name}")
         if not meta:
-            raise TriageError("Repo nicht gefunden oder fuer Token nicht sichtbar")
+            raise TriageError(
+                "Repo nicht gefunden oder fuer Token nicht sichtbar"
+            )
         data["default_branch"] = meta.get("default_branch") or "main"
 
         runs = client.get_all(
@@ -39,7 +51,10 @@ def collect_repo(client: GitHubClient, full_name: str, cfg: dict[str, Any], sinc
                 skipped += 1
                 continue
             if conclusion in FAILURE_CONCLUSIONS or (
-                conclusion is None and cfg["grading"].get("treat_missing_conclusion_as_failure")
+                conclusion is None
+                and cfg["grading"].get(
+                    "treat_missing_conclusion_as_failure"
+                )
             ):
                 data["failed_runs"].append(
                     {
@@ -60,12 +75,20 @@ def collect_repo(client: GitHubClient, full_name: str, cfg: dict[str, Any], sinc
             data["failed_runs_overflow"] = len(data["failed_runs"]) - cap
             data["failed_runs"] = data["failed_runs"][:cap]
 
-        for pr in client.get_all(f"/repos/{full_name}/pulls", {"state": "open", "per_page": 100}):
-            labels_entry = client.get_one(f"/repos/{full_name}/issues/{pr.get('number')}")
+        for pr in client.get_all(
+            f"/repos/{full_name}/pulls",
+            {"state": "open", "per_page": 100},
+        ):
+            labels_entry = client.get_one(
+                f"/repos/{full_name}/issues/{pr.get('number')}"
+            )
             label_names = []
             if labels_entry:
                 for label in labels_entry.get("labels", []):
-                    name = label.get("name") if isinstance(label, dict) else label
+                    if isinstance(label, dict):
+                        name = label.get("name")
+                    else:
+                        name = label
                     if name:
                         label_names.append(name)
             data["prs"].append(
@@ -76,13 +99,18 @@ def collect_repo(client: GitHubClient, full_name: str, cfg: dict[str, Any], sinc
                     "updated_at": pr.get("updated_at"),
                     "draft": bool(pr.get("draft")),
                     "requested_reviewers": [
-                        u.get("login") for u in pr.get("requested_reviewers", []) if isinstance(u, dict)
+                        u.get("login")
+                        for u in pr.get("requested_reviewers", [])
+                        if isinstance(u, dict)
                     ],
                     "labels": label_names,
                 }
             )
 
-        for issue in client.get_all(f"/repos/{full_name}/issues", {"state": "open", "per_page": 100}):
+        for issue in client.get_all(
+            f"/repos/{full_name}/issues",
+            {"state": "open", "per_page": 100},
+        ):
             if "pull_request" in issue:
                 continue
             label_names = []
@@ -106,8 +134,12 @@ def collect_repo(client: GitHubClient, full_name: str, cfg: dict[str, Any], sinc
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Triage-Loop: Collect (nur lesend)")
-    parser.add_argument("--config", default=None, help="Pfad zu triage/config.yaml")
+    parser = argparse.ArgumentParser(
+        description="Triage-Loop: Collect (nur lesend)"
+    )
+    parser.add_argument(
+        "--config", default=None, help="Pfad zu triage/config.yaml"
+    )
     parser.add_argument("--out", default="collect.json", help="Ausgabedatei")
     args = parser.parse_args(argv)
 
@@ -121,10 +153,14 @@ def main(argv: list[str] | None = None) -> int:
         repos[full_name] = collect_repo(client, full_name, cfg, since)
 
     payload = {"generated_at": now, "window_since": since, "repos": repos}
-    Path(args.out).write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+    Path(args.out).write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
     for name, data in repos.items():
         state = data.get("error") or (
-            f"{len(data['failed_runs'])} Run-Failures, {len(data['prs'])} PRs, {len(data['issues'])} Issues"
+            f"{len(data['failed_runs'])} Run-Failures, "
+            f"{len(data['prs'])} PRs, {len(data['issues'])} Issues"
         )
         print(f"[collect] {name}: {state}")
     return 0
