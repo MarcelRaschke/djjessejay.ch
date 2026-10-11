@@ -1,0 +1,30 @@
+name: triage-ci
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "triage/**"
+      - ".github/workflows/triage-ci.yml"
+  pull_request:
+    paths:
+      - "triage/**"
+      - ".github/workflows/triage-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Abhaengigkeiten
+        run: pip install -r triage/requirements-dev.txt
+      - name: Pytest
+        working-directory: triage
+        run: python -m pytest tests -q
