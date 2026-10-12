@@ -51,10 +51,12 @@ async function routeToCustomServer(request, url, env) {
   headers.set('cf-access-client-secret', env.ORIGIN_ACCESS_CLIENT_SECRET);
 
   try {
+    // redirect: 'manual' keeps the Access credentials from being sent to a redirect target.
     const response = await fetch(new Request(url.toString(), {
       method: request.method,
       headers,
       body: request.method !== 'GET' && request.method !== 'HEAD' ? request.body : undefined,
+      redirect: 'manual',
     }));
 
     return response;

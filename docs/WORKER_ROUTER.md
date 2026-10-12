@@ -13,57 +13,55 @@ Dieses Dokument enthält ein Beispiel für einen Cloudflare Worker, der Anfragen
 ### Worker-Beispiel (JavaScript)
 
 ```javascript
-addEventListener('fetch', event => {
-  event.respondWith(handleRequest(event.request));
-});
+// ES-Module-Worker. Secrets ORIGIN_ACCESS_CLIENT_ID / ORIGIN_ACCESS_CLIENT_SECRET per
+// `wrangler secret put` setzen; ohne sie antwortet /api mit 502 (fail closed).
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    const path = url.pathname;
 
-async function handleRequest(request) {
-  const url = new URL(request.url);
-  const path = url.pathname;
+    const ORIGIN_HOST = 'origin.djjessejay.ch'; // proxied, nur fuer den Worker (Access-Service-Token)
+    const PAGES_HOST = 'marcelraschke.github.io';
 
-  // Platzhalter: setze hier deinen origin-host (proxied, siehe Hinweise unten)
-  const ORIGIN_HOST = 'origin.djjessejay.ch'; // <--- ERSETZEN
-  const PAGES_HOST = 'marcelraschke.github.io';
+    // Route API-Requests zum Origin
+    if (path.startsWith('/api/') || path === '/api') {
+      if (!env.ORIGIN_ACCESS_CLIENT_ID || !env.ORIGIN_ACCESS_CLIENT_SECRET) {
+        return new Response('API origin credentials not configured', { status: 502 });
+      }
+      const originUrl = new URL(request.url);
+      originUrl.hostname = ORIGIN_HOST;
+      originUrl.protocol = 'https:';
 
-  // Route API-Requests zum Origin
-  if (path.startsWith('/api/') || path === '/api' ) {
-    const originUrl = new URL(request.url);
-    originUrl.hostname = ORIGIN_HOST;
-    originUrl.protocol = 'https:'; // TLS zur Origin
+      const headers = new Headers(request.headers);
+      headers.set('Host', ORIGIN_HOST);
+      // Nie clientseitige Access-Header weiterreichen, nur das eigene Service Token.
+      for (const h of ['cf-access-client-id', 'cf-access-client-secret', 'cf-access-jwt-assertion', 'cf-access-token']) headers.delete(h);
+      headers.set('cf-access-client-id', env.ORIGIN_ACCESS_CLIENT_ID);
+      headers.set('cf-access-client-secret', env.ORIGIN_ACCESS_CLIENT_SECRET);
 
-    const headers = new Headers(request.headers);
-    headers.set('Host', ORIGIN_HOST);
+      // redirect: 'manual' ist Pflicht: sonst gingen die Access-Header an ein Redirect-Ziel.
+      return fetch(originUrl.toString(), {
+        method: request.method,
+        headers,
+        body: request.method === 'GET' || request.method === 'HEAD' ? undefined : request.body,
+        redirect: 'manual',
+      });
+    }
 
-    const init = {
-      method: request.method,
-      headers,
-      body: request.body,
-      redirect: 'manual'
-    };
-
-    return fetch(originUrl.toString(), init);
-  }
-
-  // Alle anderen Anfragen an GitHub Pages
-  {
+    // Alle anderen Anfragen an GitHub Pages
     const pagesUrl = new URL(request.url);
     pagesUrl.hostname = PAGES_HOST;
     pagesUrl.protocol = 'https:';
-
     const headers = new Headers(request.headers);
     headers.set('Host', PAGES_HOST);
-
-    const init = {
+    return fetch(pagesUrl.toString(), {
       method: request.method,
       headers,
-      body: request.body,
-      redirect: 'manual'
-    };
-
-    // Optional: Response-Cache- oder Edge-Logik hier einfügen
-    return fetch(pagesUrl.toString(), init);
-  }
-}
+      body: request.method === 'GET' || request.method === 'HEAD' ? undefined : request.body,
+      redirect: 'manual',
+    });
+  },
+};
 ```
 
 ### Betriebs- und Sicherheits-Hinweise
