@@ -9,7 +9,11 @@ def text(value):
 
 
 def response(content, stop_reason="end_turn", stop_details=None):
-    return SimpleNamespace(content=content, stop_reason=stop_reason, stop_details=stop_details)
+    return SimpleNamespace(
+        content=content,
+        stop_reason=stop_reason,
+        stop_details=stop_details,
+    )
 
 
 class FakeMessages:
@@ -36,7 +40,10 @@ class AskTests(unittest.TestCase):
         self.assertEqual(call["model"], MODEL)
         self.assertEqual(call["thinking"], {"type": "adaptive"})
         self.assertEqual(call["output_config"], {"effort": "high"})
-        self.assertEqual(call["messages"], [{"role": "user", "content": "Capital of France?"}])
+        self.assertEqual(
+            call["messages"],
+            [{"role": "user", "content": "Capital of France?"}],
+        )
 
     def test_joins_only_text_blocks(self):
         thinking = SimpleNamespace(type="thinking", thinking="...")
@@ -45,7 +52,9 @@ class AskTests(unittest.TestCase):
 
     def test_refusal_raises_with_category(self):
         details = SimpleNamespace(category="cyber", explanation="x")
-        client = FakeClient(response([], stop_reason="refusal", stop_details=details))
+        client = FakeClient(
+            response([], stop_reason="refusal", stop_details=details)
+        )
         with self.assertRaisesRegex(RuntimeError, "cyber"):
             ask(client, "x")
 

@@ -1,6 +1,7 @@
-"""Referenz: eine einzelne Anfrage an die Claude Messages API mit dem offiziellen Python-SDK.
+"""Referenz: eine einzelne Anfrage an die Claude Messages API.
 
-Credentials kommen aus der Umgebung (ANTHROPIC_API_KEY oder ein `ant auth login`-Profil),
+Verwendet das offizielle Python-SDK. Credentials kommen aus der
+Umgebung (ANTHROPIC_API_KEY oder ein `ant auth login`-Profil),
 nie aus dem Quellcode.
 """
 
@@ -23,8 +24,9 @@ def ask(
 ) -> str:
     """Sendet einen Prompt und liefert den Text der Antwort.
 
-    Wirft RuntimeError bei refusal und bei abgeschnittener Antwort, damit kein
-    unvollständiger Text stillschweigend weiterverarbeitet wird.
+    Wirft RuntimeError bei refusal und bei abgeschnittener Antwort,
+    damit kein unvollständiger Text stillschweigend weiterverarbeitet
+    wird.
     """
     response = client.messages.create(
         model=MODEL,
@@ -35,13 +37,21 @@ def ask(
     )
 
     if response.stop_reason == "refusal":
-        category = response.stop_details.category if response.stop_details else None
-        raise RuntimeError(f"Anfrage abgelehnt (Kategorie: {category or 'unbekannt'})")
+        details = response.stop_details
+        category = details.category if details else None
+        raise RuntimeError(
+            f"Anfrage abgelehnt (Kategorie: {category or 'unbekannt'})"
+        )
     if response.stop_reason == "max_tokens":
-        raise RuntimeError("Antwort abgeschnitten: max_tokens erhöhen oder streamen")
+        raise RuntimeError(
+            "Antwort abgeschnitten: max_tokens erhöhen oder streamen"
+        )
 
-    # Inhaltsblöcke können thinking und tool_use enthalten, nur text-Blöcke zählen hier.
-    return "".join(block.text for block in response.content if block.type == "text")
+    # Inhaltsblöcke können thinking und tool_use enthalten,
+    # nur text-Blöcke zählen hier.
+    return "".join(
+        block.text for block in response.content if block.type == "text"
+    )
 
 
 def main() -> int:
@@ -59,7 +69,12 @@ def main() -> int:
         return 1
     except anthropic.APIStatusError as e:
         # BadRequestError, AuthenticationError, NotFoundError, 5xx usw.
-        log.error("API-Fehler %s (request-id %s): %s", e.status_code, e._request_id, e.message)
+        log.error(
+            "API-Fehler %s (request-id %s): %s",
+            e.status_code,
+            e._request_id,
+            e.message,
+        )
         return 1
     except anthropic.APIConnectionError as e:
         # Schließt APITimeoutError ein.
