@@ -25,3 +25,8 @@ ORIGIN_PREFIX = "/djjessejay.ch"
 # the Access service token that origin.djjessejay.ch admits (ORIGIN-PROTECTION-DEPLOYMENT.md).
 # Missing -> /api/* returns 502.
 API_ORIGIN_SCHEME = "https"
+
+# Deploy fails while any of these is unset on the Worker, instead of
+# shipping a Worker that answers /api/* with 502.
+[secrets]
+required = ["API_ORIGIN_HOST", "ORIGIN_ACCESS_CLIENT_ID", "ORIGIN_ACCESS_CLIENT_SECRET"]

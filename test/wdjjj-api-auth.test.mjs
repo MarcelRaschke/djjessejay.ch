@@ -10,13 +10,15 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 let worker, dir;
 const realFetch = globalThis.fetch;
 let seen = [];
+const defaultResponse = () => new Response('{"ok":true}', { status: 200, headers: { 'content-type': 'application/json' } });
+let respond = defaultResponse;
 
 before(async () => {
   dir = mkdtempSync(join(tmpdir(), 'wdjjj-'));
   const file = join(dir, 'wdjjj.mjs');
   writeFileSync(file, readFileSync(join(root, 'infra/cloudflare/wdjjj.js'), 'utf8'));
   worker = (await import(pathToFileURL(file).href)).default;
-  globalThis.fetch = async (url, init) => { seen.push({ url, headers: new Headers(init.headers) }); return new Response('{"ok":true}', { status: 200, headers: { 'content-type': 'application/json' } }); };
+  globalThis.fetch = async (url, init) => { seen.push({ url, headers: new Headers(init.headers) }); return respond(); };
 });
 after(() => { globalThis.fetch = realFetch; rmSync(dir, { recursive: true, force: true }); });
 
@@ -48,4 +50,21 @@ test('missing API origin still answers 502 before the credential check', async (
   const res = await worker.fetch(new Request('https://djjessejay.ch/api/health'), {}, {});
   assert.equal(res.status, 502);
   assert.match(await res.text(), /API origin not configured/);
+});
+
+test('Access session cookies from the origin never reach the browser', async () => {
+  const h = new Headers({ 'content-type': 'application/json' });
+  h.append('set-cookie', 'CF_Authorization=eyJ.jwt; Path=/; Secure; HttpOnly');
+  h.append('set-cookie', 'CF_AppSession=abc; Path=/; Secure');
+  h.append('set-cookie', 'sid=1; Path=/api; Secure; HttpOnly');
+  h.append('set-cookie', 'pref=dark; Path=/');
+  respond = () => new Response('{}', { status: 200, headers: h });
+  try {
+    const res = await worker.fetch(new Request('https://djjessejay.ch/api/health'), ENV, {});
+    const cookies = res.headers.getSetCookie();
+    assert.deepEqual(cookies, ['sid=1; Path=/api; Secure; HttpOnly', 'pref=dark; Path=/']);
+    assert.equal(cookies.some((c) => /^CF_/i.test(c)), false);
+  } finally {
+    respond = defaultResponse;
+  }
 });

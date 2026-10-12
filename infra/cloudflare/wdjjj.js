@@ -139,11 +139,32 @@ function withApiSecurityHeaders(upstream) {
     const lower = key.toLowerCase();
     if (STRIP_RESPONSE_HEADERS.has(lower)) continue;
     if (lower === "content-length" || lower === "transfer-encoding") continue;
+    if (lower === "set-cookie") continue;
     headers.set(key, value);
+  }
+  // Cookies are re-added one by one (Headers.set would fold them into one) and
+  // the Access session cookies minted for the Worker's service token are
+  // dropped, so they never reach the browser.
+  for (const cookie of upstreamSetCookies(upstream.headers)) {
+    if (isAccessCookie(cookie)) continue;
+    headers.append("set-cookie", cookie);
   }
   for (const [key, value] of Object.entries(OWN_HEADERS)) headers.set(key, value);
   headers.set("cache-control", "no-store");
   return new Response(upstream.body, { status: upstream.status, headers });
+}
+
+const ACCESS_COOKIE_NAMES = new Set(["cf_authorization", "cf_appsession", "cf_binding"]);
+
+function upstreamSetCookies(upstreamHeaders) {
+  if (typeof upstreamHeaders.getSetCookie === "function") return upstreamHeaders.getSetCookie();
+  const single = upstreamHeaders.get("set-cookie");
+  return single ? [single] : [];
+}
+
+function isAccessCookie(cookie) {
+  const name = cookie.split("=", 1)[0].trim().toLowerCase();
+  return ACCESS_COOKIE_NAMES.has(name);
 }
 
 export default {
