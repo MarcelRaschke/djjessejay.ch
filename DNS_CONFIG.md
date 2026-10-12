@@ -7,7 +7,7 @@ This document contains the authoritative DNS zone configuration for the djjessej
 - **Domain**: djjessejay.ch
 - **DNS Provider**: Cloudflare
 - **Static Hosting**: GitHub Pages (`marcelraschke.github.io`)
-- **API/WebSocket**: Custom Server (IPv4: `185.101.158.113`)
+- **API/WebSocket**: Custom Server (IPv4: `ORIGIN_IP`)
 - **Routing Layer**: Cloudflare Worker (`djjessejay-router`)
 - **CDN/Proxy**: Cloudflare (DDoS protection, caching, SSL termination)
 - **Last Updated**: 22.08.2026
@@ -20,8 +20,8 @@ Visitor Request
 Cloudflare (djjessejay.ch, proxied)
      ↓
 Cloudflare Worker (djjessejay-router)
-     ├─ /api/* → Routes to Custom Server (185.101.158.113)
-     ├─ /ws    → Routes to Custom Server (185.101.158.113)
+     ├─ /api/* → Routes to Custom Server (ORIGIN_IP)
+     ├─ /ws    → Routes to Custom Server (ORIGIN_IP)
      └─ /*     → Routes to GitHub Pages (marcelraschke.github.io)
 ```
 
@@ -73,8 +73,8 @@ The root domain now points to GitHub Pages:
 djjessejay.ch. 3600 IN CNAME marcelraschke.github.io.   ; Proxied (orange cloud)
 ```
 
-**Note**: CNAME replaces the previous A record (185.101.158.113). Cloudflare Worker intercepts requests and routes:
-- `/api/*` and `/ws` → Custom Server (185.101.158.113)
+**Note**: CNAME replaces the previous A record (ORIGIN_IP). Cloudflare Worker intercepts requests and routes:
+- `/api/*` and `/ws` → Custom Server (ORIGIN_IP)
 - All other requests → GitHub Pages (marcelraschke.github.io)
 
 This provides a single unified entry point with intelligent routing via Worker.
@@ -107,7 +107,7 @@ Otherwise contact form and API requests from `www.` will fail with CORS errors.
 
 ### Custom Origin Server (API/WebSocket Only)
 
-The origin server at `185.101.158.113` now hosts only API endpoints and WebSocket connections. Static files are served by GitHub Pages.
+The origin server at `ORIGIN_IP` now hosts only API endpoints and WebSocket connections. Static files are served by GitHub Pages.
 
 - **Application**: Express.js backend (Node.js >=24)
 - **Endpoints**:
@@ -222,7 +222,7 @@ Once configured:
 3. Test the Worker routing:
    - `curl -I https://djjessejay.ch/` → should route to GitHub Pages (200 with GitHub Pages headers)
    - `curl -I https://djjessejay.ch/api/health` → should route to custom server (200 from Express)
-4. Check the custom server is reachable at `185.101.158.113` and Cloudflare's IP ranges are whitelisted
+4. Check the custom server is reachable at `ORIGIN_IP` and Cloudflare's IP ranges are whitelisted
 5. Confirm the origin TLS certificate is valid (required for Full Strict SSL)
 6. Review Cloudflare Worker analytics for routing errors or timeouts
 
