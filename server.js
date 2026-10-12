@@ -68,8 +68,18 @@ app.use('/api/control-center', controlCenterRouter);
 // rate-limited by the global /api/ limiter, honeypot-checked in the router.
 app.use('/api/djjj-survey', djjjSurveyRouter);
 
-// Static files
-app.use(express.static(__dirname, { dotfiles: 'ignore', index: false }));
+// Static files.
+// In production the origin only serves /api: the public site comes from GitHub Pages
+// through the wdjjj Worker, and the Worker forwards nothing else here. Serving the
+// repository root would expose server code, scripts and internal documents, so static
+// serving is off unless SERVE_STATIC=1 (local preview, see `npm run dev`). Even then,
+// repository internals stay blocked.
+const SERVE_STATIC = process.env.SERVE_STATIC === '1';
+const STATIC_DENY = /^\/(?:server\.js|package(?:-lock)?\.json|scripts|infra|contracts|honeypot|policy|triage|test|tests|routes|src|patches|render-farm|workers|provenance|release|node_modules)(?:\/|$)|\.(?:md|ts|mjs|cjs|sh|py|yml|yaml|sql|env|pem|key|log)$/i;
+if (SERVE_STATIC) {
+  app.use((req, res, next) => (STATIC_DENY.test(req.path) ? res.status(404).end() : next()));
+  app.use(express.static(__dirname, { dotfiles: 'ignore', index: false }));
+}
 
 // Environment variables
 const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET_KEY || '';
@@ -314,9 +324,11 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// SPA fallback - serve index.html for any non-API GET
+// SPA fallback - serve index.html for any non-API GET (local preview only)
 app.use((req, res) => {
-  if (req.method === 'GET') {
+  if (req.method === 'GET' && !SERVE_STATIC) {
+    res.status(404).json({ error: 'Not found.' });
+  } else if (req.method === 'GET') {
     res.sendFile(path.join(__dirname, 'index.html'));
   } else {
     res.status(405).json({ error: 'Method not allowed.' });

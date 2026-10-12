@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "dev": "SERVE_STATIC=1 node server.js",
     "build:css": "tailwindcss -i ./src/input.css -o ./tailwind.css --minify",
     "watch:css": "tailwindcss -i ./src/input.css -o ./tailwind.css --watch",
     "sync:metadata": "node scripts/sync-canonical-metadata.mjs index.html",
