@@ -8,7 +8,7 @@ Dieses Dokument enthält ein Beispiel für einen Cloudflare Worker, der Anfragen
 
 ### Zusammenfassung
 - Ziel: Ein Worker, der `/api/*`-Requests an den Backend-Origin (`origin.djjessejay.ch`) weiterleitet und alle anderen Anfragen an GitHub Pages (`marcelraschke.github.io`) sendet.
-- Annahme: Der Origin-Host ist ein dedizierter DNS-only A-Record (z. B. origin.djjessejay.ch → ORIGIN_IP) mit gültigem TLS-Zertifikat.
+- Annahme: Der Origin-Host `origin.djjessejay.ch` ist **proxied** (orange Wolke), bevorzugt als CNAME auf einen Cloudflare Tunnel (`<tunnel-id>.cfargotunnel.com`, siehe `ORIGIN-PROTECTION-DEPLOYMENT.md`). Ein DNS-only-Eintrag würde die Origin-IP öffentlich auflösbar machen und ist nicht zulässig.
 
 ### Worker-Beispiel (JavaScript)
 
@@ -21,7 +21,7 @@ async function handleRequest(request) {
   const url = new URL(request.url);
   const path = url.pathname;
 
-  // Platzhalter: setze hier deinen origin-host (DNS-only)
+  // Platzhalter: setze hier deinen origin-host (proxied, siehe Hinweise unten)
   const ORIGIN_HOST = 'origin.djjessejay.ch'; // <--- ERSETZEN
   const PAGES_HOST = 'marcelraschke.github.io';
 
@@ -67,7 +67,7 @@ async function handleRequest(request) {
 ```
 
 ### Betriebs- und Sicherheits-Hinweise
-- Origin-Hostname: Lege `origin.djjessejay.ch` (oder ähnlichen) als DNS-only A-Record auf die Origin-IP. Installiere ein gültiges TLS-Zertifikat für diesen Host (Let's Encrypt/ACME oder anderes CA).
+- Origin-Hostname: `origin.djjessejay.ch` wird über `scripts/cloudflare-tunnel-setup.js --apply` als proxied CNAME auf den Tunnel angelegt. Ohne Tunnel: proxied A-Record auf ORIGIN_IP plus Cloudflare-Origin-CA-Zertifikat und SSL-Modus Full (strict). Nie DNS-only.
 - DNS für djjessejay.ch: Belasse die öffentliche Domain proxied (Cloudflare orange cloud) und verwende CNAME-Flattening falls nötig. Dokumentiere CNAME-Flattening-Verhalten in DNS_CONFIG.md.
 - Firewall: Beschränke direkte Zugriffe auf die Origin-IP auf Cloudflare-IP-Ranges (oder auf interne Worker/Cloudflare-Quellen). Verhindere direkten, öffentlichen Zugriff, wenn gewünscht.
 - WebSocket: Cloudflare Worker -> fetch() proxyt keine generischen WebSocket-Upgrades. Empfohlene Optionen:
