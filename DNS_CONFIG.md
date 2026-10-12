@@ -115,7 +115,7 @@ The origin server at `ORIGIN_IP` now hosts only API endpoints and WebSocket conn
 - **Endpoints**:
   - `/api/*` — REST API endpoints
   - `/ws` — WebSocket server for real-time communication
-- **TLS**: A valid certificate is required for Cloudflare's **Full (Strict)** SSL mode. Use Let's Encrypt or equivalent CA.
+- **TLS**: A valid certificate for `origin.djjessejay.ch` is required for Cloudflare's **Full (Strict)** SSL mode (otherwise 526). Use Let's Encrypt or equivalent CA.
 - **Firewall**: Restrict HTTP/HTTPS inbound to Cloudflare Worker IP ranges (ask Cloudflare for current ranges) plus administrative access. The server should NOT be directly accessible to internet clients — all traffic must flow through Cloudflare Worker.
 - **Not Used**: `deploy.sh` has been removed. Static deployment is now handled by GitHub Pages workflow (`.github/workflows/static.yml`).
 
@@ -204,7 +204,7 @@ Once configured:
 
 ### Origin Server (for Full Strict SSL)
 
-- Install a valid origin certificate (e.g., Let's Encrypt) covering `djjessejay.ch` and `www.djjessejay.ch`
+- Install a valid origin certificate (e.g., Let's Encrypt) covering `origin.djjessejay.ch` (the hostname the Worker requests), plus `djjessejay.ch` and `www.djjessejay.ch` if the origin also serves those; a `*.djjessejay.ch` wildcard does not cover the apex. Full (Strict) returns 526 when the requested hostname is missing from the certificate. Not needed with Cloudflare Tunnel, which terminates TLS at Cloudflare.
 - Alternatively, use a Cloudflare Origin CA certificate (valid only for Cloudflare-proxied traffic)
 
 ---
