@@ -4,6 +4,8 @@ This document contains the authoritative DNS zone configuration for the djjessej
 
 ## Domain Overview
 
+> **ORIGIN_IP**: Platzhalter für die öffentliche IPv4 des Express-Backends. Die Adresse steht bewusst nicht im Repository. Quelle für Betrieb und Rollback: Control Panel des Hosting-Anbieters (Server-Übersicht) oder der Passwort-Manager der Betreiber. Nicht in Issues, PRs oder Logs kopieren.
+
 - **Domain**: djjessejay.ch
 - **DNS Provider**: Cloudflare
 - **Static Hosting**: GitHub Pages (`marcelraschke.github.io`)

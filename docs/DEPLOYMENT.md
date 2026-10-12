@@ -2,6 +2,8 @@
 
 ## Overview
 
+> **ORIGIN_IP**: Platzhalter für die öffentliche IPv4 des Express-Backends. Die Adresse steht bewusst nicht im Repository. Quelle für Betrieb und Rollback: Control Panel des Hosting-Anbieters (Server-Übersicht) oder der Passwort-Manager der Betreiber. Nicht in Issues, PRs oder Logs kopieren.
+
 djjessejay.ch uses a **hybrid deployment model** combining GitHub Pages for static assets and a custom Express.js server for API/WebSocket functionality. Cloudflare Worker provides intelligent routing between the two.
 
 ```
