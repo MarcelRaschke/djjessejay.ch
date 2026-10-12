@@ -10,7 +10,8 @@
  *   - an existing tunnel with the configured name is reused; duplicates are refused
  *   - ingress always ends with a catch-all http_status:404 rule
  *   - the hostname is a proxied CNAME to <tunnel-id>.cfargotunnel.com
- *   - Access (--access) is only attached to a dedicated hostname, never to the public site
+ *   - the tunnel hostname is restricted to the Worker by a service-token-only Access app
+ *   - human Access (--access) is only attached to a dedicated hostname, never to the public site
  *   - a failed apply rolls back DNS records and a tunnel created by this run
  *   - the tunnel token is never requested or printed
  *
@@ -19,6 +20,9 @@
  *   CF_PUBLIC_HOSTNAME   hostname routed through the tunnel, e.g. origin.djjessejay.ch (required)
  *   CF_ORIGIN_SERVICE    default http://127.0.0.1:3000
  *   CF_TUNNEL_NAME       default djjessejay-origin
+ *   CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID  ID of the Access service token the wdjjj Worker uses;
+ *                        the tunnel hostname gets an Access app that admits only this token
+ *                        (required unless --allow-public-origin)
  *   CF_ACCESS_HOSTNAME   dedicated Access hostname (required with --access)
  *   CF_ACCESS_EMAILS     comma-separated allow-list (required with --access)
  *
@@ -32,10 +36,10 @@ const API_BASE = 'https://api.cloudflare.com/client/v4';
 const PUBLIC_SITE_HOSTS = ['djjessejay.ch', 'www.djjessejay.ch'];
 
 function parseArgs(argv) {
-  const known = new Set(['--apply', '--access']);
+  const known = new Set(['--apply', '--access', '--allow-public-origin']);
   const unknown = argv.filter((a) => !known.has(a));
   if (unknown.length) throw new Error(`Unknown argument(s): ${unknown.join(' ')}`);
-  return { apply: argv.includes('--apply'), access: argv.includes('--access') };
+  return { apply: argv.includes('--apply'), access: argv.includes('--access'), allowPublicOrigin: argv.includes('--allow-public-origin') };
 }
 
 const HOSTNAME_RE = /^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/;
@@ -72,7 +76,18 @@ function readConfig(env, flags) {
     originService,
     tunnelName: (env.CF_TUNNEL_NAME || 'djjessejay-origin').trim(),
     access: null,
+    originTokenId: null,
   };
+
+  // The tunnel hostname must only be reachable by the wdjjj Worker. Access with a
+  // service-token-only policy enforces that at the Cloudflare edge.
+  const tokenId = (env.CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID || '').trim();
+  if (tokenId) {
+    if (!/^[0-9a-f-]{32,36}$/i.test(tokenId)) errors.push('CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID must be the service token ID (UUID), not the client secret');
+    cfg.originTokenId = tokenId;
+  } else if (!flags.allowPublicOrigin) {
+    errors.push('Missing CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID: the tunnel hostname must be restricted to the Worker (or pass --allow-public-origin explicitly)');
+  }
 
   if (flags.access) {
     const host = (env.CF_ACCESS_HOSTNAME || '').trim().toLowerCase();
@@ -141,10 +156,32 @@ function mergeTunnelConfig(existing, hostnames, service) {
     }
     out.push(r);
   }
-  for (const h of hostnames) if (!placed.has(h)) out.push({ hostname: h, service });
+  // A missing exact rule goes in front of the first host-only rule that would otherwise
+  // match it (e.g. *.djjessejay.ch), so cloudflared's first-match evaluation picks ours.
+  for (const h of hostnames) {
+    if (placed.has(h)) continue;
+    const shadow = out.findIndex((r) => r.hostname && !r.path && hostMatches(r.hostname, h));
+    const rule = { hostname: h, service };
+    if (shadow === -1) out.push(rule); else out.splice(shadow, 0, rule);
+  }
   out.push({ service: 'http_status:404' });
   base.ingress = out;
   return base;
+}
+
+/** cloudflared hostname matching: exact, or a leading "*." wildcard for subdomains. */
+function hostMatches(pattern, host) {
+  if (pattern === host) return true;
+  return pattern.startsWith('*.') && host.endsWith(pattern.slice(1));
+}
+
+/** True when the policies are exactly one non_identity policy for exactly this service token. */
+function serviceTokenPolicyMatches(policies, tokenId) {
+  if (!Array.isArray(policies) || policies.length !== 1) return false;
+  const p = policies[0];
+  if (p.decision !== 'non_identity' || (p.exclude && p.exclude.length) || (p.require && p.require.length)) return false;
+  const inc = Array.isArray(p.include) ? p.include : [];
+  return inc.length === 1 && Boolean(inc[0] && inc[0].service_token) && inc[0].service_token.token_id === tokenId;
 }
 
 /** An existing Access app may only be reused if it protects exactly this hostname, without overrides. */
@@ -196,6 +233,9 @@ async function run(cfg, flags, api, log = console.log) {
   // Phase 1: read and validate everything. No mutation happens before this phase passes.
   const zone = await api('GET', `/zones/${cfg.zoneId}`);
   if (zone.status !== 'active') throw new Error(`Zone ${zone.name} is not active (status: ${zone.status})`);
+  if (!zone.account || zone.account.id !== cfg.accountId) {
+    throw new Error(`Zone ${zone.name} does not belong to CLOUDFLARE_ACCOUNT_ID; a tunnel CNAME only works within the same account`);
+  }
   for (const h of hostnames) {
     if (h !== zone.name && !h.endsWith(`.${zone.name}`)) throw new Error(`${h} is not inside zone ${zone.name}`);
   }
@@ -227,35 +267,52 @@ async function run(cfg, flags, api, log = console.log) {
     log(`  dns ${name}: ${s.state === 'ok' ? 'ok' : (flags.apply ? 'will create proxied CNAME' : 'would create proxied CNAME')}`);
   }
 
-  let createAccess = false;
+  const accessSpecs = [];
+  if (cfg.originTokenId) {
+    accessSpecs.push({
+      hostname: cfg.publicHostname, appName: `${cfg.tunnelName}-worker-only`, what: 'service token (Worker only)',
+      matches: (pol) => serviceTokenPolicyMatches(pol, cfg.originTokenId),
+      policy: { name: 'wdjjj worker only', decision: 'non_identity', precedence: 1, include: [{ service_token: { token_id: cfg.originTokenId } }] },
+    });
+  } else {
+    log(`  access ${cfg.publicHostname}: NONE (--allow-public-origin): the origin is reachable without the Worker`);
+  }
   if (cfg.access) {
-    const apps = await listAll(api, `/accounts/${cfg.accountId}/access/apps?domain=${encodeURIComponent(cfg.access.hostname)}&exact=true`);
-    const matching = apps.filter((a) => a.domain === cfg.access.hostname);
-    if (matching.length > 1) throw new Error(`Found ${matching.length} Access apps for ${cfg.access.hostname}; resolve the duplicates first`);
+    accessSpecs.push({
+      hostname: cfg.access.hostname, appName: `${cfg.tunnelName}-access`, what: `${cfg.access.emails.length} e-mail(s)`,
+      matches: (pol) => accessPolicyMatches(pol, cfg.access.emails),
+      policy: { name: 'allow-listed e-mails', decision: 'allow', precedence: 1, include: cfg.access.emails.map((email) => ({ email: { email } })) },
+    });
+  }
+  const accessToCreate = [];
+  for (const spec of accessSpecs) {
+    const apps = await listAll(api, `/accounts/${cfg.accountId}/access/apps?domain=${encodeURIComponent(spec.hostname)}&exact=true`);
+    const matching = apps.filter((a) => a.domain === spec.hostname);
+    if (matching.length > 1) throw new Error(`Found ${matching.length} Access apps for ${spec.hostname}; resolve the duplicates first`);
     const app = matching[0];
-    if (app && !accessAppIsStrict(app, cfg.access.hostname)) {
-      throw new Error(`Access app for ${cfg.access.hostname} has another type, extra domains or destination overrides; fix it in the dashboard first`);
+    if (app && !accessAppIsStrict(app, spec.hostname)) {
+      throw new Error(`Access app for ${spec.hostname} has another type, extra domains or destination overrides; fix it in the dashboard first`);
     }
     if (app) {
       const policies = await api('GET', `/accounts/${cfg.accountId}/access/apps/${app.id}/policies`);
-      if (!accessPolicyMatches(policies, cfg.access.emails)) {
-        throw new Error(`Access app for ${cfg.access.hostname} exists but its policies do not match CF_ACCESS_EMAILS exactly; fix it in the dashboard first`);
+      if (!spec.matches(policies)) {
+        throw new Error(`Access app for ${spec.hostname} exists but its policies do not match the expected ${spec.what} exactly; fix it in the dashboard first`);
       }
-      log(`  access ${cfg.access.hostname}: app and allow-list match`);
+      log(`  access ${spec.hostname}: app and policy match`);
     } else {
-      createAccess = true;
-      log(`  access ${cfg.access.hostname}: ${flags.apply ? 'will create' : 'would create'} app for ${cfg.access.emails.length} e-mail(s)`);
+      accessToCreate.push(spec);
+      log(`  access ${spec.hostname}: ${flags.apply ? 'will create' : 'would create'} app for ${spec.what}`);
     }
   }
   log(`  ingress: ${hostnames.join(', ')} -> ${cfg.originService}, catch-all http_status:404`);
 
   if (!flags.apply) {
     log('Plan only. Re-run with --apply to make these changes.');
-    return { created: { dns: [], tunnelId: null, accessAppId: null } };
+    return { created: { dns: [], tunnelId: null, accessAppIds: [] } };
   }
 
   // Phase 2: mutate, with rollback of everything this run changed.
-  const created = { dns: [], tunnelId: null, accessAppId: null, configChanged: false };
+  const created = { dns: [], tunnelId: null, accessAppIds: [], configChanged: false };
   let tunnelId = reused && reused.id;
   try {
     if (!tunnelId) {
@@ -264,19 +321,16 @@ async function run(cfg, flags, api, log = console.log) {
       created.tunnelId = t.id;
       log(`  tunnel ${cfg.tunnelName}: created ${tunnelId}`);
     }
-    if (createAccess) {
+    for (const spec of accessToCreate) {
       const newApp = await api('POST', `/accounts/${cfg.accountId}/access/apps`, {
-        name: `${cfg.tunnelName}-access`, domain: cfg.access.hostname, type: 'self_hosted', session_duration: '24h', app_launcher_visible: false,
+        name: spec.appName, domain: spec.hostname, type: 'self_hosted', session_duration: '24h', app_launcher_visible: false,
       });
-      created.accessAppId = newApp.id;
-      await api('POST', `/accounts/${cfg.accountId}/access/apps/${newApp.id}/policies`, {
-        name: 'allow-listed e-mails', decision: 'allow', precedence: 1,
-        include: cfg.access.emails.map((email) => ({ email: { email } })),
-      });
-      log(`  access ${cfg.access.hostname}: app ${newApp.id} created`);
+      created.accessAppIds.push(newApp.id);
+      await api('POST', `/accounts/${cfg.accountId}/access/apps/${newApp.id}/policies`, spec.policy);
+      log(`  access ${spec.hostname}: app ${newApp.id} created`);
     }
+    created.configChanged = true; // set first: a lost response must still trigger the restore
     await api('PUT', `/accounts/${cfg.accountId}/cfd_tunnel/${tunnelId}/configurations`, { config: mergeTunnelConfig(snapshot, hostnames, cfg.originService) });
-    created.configChanged = true;
     log('  ingress: updated');
     const cname = `${tunnelId}.cfargotunnel.com`;
     for (const name of dnsToCreate) {
@@ -289,7 +343,7 @@ async function run(cfg, flags, api, log = console.log) {
     const step = async (label, fn) => { try { await fn(); log(`    ${label}: done`); } catch (e) { log(`    ${label}: FAILED (${e.message})`); } };
     for (const id of created.dns) await step(`delete dns record ${id}`, () => api('DELETE', `/zones/${cfg.zoneId}/dns_records/${id}`));
     if (created.configChanged && snapshot) await step('restore previous tunnel configuration', () => api('PUT', `/accounts/${cfg.accountId}/cfd_tunnel/${tunnelId}/configurations`, { config: snapshot }));
-    if (created.accessAppId) await step(`delete access app ${created.accessAppId}`, () => api('DELETE', `/accounts/${cfg.accountId}/access/apps/${created.accessAppId}`));
+    for (const id of created.accessAppIds) await step(`delete access app ${id}`, () => api('DELETE', `/accounts/${cfg.accountId}/access/apps/${id}`));
     if (created.tunnelId) await step(`delete tunnel ${created.tunnelId}`, () => api('DELETE', `/accounts/${cfg.accountId}/cfd_tunnel/${created.tunnelId}`));
     throw err;
   }
@@ -318,4 +372,4 @@ async function main() {
 
 if (require.main === module) main();
 
-module.exports = { parseArgs, readConfig, parseOriginService, buildIngress, mergeTunnelConfig, accessPolicyMatches, accessAppIsStrict, listAll, classifyDns, run, makeApi };
+module.exports = { parseArgs, readConfig, parseOriginService, buildIngress, mergeTunnelConfig, hostMatches, accessPolicyMatches, serviceTokenPolicyMatches, accessAppIsStrict, listAll, classifyDns, run, makeApi };

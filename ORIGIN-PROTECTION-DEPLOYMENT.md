@@ -38,6 +38,7 @@ CF_TUNNEL_ID                 # verifier only
 CF_ORIGIN_PUBLIC_IP          # verifier: known origin IP, required for OP-05
 CF_ORIGIN_SERVICE            # setup, default http://127.0.0.1:3000
 CF_TUNNEL_NAME               # setup, default djjessejay-origin
+CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID  # setup: ID of the service token used by the wdjjj Worker (required)
 CF_ACCESS_HOSTNAME           # optional dedicated Access hostname
 CF_ACCESS_EMAILS             # comma-separated allow-list when --access is used
 ```
@@ -58,6 +59,22 @@ For djjessejay.ch the tunnel carries only the Express backend. The public site
 stays behind the `wdjjj` Worker, which reaches the backend through the Worker
 secret `API_ORIGIN_HOST=origin.djjessejay.ch`. Never use the apex or `www` as
 `CF_PUBLIC_HOSTNAME`; the script refuses to overwrite their existing records.
+
+### Worker-only origin (service token)
+
+The tunnel hostname is publicly resolvable, so it must only accept requests from
+the `wdjjj` Worker. The setup script therefore requires an Access service token
+and protects `CF_PUBLIC_HOSTNAME` with an Access app whose only policy is
+`non_identity` for exactly that token:
+
+1. Zero Trust → Access → Service Auth → create a service token, e.g. `wdjjj-origin`.
+   Copy Client ID and Client Secret once into your password manager; note the token ID.
+2. Store both values as Worker secrets (never in `wrangler.toml`):
+   `npx wrangler secret put ORIGIN_ACCESS_CLIENT_ID` and
+   `npx wrangler secret put ORIGIN_ACCESS_CLIENT_SECRET`.
+3. Run the setup with `CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID=<token id>`.
+
+`--allow-public-origin` skips this protection and is meant for tests only.
 
 ### 2. Apply
 
