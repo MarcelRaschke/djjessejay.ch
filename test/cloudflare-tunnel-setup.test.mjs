@@ -3,28 +3,33 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { parseArgs, readConfig, buildIngress, classifyDns, run } = require('../scripts/cloudflare-tunnel-setup.js');
+const {
+  parseArgs, readConfig, buildIngress, mergeTunnelConfig, accessPolicyMatches, classifyDns, run,
+} = require('../scripts/cloudflare-tunnel-setup.js');
 
 const BASE_ENV = {
   CLOUDFLARE_API_TOKEN: 't', CLOUDFLARE_ACCOUNT_ID: 'acc', CLOUDFLARE_ZONE_ID: 'zone',
   CF_PUBLIC_HOSTNAME: 'origin.djjessejay.ch',
 };
+const ACCESS_ENV = { ...BASE_ENV, CF_ACCESS_HOSTNAME: 'admin.djjessejay.ch', CF_ACCESS_EMAILS: 'a@b.ch' };
 
 /** In-memory Cloudflare API double that records every call. */
-function fakeApi({ tunnels = [], dns = {}, failOn = null } = {}) {
+function fakeApi({ tunnels = [], config = {}, dns = {}, apps = [], policies = {}, failOn = null } = {}) {
   const calls = [];
-  const state = { tunnels: [...tunnels], dns: structuredClone(dns), nextId: 1 };
+  const state = { tunnels: [...tunnels], config: structuredClone(config), dns: structuredClone(dns), nextId: 1 };
   const api = async (method, path, body) => {
     calls.push({ method, path, body });
     if (failOn && failOn(method, path)) throw new Error(`injected failure ${method} ${path}`);
     if (method === 'GET' && path === '/zones/zone') return { name: 'djjessejay.ch', status: 'active' };
     if (method === 'GET' && path.startsWith('/accounts/acc/cfd_tunnel?')) return state.tunnels;
     if (method === 'POST' && path === '/accounts/acc/cfd_tunnel') { const t = { id: `tun${state.nextId++}`, ...body }; state.tunnels.push(t); return t; }
-    if (method === 'PUT' && path.endsWith('/configurations')) return {};
+    if (method === 'GET' && path.endsWith('/configurations')) return { config: state.config };
+    if (method === 'PUT' && path.endsWith('/configurations')) { state.config = body.config; return {}; }
     if (method === 'GET' && path.startsWith('/zones/zone/dns_records?name=')) return state.dns[decodeURIComponent(path.split('=')[1])] || [];
     if (method === 'POST' && path === '/zones/zone/dns_records') { const r = { id: `dns${state.nextId++}`, ...body }; state.dns[body.name] = [r]; return r; }
     if (method === 'DELETE') return {};
-    if (method === 'GET' && path === '/accounts/acc/access/apps') return [];
+    if (method === 'GET' && path === '/accounts/acc/access/apps') return apps;
+    if (method === 'GET' && path.endsWith('/policies')) return policies[path.split('/')[4]] || [];
     if (method === 'POST' && path === '/accounts/acc/access/apps') return { id: 'app1', ...body };
     if (method === 'POST' && path.endsWith('/policies')) return { id: 'pol1' };
     throw new Error(`unexpected ${method} ${path}`);
@@ -33,6 +38,8 @@ function fakeApi({ tunnels = [], dns = {}, failOn = null } = {}) {
 }
 const quiet = () => {};
 const mutations = (calls) => calls.filter((c) => c.method !== 'GET');
+const APPLY = { apply: true, access: false };
+const APPLY_ACCESS = { apply: true, access: true };
 
 test('parseArgs rejects unknown flags', () => {
   assert.deepEqual(parseArgs([]), { apply: false, access: false });
@@ -43,17 +50,58 @@ test('readConfig requires the public hostname and credentials', () => {
   assert.throws(() => readConfig({}, { access: false }), /CLOUDFLARE_API_TOKEN[\s\S]*CF_PUBLIC_HOSTNAME/);
 });
 
+test('apex and www are refused as tunnel hostname', () => {
+  for (const host of ['djjessejay.ch', 'www.djjessejay.ch']) {
+    assert.throws(() => readConfig({ ...BASE_ENV, CF_PUBLIC_HOSTNAME: host }, { access: false }), /must stay behind the wdjjj Worker/);
+  }
+});
+
+test('origin service rejects credentials and paths and is normalised', () => {
+  assert.throws(() => readConfig({ ...BASE_ENV, CF_ORIGIN_SERVICE: 'http://user:secret@127.0.0.1:3000' }, { access: false }), /must not contain credentials/);
+  assert.throws(() => readConfig({ ...BASE_ENV, CF_ORIGIN_SERVICE: 'http://127.0.0.1:3000/api' }, { access: false }), /path/);
+  assert.equal(readConfig({ ...BASE_ENV, CF_ORIGIN_SERVICE: 'http://127.0.0.1:3000/' }, { access: false }).originService, 'http://127.0.0.1:3000');
+});
+
 test('Access is refused on the public site and on the tunnel hostname', () => {
   for (const host of ['djjessejay.ch', 'www.djjessejay.ch', 'origin.djjessejay.ch']) {
     assert.throws(() => readConfig({ ...BASE_ENV, CF_ACCESS_HOSTNAME: host, CF_ACCESS_EMAILS: 'a@b.ch' }, { access: true }), /Refusing to attach Access/);
   }
-  assert.doesNotThrow(() => readConfig({ ...BASE_ENV, CF_ACCESS_HOSTNAME: 'admin.djjessejay.ch', CF_ACCESS_EMAILS: 'a@b.ch' }, { access: true }));
+  assert.doesNotThrow(() => readConfig(ACCESS_ENV, { access: true }));
 });
 
 test('ingress ends with the http_status:404 catch-all', () => {
   const ing = buildIngress(['origin.djjessejay.ch'], 'http://127.0.0.1:3000');
   assert.deepEqual(ing.at(-1), { service: 'http_status:404' });
   assert.equal(ing[0].hostname, 'origin.djjessejay.ch');
+});
+
+test('mergeTunnelConfig keeps originRequest and foreign hostnames', () => {
+  const existing = {
+    originRequest: { connectTimeout: 10, caPool: '/etc/ca.pem' },
+    ingress: [
+      { hostname: 'other.djjessejay.ch', service: 'http://127.0.0.1:8080' },
+      { hostname: 'origin.djjessejay.ch', service: 'http://old:1' },
+      { service: 'http_status:404' },
+    ],
+  };
+  const merged = mergeTunnelConfig(existing, ['origin.djjessejay.ch'], 'http://127.0.0.1:3000');
+  assert.deepEqual(merged.originRequest, existing.originRequest);
+  assert.deepEqual(merged.ingress, [
+    { hostname: 'other.djjessejay.ch', service: 'http://127.0.0.1:8080' },
+    { hostname: 'origin.djjessejay.ch', service: 'http://127.0.0.1:3000' },
+    { service: 'http_status:404' },
+  ]);
+  assert.equal(existing.ingress[1].service, 'http://old:1', 'input is not mutated');
+});
+
+test('accessPolicyMatches accepts only one exact allow policy', () => {
+  const ok = [{ decision: 'allow', include: [{ email: { email: 'A@b.ch' } }] }];
+  assert.equal(accessPolicyMatches(ok, ['a@b.ch']), true);
+  assert.equal(accessPolicyMatches([], ['a@b.ch']), false);
+  assert.equal(accessPolicyMatches([{ decision: 'bypass', include: [{ everyone: {} }] }], ['a@b.ch']), false);
+  assert.equal(accessPolicyMatches([{ decision: 'allow', include: [{ everyone: {} }] }], ['a@b.ch']), false);
+  assert.equal(accessPolicyMatches([...ok, ...ok], ['a@b.ch']), false);
+  assert.equal(accessPolicyMatches(ok, ['a@b.ch', 'c@d.ch']), false);
 });
 
 test('classifyDns accepts only one proxied CNAME to the tunnel', () => {
@@ -66,13 +114,13 @@ test('classifyDns accepts only one proxied CNAME to the tunnel', () => {
 
 test('plan mode makes no changes', async () => {
   const f = fakeApi();
-  await run(readConfig(BASE_ENV, { access: false }), { apply: false, access: false }, f.api, quiet);
+  await run(readConfig(ACCESS_ENV, { access: true }), { apply: false, access: true }, f.api, quiet);
   assert.deepEqual(mutations(f.calls), []);
 });
 
 test('apply creates tunnel, ingress and proxied CNAME, and never asks for the token', async () => {
   const f = fakeApi();
-  await run(readConfig(BASE_ENV, { access: false }), { apply: true, access: false }, f.api, quiet);
+  await run(readConfig(BASE_ENV, { access: false }), APPLY, f.api, quiet);
   const m = mutations(f.calls);
   assert.equal(m[0].path, '/accounts/acc/cfd_tunnel');
   assert.equal(m[0].body.config_src, 'cloudflare');
@@ -81,33 +129,70 @@ test('apply creates tunnel, ingress and proxied CNAME, and never asks for the to
   assert.ok(!f.calls.some((c) => c.path.includes('/token')));
 });
 
+test('Access app is created before the dedicated hostname is routed', async () => {
+  const f = fakeApi();
+  await run(readConfig(ACCESS_ENV, { access: true }), APPLY_ACCESS, f.api, quiet);
+  const m = mutations(f.calls).map((c) => `${c.method} ${c.path}`);
+  assert.ok(m.indexOf('POST /accounts/acc/access/apps') < m.findIndex((x) => x.endsWith('/configurations')));
+});
+
 test('an existing tunnel is reused and duplicates are refused', async () => {
   const one = fakeApi({ tunnels: [{ id: 'old', remote_config: true }] });
-  await run(readConfig(BASE_ENV, { access: false }), { apply: true, access: false }, one.api, quiet);
+  await run(readConfig(BASE_ENV, { access: false }), APPLY, one.api, quiet);
   assert.ok(!mutations(one.calls).some((c) => c.method === 'POST' && c.path === '/accounts/acc/cfd_tunnel'));
 
   const two = fakeApi({ tunnels: [{ id: 'a' }, { id: 'b' }] });
-  await assert.rejects(run(readConfig(BASE_ENV, { access: false }), { apply: true, access: false }, two.api, quiet), /2 active tunnels/);
+  await assert.rejects(run(readConfig(BASE_ENV, { access: false }), APPLY, two.api, quiet), /2 active tunnels/);
 });
 
-test('existing DNS records are never overwritten', async () => {
+test('existing DNS records are never overwritten and nothing is mutated', async () => {
   const f = fakeApi({ dns: { 'origin.djjessejay.ch': [{ id: 'r1', type: 'A', content: '192.0.2.10', proxied: false }] } });
-  await assert.rejects(run(readConfig(BASE_ENV, { access: false }), { apply: true, access: false }, f.api, quiet), /refusing to overwrite/);
-  assert.ok(!f.calls.some((c) => c.method === 'PUT' && c.path.startsWith('/zones/')));
+  await assert.rejects(run(readConfig(BASE_ENV, { access: false }), APPLY, f.api, quiet), /refusing to overwrite/);
+  assert.deepEqual(mutations(f.calls), []);
 });
 
-test('a failed apply rolls back the DNS record and the tunnel it created', async () => {
-  const env = { ...BASE_ENV, CF_ACCESS_HOSTNAME: 'admin.djjessejay.ch', CF_ACCESS_EMAILS: 'a@b.ch' };
-  const f = fakeApi({ failOn: (m, p) => m === 'POST' && p === '/accounts/acc/access/apps' });
-  await assert.rejects(run(readConfig(env, { access: true }), { apply: true, access: true }, f.api, quiet), /injected failure/);
+test('an existing Access app with a different policy fails closed before any change', async () => {
+  const f = fakeApi({
+    tunnels: [{ id: 'old', remote_config: true }],
+    apps: [{ id: 'appX', domain: 'admin.djjessejay.ch' }],
+    policies: { appX: [{ decision: 'bypass', include: [{ everyone: {} }] }] },
+  });
+  await assert.rejects(run(readConfig(ACCESS_ENV, { access: true }), APPLY_ACCESS, f.api, quiet), /do not match CF_ACCESS_EMAILS/);
+  assert.deepEqual(mutations(f.calls), []);
+});
+
+test('an existing Access app without policies (half-created) fails closed', async () => {
+  const f = fakeApi({ apps: [{ id: 'appY', domain: 'admin.djjessejay.ch' }], policies: { appY: [] } });
+  await assert.rejects(run(readConfig(ACCESS_ENV, { access: true }), APPLY_ACCESS, f.api, quiet), /do not match/);
+  assert.deepEqual(mutations(f.calls), []);
+});
+
+test('a failed apply on a reused tunnel restores its previous configuration', async () => {
+  const previous = { originRequest: { connectTimeout: 10 }, ingress: [{ service: 'http_status:404' }] };
+  const f = fakeApi({
+    tunnels: [{ id: 'old', remote_config: true }],
+    config: previous,
+    failOn: (m, p) => m === 'POST' && p === '/zones/zone/dns_records',
+  });
+  await assert.rejects(run(readConfig(BASE_ENV, { access: false }), APPLY, f.api, quiet), /injected failure/);
+  const puts = f.calls.filter((c) => c.method === 'PUT');
+  assert.equal(puts.length, 2);
+  assert.deepEqual(puts[1].body.config, previous);
+  assert.ok(!f.calls.some((c) => c.method === 'DELETE' && c.path.includes('/cfd_tunnel/old')));
+});
+
+test('a failed apply deletes the Access app, DNS records and tunnel it created', async () => {
+  const f = fakeApi({ failOn: (m, p) => m === 'POST' && p === '/zones/zone/dns_records' && f.calls.filter((c) => c.path === p).length > 1 });
+  await assert.rejects(run(readConfig(ACCESS_ENV, { access: true }), APPLY_ACCESS, f.api, quiet), /injected failure/);
   const deletes = f.calls.filter((c) => c.method === 'DELETE').map((c) => c.path);
-  assert.equal(deletes.filter((p) => p.startsWith('/zones/zone/dns_records/')).length, 2);
+  assert.equal(deletes.filter((p) => p.startsWith('/zones/zone/dns_records/')).length, 1);
+  assert.ok(deletes.includes('/accounts/acc/access/apps/app1'));
   assert.ok(deletes.includes('/accounts/acc/cfd_tunnel/tun1'));
 });
 
 test('hostnames outside the zone are refused before any change', async () => {
   const f = fakeApi();
   const cfg = readConfig({ ...BASE_ENV, CF_PUBLIC_HOSTNAME: 'origin.example.com' }, { access: false });
-  await assert.rejects(run(cfg, { apply: true, access: false }, f.api, quiet), /not inside zone/);
+  await assert.rejects(run(cfg, APPLY, f.api, quiet), /not inside zone/);
   assert.deepEqual(mutations(f.calls), []);
 });
