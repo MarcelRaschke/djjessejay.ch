@@ -5,10 +5,14 @@ Umgebung (ANTHROPIC_API_KEY oder ein `ant auth login`-Profil),
 nie aus dem Quellcode.
 """
 
+from __future__ import annotations
+
 import logging
 import sys
+from typing import TYPE_CHECKING
 
-import anthropic
+if TYPE_CHECKING:
+    import anthropic
 
 MODEL = "claude-opus-5-5"
 
@@ -55,6 +59,9 @@ def ask(
 
 
 def main() -> int:
+    # Erst hier importieren, damit die Tests ohne installiertes SDK laufen.
+    import anthropic
+
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     client = anthropic.Anthropic()
 
