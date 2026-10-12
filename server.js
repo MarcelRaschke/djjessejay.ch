@@ -70,22 +70,45 @@ app.use('/api/djjj-survey', djjjSurveyRouter);
 
 // Static files.
 // In production the origin only serves /api: the public site comes from GitHub Pages
-// through the wdjjj Worker, and the Worker forwards nothing else here. Serving the
-// repository root would expose server code, scripts and internal documents, so static
-// serving is off unless SERVE_STATIC=1 (local preview, see `npm run dev`). Even then,
-// repository internals stay blocked.
+// through the wdjjj Worker, and the Worker forwards nothing else here. Static serving
+// is therefore off unless SERVE_STATIC=1 (local preview, `npm run dev`, or the
+// documented custom-server rollback). Even then only an explicit allowlist of public
+// site files is served; everything else in the repository stays unreachable.
 const SERVE_STATIC = process.env.SERVE_STATIC === '1';
-const STATIC_DENY = /^\/(?:server\.js|package(?:-lock)?\.json|scripts|infra|contracts|honeypot|policy|triage|test|tests|routes|src|patches|render-farm|workers|provenance|release|node_modules)(?:\/|$)|\.(?:md|ts|mjs|cjs|sh|py|yml|yaml|sql|env|pem|key|log)$/i;
+const PUBLIC_FILES = new Set([
+  'index.html', 'ivdj-supreme.html', 'artist-profile.json', 'robots.txt',
+  'favicon.ico', 'favicon.svg', 'tailwind.css', 'jessejay.css', 'scripts.js',
+  'DJ-Jesse-Jay.jpg', 'DJPult.gif', 'img_contact_sound.svg', 'spacer.svg',
+]);
+const PUBLIC_DIRS = new Set(['css', 'js', 'assets', 'survey', 'pressekit', 'presskit', 'website', 'visuals', 'vendor']);
+const BLOCKED_EXT = /\.(?:sql|env|pem|key|log|jsonl|sh|py|ts|md|ya?ml|lock)$/i;
+const staticFiles = express.static(__dirname, { dotfiles: 'ignore', index: ['index.html'], redirect: false });
+
+/** Returns 'serve', 'deny' or 'pass' (not a file request: let the SPA fallback answer). */
+function classifyStaticPath(rawPath) {
+  let decoded;
+  try { decoded = decodeURIComponent(rawPath); } catch { return 'bad'; }
+  const rel = path.posix.normalize(decoded.replace(/\\/g, '/')).replace(/^\/+/, '');
+  if (rel === '' || rel === '.') return 'serve';
+  if (rel.startsWith('..') || rel.split('/').some((seg) => seg.startsWith('.'))) return 'deny';
+  if (BLOCKED_EXT.test(rel)) return 'deny';
+  const top = rel.split('/')[0];
+  if (PUBLIC_FILES.has(rel)) return 'serve';
+  if (PUBLIC_DIRS.has(top) && rel.length > top.length) return 'serve';
+  const last = rel.split('/').pop();
+  return last.includes('.') ? 'deny' : 'pass';
+}
+
 if (SERVE_STATIC) {
-  // Check the decoded, normalised path: express.static decodes before resolving, so a
-  // percent-encoded name (/%73erver.js) must not slip past the deny list.
   app.use((req, res, next) => {
-    let decoded;
-    try { decoded = decodeURIComponent(req.path); } catch { return res.status(400).end(); }
-    const normalised = path.posix.normalize(decoded.replace(/\\/g, '/'));
-    return STATIC_DENY.test(normalised) ? res.status(404).end() : next();
+    if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+    if (req.path === '/api' || req.path.startsWith('/api/')) return next();
+    const verdict = classifyStaticPath(req.path);
+    if (verdict === 'bad') return res.status(400).end();
+    if (verdict === 'deny') return res.status(404).end();
+    if (verdict === 'serve') return staticFiles(req, res, next);
+    return next();
   });
-  app.use(express.static(__dirname, { dotfiles: 'ignore', index: false }));
 }
 
 // Environment variables

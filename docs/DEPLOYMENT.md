@@ -203,6 +203,8 @@ pm2 restart server.js
   WorkingDirectory=/path/to/app
   ExecStart=/usr/bin/node server.js
   Restart=on-failure
+  # API only by default. Only for the custom-server rollback below:
+  # Environment=SERVE_STATIC=1
 
   [Install]
   WantedBy=multi-user.target
@@ -274,6 +276,11 @@ If the hybrid GitHub Pages + Cloudflare Worker deployment fails and you need to 
    - Remove route binding: `djjessejay.ch/*`
 
 3. **Custom Server Verification**
+   - Before switching DNS: enable static serving on the origin, which is off by default.
+     systemd: uncomment `Environment=SERVE_STATIC=1` in `djjessejay.service`, then
+     `sudo systemctl daemon-reload && sudo systemctl restart djjessejay`.
+     PM2: `SERVE_STATIC=1 pm2 restart djjessejay --update-env`.
+     Only the public site allowlist in `server.js` is served, never repository internals.
    - Ensure application is running on `185.101.158.113` (ports 80/443)
    - Verify SSL certificate is valid
    - Test: `curl -k https://djjessejay.ch/` (should load the static site from custom server)
