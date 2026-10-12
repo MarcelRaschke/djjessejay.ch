@@ -43,7 +43,7 @@ CF_ACCESS_HOSTNAME           # optional dedicated Access hostname
 CF_ACCESS_EMAILS             # comma-separated allow-list when --access is used
 ```
 
-The Cloudflare token should be scoped to only the account/zone and permissions required for the operations. Cloudflare's current Tunnel API documentation requires Tunnel write plus DNS write for this bootstrap path. Access application creation requires Access Apps and Policies write. Do not use a Global API Key.
+The Cloudflare token should be scoped to only the account/zone and permissions required for the operations. Cloudflare's current Tunnel API documentation requires Tunnel write plus DNS write for this bootstrap path. Access application creation requires Access Apps and Policies write; the pre-flight check of the Worker's service token (exists, enabled, not expired) requires Access Service Tokens read. Do not use a Global API Key.
 
 ## Execution
 

@@ -191,8 +191,65 @@ function accessAppIsStrict(app, hostname) {
   const doms = Array.isArray(app.self_hosted_domains) ? app.self_hosted_domains : [];
   if (doms.some((d) => d !== hostname)) return false;
   const dests = Array.isArray(app.destinations) ? app.destinations : [];
-  if (dests.some((d) => d.type !== 'public' || d.uri !== hostname)) return false;
+  // Destination overrides can make matching paths public, so any override disqualifies the app.
+  if (dests.some((d) => !d || d.type !== 'public' || d.uri !== hostname || hasOverrides(d.overrides))) return false;
   return true;
+}
+
+function hasOverrides(o) {
+  if (o === undefined || o === null) return false;
+  return Array.isArray(o) ? o.length > 0 : true;
+}
+
+/** Splits an Access app entry ("host", "host/path", "https://host/path") into lower-case host and path. */
+function splitAppEntry(entry) {
+  const s = String(entry).replace(/^[a-z][a-z0-9+.-]*:\/\//i, '');
+  const i = s.indexOf('/');
+  return i === -1 ? { host: s.toLowerCase(), path: '' } : { host: s.slice(0, i).toLowerCase(), path: s.slice(i) };
+}
+
+/** Every public hostname/path entry an Access app protects. */
+function accessAppEntries(app) {
+  const raw = [];
+  if (typeof app.domain === 'string') raw.push(app.domain);
+  for (const d of Array.isArray(app.self_hosted_domains) ? app.self_hosted_domains : []) if (typeof d === 'string') raw.push(d);
+  for (const d of Array.isArray(app.destinations) ? app.destinations : []) if (d && d.type === 'public' && typeof d.uri === 'string') raw.push(d.uri);
+  return raw.map(splitAppEntry);
+}
+
+/**
+ * Access apps other than the exact root app that also cover `hostname` and could take precedence:
+ * any entry with a path (a more specific path app wins over the root app), or another app naming
+ * the exact host. A wildcard root entry (*.zone, no path) is less specific than the exact app and is allowed.
+ */
+function conflictingAccessApps(apps, hostname) {
+  const host = hostname.toLowerCase();
+  return apps.filter((app) => {
+    if (app.domain === hostname) return false; // the root app itself; checked by accessAppIsStrict
+    return accessAppEntries(app).some((e) => {
+      if (!hostMatches(e.host, host)) return false;
+      const scoped = e.path !== '' && e.path !== '/' && e.path !== '/*';
+      return scoped || e.host === host;
+    });
+  });
+}
+
+/** Rejects a missing, disabled or expired service token before anything is published. */
+async function checkServiceToken(api, accountId, tokenId, now = Date.now()) {
+  let tok;
+  try {
+    tok = await api('GET', `/accounts/${accountId}/access/service_tokens/${tokenId}`);
+  } catch (e) {
+    throw new Error(`Service token ${tokenId} could not be read (${e.message}); check CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID and the API token's Access: Service Tokens permission`);
+  }
+  if (!tok) throw new Error(`Service token ${tokenId} not found`);
+  if (tok.enabled === false) throw new Error(`Service token ${tokenId} is disabled; the Worker could not authenticate`);
+  if (tok.expires_at) {
+    const exp = Date.parse(tok.expires_at);
+    if (Number.isNaN(exp) || exp <= now) throw new Error(`Service token ${tokenId} has expired (${tok.expires_at}); rotate it first`);
+    return { expiresAt: tok.expires_at };
+  }
+  return { expiresAt: null };
 }
 
 /** Reads every page of a paginated list endpoint (path must already contain a query string). */
@@ -284,10 +341,20 @@ async function run(cfg, flags, api, log = console.log) {
       policy: { name: 'allow-listed e-mails', decision: 'allow', precedence: 1, include: cfg.access.emails.map((email) => ({ email: { email } })) },
     });
   }
+  if (cfg.originTokenId) {
+    const tok = await checkServiceToken(api, cfg.accountId, cfg.originTokenId);
+    log(`  service token: enabled${tok.expiresAt ? `, expires ${tok.expiresAt}` : ''}`);
+  }
   const accessToCreate = [];
+  // All apps of the account: path- or host-scoped apps elsewhere can override the root app.
+  const allApps = accessSpecs.length ? await listAll(api, `/accounts/${cfg.accountId}/access/apps?`) : [];
   for (const spec of accessSpecs) {
-    const apps = await listAll(api, `/accounts/${cfg.accountId}/access/apps?domain=${encodeURIComponent(spec.hostname)}&exact=true`);
-    const matching = apps.filter((a) => a.domain === spec.hostname);
+    const conflicts = conflictingAccessApps(allApps, spec.hostname);
+    if (conflicts.length) {
+      const names = conflicts.map((a) => `${a.name || a.id} (${a.domain})`).join(', ');
+      throw new Error(`Other Access apps also cover ${spec.hostname} and may take precedence: ${names}; remove or reconcile them first`);
+    }
+    const matching = allApps.filter((a) => a.domain === spec.hostname);
     if (matching.length > 1) throw new Error(`Found ${matching.length} Access apps for ${spec.hostname}; resolve the duplicates first`);
     const app = matching[0];
     if (app && !accessAppIsStrict(app, spec.hostname)) {
@@ -312,16 +379,18 @@ async function run(cfg, flags, api, log = console.log) {
   }
 
   // Phase 2: mutate, with rollback of everything this run changed.
-  const created = { dns: [], dnsAttempted: [], tunnelId: null, accessAppIds: [], configChanged: false };
+  const created = { dns: [], dnsAttempted: [], tunnelId: null, tunnelAttempted: false, accessAppIds: [], accessAttempted: [], configChanged: false };
   let tunnelId = reused && reused.id;
   try {
     if (!tunnelId) {
+      created.tunnelAttempted = true; // before the POST: a lost response must still be reconciled
       const t = await api('POST', `/accounts/${cfg.accountId}/cfd_tunnel`, { name: cfg.tunnelName, config_src: 'cloudflare' });
       tunnelId = t.id;
       created.tunnelId = t.id;
       log(`  tunnel ${cfg.tunnelName}: created ${tunnelId}`);
     }
     for (const spec of accessToCreate) {
+      created.accessAttempted.push(spec.hostname); // before the POST, as above
       const newApp = await api('POST', `/accounts/${cfg.accountId}/access/apps`, {
         name: spec.appName, domain: spec.hostname, type: 'self_hosted', session_duration: '24h', app_launcher_visible: false,
       });
@@ -343,18 +412,33 @@ async function run(cfg, flags, api, log = console.log) {
     log('  rolling back changes made by this run');
     const step = async (label, fn) => { try { await fn(); log(`    ${label}: done`); } catch (e) { log(`    ${label}: FAILED (${e.message})`); } };
     for (const id of created.dns) await step(`delete dns record ${id}`, () => api('DELETE', `/zones/${cfg.zoneId}/dns_records/${id}`));
-    // A create whose response was lost has no id: these hostnames had no record in phase 1,
-    // so any CNAME now pointing at this tunnel was created by this run and is removed.
+    // These hostnames had no record in phase 1, so any CNAME still pointing at this tunnel was
+    // created by this run: a lost create response, or a delete above that failed. Remove it.
     for (const { name, content } of created.dnsAttempted) {
       await step(`reconcile dns ${name}`, async () => {
         const recs = await api('GET', `/zones/${cfg.zoneId}/dns_records?name=${encodeURIComponent(name)}`);
         for (const r of recs) {
-          if (r.type === 'CNAME' && r.content === content && !created.dns.includes(r.id)) await api('DELETE', `/zones/${cfg.zoneId}/dns_records/${r.id}`);
+          if (r.type === 'CNAME' && r.content === content) await api('DELETE', `/zones/${cfg.zoneId}/dns_records/${r.id}`);
         }
       });
     }
     if (created.configChanged && snapshot) await step('restore previous tunnel configuration', () => api('PUT', `/accounts/${cfg.accountId}/cfd_tunnel/${tunnelId}/configurations`, { config: snapshot }));
     for (const id of created.accessAppIds) await step(`delete access app ${id}`, () => api('DELETE', `/accounts/${cfg.accountId}/access/apps/${id}`));
+    // Phase 1 found no app for these hostnames, so any app still there was created by this run.
+    for (const hostname of created.accessAttempted) {
+      await step(`reconcile access ${hostname}`, async () => {
+        const apps = await listAll(api, `/accounts/${cfg.accountId}/access/apps?`);
+        for (const a of apps) if (a.domain === hostname) await api('DELETE', `/accounts/${cfg.accountId}/access/apps/${a.id}`);
+      });
+    }
+    // Phase 1 found no tunnel with this name, so one that exists now was created by this run.
+    if (!created.tunnelId && created.tunnelAttempted) {
+      await step(`reconcile tunnel ${cfg.tunnelName}`, async () => {
+        const ts = await api('GET', `/accounts/${cfg.accountId}/cfd_tunnel?name=${encodeURIComponent(cfg.tunnelName)}&is_deleted=false`);
+        if (ts.length > 1) throw new Error(`${ts.length} tunnels named ${cfg.tunnelName}; delete the one created by this run manually`);
+        if (ts.length === 1) await api('DELETE', `/accounts/${cfg.accountId}/cfd_tunnel/${ts[0].id}`);
+      });
+    }
     if (created.tunnelId) await step(`delete tunnel ${created.tunnelId}`, () => api('DELETE', `/accounts/${cfg.accountId}/cfd_tunnel/${created.tunnelId}`));
     throw err;
   }
@@ -383,4 +467,4 @@ async function main() {
 
 if (require.main === module) main();
 
-module.exports = { parseArgs, readConfig, parseOriginService, buildIngress, mergeTunnelConfig, hostMatches, accessPolicyMatches, serviceTokenPolicyMatches, accessAppIsStrict, listAll, classifyDns, run, makeApi };
+module.exports = { parseArgs, readConfig, parseOriginService, buildIngress, mergeTunnelConfig, hostMatches, accessPolicyMatches, serviceTokenPolicyMatches, accessAppIsStrict, conflictingAccessApps, checkServiceToken, listAll, classifyDns, run, makeApi };

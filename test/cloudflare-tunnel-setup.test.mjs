@@ -4,7 +4,7 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const {
-  parseArgs, readConfig, buildIngress, mergeTunnelConfig, accessPolicyMatches, serviceTokenPolicyMatches, accessAppIsStrict, listAll, classifyDns, run,
+  parseArgs, readConfig, buildIngress, mergeTunnelConfig, accessPolicyMatches, serviceTokenPolicyMatches, accessAppIsStrict, conflictingAccessApps, checkServiceToken, listAll, classifyDns, run,
 } = require('../scripts/cloudflare-tunnel-setup.js');
 
 const BASE_ENV = {
@@ -17,9 +17,9 @@ const PUBLIC_ORIGIN_ENV = { ...BASE_ENV, CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID: '' }
 const ACCESS_ENV = { ...BASE_ENV, CF_ACCESS_HOSTNAME: 'admin.djjessejay.ch', CF_ACCESS_EMAILS: 'a@b.ch' };
 
 /** In-memory Cloudflare API double that records every call. */
-function fakeApi({ tunnels = [], config = {}, dns = {}, apps = [], policies = {}, failOn = null, zoneAccount = 'acc' } = {}) {
+function fakeApi({ tunnels = [], config = {}, dns = {}, apps = [], policies = {}, failOn = null, zoneAccount = 'acc', serviceToken = { id: '00000000-0000-4000-8000-000000000001' } } = {}) {
   const calls = [];
-  const state = { tunnels: [...tunnels], config: structuredClone(config), dns: structuredClone(dns), nextId: 1 };
+  const state = { tunnels: [...tunnels], config: structuredClone(config), dns: structuredClone(dns), apps: [...apps], nextId: 1 };
   const api = async (method, path, body) => {
     calls.push({ method, path, body });
     if (failOn && failOn(method, path)) throw new Error(`injected failure ${method} ${path}`);
@@ -30,15 +30,23 @@ function fakeApi({ tunnels = [], config = {}, dns = {}, apps = [], policies = {}
     if (method === 'PUT' && path.endsWith('/configurations')) { state.config = body.config; return {}; }
     if (method === 'GET' && path.startsWith('/zones/zone/dns_records?name=')) return state.dns[decodeURIComponent(path.split('=')[1])] || [];
     if (method === 'POST' && path === '/zones/zone/dns_records') { const r = { id: `dns${state.nextId++}`, ...body }; state.dns[body.name] = [r]; return r; }
+    if (method === 'GET' && path.startsWith('/accounts/acc/access/service_tokens/')) { if (!serviceToken) throw new Error('404 not found'); return serviceToken; }
+    if (method === 'DELETE' && path.startsWith('/zones/zone/dns_records/')) {
+      const id = path.split('/').pop();
+      for (const k of Object.keys(state.dns)) state.dns[k] = state.dns[k].filter((r) => r.id !== id);
+      return {};
+    }
+    if (method === 'DELETE' && path.startsWith('/accounts/acc/access/apps/')) { const id = path.split('/').pop(); state.apps = state.apps.filter((a) => a.id !== id); return {}; }
+    if (method === 'DELETE' && path.startsWith('/accounts/acc/cfd_tunnel/')) { const id = path.split('/').pop(); state.tunnels = state.tunnels.filter((t) => t.id !== id); return {}; }
     if (method === 'DELETE') return {};
     if (method === 'GET' && path.startsWith('/accounts/acc/access/apps?')) {
       const q = new URLSearchParams(path.split('?')[1]);
       const page = Number(q.get('page') || 1), per = Number(q.get('per_page') || 50);
-      const filtered = apps.filter((a) => !q.get('domain') || a.domain === q.get('domain'));
+      const filtered = state.apps.filter((a) => !q.get('domain') || a.domain === q.get('domain'));
       return filtered.slice((page - 1) * per, page * per);
     }
     if (method === 'GET' && path.endsWith('/policies')) return policies[path.split('/')[5]] || [];
-    if (method === 'POST' && path === '/accounts/acc/access/apps') return { id: `app${state.nextId++}`, ...body };
+    if (method === 'POST' && path === '/accounts/acc/access/apps') { const a = { id: `app${state.nextId++}`, ...body }; state.apps.push(a); return a; }
     if (method === 'POST' && path.endsWith('/policies')) return { id: 'pol1' };
     throw new Error(`unexpected ${method} ${path}`);
   };
@@ -285,7 +293,7 @@ test('an Access app on a later page is found, and one with overrides fails close
   apps.push({ id: 'appZ', type: 'self_hosted', domain: 'admin.djjessejay.ch', destinations: [{ type: 'public', uri: 'admin.djjessejay.ch/open' }] });
   const f = fakeApi({ apps, policies: { appZ: [{ decision: 'allow', include: [{ email: { email: 'a@b.ch' } }] }] } });
   await assert.rejects(run(readConfig(ACCESS_ENV, { access: true }), APPLY_ACCESS, f.api, quiet), /destination overrides/);
-  assert.ok(f.calls.some((c) => c.path.includes('access/apps?domain=admin.djjessejay.ch&exact=true')));
+  assert.ok(f.calls.some((c) => c.path.startsWith('/accounts/acc/access/apps?') && c.path.includes('page=2')));
   assert.deepEqual(mutations(f.calls), []);
 });
 
@@ -323,4 +331,86 @@ test('hostnames outside the zone are refused before any change', async () => {
   const cfg = readConfig({ ...BASE_ENV, CF_PUBLIC_HOSTNAME: 'origin.example.com' }, { access: false });
   await assert.rejects(run(cfg, APPLY, f.api, quiet), /not inside zone/);
   assert.deepEqual(mutations(f.calls), []);
+});
+
+test('accessAppIsStrict rejects destination overrides on an exact-host destination', () => {
+  const h = 'origin.djjessejay.ch';
+  assert.equal(accessAppIsStrict({ type: 'self_hosted', domain: h, destinations: [{ type: 'public', uri: h, overrides: [] }] }, h), true);
+  assert.equal(accessAppIsStrict({ type: 'self_hosted', domain: h, destinations: [{ type: 'public', uri: h, overrides: [{ path: '/public' }] }] }, h), false);
+  assert.equal(accessAppIsStrict({ type: 'self_hosted', domain: h, destinations: [{ type: 'public', uri: h, overrides: {} }] }, h), false);
+});
+
+test('conflictingAccessApps finds path apps and other exact-host apps, allows a wildcard root app', () => {
+  const h = 'origin.djjessejay.ch';
+  const apps = [
+    { id: 'root', domain: h },
+    { id: 'path', domain: `${h}/public` },
+    { id: 'dest', domain: 'x.djjessejay.ch', destinations: [{ type: 'public', uri: `https://${h}/open` }] },
+    { id: 'multi', domain: 'y.djjessejay.ch', self_hosted_domains: ['y.djjessejay.ch', h] },
+    { id: 'wild', domain: '*.djjessejay.ch' },
+    { id: 'wildpath', domain: '*.djjessejay.ch/admin' },
+    { id: 'other', domain: 'admin.djjessejay.ch/x' },
+  ];
+  assert.deepEqual(conflictingAccessApps(apps, h).map((a) => a.id), ['path', 'dest', 'multi', 'wildpath']);
+});
+
+test('a more specific path app on the hostname is refused before any change', async () => {
+  const f = fakeApi({ apps: [{ id: 'pub', name: 'public area', type: 'self_hosted', domain: 'origin.djjessejay.ch/public' }] });
+  await assert.rejects(run(readConfig(BASE_ENV, { access: false }), APPLY, f.api, quiet), /Other Access apps also cover origin\.djjessejay\.ch[\s\S]*public area/);
+  assert.deepEqual(mutations(f.calls), []);
+});
+
+test('a disabled, expired or unreadable service token is refused before any change', async () => {
+  for (const serviceToken of [{ id: TOKEN, enabled: false }, { id: TOKEN, expires_at: '2020-01-01T00:00:00Z' }, null]) {
+    const f = fakeApi({ serviceToken });
+    await assert.rejects(run(readConfig(BASE_ENV, { access: false }), APPLY, f.api, quiet), /disabled|expired|could not be read/);
+    assert.deepEqual(mutations(f.calls), []);
+  }
+  const ok = await checkServiceToken(async () => ({ id: TOKEN, expires_at: '2099-01-01T00:00:00Z' }), 'acc', TOKEN);
+  assert.equal(ok.expiresAt, '2099-01-01T00:00:00Z');
+});
+
+test('a tunnel whose create response was lost is found by name and deleted on rollback', async () => {
+  const f = fakeApi({ failOn: (m, p) => m === 'POST' && p === '/accounts/acc/access/apps' });
+  const api = async (m, p, b) => {
+    if (m === 'POST' && p === '/accounts/acc/cfd_tunnel') {
+      f.calls.push({ method: m, path: p, body: b });
+      f.state.tunnels.push({ id: 'ghost', name: b.name });
+      throw new Error('response lost');
+    }
+    return f.api(m, p, b);
+  };
+  await assert.rejects(run(readConfig(BASE_ENV, { access: false }), APPLY, api, quiet), /response lost/);
+  assert.ok(f.calls.some((c) => c.method === 'DELETE' && c.path === '/accounts/acc/cfd_tunnel/ghost'));
+  assert.equal(f.state.tunnels.length, 0);
+});
+
+test('an Access app whose create response was lost is reconciled on rollback', async () => {
+  const f = fakeApi();
+  const api = async (m, p, b) => {
+    if (m === 'POST' && p === '/accounts/acc/access/apps') {
+      f.calls.push({ method: m, path: p, body: b });
+      f.state.apps.push({ id: 'ghostapp', ...b });
+      throw new Error('response lost');
+    }
+    return f.api(m, p, b);
+  };
+  await assert.rejects(run(readConfig(BASE_ENV, { access: false }), APPLY, api, quiet), /response lost/);
+  assert.ok(f.calls.some((c) => c.method === 'DELETE' && c.path === '/accounts/acc/access/apps/ghostapp'));
+  assert.equal(f.state.apps.length, 0);
+});
+
+test('a DNS record whose rollback delete failed is retried during reconciliation', async () => {
+  let dnsPosts = 0, firstDelete = true;
+  const f = fakeApi({
+    failOn: (m, p) => {
+      if (m === 'POST' && p === '/zones/zone/dns_records') return ++dnsPosts === 2;
+      if (m === 'DELETE' && p.startsWith('/zones/zone/dns_records/') && firstDelete) { firstDelete = false; return true; }
+      return false;
+    },
+  });
+  await assert.rejects(run(readConfig(ACCESS_ENV, { access: true }), APPLY_ACCESS, f.api, quiet), /injected failure/);
+  const dnsDeletes = f.calls.filter((c) => c.method === 'DELETE' && c.path.startsWith('/zones/zone/dns_records/'));
+  assert.equal(dnsDeletes.length, 2, 'failed delete, then the reconciliation retry');
+  assert.equal(f.state.dns['origin.djjessejay.ch'].length, 0);
 });
