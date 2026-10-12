@@ -22,7 +22,7 @@ djjessejay.ch uses a **hybrid deployment model** combining GitHub Pages for stat
          ↓                                        ↓
    ┌─────────────┐                    ┌──────────────────────┐
    │ GitHub      │                    │  Custom Server       │
-   │ Pages       │                    │  185.101.158.113     │
+   │ Pages       │                    │  ORIGIN_IP     │
    │             │                    │                      │
    │ Static Site │                    │  Express.js API      │
    │ Hosting     │                    │  (WebSocket: planned)│
@@ -57,7 +57,7 @@ djjessejay.ch uses a **hybrid deployment model** combining GitHub Pages for stat
 
 **No longer used**: `deploy.sh` script (removed; static files no longer rsync'd to custom server)
 
-### 2. Custom Express.js Server (185.101.158.113) — API & WebSocket
+### 2. Custom Express.js Server (ORIGIN_IP) — API & WebSocket
 
 **Purpose**: Provides REST API endpoints.
 
@@ -82,7 +82,7 @@ djjessejay.ch uses a **hybrid deployment model** combining GitHub Pages for stat
 **Purpose**: Provides single entry point with intelligent path-based routing.
 
 **Behavior**:
-- `/api/*` → Routes to custom server (185.101.158.113)
+- `/api/*` → Routes to custom server (ORIGIN_IP)
 - `/ws` → WebSocket (currently returns 501 Not Implemented)
 - `/*` → Routes to GitHub Pages (marcelraschke.github.io)
 
@@ -136,7 +136,7 @@ Developer makes backend changes to server.js or API code
 Manual deployment to custom server
    (via SSH, git pull + npm restart, or other mechanism)
             ↓
-Available at 185.101.158.113
+Available at ORIGIN_IP
             ↓
 User requests /api/* or /ws → Cloudflare Worker routes to custom server
 ```
@@ -175,7 +175,7 @@ Deploy backend code via SSH (not automated by GitHub Actions):
 
 ```bash
 # SSH to server
-ssh user@185.101.158.113
+ssh user@ORIGIN_IP
 cd /path/to/app
 
 # Update code and dependencies
@@ -227,8 +227,8 @@ pm2 restart server.js
 
 ### API Endpoints Returning 404 or Timeout
 
-1. Check custom server is running (`ssh 185.101.158.113` and verify service)
-2. Test custom server directly (bypassing Cloudflare): `curl -k --resolve djjessejay.ch:443:185.101.158.113 https://djjessejay.ch/api/test`
+1. Check custom server is running (`ssh ORIGIN_IP` and verify service)
+2. Test custom server directly (bypassing Cloudflare): `curl -k --resolve djjessejay.ch:443:ORIGIN_IP https://djjessejay.ch/api/test`
 3. Check Cloudflare Worker analytics for routing errors
 4. Verify `/api/*` requests are reaching the custom server
 
@@ -252,7 +252,7 @@ pm2 restart server.js
 **If needed**:
 1. Add `ws` package import and HTTP upgrade handler to `server.js`
 2. Implement WebSocket server logic
-3. Test locally before deploying to `185.101.158.113`
+3. Test locally before deploying to `ORIGIN_IP`
 4. Then Worker routing `/ws` → custom server will function
 
 **Until implemented**: Remove `/ws` from Cloudflare Worker routing or return 501 Not Implemented.
@@ -265,7 +265,7 @@ If the hybrid GitHub Pages + Cloudflare Worker deployment fails and you need to 
 
 1. **DNS Revert** (Cloudflare Dashboard → DNS → Records)
    - Delete the CNAME record for `djjessejay.ch`
-   - Restore the original A record: `djjessejay.ch` → `185.101.158.113` (Proxied)
+   - Restore the original A record: `djjessejay.ch` → `ORIGIN_IP` (Proxied)
    - DNS propagation: ~10-30 minutes
 
 2. **Cloudflare Worker Disable**
@@ -274,7 +274,7 @@ If the hybrid GitHub Pages + Cloudflare Worker deployment fails and you need to 
    - Remove route binding: `djjessejay.ch/*`
 
 3. **Custom Server Verification**
-   - Ensure application is running on `185.101.158.113` (ports 80/443)
+   - Ensure application is running on `ORIGIN_IP` (ports 80/443)
    - Verify SSL certificate is valid
    - Test: `curl -k https://djjessejay.ch/` (should load the static site from custom server)
 

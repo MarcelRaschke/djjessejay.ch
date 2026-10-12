@@ -8,7 +8,7 @@ Dieses Dokument enthält ein Beispiel für einen Cloudflare Worker, der Anfragen
 
 ### Zusammenfassung
 - Ziel: Ein Worker, der `/api/*`-Requests an den Backend-Origin (`origin.djjessejay.ch`) weiterleitet und alle anderen Anfragen an GitHub Pages (`marcelraschke.github.io`) sendet.
-- Annahme: Der Origin-Host ist ein dedizierter DNS-only A-Record (z. B. origin.djjessejay.ch → 185.101.158.113) mit gültigem TLS-Zertifikat.
+- Annahme: Der Origin-Host ist ein dedizierter DNS-only A-Record (z. B. origin.djjessejay.ch → ORIGIN_IP) mit gültigem TLS-Zertifikat.
 
 ### Worker-Beispiel (JavaScript)
 

@@ -2,7 +2,7 @@
  * Cloudflare Worker: djjessejay-router
  *
  * Intelligent routing for hybrid deployment:
- * - API requests (/api/*) → Custom server (185.101.158.113)
+ * - API requests (/api/*) → Custom server (origin.djjessejay.ch)
  * - WebSocket (/ws) → Custom server (NOT YET IMPLEMENTED - returns 501)
  * - All other requests → GitHub Pages (marcelraschke.github.io)
  *
@@ -13,7 +13,7 @@
  * 4. Go to Routes and bind to domain: djjessejay.ch/* → djjessejay-router
  */
 
-const CUSTOM_SERVER = '185.101.158.113';
+const CUSTOM_SERVER = 'origin.djjessejay.ch'; // proxied hostname; origin IP is not stored in the repo
 const GITHUB_PAGES = 'marcelraschke.github.io';
 
 export default {
