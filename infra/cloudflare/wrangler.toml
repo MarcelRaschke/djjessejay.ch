@@ -21,4 +21,7 @@ ORIGIN_PREFIX = "/djjessejay.ch"
 # (`wrangler secret put API_ORIGIN_HOST`), holding the Express origin hostname
 # (e.g. origin.djjessejay.ch). Declaring it in [vars] makes every deploy
 # overwrite the secret. Unset -> /api/* returns 502 (see wdjjj.js).
+# ORIGIN_ACCESS_CLIENT_ID and ORIGIN_ACCESS_CLIENT_SECRET are Wrangler secrets as well:
+# the Access service token that origin.djjessejay.ch admits (ORIGIN-PROTECTION-DEPLOYMENT.md).
+# Missing -> /api/* returns 502.
 API_ORIGIN_SCHEME = "https"
