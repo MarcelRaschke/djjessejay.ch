@@ -4,7 +4,7 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const {
-  parseArgs, readConfig, buildIngress, mergeTunnelConfig, accessPolicyMatches, classifyDns, run,
+  parseArgs, readConfig, buildIngress, mergeTunnelConfig, accessPolicyMatches, accessAppIsStrict, listAll, classifyDns, run,
 } = require('../scripts/cloudflare-tunnel-setup.js');
 
 const BASE_ENV = {
@@ -28,7 +28,12 @@ function fakeApi({ tunnels = [], config = {}, dns = {}, apps = [], policies = {}
     if (method === 'GET' && path.startsWith('/zones/zone/dns_records?name=')) return state.dns[decodeURIComponent(path.split('=')[1])] || [];
     if (method === 'POST' && path === '/zones/zone/dns_records') { const r = { id: `dns${state.nextId++}`, ...body }; state.dns[body.name] = [r]; return r; }
     if (method === 'DELETE') return {};
-    if (method === 'GET' && path === '/accounts/acc/access/apps') return apps;
+    if (method === 'GET' && path.startsWith('/accounts/acc/access/apps?')) {
+      const q = new URLSearchParams(path.split('?')[1]);
+      const page = Number(q.get('page') || 1), per = Number(q.get('per_page') || 50);
+      const filtered = apps.filter((a) => !q.get('domain') || a.domain === q.get('domain'));
+      return filtered.slice((page - 1) * per, page * per);
+    }
     if (method === 'GET' && path.endsWith('/policies')) return policies[path.split('/')[4]] || [];
     if (method === 'POST' && path === '/accounts/acc/access/apps') return { id: 'app1', ...body };
     if (method === 'POST' && path.endsWith('/policies')) return { id: 'pol1' };
@@ -75,23 +80,47 @@ test('ingress ends with the http_status:404 catch-all', () => {
   assert.equal(ing[0].hostname, 'origin.djjessejay.ch');
 });
 
-test('mergeTunnelConfig keeps originRequest and foreign hostnames', () => {
+test('mergeTunnelConfig keeps originRequest, foreign and path-only rules, and rule precedence', () => {
   const existing = {
     originRequest: { connectTimeout: 10, caPool: '/etc/ca.pem' },
     ingress: [
-      { hostname: 'other.djjessejay.ch', service: 'http://127.0.0.1:8080' },
       { hostname: 'origin.djjessejay.ch', service: 'http://old:1' },
+      { hostname: '*.djjessejay.ch', service: 'http://127.0.0.1:9000' },
+      { path: '^/metrics$', service: 'http://127.0.0.1:2000' },
+      { hostname: 'origin.djjessejay.ch', path: '^/ws', service: 'ws://127.0.0.1:3001' },
       { service: 'http_status:404' },
     ],
   };
   const merged = mergeTunnelConfig(existing, ['origin.djjessejay.ch'], 'http://127.0.0.1:3000');
   assert.deepEqual(merged.originRequest, existing.originRequest);
   assert.deepEqual(merged.ingress, [
-    { hostname: 'other.djjessejay.ch', service: 'http://127.0.0.1:8080' },
     { hostname: 'origin.djjessejay.ch', service: 'http://127.0.0.1:3000' },
+    { hostname: '*.djjessejay.ch', service: 'http://127.0.0.1:9000' },
+    { path: '^/metrics$', service: 'http://127.0.0.1:2000' },
+    { hostname: 'origin.djjessejay.ch', path: '^/ws', service: 'ws://127.0.0.1:3001' },
     { service: 'http_status:404' },
   ]);
-  assert.equal(existing.ingress[1].service, 'http://old:1', 'input is not mutated');
+  assert.equal(existing.ingress[0].service, 'http://old:1', 'input is not mutated');
+});
+
+test('mergeTunnelConfig adds a missing rule before the catch-all', () => {
+  const merged = mergeTunnelConfig({ ingress: [{ hostname: 'other.djjessejay.ch', service: 'http://x:1' }, { service: 'http_status:404' }] }, ['origin.djjessejay.ch'], 'http://127.0.0.1:3000');
+  assert.deepEqual(merged.ingress.map((r) => r.hostname || 'catch-all'), ['other.djjessejay.ch', 'origin.djjessejay.ch', 'catch-all']);
+});
+
+test('accessAppIsStrict rejects other types, extra domains and destination overrides', () => {
+  const h = 'admin.djjessejay.ch';
+  assert.equal(accessAppIsStrict({ type: 'self_hosted', domain: h }, h), true);
+  assert.equal(accessAppIsStrict({ type: 'self_hosted', domain: h, destinations: [{ type: 'public', uri: h }] }, h), true);
+  assert.equal(accessAppIsStrict({ type: 'bookmark', domain: h }, h), false);
+  assert.equal(accessAppIsStrict({ type: 'self_hosted', domain: h, self_hosted_domains: [h, 'x.djjessejay.ch'] }, h), false);
+  assert.equal(accessAppIsStrict({ type: 'self_hosted', domain: h, destinations: [{ type: 'public', uri: `${h}/public` }] }, h), false);
+});
+
+test('listAll follows pagination', async () => {
+  const data = Array.from({ length: 120 }, (_, i) => i);
+  const api = async (m, p) => { const q = new URLSearchParams(p.split('?')[1]); const page = +q.get('page'), per = +q.get('per_page'); return data.slice((page - 1) * per, page * per); };
+  assert.equal((await listAll(api, '/x?a=1', 50)).length, 120);
 });
 
 test('accessPolicyMatches accepts only one exact allow policy', () => {
@@ -154,15 +183,24 @@ test('existing DNS records are never overwritten and nothing is mutated', async 
 test('an existing Access app with a different policy fails closed before any change', async () => {
   const f = fakeApi({
     tunnels: [{ id: 'old', remote_config: true }],
-    apps: [{ id: 'appX', domain: 'admin.djjessejay.ch' }],
+    apps: [{ id: 'appX', type: 'self_hosted', domain: 'admin.djjessejay.ch' }],
     policies: { appX: [{ decision: 'bypass', include: [{ everyone: {} }] }] },
   });
   await assert.rejects(run(readConfig(ACCESS_ENV, { access: true }), APPLY_ACCESS, f.api, quiet), /do not match CF_ACCESS_EMAILS/);
   assert.deepEqual(mutations(f.calls), []);
 });
 
+test('an Access app on a later page is found, and one with overrides fails closed', async () => {
+  const apps = Array.from({ length: 60 }, (_, i) => ({ id: `f${i}`, type: 'self_hosted', domain: `f${i}.djjessejay.ch` }));
+  apps.push({ id: 'appZ', type: 'self_hosted', domain: 'admin.djjessejay.ch', destinations: [{ type: 'public', uri: 'admin.djjessejay.ch/open' }] });
+  const f = fakeApi({ apps, policies: { appZ: [{ decision: 'allow', include: [{ email: { email: 'a@b.ch' } }] }] } });
+  await assert.rejects(run(readConfig(ACCESS_ENV, { access: true }), APPLY_ACCESS, f.api, quiet), /destination overrides/);
+  assert.ok(f.calls.some((c) => c.path.includes('access/apps?domain=admin.djjessejay.ch&exact=true')));
+  assert.deepEqual(mutations(f.calls), []);
+});
+
 test('an existing Access app without policies (half-created) fails closed', async () => {
-  const f = fakeApi({ apps: [{ id: 'appY', domain: 'admin.djjessejay.ch' }], policies: { appY: [] } });
+  const f = fakeApi({ apps: [{ id: 'appY', type: 'self_hosted', domain: 'admin.djjessejay.ch' }], policies: { appY: [] } });
   await assert.rejects(run(readConfig(ACCESS_ENV, { access: true }), APPLY_ACCESS, f.api, quiet), /do not match/);
   assert.deepEqual(mutations(f.calls), []);
 });

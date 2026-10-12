@@ -120,15 +120,53 @@ function buildIngress(hostnames, service) {
 
 /**
  * Merges our hostnames into an existing remote tunnel config. Keeps every other key
- * (originRequest, warp-routing, ...) and every rule for other hostnames, replaces the
- * rules for our hostnames and ends with exactly one http_status:404 catch-all.
+ * (originRequest, warp-routing, ...) and every rule that is not ours, including
+ * path-only rules. Our host-only rule is replaced in place so it keeps its precedence;
+ * missing ones are added before the single http_status:404 catch-all at the end.
  */
 function mergeTunnelConfig(existing, hostnames, service) {
   const base = existing && typeof existing === 'object' ? JSON.parse(JSON.stringify(existing)) : {};
-  const ours = new Set(hostnames);
-  const kept = (Array.isArray(base.ingress) ? base.ingress : []).filter((r) => r && r.hostname && !ours.has(r.hostname));
-  base.ingress = [...kept, ...buildIngress(hostnames, service)];
+  const rules = Array.isArray(base.ingress) ? base.ingress : [];
+  const isCatchAll = (r) => r && !r.hostname && !r.path;
+  const isOurs = (r) => r && hostnames.includes(r.hostname) && !r.path;
+  const placed = new Set();
+  const out = [];
+  for (const r of rules) {
+    if (isCatchAll(r)) continue;
+    if (isOurs(r)) {
+      if (placed.has(r.hostname)) continue; // drop duplicates of our rule
+      placed.add(r.hostname);
+      out.push({ ...r, service });
+      continue;
+    }
+    out.push(r);
+  }
+  for (const h of hostnames) if (!placed.has(h)) out.push({ hostname: h, service });
+  out.push({ service: 'http_status:404' });
+  base.ingress = out;
   return base;
+}
+
+/** An existing Access app may only be reused if it protects exactly this hostname, without overrides. */
+function accessAppIsStrict(app, hostname) {
+  if (!app || app.type !== 'self_hosted') return false;
+  if (app.domain !== hostname) return false;
+  const doms = Array.isArray(app.self_hosted_domains) ? app.self_hosted_domains : [];
+  if (doms.some((d) => d !== hostname)) return false;
+  const dests = Array.isArray(app.destinations) ? app.destinations : [];
+  if (dests.some((d) => d.type !== 'public' || d.uri !== hostname)) return false;
+  return true;
+}
+
+/** Reads every page of a paginated list endpoint (path must already contain a query string). */
+async function listAll(api, path, perPage = 50) {
+  const all = [];
+  for (let page = 1; page <= 100; page++) {
+    const items = await api('GET', `${path}&per_page=${perPage}&page=${page}`);
+    all.push(...items);
+    if (items.length < perPage) return all;
+  }
+  throw new Error(`${path}: more than 100 pages, refusing to continue`);
 }
 
 /** True when an Access app's policies are exactly one allow policy for exactly these e-mails. */
@@ -191,8 +229,13 @@ async function run(cfg, flags, api, log = console.log) {
 
   let createAccess = false;
   if (cfg.access) {
-    const apps = await api('GET', `/accounts/${cfg.accountId}/access/apps`);
-    const app = apps.find((a) => a.domain === cfg.access.hostname);
+    const apps = await listAll(api, `/accounts/${cfg.accountId}/access/apps?domain=${encodeURIComponent(cfg.access.hostname)}&exact=true`);
+    const matching = apps.filter((a) => a.domain === cfg.access.hostname);
+    if (matching.length > 1) throw new Error(`Found ${matching.length} Access apps for ${cfg.access.hostname}; resolve the duplicates first`);
+    const app = matching[0];
+    if (app && !accessAppIsStrict(app, cfg.access.hostname)) {
+      throw new Error(`Access app for ${cfg.access.hostname} has another type, extra domains or destination overrides; fix it in the dashboard first`);
+    }
     if (app) {
       const policies = await api('GET', `/accounts/${cfg.accountId}/access/apps/${app.id}/policies`);
       if (!accessPolicyMatches(policies, cfg.access.emails)) {
@@ -275,4 +318,4 @@ async function main() {
 
 if (require.main === module) main();
 
-module.exports = { parseArgs, readConfig, parseOriginService, buildIngress, mergeTunnelConfig, accessPolicyMatches, classifyDns, run, makeApi };
+module.exports = { parseArgs, readConfig, parseOriginService, buildIngress, mergeTunnelConfig, accessPolicyMatches, accessAppIsStrict, listAll, classifyDns, run, makeApi };
