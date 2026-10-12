@@ -12,7 +12,9 @@
  * 3. Save and Deploy
  * 4. Settings → Variables and Secrets → add two secrets (type "Secret"):
  *      ORIGIN_ACCESS_CLIENT_ID, ORIGIN_ACCESS_CLIENT_SECRET
- *    (the Access service token admitted by origin.djjessejay.ch), or via CLI:
+ *    (Client ID/Secret of the Access service token admitted by origin.djjessejay.ch;
+ *    issuing the token and its non_identity policy: docs/DEPLOYMENT.md step 5,
+ *    requires PR #162), or via CLI:
  *      npx wrangler secret put ORIGIN_ACCESS_CLIENT_ID --name djjessejay-router
  *      npx wrangler secret put ORIGIN_ACCESS_CLIENT_SECRET --name djjessejay-router
  *    Without them every /api/* request answers 502.

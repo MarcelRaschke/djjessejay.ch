@@ -95,12 +95,21 @@ djjessejay.ch uses a **hybrid deployment model** combining GitHub Pages for stat
 2. Copy code from `docs/cloudflare-worker-router.js`
 3. Name the worker: `djjessejay-router`
 4. Save and Deploy
-5. Settings → Variables and Secrets: add the secrets `ORIGIN_ACCESS_CLIENT_ID` and
-   `ORIGIN_ACCESS_CLIENT_SECRET` (type Secret, the Access service token from
-   `ORIGIN-PROTECTION-DEPLOYMENT.md`). CLI alternative:
+5. Issue the service token and admit only it on the origin. Requires the
+   service-token provisioning from PR #162 (`scripts/cloudflare-tunnel-setup.js`);
+   do not run these steps before #162 is merged.
+   - Zero Trust → Access → Service credentials → Service Tokens → Create.
+     Client ID and Client Secret are shown once; store them in a password manager.
+   - Run `scripts/cloudflare-tunnel-setup.js` with `CF_PUBLIC_HOSTNAME=origin.djjessejay.ch`
+     and `CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID=<token id>` (the token's ID, not the Client ID).
+     It creates the Access app for `origin.djjessejay.ch` with one `non_identity`
+     policy that includes only this token. Plan first, then `--apply`.
+6. Settings → Variables and Secrets: add the secrets `ORIGIN_ACCESS_CLIENT_ID` and
+   `ORIGIN_ACCESS_CLIENT_SECRET` (type Secret, the Client ID and Client Secret from step 5). CLI alternative:
    `npx wrangler secret put ORIGIN_ACCESS_CLIENT_ID --name djjessejay-router` (same for the secret).
-6. Verify: `/api/health` on the Worker must not return 502 "API origin credentials not configured".
-7. Only then go to Routes and bind: `djjessejay.ch/*` → `djjessejay-router` (Cloudflare Worker)
+7. Verify: `/api/health` on the Worker must not return 502 "API origin credentials not configured"
+   and must not return an Access 403 (token not admitted).
+8. Only then go to Routes and bind: `djjessejay.ch/*` → `djjessejay-router` (Cloudflare Worker)
 
 **Advantages**:
 - Single domain (`djjessejay.ch`) for all functionality
