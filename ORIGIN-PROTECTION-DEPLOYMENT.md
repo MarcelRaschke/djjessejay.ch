@@ -33,7 +33,7 @@ This feature establishes a fail-closed deployment gate for a Cloudflare Tunnel b
 CLOUDFLARE_API_TOKEN
 CLOUDFLARE_ACCOUNT_ID
 CLOUDFLARE_ZONE_ID
-CF_PUBLIC_HOSTNAME
+CF_PUBLIC_HOSTNAME           # tunnel hostname; for this site: origin.djjessejay.ch
 CF_TUNNEL_ID                 # verifier only
 CF_ORIGIN_PUBLIC_IP          # verifier: known origin IP, required for OP-05
 CF_ORIGIN_SERVICE            # setup, default http://127.0.0.1:3000
@@ -53,6 +53,11 @@ node scripts/cloudflare-tunnel-setup.js
 ```
 
 The default mode makes no Cloudflare changes.
+
+For djjessejay.ch the tunnel carries only the Express backend. The public site
+stays behind the `wdjjj` Worker, which reaches the backend through the Worker
+secret `API_ORIGIN_HOST=origin.djjessejay.ch`. Never use the apex or `www` as
+`CF_PUBLIC_HOSTNAME`; the script refuses to overwrite their existing records.
 
 ### 2. Apply
 
