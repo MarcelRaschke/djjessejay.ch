@@ -265,30 +265,38 @@ If the hybrid GitHub Pages + Cloudflare Worker deployment fails and you need to 
 
 ### Rollback Steps
 
-1. **DNS Revert** (Cloudflare Dashboard → DNS → Records)
+Prepare and verify the origin first. DNS and the Worker change only after the
+origin answers correctly, otherwise the site returns 404 during the switch.
+
+1. **Prepare the origin** (static serving is off by default)
+   - systemd: uncomment `Environment=SERVE_STATIC=1` in `djjessejay.service`, then
+     `sudo systemctl daemon-reload && sudo systemctl restart djjessejay`.
+   - PM2: `SERVE_STATIC=1 pm2 restart djjessejay --update-env`.
+   - Only the public site allowlist in `server.js` is served, never repository internals.
+   - Ensure the application listens on ports 80/443 and the SSL certificate is valid.
+
+2. **Verify the origin before switching traffic**
+   - `curl -k --resolve djjessejay.ch:443:<ORIGIN_IP> https://djjessejay.ch/` must return the site (200),
+     `.../server.js` and `.../.env` must return 404.
+   - Do not continue until this check passes.
+
+3. **DNS Revert** (Cloudflare Dashboard → DNS → Records)
    - Delete the CNAME record for `djjessejay.ch`
-   - Restore the original A record: `djjessejay.ch` → `185.101.158.113` (Proxied)
+   - Restore the A record: `djjessejay.ch` → `<ORIGIN_IP>` (Proxied)
    - DNS propagation: ~10-30 minutes
 
-2. **Cloudflare Worker Disable**
+4. **Cloudflare Worker Disable**
    - Cloudflare Dashboard → Workers & Pages
    - Delete or disable the `djjessejay-router` Worker
    - Remove route binding: `djjessejay.ch/*`
+   - Test: `curl -I https://djjessejay.ch/` (should be served by the custom server)
 
-3. **Custom Server Verification**
-   - Before switching DNS: enable static serving on the origin, which is off by default.
-     systemd: uncomment `Environment=SERVE_STATIC=1` in `djjessejay.service`, then
-     `sudo systemctl daemon-reload && sudo systemctl restart djjessejay`.
-     PM2: `SERVE_STATIC=1 pm2 restart djjessejay --update-env`.
-     Only the public site allowlist in `server.js` is served, never repository internals.
-   - Ensure application is running on `185.101.158.113` (ports 80/443)
-   - Verify SSL certificate is valid
-   - Test: `curl -k https://djjessejay.ch/` (should load the static site from custom server)
-
-4. **GitHub Pages Disable** (optional)
+5. **GitHub Pages Disable** (optional)
    - Repository → Settings → Pages
    - Disable GitHub Pages
    - This prevents confusion if DNS resolves to both sources
+
+`<ORIGIN_IP>` is the origin server address, kept out of the repository.
 
 ### Rollback Timing
 - Full rollback should be complete within 30-45 minutes (DNS propagation + verification)
