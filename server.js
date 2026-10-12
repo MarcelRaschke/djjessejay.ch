@@ -77,7 +77,14 @@ app.use('/api/djjj-survey', djjjSurveyRouter);
 const SERVE_STATIC = process.env.SERVE_STATIC === '1';
 const STATIC_DENY = /^\/(?:server\.js|package(?:-lock)?\.json|scripts|infra|contracts|honeypot|policy|triage|test|tests|routes|src|patches|render-farm|workers|provenance|release|node_modules)(?:\/|$)|\.(?:md|ts|mjs|cjs|sh|py|yml|yaml|sql|env|pem|key|log)$/i;
 if (SERVE_STATIC) {
-  app.use((req, res, next) => (STATIC_DENY.test(req.path) ? res.status(404).end() : next()));
+  // Check the decoded, normalised path: express.static decodes before resolving, so a
+  // percent-encoded name (/%73erver.js) must not slip past the deny list.
+  app.use((req, res, next) => {
+    let decoded;
+    try { decoded = decodeURIComponent(req.path); } catch { return res.status(400).end(); }
+    const normalised = path.posix.normalize(decoded.replace(/\\/g, '/'));
+    return STATIC_DENY.test(normalised) ? res.status(404).end() : next();
+  });
   app.use(express.static(__dirname, { dotfiles: 'ignore', index: false }));
 }
 
