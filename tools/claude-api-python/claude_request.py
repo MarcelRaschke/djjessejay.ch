@@ -50,6 +50,10 @@ def ask(
         raise RuntimeError(
             "Antwort abgeschnitten: max_tokens erhöhen oder streamen"
         )
+    if response.stop_reason == "model_context_window_exceeded":
+        raise RuntimeError(
+            "Antwort abgeschnitten: Kontextfenster des Modells ausgeschöpft"
+        )
 
     # Inhaltsblöcke können thinking und tool_use enthalten,
     # nur text-Blöcke zählen hier.
@@ -70,7 +74,7 @@ def main() -> int:
     except anthropic.RateLimitError as e:
         log.error(
             "Rate limit (request-id %s), retry-after: %s",
-            e._request_id,
+            e.request_id,
             e.response.headers.get("retry-after", "unbekannt"),
         )
         return 1
@@ -79,7 +83,7 @@ def main() -> int:
         log.error(
             "API-Fehler %s (request-id %s): %s",
             e.status_code,
-            e._request_id,
+            e.request_id,
             e.message,
         )
         return 1

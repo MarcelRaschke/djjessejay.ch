@@ -68,6 +68,16 @@ class AskTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "abgeschnitten"):
             ask(client, "x")
 
+    def test_context_window_exceeded_raises(self):
+        client = FakeClient(
+            response(
+                [text("halb")],
+                stop_reason="model_context_window_exceeded",
+            )
+        )
+        with self.assertRaisesRegex(RuntimeError, "Kontextfenster"):
+            ask(client, "x")
+
 
 if __name__ == "__main__":
     unittest.main()
