@@ -95,7 +95,12 @@ djjessejay.ch uses a **hybrid deployment model** combining GitHub Pages for stat
 2. Copy code from `docs/cloudflare-worker-router.js`
 3. Name the worker: `djjessejay-router`
 4. Save and Deploy
-5. Go to Routes and bind: `djjessejay.ch/*` → `djjessejay-router` (Cloudflare Worker)
+5. Settings → Variables and Secrets: add the secrets `ORIGIN_ACCESS_CLIENT_ID` and
+   `ORIGIN_ACCESS_CLIENT_SECRET` (type Secret, the Access service token from
+   `ORIGIN-PROTECTION-DEPLOYMENT.md`). CLI alternative:
+   `npx wrangler secret put ORIGIN_ACCESS_CLIENT_ID --name djjessejay-router` (same for the secret).
+6. Verify: `/api/health` on the Worker must not return 502 "API origin credentials not configured".
+7. Only then go to Routes and bind: `djjessejay.ch/*` → `djjessejay-router` (Cloudflare Worker)
 
 **Advantages**:
 - Single domain (`djjessejay.ch`) for all functionality

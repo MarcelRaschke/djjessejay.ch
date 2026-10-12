@@ -10,7 +10,15 @@
  * 1. Copy this code into Cloudflare dashboard → Workers & Pages → Create → Copy Paste
  * 2. Name the worker: djjessejay-router
  * 3. Save and Deploy
- * 4. Go to Routes and bind to domain: djjessejay.ch/* → djjessejay-router
+ * 4. Settings → Variables and Secrets → add two secrets (type "Secret"):
+ *      ORIGIN_ACCESS_CLIENT_ID, ORIGIN_ACCESS_CLIENT_SECRET
+ *    (the Access service token admitted by origin.djjessejay.ch), or via CLI:
+ *      npx wrangler secret put ORIGIN_ACCESS_CLIENT_ID --name djjessejay-router
+ *      npx wrangler secret put ORIGIN_ACCESS_CLIENT_SECRET --name djjessejay-router
+ *    Without them every /api/* request answers 502.
+ * 5. Verify before binding the route: the worker's /api/health must not return
+ *    502 "API origin credentials not configured".
+ * 6. Go to Routes and bind to domain: djjessejay.ch/* → djjessejay-router
  */
 
 const CUSTOM_SERVER = 'origin.djjessejay.ch'; // proxied hostname; origin IP is not stored in the repo
@@ -44,6 +52,10 @@ async function routeToCustomServer(request, url, env) {
   if (!env.ORIGIN_ACCESS_CLIENT_ID || !env.ORIGIN_ACCESS_CLIENT_SECRET) {
     return new Response('API origin credentials not configured', { status: 502 });
   }
+  // Always HTTPS to the origin: the Access secret must never travel over plaintext,
+  // and Always Use HTTPS does not apply to Worker subrequests within the zone.
+  url.protocol = 'https:';
+  url.port = '';
   url.hostname = CUSTOM_SERVER;
   const headers = new Headers(request.headers);
   for (const name of ['cf-access-client-id', 'cf-access-client-secret', 'cf-access-jwt-assertion', 'cf-access-token']) headers.delete(name);
