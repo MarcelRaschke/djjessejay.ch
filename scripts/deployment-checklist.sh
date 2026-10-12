@@ -6,9 +6,9 @@ failed=0; passed=0
 check() {
   printf "%-50s" "Checking: $1... "
   if eval "$2" > /dev/null 2>&1; then
-    echo -e "${GREEN}✅${NC}"; ((passed++))
+    echo -e "${GREEN}✅${NC}"; passed=$((passed + 1))
   else
-    echo -e "${RED}❌${NC}"; ((failed++))
+    echo -e "${RED}❌${NC}"; failed=$((failed + 1))
   fi
 }
 check "CLOUDFLARE_API_TOKEN set" "[[ -n \$CLOUDFLARE_API_TOKEN ]]"
