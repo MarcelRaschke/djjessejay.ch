@@ -67,7 +67,7 @@ async function handleRequest(request) {
 ```
 
 ### Betriebs- und Sicherheits-Hinweise
-- Origin-Hostname: `origin.djjessejay.ch` wird über `scripts/cloudflare-tunnel-setup.js --apply` als proxied CNAME auf den Tunnel angelegt. Ohne Tunnel: proxied A-Record auf ORIGIN_IP plus Cloudflare-Origin-CA-Zertifikat und SSL-Modus Full (strict). Nie DNS-only.
+- Origin-Hostname: `origin.djjessejay.ch` wird als proxied CNAME auf den Tunnel angelegt, gemäss `ORIGIN-PROTECTION-DEPLOYMENT.md`. Das Setup-Skript `scripts/cloudflare-tunnel-setup.js` erst ausführen, wenn es den Vertrag erfüllt (PR #162: Plan-Modus, `--apply`, DNS-Route, keine Access-App auf der öffentlichen Domain, kein Token-Output). Ältere Fassungen nicht ausführen. Ohne Tunnel: proxied A-Record auf ORIGIN_IP plus Cloudflare-Origin-CA-Zertifikat und SSL-Modus Full (strict). Nie DNS-only.
 - DNS für djjessejay.ch: Belasse die öffentliche Domain proxied (Cloudflare orange cloud) und verwende CNAME-Flattening falls nötig. Dokumentiere CNAME-Flattening-Verhalten in DNS_CONFIG.md.
 - Firewall: Beschränke direkte Zugriffe auf die Origin-IP auf Cloudflare-IP-Ranges (oder auf interne Worker/Cloudflare-Quellen). Verhindere direkten, öffentlichen Zugriff, wenn gewünscht.
 - WebSocket: Cloudflare Worker -> fetch() proxyt keine generischen WebSocket-Upgrades. Empfohlene Optionen:
