@@ -2,8 +2,9 @@
 # Canonical GitHub Pages project site for this repository.
 name = "wdjjj"
 main = "wdjjj.js"
-compatibility_date = "2026-09-01"
+compatibility_date = "2026-10-01"
 workers_dev = false
+preview_urls = false
 
 routes = [
   { pattern = "djjessejay.ch/*",     zone_name = "djjessejay.ch" },
@@ -16,8 +17,8 @@ enabled = true
 [vars]
 ORIGIN_HOST = "marcelraschke.github.io"
 ORIGIN_PREFIX = "/djjessejay.ch"
-# API backend origin for /api/* routing. Set API_ORIGIN_HOST to the Express
-# server host (e.g. origin.djjessejay.ch) via Wrangler secret or dashboard.
-# Leave empty to disable API routing (returns 502 for /api/*).
-API_ORIGIN_HOST = ""
+# API_ORIGIN_HOST is intentionally NOT declared here. It is a Wrangler secret
+# (`wrangler secret put API_ORIGIN_HOST`), holding the Express origin hostname
+# (e.g. origin.djjessejay.ch). Declaring it in [vars] makes every deploy
+# overwrite the secret. Unset -> /api/* returns 502 (see wdjjj.js).
 API_ORIGIN_SCHEME = "https"
