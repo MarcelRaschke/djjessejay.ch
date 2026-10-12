@@ -111,6 +111,23 @@ test('mergeTunnelConfig adds a missing rule before the catch-all', () => {
   assert.deepEqual(merged.ingress.map((r) => r.hostname || 'catch-all'), ['other.djjessejay.ch', 'origin.djjessejay.ch', 'catch-all']);
 });
 
+test('a DNS record whose create response was lost is still removed on rollback', async () => {
+  const f = fakeApi();
+  // Cloudflare creates the record, but the response never arrives.
+  const realApi = f.api;
+  const api = async (m, p, b) => {
+    if (m === 'POST' && p === '/zones/zone/dns_records') {
+      f.state.dns[b.name] = [{ id: 'lost1', ...b }];
+      f.calls.push({ method: m, path: p, body: b });
+      throw new Error('response lost');
+    }
+    return realApi(m, p, b);
+  };
+  await assert.rejects(run(readConfig(BASE_ENV, { access: false }), APPLY, api, quiet), /response lost/);
+  assert.ok(f.calls.some((c) => c.method === 'DELETE' && c.path === '/zones/zone/dns_records/lost1'));
+  assert.ok(f.calls.some((c) => c.method === 'DELETE' && c.path === '/accounts/acc/cfd_tunnel/tun1'));
+});
+
 test('a missing exact rule is inserted before a shadowing wildcard', () => {
   const merged = mergeTunnelConfig({ ingress: [
     { path: '^/metrics$', service: 'http://127.0.0.1:2000' },

@@ -312,7 +312,7 @@ async function run(cfg, flags, api, log = console.log) {
   }
 
   // Phase 2: mutate, with rollback of everything this run changed.
-  const created = { dns: [], tunnelId: null, accessAppIds: [], configChanged: false };
+  const created = { dns: [], dnsAttempted: [], tunnelId: null, accessAppIds: [], configChanged: false };
   let tunnelId = reused && reused.id;
   try {
     if (!tunnelId) {
@@ -334,6 +334,7 @@ async function run(cfg, flags, api, log = console.log) {
     log('  ingress: updated');
     const cname = `${tunnelId}.cfargotunnel.com`;
     for (const name of dnsToCreate) {
+      created.dnsAttempted.push({ name, content: cname }); // before the POST: a lost response must still be reconciled
       const rec = await api('POST', `/zones/${cfg.zoneId}/dns_records`, { type: 'CNAME', name, content: cname, proxied: true, comment: `tunnel ${cfg.tunnelName}` });
       created.dns.push(rec.id);
       log(`  dns ${name}: created proxied CNAME`);
@@ -342,6 +343,16 @@ async function run(cfg, flags, api, log = console.log) {
     log('  rolling back changes made by this run');
     const step = async (label, fn) => { try { await fn(); log(`    ${label}: done`); } catch (e) { log(`    ${label}: FAILED (${e.message})`); } };
     for (const id of created.dns) await step(`delete dns record ${id}`, () => api('DELETE', `/zones/${cfg.zoneId}/dns_records/${id}`));
+    // A create whose response was lost has no id: these hostnames had no record in phase 1,
+    // so any CNAME now pointing at this tunnel was created by this run and is removed.
+    for (const { name, content } of created.dnsAttempted) {
+      await step(`reconcile dns ${name}`, async () => {
+        const recs = await api('GET', `/zones/${cfg.zoneId}/dns_records?name=${encodeURIComponent(name)}`);
+        for (const r of recs) {
+          if (r.type === 'CNAME' && r.content === content && !created.dns.includes(r.id)) await api('DELETE', `/zones/${cfg.zoneId}/dns_records/${r.id}`);
+        }
+      });
+    }
     if (created.configChanged && snapshot) await step('restore previous tunnel configuration', () => api('PUT', `/accounts/${cfg.accountId}/cfd_tunnel/${tunnelId}/configurations`, { config: snapshot }));
     for (const id of created.accessAppIds) await step(`delete access app ${id}`, () => api('DELETE', `/accounts/${cfg.accountId}/access/apps/${id}`));
     if (created.tunnelId) await step(`delete tunnel ${created.tunnelId}`, () => api('DELETE', `/accounts/${cfg.accountId}/cfd_tunnel/${created.tunnelId}`));

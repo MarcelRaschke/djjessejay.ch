@@ -72,7 +72,12 @@ and protects `CF_PUBLIC_HOSTNAME` with an Access app whose only policy is
 2. Store both values as Worker secrets (never in `wrangler.toml`):
    `npx wrangler secret put ORIGIN_ACCESS_CLIENT_ID` and
    `npx wrangler secret put ORIGIN_ACCESS_CLIENT_SECRET`.
-3. Run the setup with `CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID=<token id>`.
+3. Make sure the deployed `wdjjj` Worker forwards the token (`cf-access-client-id` /
+   `cf-access-client-secret` on `/api` subrequests; PR #160). Until that Worker is live,
+   applying the service-token-only policy makes every `/api` request fail at Access.
+4. Run the setup with `CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID=<token id>`.
+5. Store the token ID as repository variable `CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID` so the
+   deployment checklist can verify it.
 
 `--allow-public-origin` skips this protection and is meant for tests only.
 
