@@ -84,7 +84,10 @@ const PUBLIC_DIRS = new Set(['css', 'js', 'assets', 'survey', 'pressekit', 'pres
 const BLOCKED_EXT = /\.(?:sql|env|pem|key|log|jsonl|sh|py|ts|md|ya?ml|lock)$/i;
 const staticFiles = express.static(__dirname, { dotfiles: 'ignore', index: ['index.html'], redirect: false });
 
-/** Returns 'serve', 'deny' or 'pass' (not a file request: let the SPA fallback answer). */
+/**
+ * Returns 'serve', 'deny', 'bad', 'pass' (not a file request: let the SPA fallback answer)
+ * or { redirect } for an allowlisted directory requested without its trailing slash.
+ */
 function classifyStaticPath(rawPath) {
   let decoded;
   try { decoded = decodeURIComponent(rawPath); } catch { return 'bad'; }
@@ -95,6 +98,8 @@ function classifyStaticPath(rawPath) {
   const top = rel.split('/')[0];
   if (PUBLIC_FILES.has(rel)) return 'serve';
   if (PUBLIC_DIRS.has(top) && rel.length > top.length) return 'serve';
+  // "/survey" -> "/survey/" (built from the allowlisted name, so "//survey" cannot become an off-site redirect).
+  if (PUBLIC_DIRS.has(rel)) return { redirect: `/${rel}/` };
   const last = rel.split('/').pop();
   return last.includes('.') ? 'deny' : 'pass';
 }
@@ -107,6 +112,10 @@ if (SERVE_STATIC) {
     if (verdict === 'bad') return res.status(400).end();
     if (verdict === 'deny') return res.status(404).end();
     if (verdict === 'serve') return staticFiles(req, res, next);
+    if (verdict && verdict.redirect) {
+      const query = req.originalUrl.includes('?') ? req.originalUrl.slice(req.originalUrl.indexOf('?')) : '';
+      return res.redirect(301, verdict.redirect + query);
+    }
     return next();
   });
 }
