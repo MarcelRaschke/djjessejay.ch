@@ -17,7 +17,7 @@ Generated content is never evidence.
 This repository is a **hybrid deployment**: GitHub Pages for static assets + Express.js backend for API/WebSocket, routed via Cloudflare Worker.
 
 - **Static hosting**: GitHub Pages (auto-deployed from `main` via `.github/workflows/static.yml`)
-- **Dynamic backend**: Express 5 server on custom origin (185.101.158.113) — API endpoints, CORS, rate limiting, Nodemailer, WebSocket
+- **Dynamic backend**: Express 5 server on custom origin `origin.djjessejay.ch` (origin IP intentionally not stored in the repository) — API endpoints, CORS, rate limiting, Nodemailer, WebSocket
 - **Routing**: Cloudflare Worker (`djjessejay-router`) — routes `/api/*` and `/ws` to custom server, all other requests to GitHub Pages
 - **DNS**: Single CNAME `djjessejay.ch` → `marcelraschke.github.io` (proxied by Cloudflare)
 
@@ -36,7 +36,7 @@ npm run dev              # Local preview: API plus static site (SERVE_STATIC=1)
 
 **Static deployment**: Automatic via `.github/workflows/static.yml` on push to `main` (no manual deployment script required).
 
-**Backend deployment**: Manual (deploy.sh was removed; use SSH or custom CI/CD to deploy Express server changes to 185.101.158.113).
+**Backend deployment**: Manual (deploy.sh was removed; use SSH or custom CI/CD to deploy Express server changes to the origin host).
 
 ## Canonical artist facts
 
