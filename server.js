@@ -77,7 +77,7 @@ app.use('/api/djjj-survey', djjjSurveyRouter);
 // site files is served; everything else in the repository stays unreachable.
 const SERVE_STATIC = process.env.SERVE_STATIC === '1';
 const PUBLIC_FILES = new Set([
-  'index.html', 'ivdj-supreme.html', 'artist-profile.json', 'robots.txt',
+  'index.html', 'ivdj-supreme.html', 'hero-test.html', 'artist-profile.json', 'robots.txt',
   'favicon.ico', 'favicon.svg', 'tailwind.css', 'jessejay.css', 'scripts.js',
   'DJ-Jesse-Jay.jpg', 'DJPult.gif', 'img_contact_sound.svg', 'spacer.svg',
 ]);

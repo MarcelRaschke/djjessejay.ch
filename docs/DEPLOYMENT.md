@@ -292,8 +292,12 @@ origin answers correctly, otherwise the site returns 404 during the switch.
    - Ensure the application listens on ports 80/443 and the SSL certificate is valid.
 
 2. **Verify the origin before switching traffic**
-   - `curl -k --resolve djjessejay.ch:443:ORIGIN_IP https://djjessejay.ch/` must return the site (200),
+   - The firewall only admits Cloudflare ranges, so run the probe on the origin itself
+     (SSH in as the admin user), not from a workstation:
+     `curl -k --resolve djjessejay.ch:443:127.0.0.1 https://djjessejay.ch/` must return the site (200),
      `.../server.js` and `.../.env` must return 404.
+   - Probing from a workstation instead needs a temporary firewall rule for that one source IP;
+     remove it right after the check.
    - Do not continue until this check passes.
 
 3. **DNS Revert** (Cloudflare Dashboard → DNS → Records)

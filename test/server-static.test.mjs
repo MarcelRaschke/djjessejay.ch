@@ -34,8 +34,10 @@ before(async () => {
 });
 after(() => { if (child) child.kill(); });
 
-test('the site root is served', async () => {
+test('the site root and documented public pages are served', async () => {
   assert.equal((await get('/')).status, 200);
+  assert.equal((await get('/hero-test.html')).status, 200);
+  assert.equal((await get('/index-legacy.html')).status, 404);
 });
 
 test('repository internals stay unreachable, also percent-encoded', async () => {
