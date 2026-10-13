@@ -1,0 +1,93 @@
+name: Cloudflare SuperAgent Orchestrator Worker
+
+on:
+  pull_request:
+    paths:
+      - "workers/superagent-orchestrator/**"
+      - ".github/workflows/cloudflare-superagent-orchestrator.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "workers/superagent-orchestrator/**"
+      - ".github/workflows/cloudflare-superagent-orchestrator.yml"
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: "Deploy to Cloudflare workers.dev"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-superagent-orchestrator-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: workers/superagent-orchestrator
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: workers/superagent-orchestrator/package.json
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+
+      - name: Typecheck and Wrangler dry run
+        run: npm run check
+
+  deploy:
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      inputs.deploy == true &&
+      github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: cloudflare-preview
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: workers/superagent-orchestrator/package.json
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+
+      - name: Verify deployment guard and scoped credentials
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF}" = "refs/heads/main"
+          test -n "${CLOUDFLARE_API_TOKEN:-}"
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}"
+
+      - name: Deploy workers.dev preview
+        run: npm run deploy
+        env:
+          # Scoped API token only. Never use CLOUDFLARE_API_KEY/CLOUDFLARE_EMAIL.
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
