@@ -23,7 +23,10 @@ jobs:
       - name: Deployment Checklist
         run: bash scripts/deployment-checklist.sh
         env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
-          ORIGIN_HOST: ${{ secrets.ORIGIN_HOST }}
+          CF_PUBLIC_HOSTNAME: origin.djjessejay.ch
+          # Service token ID (not the secret) as a repository variable.
+          CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID: ${{ vars.CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID }}

@@ -33,16 +33,17 @@ This feature establishes a fail-closed deployment gate for a Cloudflare Tunnel b
 CLOUDFLARE_API_TOKEN
 CLOUDFLARE_ACCOUNT_ID
 CLOUDFLARE_ZONE_ID
-CF_PUBLIC_HOSTNAME
+CF_PUBLIC_HOSTNAME           # tunnel hostname; for this site: origin.djjessejay.ch
 CF_TUNNEL_ID                 # verifier only
 CF_ORIGIN_PUBLIC_IP          # verifier: known origin IP, required for OP-05
 CF_ORIGIN_SERVICE            # setup, default http://127.0.0.1:3000
 CF_TUNNEL_NAME               # setup, default djjessejay-origin
+CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID  # setup: ID of the service token used by the wdjjj Worker (required)
 CF_ACCESS_HOSTNAME           # optional dedicated Access hostname
 CF_ACCESS_EMAILS             # comma-separated allow-list when --access is used
 ```
 
-The Cloudflare token should be scoped to only the account/zone and permissions required for the operations. Cloudflare's current Tunnel API documentation requires Tunnel write plus DNS write for this bootstrap path. Access application creation requires Access Apps and Policies write. Do not use a Global API Key.
+The Cloudflare token should be scoped to only the account/zone and permissions required for the operations. Cloudflare's current Tunnel API documentation requires Tunnel write plus DNS write for this bootstrap path. Access application creation requires Access Apps and Policies write; the pre-flight check of the Worker's service token (exists, enabled, not expired) requires Access Service Tokens read. Do not use a Global API Key.
 
 ## Execution
 
@@ -53,6 +54,32 @@ node scripts/cloudflare-tunnel-setup.js
 ```
 
 The default mode makes no Cloudflare changes.
+
+For djjessejay.ch the tunnel carries only the Express backend. The public site
+stays behind the `wdjjj` Worker, which reaches the backend through the Worker
+secret `API_ORIGIN_HOST=origin.djjessejay.ch`. Never use the apex or `www` as
+`CF_PUBLIC_HOSTNAME`; the script refuses to overwrite their existing records.
+
+### Worker-only origin (service token)
+
+The tunnel hostname is publicly resolvable, so it must only accept requests from
+the `wdjjj` Worker. The setup script therefore requires an Access service token
+and protects `CF_PUBLIC_HOSTNAME` with an Access app whose only policy is
+`non_identity` for exactly that token:
+
+1. Zero Trust → Access → Service Auth → create a service token, e.g. `wdjjj-origin`.
+   Copy Client ID and Client Secret once into your password manager; note the token ID.
+2. Store both values as Worker secrets (never in `wrangler.toml`):
+   `npx wrangler secret put ORIGIN_ACCESS_CLIENT_ID` and
+   `npx wrangler secret put ORIGIN_ACCESS_CLIENT_SECRET`.
+3. Make sure the deployed `wdjjj` Worker forwards the token (`cf-access-client-id` /
+   `cf-access-client-secret` on `/api` subrequests; PR #160). Until that Worker is live,
+   applying the service-token-only policy makes every `/api` request fail at Access.
+4. Run the setup with `CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID=<token id>`.
+5. Store the token ID as repository variable `CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID` so the
+   deployment checklist can verify it.
+
+`--allow-public-origin` skips this protection and is meant for tests only.
 
 ### 2. Apply
 
