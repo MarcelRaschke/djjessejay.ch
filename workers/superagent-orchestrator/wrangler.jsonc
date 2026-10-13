@@ -1,0 +1,36 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "cy8er-superagent-orchestrator",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-07-14",
+  "workers_dev": true,
+  "preview_urls": true,
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  "queues": {
+    "producers": [
+      {
+        "binding": "QUEUE",
+        "queue": "superagent-merge-jobs"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "superagent-merge-jobs",
+        "max_batch_size": 1,
+        "max_batch_timeout": 0,
+        "max_retries": 3,
+        "dead_letter_queue": "superagent-merge-jobs-dlq"
+      }
+    ]
+  },
+  "triggers": {
+    "crons": ["0 * * * *"]
+  },
+  "vars": {
+    "DEPLOYMENT_ENV": "preview",
+    "TUNNEL_MERGE_HOST": "hermes.cy8er.djjessejay.ch"
+  }
+}
