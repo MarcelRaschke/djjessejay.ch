@@ -76,3 +76,16 @@ test('a non-https API origin scheme is refused before the token is attached', as
   assert.match(await res.text(), /must use https/);
   assert.equal(seen.length, 0);
 });
+
+test('the service token only goes to a subdomain of the own zone', async () => {
+  for (const host of ['evil.example', 'origin.djjessejay.ch.evil.example', 'djjessejay.ch', 'www.djjessejay.ch', 'user@origin.djjessejay.ch', 'origin.djjessejay.ch/x', 'origin.djjessejay.ch:8443', '']) {
+    seen = [];
+    const res = await worker.fetch(new Request('https://djjessejay.ch/api/health'), { ...ENV, API_ORIGIN_HOST: host }, {});
+    assert.equal(res.status, 502, host);
+    assert.equal(seen.length, 0, host);
+  }
+  seen = [];
+  const ok = await worker.fetch(new Request('https://djjessejay.ch/api/health'), { ...ENV, API_ORIGIN_HOST: 'api.djjessejay.ch' }, {});
+  assert.equal(ok.status, 200);
+  assert.equal(new URL(seen[0].url).hostname, 'api.djjessejay.ch');
+});
