@@ -546,7 +546,8 @@ npm install
 npm run build:css
 npm run sync:metadata
 npm test
-npm start
+npm run dev   # local preview: API plus the public site (SERVE_STATIC=1)
+npm start     # API only, as in production (static serving off)
 ```
 
 ## `index.html` canonical metadata
