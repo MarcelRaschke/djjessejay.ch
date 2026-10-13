@@ -68,3 +68,11 @@ test('Access session cookies from the origin never reach the browser', async () 
     respond = defaultResponse;
   }
 });
+
+test('a non-https API origin scheme is refused before the token is attached', async () => {
+  seen = [];
+  const res = await worker.fetch(new Request('https://djjessejay.ch/api/health'), { ...ENV, API_ORIGIN_SCHEME: 'http' }, {});
+  assert.equal(res.status, 502);
+  assert.match(await res.text(), /must use https/);
+  assert.equal(seen.length, 0);
+});

@@ -109,9 +109,8 @@ function withSecurityHeaders(response, upstream, originHost, originPrefix) {
 }
 
 function proxyToApiOrigin(request, url, apiOriginHost, env) {
-  const apiScheme = (env && env.API_ORIGIN_SCHEME) || "https";
   const apiOriginPort = (env && env.API_ORIGIN_PORT) || "";
-  const target = new URL(`${apiScheme}://${apiOriginHost}${apiOriginPort ? ":" + apiOriginPort : ""}${url.pathname}${url.search}`);
+  const target = new URL(`https://${apiOriginHost}${apiOriginPort ? ":" + apiOriginPort : ""}${url.pathname}${url.search}`);
   const headers = new Headers(request.headers);
   headers.set("host", apiOriginHost);
   // Never forward client-supplied Access credentials; send only the Worker's own
@@ -196,6 +195,12 @@ export default {
       // request anyway; answer here instead of sending an unauthenticated subrequest.
       if (!env.ORIGIN_ACCESS_CLIENT_ID || !env.ORIGIN_ACCESS_CLIENT_SECRET) {
         return new Response("API origin credentials not configured", { status: 502, headers: { ...OWN_HEADERS, "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
+      }
+      // The service token must never travel over plaintext; Always Use HTTPS does not apply
+      // to Worker subrequests, so refuse any other scheme instead of downgrading.
+      const apiScheme = (env && env.API_ORIGIN_SCHEME) || "https";
+      if (apiScheme !== "https") {
+        return new Response("API origin must use https", { status: 502, headers: { ...OWN_HEADERS, "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
       }
       if (request.method !== "GET" && request.method !== "HEAD" && request.method !== "POST") {
         return new Response("Method Not Allowed", { status: 405, headers: { ...OWN_HEADERS, allow: "GET, HEAD, POST", "cache-control": "no-store" } });

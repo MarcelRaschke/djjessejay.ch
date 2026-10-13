@@ -100,9 +100,14 @@ jobs:
       - name: Verify origin rejects requests without the service token
         run: |
           set -euo pipefail
-          code="$(curl -sS -A "wdjjj-healthcheck/1.0" -o /dev/null -w '%{http_code}' --max-redirs 0 https://origin.djjessejay.ch/api/health || true)"
+          # Transport errors (DNS, TLS, connect) fail the step: only a real HTTP answer counts.
+          # 302/403 from Access are HTTP responses, so curl exits 0 for them without --fail.
+          if ! code="$(curl -sS -A "wdjjj-healthcheck/1.0" -o /dev/null -w '%{http_code}' --max-redirs 0 https://origin.djjessejay.ch/api/health)"; then
+            echo "origin.djjessejay.ch could not be reached; the probe proves nothing" >&2
+            exit 1
+          fi
           echo "Direct origin HTTP status without token: $code"
-          if [ "$code" = "200" ]; then
+          if [ "$code" = "200" ] || [ "$code" = "000" ]; then
             echo "origin.djjessejay.ch answers without the Access service token" >&2
             exit 1
           fi
