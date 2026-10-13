@@ -56,3 +56,10 @@ test('a double-slash directory request cannot become an off-site redirect', asyn
   assert.equal(r.status, 301);
   assert.equal(r.location, '/survey/');
 });
+
+test('a nested public directory without trailing slash redirects to its index', async () => {
+  const r = await get('/visuals/blue-dimension-21600');
+  assert.equal(r.status, 301);
+  assert.equal(r.location, '/visuals/blue-dimension-21600/');
+  assert.equal((await get('/visuals/blue-dimension-21600/')).status, 200);
+});

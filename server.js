@@ -3,6 +3,7 @@
 const express = require('express');
 const nodemailer = require('nodemailer');
 const path = require('path');
+const fs = require('fs');
 const rateLimit = require('express-rate-limit');
 const cors = require('cors');
 const controlCenterRouter = require('./control-center/data-sources');
@@ -84,6 +85,10 @@ const PUBLIC_DIRS = new Set(['css', 'js', 'assets', 'survey', 'pressekit', 'pres
 const BLOCKED_EXT = /\.(?:sql|env|pem|key|log|jsonl|sh|py|ts|md|ya?ml|lock)$/i;
 const staticFiles = express.static(__dirname, { dotfiles: 'ignore', index: ['index.html'], redirect: false });
 
+function isDirectory(rel) {
+  try { return fs.statSync(path.join(__dirname, rel)).isDirectory(); } catch { return false; }
+}
+
 /**
  * Returns 'serve', 'deny', 'bad', 'pass' (not a file request: let the SPA fallback answer)
  * or { redirect } for an allowlisted directory requested without its trailing slash.
@@ -97,9 +102,11 @@ function classifyStaticPath(rawPath) {
   if (BLOCKED_EXT.test(rel)) return 'deny';
   const top = rel.split('/')[0];
   if (PUBLIC_FILES.has(rel)) return 'serve';
+  // A directory inside the allowlist requested without its trailing slash ("/survey",
+  // "/visuals/blue-dimension-21600") redirects to its index. The target is built from the
+  // normalized relative path, so "//survey" cannot become an off-site redirect.
+  if (PUBLIC_DIRS.has(top) && !decoded.endsWith('/') && isDirectory(rel)) return { redirect: `/${rel}/` };
   if (PUBLIC_DIRS.has(top) && rel.length > top.length) return 'serve';
-  // "/survey" -> "/survey/" (built from the allowlisted name, so "//survey" cannot become an off-site redirect).
-  if (PUBLIC_DIRS.has(rel)) return { redirect: `/${rel}/` };
   const last = rel.split('/').pop();
   return last.includes('.') ? 'deny' : 'pass';
 }
