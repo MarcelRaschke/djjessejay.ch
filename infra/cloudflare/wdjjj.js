@@ -108,14 +108,12 @@ function withSecurityHeaders(response, upstream, originHost, originPrefix) {
   return new Response(upstream.body, { status: upstream.status, headers });
 }
 
+// The only host that may receive the Access service token. The deploy workflow probes
+// exactly this host for the Access denial, so it must not be widened silently.
+const API_ORIGIN_HOST_ALLOWED = `origin.${CANONICAL_HOST}`;
+
 function isAllowedApiOriginHost(host) {
-  if (typeof host !== "string" || !/^[a-z0-9.-]+$/i.test(host)) return false;
-  let parsed;
-  try { parsed = new URL(`https://${host}/`); } catch { return false; }
-  const h = parsed.hostname.toLowerCase();
-  if (parsed.username || parsed.password || parsed.port || h !== host.toLowerCase()) return false;
-  if (h === CANONICAL_HOST || h === `www.${CANONICAL_HOST}`) return false;
-  return h.endsWith(`.${CANONICAL_HOST}`) && !h.includes("..");
+  return typeof host === "string" && host.toLowerCase() === API_ORIGIN_HOST_ALLOWED;
 }
 
 function proxyToApiOrigin(request, url, apiOriginHost, env) {
@@ -218,8 +216,8 @@ export default {
       if (apiScheme !== "https") {
         return new Response("API origin must use https", { status: 502, headers: { ...OWN_HEADERS, "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
       }
-      // The service token may only go to a subdomain of our own zone (never apex/www,
-      // never userinfo/path tricks): a mistyped or tampered API_ORIGIN_HOST fails closed.
+      // The service token may only go to origin.djjessejay.ch: a mistyped or tampered
+      // API_ORIGIN_HOST fails closed.
       if (!isAllowedApiOriginHost(apiOriginHost)) {
         return new Response("API origin host not allowed", { status: 502, headers: { ...OWN_HEADERS, "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
       }
