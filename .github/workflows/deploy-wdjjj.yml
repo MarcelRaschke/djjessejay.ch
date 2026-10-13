@@ -75,6 +75,38 @@ jobs:
           echo "Cloudflare Worker health check failed" >&2
           exit 1
 
+      - name: Verify authenticated API path
+        # /api/* goes Worker -> Access service token -> origin. A mistyped, rotated, disabled or
+        # non-admitted token still passes [secrets].required, so exercise the real path.
+        run: |
+          set -euo pipefail
+          ua="wdjjj-healthcheck/1.0 (+https://github.com/MarcelRaschke/djjessejay.ch ci smoke test)"
+          for attempt in 1 2 3 4 5 6; do
+            headers="$(mktemp)"
+            code="$(curl -sS -A "$ua" -D "$headers" -o api-health.json -w '%{http_code}' https://djjessejay.ch/api/health || true)"
+            echo "API health HTTP status: $code"
+            if [ "$code" = "200" ] && grep -q '"status":"healthy"' api-health.json; then
+              if grep -qi '^set-cookie: *CF_' "$headers"; then
+                echo "Access session cookie leaked to the client" >&2
+                exit 1
+              fi
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Authenticated API path failed: check ORIGIN_ACCESS_CLIENT_ID/SECRET, the Access policy and the tunnel" >&2
+          exit 1
+
+      - name: Verify origin rejects requests without the service token
+        run: |
+          set -euo pipefail
+          code="$(curl -sS -A "wdjjj-healthcheck/1.0" -o /dev/null -w '%{http_code}' --max-redirs 0 https://origin.djjessejay.ch/api/health || true)"
+          echo "Direct origin HTTP status without token: $code"
+          if [ "$code" = "200" ]; then
+            echo "origin.djjessejay.ch answers without the Access service token" >&2
+            exit 1
+          fi
+
       - name: Verify apex
         run: |
           set -euo pipefail
