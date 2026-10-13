@@ -104,19 +104,29 @@ jobs:
           exit 1
 
       - name: Verify origin rejects requests without the service token
+        # Only an Access denial counts. Express sets RateLimit-Policy on every /api response
+        # (express-rate-limit standardHeaders), so that header means the backend was reached.
+        # Access answers non-browser clients with a redirect to its login (302/303/307),
+        # or 401 (managed OAuth) / 403.
         run: |
           set -euo pipefail
-          # Transport errors (DNS, TLS, connect) fail the step: only a real HTTP answer counts.
-          # 302/403 from Access are HTTP responses, so curl exits 0 for them without --fail.
-          if ! code="$(curl -sS -A "wdjjj-healthcheck/1.0" -o /dev/null -w '%{http_code}' --max-redirs 0 https://origin.djjessejay.ch/api/health)"; then
+          headers="$(mktemp)"
+          if ! code="$(curl -sS -A "wdjjj-healthcheck/1.0" -D "$headers" -o /dev/null -w '%{http_code}' --max-redirs 0 https://origin.djjessejay.ch/api/health)"; then
             echo "origin.djjessejay.ch could not be reached; the probe proves nothing" >&2
             exit 1
           fi
           echo "Direct origin HTTP status without token: $code"
-          if [ "$code" = "200" ] || [ "$code" = "000" ]; then
-            echo "origin.djjessejay.ch answers without the Access service token" >&2
+          if grep -qi '^ratelimit-policy:' "$headers"; then
+            echo "The backend answered without the Access service token: origin is publicly reachable" >&2
             exit 1
           fi
+          case "$code" in
+            302|303|307)
+              if grep -qiE '^location: *[^ ]*(/cdn-cgi/access/|cloudflareaccess\.com)' "$headers"; then exit 0; fi
+              echo "Redirect does not point to Cloudflare Access" >&2; exit 1 ;;
+            401|403) exit 0 ;;
+            *) echo "Unexpected status $code: not an Access denial" >&2; exit 1 ;;
+          esac
 
       - name: Verify apex
         run: |
