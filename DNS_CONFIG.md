@@ -311,6 +311,25 @@ curl -I https://marcelraschke.github.io/
 
 ---
 
+## Undocumented Hosts (2026-10 Audit)
+
+### hermes.cy8er.djjessejay.ch
+
+**Status**: Not configured (NXDOMAIN as of 2026-10-13).
+
+- No DNS record exists for this host in the Cloudflare zone; queries return NXDOMAIN instead of resolving to Cloudflare edge IPs. Compare: `djjessejay.ch` resolves to `188.114.96.0` / `188.114.97.0` (Cloudflare, proxied).
+- `hermes` is a multi-level subdomain (`hermes.cy8er.djjessejay.ch`). If it is intended to be served through the zone, either add a record for `hermes.cy8er` directly, or add a record for `cy8er` plus a record for `hermes.cy8er` (each label needs its own record or a covering wildcard).
+- No reference to `hermes` or `cy8er` exists anywhere in this repository (code, Workers, or docs). This host is therefore **not** part of the documented deployment. If it is expected to exist, its origin, owner, and purpose must be clarified before it is added here.
+- If the host is not legitimate, no action is needed in DNS — an NXDOMAIN response cannot be "claimed" by an attacker. However, if `cy8er` or wildcard records are ever added, they must be documented here immediately to keep this file authoritative.
+
+### djjessejay-ch.paulimausizu.chatgpt.site
+
+**Status**: External ChatGPT site; login-gated ("Continue with ChatGPT"), not publicly readable — content could not be audited as of 2026-10-13.
+
+- This host lives outside the `djjessejay.ch` zone (resolves to Cloudflare IPs `104.18.22.186` / `104.18.23.186`). It is not controlled by this repository's DNS.
+- The path segment `djjessejay-ch` in the hostname suggests it may be a ChatGPT-generated copy or derivative of this site. Because the content is authentication-gated, unauthorized reproduction could not be confirmed or ruled out.
+- If the site reproduces or derives from this project's content without authorization, `INCIDENT_RESPONSE.md` defines the project's escalation path; OpenAI also accepts copyright/removal reports via `https://openai.com/policies`.
+
 ## References
 
 - [Cloudflare DNS Documentation](https://developers.cloudflare.com/dns/)
