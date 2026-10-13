@@ -43,3 +43,33 @@ Expected:
 - POST: `405`
 
 The live-site smoke test is intentionally external: CI must verify the deployed edge, not merely the repository contents.
+
+## Cloudflare Pages Build-Konfiguration (statische Website)
+
+Das Git-verbundene Cloudflare-Pages-Projekt für dieses Repository ist für eine statische Website konfiguriert, nicht für Next.js. Der Build-`npx next build` (Stand 13.10.2026) schlägt zwangsläufig fehl: kein `pages/`- oder `app/`-Verzeichnis, keine next/react-Abhängigkeit.
+
+Korrigierte Werte (idempotent setzt `pages-build-config.sh`):
+
+| Einstellung | Wert |
+| --- | --- |
+| Framework preset | None |
+| Build command | `npm run build:css` |
+| Build output directory | `/` (Repo-Root) |
+| Production branch | `main` |
+| `NODE_VERSION` | `24` (package.json `engines`) |
+
+Ausführen:
+
+```bash
+export CF_API_TOKEN="..."   # Custom Token, Account-Berechtigung: Cloudflare Pages Edit
+export CF_ACCOUNT_ID="..."
+cd infra/cloudflare
+./pages-build-config.sh            # Projektname wird automatisch ermittelt
+./pages-build-config.sh <name>      # oder explizit
+```
+
+Einschränkungen:
+
+- Pages bedient nur statische Assets. `server.js` (Express, `/api/*`, Contact-Form-Backend, AI-Proxy) läuft auf Pages nicht — produktiv bleibt dafür der wdjjj-Worker-Pfad.
+- Preview-Builds für Feature-Branches werden weiterhin getriggert; produktiv deployt nur `main`.
+- Nach dem Fix gilt weiterhin: Der WKD-Endpunkt (PR #172) wird von dieser Pipeline mit ausgeliefert (`.well-known` liegt im Repo-Root).
