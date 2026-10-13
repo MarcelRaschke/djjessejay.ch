@@ -119,8 +119,14 @@ function isAllowedApiOriginHost(host) {
 }
 
 function proxyToApiOrigin(request, url, apiOriginHost, env) {
-  const apiOriginPort = (env && env.API_ORIGIN_PORT) || "";
-  const target = new URL(`https://${apiOriginHost}${apiOriginPort ? ":" + apiOriginPort : ""}${url.pathname}${url.search}`);
+  const target = new URL("https://placeholder.invalid/");
+  // Build from validated parts only: no port or userinfo can sneak in.
+  target.hostname = apiOriginHost;
+  target.pathname = url.pathname;
+  target.search = url.search;
+  if (target.hostname !== apiOriginHost.toLowerCase() || target.port || target.username || target.password) {
+    return Promise.resolve(new Response("API origin host not allowed", { status: 502, headers: { ...OWN_HEADERS, "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } }));
+  }
   const headers = new Headers(request.headers);
   headers.set("host", apiOriginHost);
   // Never forward client-supplied Access credentials; send only the Worker's own

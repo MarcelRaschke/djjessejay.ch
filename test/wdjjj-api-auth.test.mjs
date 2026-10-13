@@ -89,3 +89,14 @@ test('the service token only goes to a subdomain of the own zone', async () => {
   assert.equal(ok.status, 200);
   assert.equal(new URL(seen[0].url).hostname, 'api.djjessejay.ch');
 });
+
+test('API_ORIGIN_PORT cannot redirect the token to another host', async () => {
+  seen = [];
+  const res = await worker.fetch(new Request('https://djjessejay.ch/api/health?x=1'), { ...ENV, API_ORIGIN_PORT: '443@attacker.example' }, {});
+  assert.equal(res.status, 200);
+  assert.equal(seen.length, 1);
+  const u = new URL(seen[0].url);
+  assert.equal(u.hostname, 'origin.djjessejay.ch');
+  assert.equal(u.port, '');
+  assert.equal(u.search, '?x=1');
+});
