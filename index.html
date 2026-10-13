@@ -86,7 +86,25 @@
     .metric{transition:transform .2s ease,border-color .2s ease}.metric:hover{transform:translateY(-3px);border-color:rgba(255,210,26,.5)}
     .reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s ease}
     .reveal.in{opacity:1;transform:none}
-    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
+    ::selection{background:rgba(0,217,255,.35);color:var(--text)}
+    a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:2px}
+    ::-webkit-scrollbar{width:10px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:rgba(0,217,255,.28);border-radius:6px}::-webkit-scrollbar-thumb:hover{background:rgba(0,217,255,.5)}
+    .progress{position:fixed;top:0;left:0;height:2px;width:0;background:linear-gradient(90deg,var(--gold),var(--cyan));z-index:40;box-shadow:0 0 10px rgba(0,217,255,.6)}
+    .ticker{overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(3,12,22,.6);padding:14px 0}
+    .ticker-track{display:flex;gap:48px;width:max-content;animation:slide 34s linear infinite}
+    .ticker-track span{font:600 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+    .ticker-track b{color:var(--cyan);font-weight:600}
+    @keyframes slide{to{transform:translateX(-50%)}}
+    nav a{position:relative;transition:color .18s ease}
+    nav a:after{content:"";position:absolute;left:0;right:100%;bottom:-6px;height:1px;background:var(--cyan);transition:right .22s ease}
+    nav a:hover:after,nav a.active:after{right:0}
+    nav a.active{color:var(--cyan)}
+    .to-top{position:fixed;right:22px;bottom:22px;width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--line);background:rgba(2,8,18,.85);backdrop-filter:blur(12px);color:var(--cyan);text-decoration:none;font-size:18px;opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .25s ease,transform .25s ease,border-color .18s ease;z-index:30}
+    .to-top.show{opacity:1;pointer-events:auto;transform:none}
+    .to-top:hover{border-color:rgba(0,217,255,.6);box-shadow:0 0 22px rgba(0,217,255,.3)}
+    footer a{color:var(--silver);text-decoration:none;transition:color .18s ease}footer a:hover{color:var(--cyan)}
+    .section-head h2{background:linear-gradient(120deg,#edfaff 30%,#9fd8ff 55%,#edfaff 80%);-webkit-background-clip:text;background-clip:text;color:transparent}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}.ticker-track{animation:none}}
     @media(max-width:820px){.nav{height:auto;flex-direction:column;align-items:flex-start;gap:10px;padding:12px 0}nav{flex-wrap:wrap;gap:14px}.hero{grid-template-columns:1fr;padding-top:48px}.signal{max-width:520px;margin:auto}.bio{grid-template-columns:1fr}.card,.card.wide{grid-column:span 12}.signal-panel{grid-template-columns:1fr 1fr}}
     @media(max-width:480px){.wrap{width:min(var(--max),calc(100% - 22px))}section{padding:64px 0}.signal-panel{grid-template-columns:1fr 1fr}.metric{padding:15px}.metric strong{font-size:26px}}
   </style>
@@ -106,6 +124,7 @@
 }</script>
 </head>
 <body>
+<div class="progress" id="progress" aria-hidden="true"></div>
 <div class="aurora" aria-hidden="true"></div>
 <header class="top">
   <div class="wrap nav">
@@ -136,6 +155,12 @@
       <div class="hz">97.5 MHz</div><div class="disc"></div><div class="scope"><i></i></div><div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
     </div>
   </section>
+
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <span><b>///</b> Zürich Underground</span><span><b>97.5</b> Blue Dimension Signal</span><span><b>EST.</b> 1997</span><span>Vinyl-Kultur</span><span>Progressive House</span><span>Techno</span><span>Deep House</span><span><b>///</b> Zürich Underground</span><span><b>97.5</b> Blue Dimension Signal</span><span><b>EST.</b> 1997</span><span>Vinyl-Kultur</span><span>Progressive House</span><span>Techno</span><span>Deep House</span>
+    </div>
+  </div>
 
   <section id="signal">
     <div class="wrap">
@@ -200,6 +225,7 @@
     <span class="mono">BLUE DIMENSION // SIGNAL 97.5</span>
   </div>
 </footer>
+<a class="to-top" href="#top" aria-label="Zurück nach oben">↑</a>
 <script>
 (function(){
   if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
@@ -209,6 +235,20 @@
       entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target)}});
     },{threshold:.12}).observe(s);
   });
+})();
+(function(){
+  var bar=document.getElementById('progress'),top=document.querySelector('.to-top');
+  var navlinks=document.querySelectorAll('header nav a[href^="#"]');
+  var sections=[].map.call(navlinks,function(a){return document.querySelector(a.getAttribute('href'))}).filter(Boolean);
+  function onScroll(){
+    var h=document.documentElement,max=h.scrollHeight-h.clientHeight;
+    bar.style.width=(max>0?(h.scrollTop/max)*100:0)+'%';
+    top.classList.toggle('show',h.scrollTop>600);
+    var cur=-1,y=h.scrollTop+140;
+    sections.forEach(function(s,i){if(s.offsetTop<=y)cur=i});
+    navlinks.forEach(function(a,i){a.classList.toggle('active',i===cur)});
+  }
+  addEventListener('scroll',onScroll,{passive:true});onScroll();
 })();
 </script>
 </body>
