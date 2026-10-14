@@ -16,8 +16,10 @@ enabled = true
 [vars]
 ORIGIN_HOST = "marcelraschke.github.io"
 ORIGIN_PREFIX = "/djjessejay.ch"
-# API backend origin for /api/* routing. Set API_ORIGIN_HOST to the Express
-# server host (e.g. origin.djjessejay.ch) via Wrangler secret or dashboard.
-# Leave empty to disable API routing (returns 502 for /api/*).
-API_ORIGIN_HOST = ""
+# API backend origin for /api/* routing. API_ORIGIN_HOST is managed as a
+# Cloudflare remote secret (set via `wrangler secret put API_ORIGIN_HOST` or
+# the dashboard) and is deliberately NOT declared here. A local [vars] entry
+# with the same name replaces the remote secret on every deploy (Wrangler
+# warning observed in deploy-wdjjj run 38246122897, 2026-10-12) and would
+# silently disable /api/* routing at the live edge.
 API_ORIGIN_SCHEME = "https"

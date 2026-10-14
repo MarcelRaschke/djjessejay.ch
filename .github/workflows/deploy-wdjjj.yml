@@ -51,6 +51,15 @@ jobs:
           }
           echo "Cloudflare deployment credentials are configured."
 
+      # NOTE: run 38246122897 (2026-10-12) uploaded the Worker but failed at
+      # trigger configuration: "A request to the Cloudflare API
+      # (/accounts/<id>/workers/scripts/wdjjj/routes) failed. No access to the
+      # specified resource." The Worker then has no bound routes and djjessejay.ch
+      # stays on the DNS fallback origin (HTTP 522). CLOUDFLARE_API_TOKEN needs
+      # Account permissions "Workers Scripts:Edit" AND "Workers Routes:Edit"
+      # (plus "Account Settings:Read"); a token with only script-edit uploads
+      # the code but cannot bind routes. See scripts/deployment-checklist.sh and
+      # DNS_CONFIG.md for the expected end state.
       - name: Deploy wdjjj
         uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
         with:
