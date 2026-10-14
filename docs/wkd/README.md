@@ -12,7 +12,10 @@ Der bestehende Worker workers/pgp-directory (ASCII-armored /pgp.txt) bleibt davo
 
 ## Endpunkte (Direct Method)
 
-    https://djjessejay.ch/.well-known/openpgpkey/djjessejay.ch/hu/<zbase32-hash>?l=<local-part>
+    https://djjessejay.ch/.well-known/openpgpkey/hu/<zbase32-hash>?l=<local-part>
+    https://djjessejay.ch/.well-known/openpgpkey/policy
+
+Das Domain-Segment (`/openpgpkey/<domain>/hu/...`) gehört ausschliesslich zur Advanced Method auf `openpgpkey.djjessejay.ch` (Phase 2) und wird in Phase 1 bewusst nicht verwendet (Draft Section 3.1).
 
 ## WKD-Hashes (Z-Base-32 über SHA-1 des kleingeschriebenen local-part, RFC 6189 §5.1.6)
 

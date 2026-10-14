@@ -3,7 +3,9 @@
 # Run after the GitHub Pages deploy has completed.
 set -euo pipefail
 
-BASE="https://djjessejay.ch/.well-known/openpgpkey/djjessejay.ch"
+BASE="https://djjessejay.ch/.well-known/openpgpkey"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+WKD_DIR="${REPO_ROOT}/.well-known/openpgpkey"
 
 status() { curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$1"; }
 
@@ -14,8 +16,9 @@ echo "      GET ${BASE}/policy -> ${POLICY_CODE}"
 
 echo "[2/3] Key files under hu/ (MUST be 200 each)"
 FOUND=0
-for HASH_FILE in hu/*; do
-  [ -f "${HASH_FILE}" ] || { echo "      hu/ is empty - no keys published yet"; exit 1; }
+for FILE in "${WKD_DIR}"/hu/*; do
+  [ -f "${FILE}" ] || { echo "      hu/ is empty - no keys published yet"; exit 1; }
+  HASH_FILE="hu/$(basename "${FILE}")"
   case "${HASH_FILE}" in hu/.gitkeep) continue ;; esac
   CODE="$(status "${BASE}/${HASH_FILE}")"
   echo "      GET ${BASE}/${HASH_FILE} -> ${CODE}"
@@ -25,7 +28,8 @@ done
 [ "${FOUND}" -gt 0 ] || { echo "FAIL: no key files found" >&2; exit 1; }
 
 echo "[3/3] Binary format check (first byte = packet tag 0xb4-ish, not ASCII armor)"
-for HASH_FILE in hu/*; do
+for FILE in "${WKD_DIR}"/hu/*; do
+  HASH_FILE="hu/$(basename "${FILE}")"
   case "${HASH_FILE}" in hu/.gitkeep) continue ;; esac
   FIRST="$(curl -s --max-time 20 "${BASE}/${HASH_FILE}" | head -c 4)"
   case "${FIRST}" in

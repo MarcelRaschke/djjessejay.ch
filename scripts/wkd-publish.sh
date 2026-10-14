@@ -13,7 +13,11 @@
 set -euo pipefail
 
 DOMAIN="djjessejay.ch"
-WKD_ROOT=".well-known/openpgpkey/${DOMAIN}/hu"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Direct Method layout (draft-koch-openpgp-webkey-service, Section 3.1):
+#   https://<domain>/.well-known/openpgpkey/hu/<hash>
+# The <domain> path segment exists only in the Advanced Method.
+WKD_ROOT="${REPO_ROOT}/.well-known/openpgpkey/hu"
 ZBASE32='[ybndrfg8ejkmcpqxot1uwisza345h769]{32}'
 
 if [ "$#" -lt 1 ]; then
@@ -52,6 +56,6 @@ if [ "${SIZE}" -le 1024 ]; then
   exit 1
 fi
 
-echo "Published: ${ADDRESS} -> ${WKD_ROOT}/${HASH} (${SIZE} bytes, binary)"
+echo "Published: ${ADDRESS} -> ${WKD_ROOT#"${REPO_ROOT}"/}/${HASH} (${SIZE} bytes, binary)"
 echo "Next: commit, push, wait for Pages deploy, then run scripts/wkd-verify.sh"
 echo "Client verification: gpg --locate-keys ${ADDRESS}"
