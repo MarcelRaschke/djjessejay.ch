@@ -47,6 +47,8 @@ Thumbs.db
 
 # Database dumps & exports (historical data archives, not used by static site)
 *.sql
+!db/schema.sql
+!db/migrations/*.sql
 *.xml
 
 # Video files (large assets, not needed for GitHub Pages deployment)
@@ -90,3 +92,10 @@ coverage/
 # Honeypot logs (attacker IPs/user-agents; never commit)
 honeypot/.logs/
 honeypot/logs/
+
+# djjj survey responses (community-submitted personal data; never commit)
+.survey-data/
+
+# SQLite database files (derived artifact, never committed)
+*.sqlite
+*.sqlite3

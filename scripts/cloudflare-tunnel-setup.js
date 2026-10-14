@@ -1,160 +1,470 @@
 #!/usr/bin/env node
-/**
- * Cloudflare Tunnel + optional Access bootstrap.
- *
- * Safety model:
- *   - dry-run is the default
- *   - --apply is mandatory for mutations
- *   - credentials are read only from environment variables
- *   - existing DNS records are never overwritten implicitly
- *   - Access is only created for CF_ACCESS_HOSTNAME, never the public site hostname
- *
- * Requires Node.js >= 22 and no npm dependencies.
- */
-
 'use strict';
 
-const CF_API = 'https://api.cloudflare.com/client/v4';
-const args = new Set(process.argv.slice(2));
-const apply = args.has('--apply');
-const access = args.has('--access');
+/**
+ * Cloudflare Tunnel bootstrap for djjessejay.ch origin protection.
+ *
+ * Implements the contract in ORIGIN-PROTECTION-DEPLOYMENT.md:
+ *   - plan-only by default; Cloudflare is mutated only with --apply
+ *   - existing DNS records are never overwritten
+ *   - an existing tunnel with the configured name is reused; duplicates are refused
+ *   - ingress always ends with a catch-all http_status:404 rule
+ *   - the hostname is a proxied CNAME to <tunnel-id>.cfargotunnel.com
+ *   - the tunnel hostname is restricted to the Worker by a service-token-only Access app
+ *   - human Access (--access) is only attached to a dedicated hostname, never to the public site
+ *   - a failed apply rolls back DNS records and a tunnel created by this run
+ *   - the tunnel token is never requested or printed
+ *
+ * Environment:
+ *   CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_ZONE_ID   (required)
+ *   CF_PUBLIC_HOSTNAME   hostname routed through the tunnel, e.g. origin.djjessejay.ch (required)
+ *   CF_ORIGIN_SERVICE    default http://127.0.0.1:3000
+ *   CF_TUNNEL_NAME       default djjessejay-origin
+ *   CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID  ID of the Access service token the wdjjj Worker uses;
+ *                        the tunnel hostname gets an Access app that admits only this token
+ *                        (required unless --allow-public-origin)
+ *   CF_ACCESS_HOSTNAME   dedicated Access hostname (required with --access)
+ *   CF_ACCESS_EMAILS     comma-separated allow-list (required with --access)
+ *
+ * Usage:
+ *   node scripts/cloudflare-tunnel-setup.js            # plan only
+ *   node scripts/cloudflare-tunnel-setup.js --apply    # create / reconcile
+ *   node scripts/cloudflare-tunnel-setup.js --apply --access
+ */
 
-function required(name) {
-  const value = process.env[name];
-  if (!value) throw new Error(`Missing required environment variable: ${name}`);
-  return value;
+const API_BASE = 'https://api.cloudflare.com/client/v4';
+const PUBLIC_SITE_HOSTS = ['djjessejay.ch', 'www.djjessejay.ch'];
+
+function parseArgs(argv) {
+  const known = new Set(['--apply', '--access', '--allow-public-origin']);
+  const unknown = argv.filter((a) => !known.has(a));
+  if (unknown.length) throw new Error(`Unknown argument(s): ${unknown.join(' ')}`);
+  return { apply: argv.includes('--apply'), access: argv.includes('--access'), allowPublicOrigin: argv.includes('--allow-public-origin') };
 }
 
-function env(name, fallback) {
-  return process.env[name] || fallback;
+const HOSTNAME_RE = /^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/;
+
+/** Accepts only scheme://host[:port], so no credentials or paths can reach logs or the tunnel config. */
+function parseOriginService(raw, errors) {
+  const value = String(raw).trim();
+  let u;
+  try { u = new URL(value); } catch { errors.push('CF_ORIGIN_SERVICE is not a valid URL'); return ''; }
+  if (!['http:', 'https:'].includes(u.protocol)) errors.push('CF_ORIGIN_SERVICE must use http or https');
+  if (u.username || u.password) errors.push('CF_ORIGIN_SERVICE must not contain credentials');
+  if ((u.pathname && u.pathname !== '/') || u.search || u.hash) errors.push('CF_ORIGIN_SERVICE must not contain a path, query or fragment');
+  return `${u.protocol}//${u.host}`;
 }
 
-function assertHostname(value, name) {
-  if (!/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i.test(value)) {
-    throw new Error(`${name} is not a valid DNS hostname`);
+function readConfig(env, flags) {
+  const errors = [];
+  for (const key of ['CLOUDFLARE_API_TOKEN', 'CLOUDFLARE_ACCOUNT_ID', 'CLOUDFLARE_ZONE_ID', 'CF_PUBLIC_HOSTNAME']) {
+    if (!env[key]) errors.push(`Missing ${key}`);
   }
+  const publicHostname = (env.CF_PUBLIC_HOSTNAME || '').trim().toLowerCase();
+  if (publicHostname && !HOSTNAME_RE.test(publicHostname)) errors.push(`CF_PUBLIC_HOSTNAME is not a valid hostname: ${publicHostname}`);
+  else if (PUBLIC_SITE_HOSTS.includes(publicHostname)) {
+    errors.push(`Refusing ${publicHostname} as tunnel hostname: the public site must stay behind the wdjjj Worker`);
+  }
+
+  const originService = parseOriginService(env.CF_ORIGIN_SERVICE || 'http://127.0.0.1:3000', errors);
+
+  const cfg = {
+    token: env.CLOUDFLARE_API_TOKEN,
+    accountId: env.CLOUDFLARE_ACCOUNT_ID,
+    zoneId: env.CLOUDFLARE_ZONE_ID,
+    publicHostname,
+    originService,
+    tunnelName: (env.CF_TUNNEL_NAME || 'djjessejay-origin').trim(),
+    access: null,
+    originTokenId: null,
+  };
+
+  // The tunnel hostname must only be reachable by the wdjjj Worker. Access with a
+  // service-token-only policy enforces that at the Cloudflare edge.
+  const tokenId = (env.CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID || '').trim();
+  if (tokenId) {
+    if (!/^[0-9a-f-]{32,36}$/i.test(tokenId)) errors.push('CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID must be the service token ID (UUID), not the client secret');
+    cfg.originTokenId = tokenId;
+  } else if (!flags.allowPublicOrigin) {
+    errors.push('Missing CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID: the tunnel hostname must be restricted to the Worker (or pass --allow-public-origin explicitly)');
+  }
+
+  if (flags.access) {
+    const host = (env.CF_ACCESS_HOSTNAME || '').trim().toLowerCase();
+    const emails = (env.CF_ACCESS_EMAILS || '').split(',').map((e) => e.trim()).filter(Boolean);
+    if (!host) errors.push('--access requires CF_ACCESS_HOSTNAME');
+    else if (!HOSTNAME_RE.test(host)) errors.push(`CF_ACCESS_HOSTNAME is not a valid hostname: ${host}`);
+    else if (host === publicHostname || PUBLIC_SITE_HOSTS.includes(host)) {
+      errors.push(`Refusing to attach Access to ${host}: Access needs a dedicated hostname, not the public site or the tunnel hostname`);
+    }
+    if (!emails.length) errors.push('--access requires CF_ACCESS_EMAILS');
+    const bad = emails.filter((e) => !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e));
+    if (bad.length) errors.push(`Invalid e-mail(s) in CF_ACCESS_EMAILS: ${bad.join(', ')}`);
+    cfg.access = { hostname: host, emails };
+  }
+
+  if (errors.length) {
+    const err = new Error(errors.join('\n'));
+    err.configErrors = errors;
+    throw err;
+  }
+  return cfg;
 }
 
-async function cf(path, options = {}) {
-  const token = required('CLOUDFLARE_API_TOKEN');
-  const response = await fetch(`${CF_API}${path}`, {
-    ...options,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-      ...(options.headers || {}),
-    },
+function makeApi(token, fetchImpl = globalThis.fetch) {
+  return async function api(method, path, body) {
+    const res = await fetchImpl(`${API_BASE}${path}`, {
+      method,
+      headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+    let json;
+    try { json = await res.json(); } catch { throw new Error(`${method} ${path}: HTTP ${res.status}, response is not JSON`); }
+    if (!json.success) {
+      const msg = (json.errors || []).map((e) => `${e.code}: ${e.message}`).join('; ') || `HTTP ${res.status}`;
+      throw new Error(`${method} ${path}: ${msg}`);
+    }
+    return json.result;
+  };
+}
+
+/** Ingress rules: one per hostname, then the mandatory catch-all. */
+function buildIngress(hostnames, service) {
+  return [...hostnames.map((hostname) => ({ hostname, service })), { service: 'http_status:404' }];
+}
+
+/**
+ * Merges our hostnames into an existing remote tunnel config. Keeps every other key
+ * (originRequest, warp-routing, ...) and every rule that is not ours, including
+ * path-only rules. Our host-only rule is replaced in place so it keeps its precedence;
+ * missing ones are added before the single http_status:404 catch-all at the end.
+ */
+function mergeTunnelConfig(existing, hostnames, service) {
+  const base = existing && typeof existing === 'object' ? JSON.parse(JSON.stringify(existing)) : {};
+  const rules = Array.isArray(base.ingress) ? base.ingress : [];
+  const isCatchAll = (r) => r && !r.hostname && !r.path;
+  const isOurs = (r) => r && hostnames.includes(r.hostname) && !r.path;
+  const placed = new Set();
+  const out = [];
+  for (const r of rules) {
+    if (isCatchAll(r)) continue;
+    if (isOurs(r)) {
+      if (placed.has(r.hostname)) continue; // drop duplicates of our rule
+      placed.add(r.hostname);
+      out.push({ ...r, service });
+      continue;
+    }
+    out.push(r);
+  }
+  // A missing exact rule goes in front of the first host-only rule that would otherwise
+  // match it (e.g. *.djjessejay.ch), so cloudflared's first-match evaluation picks ours.
+  for (const h of hostnames) {
+    if (placed.has(h)) continue;
+    const shadow = out.findIndex((r) => r.hostname && !r.path && hostMatches(r.hostname, h));
+    const rule = { hostname: h, service };
+    if (shadow === -1) out.push(rule); else out.splice(shadow, 0, rule);
+  }
+  out.push({ service: 'http_status:404' });
+  base.ingress = out;
+  return base;
+}
+
+/** cloudflared hostname matching: exact, or a leading "*." wildcard for subdomains. */
+function hostMatches(pattern, host) {
+  if (pattern === host) return true;
+  return pattern.startsWith('*.') && host.endsWith(pattern.slice(1));
+}
+
+/** True when the policies are exactly one non_identity policy for exactly this service token. */
+function serviceTokenPolicyMatches(policies, tokenId) {
+  if (!Array.isArray(policies) || policies.length !== 1) return false;
+  const p = policies[0];
+  if (p.decision !== 'non_identity' || (p.exclude && p.exclude.length) || (p.require && p.require.length)) return false;
+  const inc = Array.isArray(p.include) ? p.include : [];
+  return inc.length === 1 && Boolean(inc[0] && inc[0].service_token) && inc[0].service_token.token_id === tokenId;
+}
+
+/** An existing Access app may only be reused if it protects exactly this hostname, without overrides. */
+function accessAppIsStrict(app, hostname) {
+  if (!app || app.type !== 'self_hosted') return false;
+  if (app.domain !== hostname) return false;
+  const doms = Array.isArray(app.self_hosted_domains) ? app.self_hosted_domains : [];
+  if (doms.some((d) => d !== hostname)) return false;
+  const dests = Array.isArray(app.destinations) ? app.destinations : [];
+  // Destination overrides can make matching paths public, so any override disqualifies the app.
+  if (dests.some((d) => !d || d.type !== 'public' || d.uri !== hostname || hasOverrides(d.overrides))) return false;
+  return true;
+}
+
+function hasOverrides(o) {
+  if (o === undefined || o === null) return false;
+  return Array.isArray(o) ? o.length > 0 : true;
+}
+
+/** Splits an Access app entry ("host", "host/path", "https://host/path") into lower-case host and path. */
+function splitAppEntry(entry) {
+  const s = String(entry).replace(/^[a-z][a-z0-9+.-]*:\/\//i, '');
+  const i = s.indexOf('/');
+  return i === -1 ? { host: s.toLowerCase(), path: '' } : { host: s.slice(0, i).toLowerCase(), path: s.slice(i) };
+}
+
+/** Every public hostname/path entry an Access app protects. */
+function accessAppEntries(app) {
+  const raw = [];
+  if (typeof app.domain === 'string') raw.push(app.domain);
+  for (const d of Array.isArray(app.self_hosted_domains) ? app.self_hosted_domains : []) if (typeof d === 'string') raw.push(d);
+  for (const d of Array.isArray(app.destinations) ? app.destinations : []) if (d && d.type === 'public' && typeof d.uri === 'string') raw.push(d.uri);
+  return raw.map(splitAppEntry);
+}
+
+/**
+ * Access apps other than the exact root app that also cover `hostname` and could take precedence:
+ * any entry with a path (a more specific path app wins over the root app), or another app naming
+ * the exact host. A wildcard root entry (*.zone, no path) is less specific than the exact app and is allowed.
+ */
+function conflictingAccessApps(apps, hostname) {
+  const host = hostname.toLowerCase();
+  return apps.filter((app) => {
+    if (app.domain === hostname) return false; // the root app itself; checked by accessAppIsStrict
+    return accessAppEntries(app).some((e) => {
+      if (!hostMatches(e.host, host)) return false;
+      const scoped = e.path !== '' && e.path !== '/' && e.path !== '/*';
+      return scoped || e.host === host;
+    });
   });
-  const body = await response.json().catch(() => ({}));
-  if (!response.ok || body.success === false) {
-    const detail = JSON.stringify(body.errors || body, null, 2);
-    throw new Error(`Cloudflare API ${response.status}: ${detail}`);
+}
+
+/** Rejects a missing, disabled or expired service token before anything is published. */
+async function checkServiceToken(api, accountId, tokenId, now = Date.now()) {
+  let tok;
+  try {
+    tok = await api('GET', `/accounts/${accountId}/access/service_tokens/${tokenId}`);
+  } catch (e) {
+    throw new Error(`Service token ${tokenId} could not be read (${e.message}); check CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID and the API token's Access: Service Tokens permission`);
   }
-  return body.result;
+  if (!tok) throw new Error(`Service token ${tokenId} not found`);
+  if (tok.enabled === false) throw new Error(`Service token ${tokenId} is disabled; the Worker could not authenticate`);
+  if (tok.expires_at) {
+    const exp = Date.parse(tok.expires_at);
+    if (Number.isNaN(exp) || exp <= now) throw new Error(`Service token ${tokenId} has expired (${tok.expires_at}); rotate it first`);
+    return { expiresAt: tok.expires_at };
+  }
+  return { expiresAt: null };
+}
+
+/** Reads every page of a paginated list endpoint (path must already contain a query string). */
+async function listAll(api, path, perPage = 50) {
+  const all = [];
+  for (let page = 1; page <= 100; page++) {
+    const items = await api('GET', `${path}&per_page=${perPage}&page=${page}`);
+    all.push(...items);
+    if (items.length < perPage) return all;
+  }
+  throw new Error(`${path}: more than 100 pages, refusing to continue`);
+}
+
+/** True when an Access app's policies are exactly one allow policy for exactly these e-mails. */
+function accessPolicyMatches(policies, emails) {
+  if (!Array.isArray(policies) || policies.length !== 1) return false;
+  const p = policies[0];
+  if (p.decision !== 'allow' || (p.exclude && p.exclude.length) || (p.require && p.require.length)) return false;
+  const inc = Array.isArray(p.include) ? p.include : [];
+  if (!inc.every((i) => i && i.email && typeof i.email.email === 'string')) return false;
+  const got = [...new Set(inc.map((i) => i.email.email.toLowerCase()))].sort();
+  const want = [...new Set(emails.map((e) => e.toLowerCase()))].sort();
+  return got.length === want.length && got.every((e, i) => e === want[i]);
+}
+
+/** Classifies an existing DNS state for a hostname against the expected tunnel CNAME. */
+function classifyDns(records, target) {
+  if (!records.length) return { state: 'missing' };
+  const ok = records.length === 1 && records[0].type === 'CNAME' && records[0].content === target && records[0].proxied === true;
+  return ok ? { state: 'ok', id: records[0].id } : { state: 'conflict', records };
+}
+
+async function run(cfg, flags, api, log = console.log) {
+  const mode = flags.apply ? 'APPLY' : 'PLAN';
+  log(`Cloudflare Tunnel setup (${mode})`);
+  const hostnames = [cfg.publicHostname, ...(cfg.access ? [cfg.access.hostname] : [])];
+
+  // Phase 1: read and validate everything. No mutation happens before this phase passes.
+  const zone = await api('GET', `/zones/${cfg.zoneId}`);
+  if (zone.status !== 'active') throw new Error(`Zone ${zone.name} is not active (status: ${zone.status})`);
+  if (!zone.account || zone.account.id !== cfg.accountId) {
+    throw new Error(`Zone ${zone.name} does not belong to CLOUDFLARE_ACCOUNT_ID; a tunnel CNAME only works within the same account`);
+  }
+  for (const h of hostnames) {
+    if (h !== zone.name && !h.endsWith(`.${zone.name}`)) throw new Error(`${h} is not inside zone ${zone.name}`);
+  }
+  log(`  zone ${zone.name}: active`);
+
+  const tunnels = await api('GET', `/accounts/${cfg.accountId}/cfd_tunnel?name=${encodeURIComponent(cfg.tunnelName)}&is_deleted=false`);
+  if (tunnels.length > 1) throw new Error(`Found ${tunnels.length} active tunnels named ${cfg.tunnelName}; resolve the duplicates first`);
+  const reused = tunnels[0] || null;
+  if (reused && reused.remote_config === false) throw new Error(`Tunnel ${cfg.tunnelName} is locally managed; expected config_src=cloudflare`);
+  let snapshot = null;
+  if (reused) {
+    const conf = await api('GET', `/accounts/${cfg.accountId}/cfd_tunnel/${reused.id}/configurations`);
+    snapshot = (conf && conf.config) || {};
+    log(`  tunnel ${cfg.tunnelName}: reuse ${reused.id}`);
+  } else {
+    log(`  tunnel ${cfg.tunnelName}: ${flags.apply ? 'will create' : 'would create'}`);
+  }
+
+  const target = reused ? `${reused.id}.cfargotunnel.com` : null;
+  const dnsToCreate = [];
+  for (const name of hostnames) {
+    const records = await api('GET', `/zones/${cfg.zoneId}/dns_records?name=${encodeURIComponent(name)}`);
+    const s = target ? classifyDns(records, target) : (records.length ? { state: 'conflict', records } : { state: 'missing' });
+    if (s.state === 'conflict') {
+      const desc = s.records.map((r) => `${r.type} ${r.proxied ? 'proxied' : 'dns-only'}`).join(', ');
+      throw new Error(`DNS ${name} already exists (${desc}); refusing to overwrite. Remove or change it explicitly first.`);
+    }
+    if (s.state === 'missing') dnsToCreate.push(name);
+    log(`  dns ${name}: ${s.state === 'ok' ? 'ok' : (flags.apply ? 'will create proxied CNAME' : 'would create proxied CNAME')}`);
+  }
+
+  const accessSpecs = [];
+  if (cfg.originTokenId) {
+    accessSpecs.push({
+      hostname: cfg.publicHostname, appName: `${cfg.tunnelName}-worker-only`, what: 'service token (Worker only)',
+      matches: (pol) => serviceTokenPolicyMatches(pol, cfg.originTokenId),
+      policy: { name: 'wdjjj worker only', decision: 'non_identity', precedence: 1, include: [{ service_token: { token_id: cfg.originTokenId } }] },
+    });
+  } else {
+    log(`  access ${cfg.publicHostname}: NONE (--allow-public-origin): the origin is reachable without the Worker`);
+  }
+  if (cfg.access) {
+    accessSpecs.push({
+      hostname: cfg.access.hostname, appName: `${cfg.tunnelName}-access`, what: `${cfg.access.emails.length} e-mail(s)`,
+      matches: (pol) => accessPolicyMatches(pol, cfg.access.emails),
+      policy: { name: 'allow-listed e-mails', decision: 'allow', precedence: 1, include: cfg.access.emails.map((email) => ({ email: { email } })) },
+    });
+  }
+  if (cfg.originTokenId) {
+    const tok = await checkServiceToken(api, cfg.accountId, cfg.originTokenId);
+    log(`  service token: enabled${tok.expiresAt ? `, expires ${tok.expiresAt}` : ''}`);
+  }
+  const accessToCreate = [];
+  // All apps of the account: path- or host-scoped apps elsewhere can override the root app.
+  const allApps = accessSpecs.length ? await listAll(api, `/accounts/${cfg.accountId}/access/apps?`) : [];
+  for (const spec of accessSpecs) {
+    const conflicts = conflictingAccessApps(allApps, spec.hostname);
+    if (conflicts.length) {
+      const names = conflicts.map((a) => `${a.name || a.id} (${a.domain})`).join(', ');
+      throw new Error(`Other Access apps also cover ${spec.hostname} and may take precedence: ${names}; remove or reconcile them first`);
+    }
+    const matching = allApps.filter((a) => a.domain === spec.hostname);
+    if (matching.length > 1) throw new Error(`Found ${matching.length} Access apps for ${spec.hostname}; resolve the duplicates first`);
+    const app = matching[0];
+    if (app && !accessAppIsStrict(app, spec.hostname)) {
+      throw new Error(`Access app for ${spec.hostname} has another type, extra domains or destination overrides; fix it in the dashboard first`);
+    }
+    if (app) {
+      const policies = await api('GET', `/accounts/${cfg.accountId}/access/apps/${app.id}/policies`);
+      if (!spec.matches(policies)) {
+        throw new Error(`Access app for ${spec.hostname} exists but its policies do not match the expected ${spec.what} exactly; fix it in the dashboard first`);
+      }
+      log(`  access ${spec.hostname}: app and policy match`);
+    } else {
+      accessToCreate.push(spec);
+      log(`  access ${spec.hostname}: ${flags.apply ? 'will create' : 'would create'} app for ${spec.what}`);
+    }
+  }
+  log(`  ingress: ${hostnames.join(', ')} -> ${cfg.originService}, catch-all http_status:404`);
+
+  if (!flags.apply) {
+    log('Plan only. Re-run with --apply to make these changes.');
+    return { created: { dns: [], tunnelId: null, accessAppIds: [] } };
+  }
+
+  // Phase 2: mutate, with rollback of everything this run changed.
+  const created = { dns: [], dnsAttempted: [], tunnelId: null, tunnelAttempted: false, accessAppIds: [], accessAttempted: [], configChanged: false };
+  let tunnelId = reused && reused.id;
+  try {
+    if (!tunnelId) {
+      created.tunnelAttempted = true; // before the POST: a lost response must still be reconciled
+      const t = await api('POST', `/accounts/${cfg.accountId}/cfd_tunnel`, { name: cfg.tunnelName, config_src: 'cloudflare' });
+      tunnelId = t.id;
+      created.tunnelId = t.id;
+      log(`  tunnel ${cfg.tunnelName}: created ${tunnelId}`);
+    }
+    for (const spec of accessToCreate) {
+      created.accessAttempted.push(spec.hostname); // before the POST, as above
+      const newApp = await api('POST', `/accounts/${cfg.accountId}/access/apps`, {
+        name: spec.appName, domain: spec.hostname, type: 'self_hosted', session_duration: '24h', app_launcher_visible: false,
+      });
+      created.accessAppIds.push(newApp.id);
+      await api('POST', `/accounts/${cfg.accountId}/access/apps/${newApp.id}/policies`, spec.policy);
+      log(`  access ${spec.hostname}: app ${newApp.id} created`);
+    }
+    created.configChanged = true; // set first: a lost response must still trigger the restore
+    await api('PUT', `/accounts/${cfg.accountId}/cfd_tunnel/${tunnelId}/configurations`, { config: mergeTunnelConfig(snapshot, hostnames, cfg.originService) });
+    log('  ingress: updated');
+    const cname = `${tunnelId}.cfargotunnel.com`;
+    for (const name of dnsToCreate) {
+      created.dnsAttempted.push({ name, content: cname }); // before the POST: a lost response must still be reconciled
+      const rec = await api('POST', `/zones/${cfg.zoneId}/dns_records`, { type: 'CNAME', name, content: cname, proxied: true, comment: `tunnel ${cfg.tunnelName}` });
+      created.dns.push(rec.id);
+      log(`  dns ${name}: created proxied CNAME`);
+    }
+  } catch (err) {
+    log('  rolling back changes made by this run');
+    const step = async (label, fn) => { try { await fn(); log(`    ${label}: done`); } catch (e) { log(`    ${label}: FAILED (${e.message})`); } };
+    for (const id of created.dns) await step(`delete dns record ${id}`, () => api('DELETE', `/zones/${cfg.zoneId}/dns_records/${id}`));
+    // These hostnames had no record in phase 1, so any CNAME still pointing at this tunnel was
+    // created by this run: a lost create response, or a delete above that failed. Remove it.
+    for (const { name, content } of created.dnsAttempted) {
+      await step(`reconcile dns ${name}`, async () => {
+        const recs = await api('GET', `/zones/${cfg.zoneId}/dns_records?name=${encodeURIComponent(name)}`);
+        for (const r of recs) {
+          if (r.type === 'CNAME' && r.content === content) await api('DELETE', `/zones/${cfg.zoneId}/dns_records/${r.id}`);
+        }
+      });
+    }
+    if (created.configChanged && snapshot) await step('restore previous tunnel configuration', () => api('PUT', `/accounts/${cfg.accountId}/cfd_tunnel/${tunnelId}/configurations`, { config: snapshot }));
+    for (const id of created.accessAppIds) await step(`delete access app ${id}`, () => api('DELETE', `/accounts/${cfg.accountId}/access/apps/${id}`));
+    // Phase 1 found no app for these hostnames, so any app still there was created by this run.
+    for (const hostname of created.accessAttempted) {
+      await step(`reconcile access ${hostname}`, async () => {
+        const apps = await listAll(api, `/accounts/${cfg.accountId}/access/apps?`);
+        for (const a of apps) if (a.domain === hostname) await api('DELETE', `/accounts/${cfg.accountId}/access/apps/${a.id}`);
+      });
+    }
+    // Phase 1 found no tunnel with this name, so one that exists now was created by this run.
+    if (!created.tunnelId && created.tunnelAttempted) {
+      await step(`reconcile tunnel ${cfg.tunnelName}`, async () => {
+        const ts = await api('GET', `/accounts/${cfg.accountId}/cfd_tunnel?name=${encodeURIComponent(cfg.tunnelName)}&is_deleted=false`);
+        if (ts.length > 1) throw new Error(`${ts.length} tunnels named ${cfg.tunnelName}; delete the one created by this run manually`);
+        if (ts.length === 1) await api('DELETE', `/accounts/${cfg.accountId}/cfd_tunnel/${ts[0].id}`);
+      });
+    }
+    if (created.tunnelId) await step(`delete tunnel ${created.tunnelId}`, () => api('DELETE', `/accounts/${cfg.accountId}/cfd_tunnel/${created.tunnelId}`));
+    throw err;
+  }
+
+  log('Done. Install cloudflared on the origin with the tunnel token from the Cloudflare dashboard');
+  log('(Zero Trust -> Networks -> Tunnels). This script does not print the token.');
+  return { created };
 }
 
 async function main() {
-  const accountId = required('CLOUDFLARE_ACCOUNT_ID');
-  const zoneId = required('CLOUDFLARE_ZONE_ID');
-  const publicHostname = required('CF_PUBLIC_HOSTNAME');
-  const originService = env('CF_ORIGIN_SERVICE', 'http://127.0.0.1:3000');
-  const tunnelName = env('CF_TUNNEL_NAME', 'djjessejay-origin');
-  const accessHostname = process.env.CF_ACCESS_HOSTNAME;
-  const accessEmails = (process.env.CF_ACCESS_EMAILS || '').split(',').map(s => s.trim()).filter(Boolean);
-
-  assertHostname(publicHostname, 'CF_PUBLIC_HOSTNAME');
-  if (access) {
-    if (!accessHostname) throw new Error('CF_ACCESS_HOSTNAME is required with --access');
-    assertHostname(accessHostname, 'CF_ACCESS_HOSTNAME');
-    if (accessHostname === publicHostname) {
-      throw new Error('CF_ACCESS_HOSTNAME must be distinct from CF_PUBLIC_HOSTNAME; do not put Access in front of the public site accidentally');
-    }
-    if (accessEmails.length === 0) throw new Error('CF_ACCESS_EMAILS must contain at least one email with --access');
+  let flags, cfg;
+  try {
+    flags = parseArgs(process.argv.slice(2));
+    cfg = readConfig(process.env, flags);
+  } catch (err) {
+    console.error(`Configuration error:\n  ${err.message.split('\n').join('\n  ')}`);
+    process.exit(2);
   }
-
-  const config = {
-    tunnelName,
-    publicHostname,
-    originService,
-    accessHostname: accessHostname || null,
-    accessEmails,
-  };
-
-  console.log(JSON.stringify({ mode: apply ? 'APPLY' : 'PLAN', config }, null, 2));
-
-  if (!apply) {
-    console.log('DRY-RUN: no Cloudflare mutation performed. Re-run with --apply to execute.');
-    return;
+  try {
+    await run(cfg, flags, makeApi(cfg.token));
+  } catch (err) {
+    console.error(`FAILED: ${err.message}`);
+    process.exit(1);
   }
-
-  const tunnel = await cf(`/accounts/${accountId}/cfd_tunnel`, {
-    method: 'POST',
-    body: JSON.stringify({ name: tunnelName, config_src: 'cloudflare' }),
-  });
-
-  const tunnelId = tunnel.id;
-  if (!tunnelId) throw new Error('Cloudflare did not return a tunnel id');
-
-  await cf(`/accounts/${accountId}/cfd_tunnel/${tunnelId}/configurations`, {
-    method: 'PUT',
-    body: JSON.stringify({
-      config: {
-        ingress: [
-          { hostname: publicHostname, service: originService, originRequest: {} },
-          ...(accessHostname ? [{ hostname: accessHostname, service: originService, originRequest: {} }] : []),
-          { service: 'http_status:404' },
-        ],
-      },
-    }),
-  });
-
-  const dns = await cf(`/zones/${zoneId}/dns_records?type=CNAME&name=${encodeURIComponent(publicHostname)}`);
-  if (Array.isArray(dns) && dns.length > 0) {
-    throw new Error(`DNS record already exists for ${publicHostname}; refusing to overwrite it automatically`);
-  }
-
-  await cf(`/zones/${zoneId}/dns_records`, {
-    method: 'POST',
-    body: JSON.stringify({
-      type: 'CNAME',
-      name: publicHostname,
-      content: `${tunnelId}.cfargotunnel.com`,
-      proxied: true,
-      ttl: 1,
-    }),
-  });
-
-  let accessApp = null;
-  if (accessHostname) {
-    accessApp = await cf(`/accounts/${accountId}/access/apps`, {
-      method: 'POST',
-      body: JSON.stringify({
-        name: `${tunnelName} Access`,
-        domain: accessHostname,
-        type: 'self_hosted',
-        session_duration: '24h',
-        policies: [
-          {
-            name: `${tunnelName} allow-list`,
-            decision: 'allow',
-            include: accessEmails.map(email => ({ email: { email } })),
-          },
-        ],
-      }),
-    });
-  }
-
-  // Never print tunnel credentials/token. The operator can retrieve the token from Cloudflare.
-  console.log(JSON.stringify({
-    success: true,
-    tunnelId,
-    dnsTarget: `${tunnelId}.cfargotunnel.com`,
-    accessApplicationId: accessApp?.id || null,
-    next: `Run cloudflared with the tunnel token from Cloudflare; verify with scripts/verify-origin-protection.js`,
-  }, null, 2));
 }
 
-main().catch(error => {
-  console.error(`ERROR: ${error.message}`);
-  process.exitCode = 1;
-});
+if (require.main === module) main();
+
+module.exports = { parseArgs, readConfig, parseOriginService, buildIngress, mergeTunnelConfig, hostMatches, accessPolicyMatches, serviceTokenPolicyMatches, accessAppIsStrict, conflictingAccessApps, checkServiceToken, listAll, classifyDns, run, makeApi };

@@ -61,7 +61,7 @@ function createHarness(audioBpm = 128) {
     }
   };
 
-  const context = vm.createContext({ window, document });
+  const context = vm.createContext({ window, document, CustomEvent: window.CustomEvent });
   vm.runInContext(source, context, { filename: 'fauli.js' });
 
   return {
@@ -80,7 +80,7 @@ test('CHILL state is deterministic and canonical', () => {
   const { FAULI } = createHarness();
   FAULI.setState(FAULI.STATES.CHILL);
 
-  assert.deepEqual(FAULI.getSnapshot(), {
+  assert.deepEqual({ ...FAULI.getSnapshot() }, {
     stability: 100,
     visualBpm: 0.5,
     signal: '97.5 MHz',
@@ -123,6 +123,6 @@ test('determinism: same initial state + same transition sequence = same final sn
     b.FAULI.setState(state);
   }
 
-  assert.deepEqual(a.FAULI.getSnapshot(), b.FAULI.getSnapshot());
+  assert.deepEqual({ ...a.FAULI.getSnapshot() }, { ...b.FAULI.getSnapshot() });
   assert.equal(a.audio.bpm, b.audio.bpm);
 });

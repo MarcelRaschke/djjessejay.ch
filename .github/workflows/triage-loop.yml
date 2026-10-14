@@ -1,0 +1,56 @@
+name: triage-loop
+
+on:
+  workflow_dispatch: {}
+  # Phase 2 (supervisierter Betrieb): nur manuell ausloesen.
+  # Phase 3 (unbeaufsichtigt): folgende zwei Zeilen aktivieren — montags 08:30 Europe/Zurich:
+  # schedule:
+  #   - cron: "30 6 * * 1"
+
+concurrency:
+  group: triage-loop
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+  actions: read
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Abhaengigkeiten
+        run: pip install pyyaml
+      - name: Collect
+        working-directory: triage
+        run: python collect.py --out collect.json
+        env:
+          # Cross-Repo-Lesezugriff (jessejay-ch/djjessejay.ch) braucht einen PAT als Secret.
+          # Ohne Secret faellt der Loop auf den Repo-Token zurueck (Self-Repo lesbar, Cross-Repo fail-closed).
+          GITHUB_TOKEN: ${{ secrets.IVDJ_TRIAGE_TOKEN || github.token }}
+      - name: Grade
+        id: grade
+        working-directory: triage
+        run: python grade.py --collect collect.json --report report.json --trace trace.json
+      - name: Report
+        if: always()
+        working-directory: triage
+        run: python report.py --report report.json --trace trace.json
+        env:
+          SLACK_WEBHOOK_URL_DEFAULT: ${{ secrets.SLACK_WEBHOOK_GITHUB }}
+          SLACK_WEBHOOK_URL_CRITICAL: ${{ secrets.SLACK_WEBHOOK_CRITICAL }}
+      - name: Trace-Artefakt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: triage-trace
+          path: triage/trace.json
+          retention-days: 90
+          if-no-files-found: ignore

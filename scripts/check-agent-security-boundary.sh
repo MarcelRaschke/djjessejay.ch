@@ -78,7 +78,7 @@ done < <(find src scripts .github -type f \
 # AGENT-SEC-07: provider credentials must be read from the environment rather
 # than passed through request input. This is a static boundary check.
 if grep -REInq \
-  'request\.(input|params|arguments).*([A-Z_]*(API_KEY|TOKEN|SECRET)|privateKey)|["'"'](api[_-]?key|access[_-]?token|private[_-]?key)["'"'][[:space:]]*:' \
+  'request\.(input|params|arguments).*([A-Z_]*(API_KEY|TOKEN|SECRET)|privateKey)|["'"'"'](api[_-]?key|access[_-]?token|private[_-]?key)["'"'"'][[:space:]]*:' \
   src/agent --include='*.js' --include='*.mjs' --include='*.ts' 2>/dev/null; then
   fail 'credential material appears to cross the agent/tool request boundary'
 fi

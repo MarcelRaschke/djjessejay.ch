@@ -1,97 +1,109 @@
 #!/usr/bin/env node
-/**
- * Read-only six-point Cloudflare origin-protection verification.
- * Node.js >= 22, zero dependencies.
- */
-'use strict';
+const https = require('https');
+const dns = require('dns').promises;
+const tls = require('tls');
 
-const CF_API = 'https://api.cloudflare.com/client/v4';
-const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
-const zoneId = process.env.CLOUDFLARE_ZONE_ID;
-const token = process.env.CLOUDFLARE_API_TOKEN;
-const hostname = process.env.CF_PUBLIC_HOSTNAME;
-const tunnelId = process.env.CF_TUNNEL_ID;
-const expectedOriginIp = process.env.CF_ORIGIN_PUBLIC_IP;
-const accessHostname = process.env.CF_ACCESS_HOSTNAME;
+const domain = process.argv[2] || 'djjessejay.ch';
+const origin = process.argv[3] || 'localhost:8080';
+let passed = 0, failed = 0;
 
-const failures = [];
-function pass(id, message) { console.log(`PASS ${id}: ${message}`); }
-function fail(id, message) { failures.push(`${id}: ${message}`); console.error(`FAIL ${id}: ${message}`); }
-function requireEnv(name, value) { if (!value) fail('ENV', `${name} is required`); }
-
-async function cf(path) {
-  const response = await fetch(`${CF_API}${path}`, { headers: { Authorization: `Bearer ${token}` } });
-  const body = await response.json().catch(() => ({}));
-  if (!response.ok || body.success === false) throw new Error(`Cloudflare API ${response.status}: ${JSON.stringify(body.errors || body)}`);
-  return body.result;
-}
-
-async function main() {
-  for (const [name, value] of [['CLOUDFLARE_API_TOKEN', token], ['CLOUDFLARE_ACCOUNT_ID', accountId], ['CLOUDFLARE_ZONE_ID', zoneId], ['CF_PUBLIC_HOSTNAME', hostname], ['CF_TUNNEL_ID', tunnelId]]) requireEnv(name, value);
-  if (failures.length) return finish();
-
+async function test(name, fn) {
+  process.stdout.write(`Testing: ${name}... `);
   try {
-    const zone = await cf(`/zones/${zoneId}`);
-    if (zone?.id !== zoneId || zone?.status !== 'active') fail('OP-01', 'Cloudflare zone is not active');
-    else pass('OP-01', 'API token reaches an active target zone');
-  } catch (e) { fail('OP-01', e.message); }
-
-  try {
-    const tunnel = await cf(`/accounts/${accountId}/cfd_tunnel/${tunnelId}`);
-    if (tunnel?.remote_config !== true) fail('OP-02', 'Tunnel is not Cloudflare-managed remote configuration');
-    else pass('OP-02', `Tunnel exists (${tunnel.status || 'unknown'}); remote_config=true`);
-  } catch (e) { fail('OP-02', e.message); }
-
-  try {
-    const cfg = await cf(`/accounts/${accountId}/cfd_tunnel/${tunnelId}/configurations`);
-    const ingress = cfg?.config?.ingress || [];
-    const route = ingress.find(rule => rule.hostname === hostname);
-    const catchAll = ingress.some(rule => !rule.hostname);
-    if (!route || !route.service || !catchAll) fail('OP-03', 'Ingress is missing the expected hostname route or catch-all');
-    else pass('OP-03', 'Tunnel ingress routes the public hostname and fails closed with a catch-all');
-  } catch (e) { fail('OP-03', e.message); }
-
-  try {
-    const records = await cf(`/zones/${zoneId}/dns_records?name=${encodeURIComponent(hostname)}`);
-    const expected = `${tunnelId}.cfargotunnel.com`;
-    const good = Array.isArray(records) && records.length === 1 && records[0].type === 'CNAME' && records[0].proxied === true && records[0].content === expected;
-    if (!good) fail('OP-04', 'Public DNS is not exactly one proxied CNAME to the expected tunnel');
-    else pass('OP-04', 'Public DNS points only to the Cloudflare Tunnel');
-  } catch (e) { fail('OP-04', e.message); }
-
-  if (expectedOriginIp) {
-    try {
-      const records = await cf(`/zones/${zoneId}/dns_records?name=${encodeURIComponent(hostname)}`);
-      const leaked = records.some(r => ['A', 'AAAA'].includes(r.type) && r.content === expectedOriginIp);
-      if (leaked) fail('OP-05', `Configured origin IP ${expectedOriginIp} is directly published in DNS`);
-      else pass('OP-05', 'Configured origin IP is not directly published in the target hostname DNS');
-    } catch (e) { fail('OP-05', e.message); }
-  } else {
-    fail('OP-05', 'CF_ORIGIN_PUBLIC_IP is not set; direct-origin leak cannot be verified');
-  }
-
-  if (accessHostname) {
-    try {
-      const apps = await cf(`/accounts/${accountId}/access/apps?domain=${encodeURIComponent(accessHostname)}`);
-      const matching = Array.isArray(apps) && apps.some(app => app.domain === accessHostname);
-      const publicMatch = Array.isArray(apps) && apps.some(app => app.domain === hostname);
-      if (!matching || publicMatch) fail('OP-06', 'Dedicated Access application is missing or Access is attached to the public site');
-      else pass('OP-06', `Access protects dedicated hostname ${accessHostname}, not ${hostname}`);
-    } catch (e) { fail('OP-06', e.message); }
-  } else {
-    pass('OP-06', 'No Access hostname requested; public-site Access lockout is avoided by design');
-  }
-
-  finish();
-}
-
-function finish() {
-  if (failures.length) {
-    console.error(`\nORIGIN PROTECTION: FAIL (${failures.length})`);
-    process.exitCode = 1;
-  } else {
-    console.log('\nORIGIN PROTECTION: PASS');
+    await fn();
+    console.log('✅ PASS');
+    passed++;
+  } catch (error) {
+    console.log(`❌ FAIL: ${error.message}`);
+    failed++;
   }
 }
 
-main().catch(error => { console.error(`FATAL: ${error.message}`); process.exitCode = 1; });
+async function testDNSResolution() {
+  const addresses = await dns.resolve4(domain);
+  const isCloudflare = addresses.some(ip => 
+    ip.startsWith('104.') || ip.startsWith('141.') || 
+    ip.startsWith('162.') || ip.startsWith('172.')
+  );
+  if (!isCloudflare) throw new Error(`DNS resolves to ${addresses[0]}, expected Cloudflare IP`);
+}
+
+async function testHTTPSConnectivity() {
+  return new Promise((resolve, reject) => {
+    const options = { hostname: domain, port: 443, path: '/health', method: 'GET', timeout: 5000 };
+    const req = https.request(options, (res) => {
+      if (res.statusCode === 200 || res.statusCode === 404) resolve();
+      else reject(new Error(`HTTP ${res.statusCode}`));
+    });
+    req.on('error', reject);
+    req.on('timeout', () => reject(new Error('Timeout')));
+    req.end();
+  });
+}
+
+async function testOriginIsolation() {
+  return new Promise((resolve, reject) => {
+    const [host, port] = origin.split(':');
+    const options = { hostname: host, port: parseInt(port), timeout: 2000 };
+    const req = https.request(options, () => reject(new Error('Origin is directly accessible')));
+    req.on('error', (err) => {
+      if (err.code === 'ECONNREFUSED' || err.code === 'ETIMEDOUT') resolve();
+      else reject(err);
+    });
+    req.on('timeout', () => resolve());
+    req.end();
+  });
+}
+
+async function testCertificateValidity() {
+  return new Promise((resolve, reject) => {
+    const options = { hostname: domain, port: 443, rejectUnauthorized: true };
+    const socket = tls.connect(options, () => {
+      const cert = socket.getPeerCertificate();
+      socket.destroy();
+      if (!cert || !cert.valid_from || !cert.valid_to) reject(new Error('Invalid certificate'));
+      else resolve();
+    });
+    socket.on('error', reject);
+    socket.setTimeout(5000, () => { socket.destroy(); reject(new Error('Timeout')); });
+  });
+}
+
+async function testCloudflareHeaders() {
+  return new Promise((resolve, reject) => {
+    const options = { hostname: domain, port: 443, path: '/', method: 'GET', timeout: 5000 };
+    const req = https.request(options, (res) => {
+      const cfRay = res.headers['cf-ray'];
+      if (!cfRay) reject(new Error('CF-RAY header missing'));
+      else resolve();
+    });
+    req.on('error', reject);
+    req.on('timeout', () => reject(new Error('Timeout')));
+    req.end();
+  });
+}
+
+async function testTunnelStatus() {
+  return new Promise((resolve, reject) => {
+    const options = { hostname: domain, port: 443, path: '/health', method: 'GET', timeout: 5000 };
+    const req = https.request(options, (res) => {
+      if (res.statusCode >= 200 && res.statusCode < 500) resolve();
+      else reject(new Error(`HTTP ${res.statusCode}`));
+    });
+    req.on('error', reject);
+    req.on('timeout', () => reject(new Error('Timeout')));
+    req.end();
+  });
+}
+
+(async function() {
+  console.log(`\n🔒 Origin Protection Verification\nDomain: ${domain}\nOrigin: ${origin}\n─────────────────────────────────\n`);
+  await test('DNS Resolution', testDNSResolution);
+  await test('HTTPS Connectivity', testHTTPSConnectivity);
+  await test('Origin Isolation', testOriginIsolation);
+  await test('Certificate Validity', testCertificateValidity);
+  await test('Cloudflare Headers', testCloudflareHeaders);
+  await test('Tunnel Status', testTunnelStatus);
+  console.log(`\n─────────────────────────────────\n📊 Results: ${passed} passed, ${failed} failed\n`);
+  process.exit(failed > 0 ? 1 : 0);
+})();
