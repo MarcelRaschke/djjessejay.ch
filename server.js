@@ -85,9 +85,23 @@ const PUBLIC_DIRS = new Set(['css', 'js', 'assets', 'survey', 'pressekit', 'pres
 const BLOCKED_EXT = /\.(?:sql|env|pem|key|log|jsonl|sh|py|ts|md|ya?ml|lock)$/i;
 const staticFiles = express.static(__dirname, { dotfiles: 'ignore', index: ['index.html'], redirect: false });
 
-function isDirectory(rel) {
-  try { return fs.statSync(path.join(__dirname, rel)).isDirectory(); } catch { return false; }
+// Directory index of the allowlisted trees, built once at startup so the request path never
+// touches the filesystem synchronously. Directories added later need a restart to get the
+// trailing-slash redirect; their files are still served by express.static.
+function collectPublicDirectories() {
+  const dirs = new Set();
+  const walk = (rel) => {
+    let entries;
+    try { entries = fs.readdirSync(path.join(__dirname, rel), { withFileTypes: true }); } catch { return; }
+    dirs.add(rel);
+    for (const entry of entries) {
+      if (entry.isDirectory() && !entry.name.startsWith('.')) walk(`${rel}/${entry.name}`);
+    }
+  };
+  for (const top of PUBLIC_DIRS) walk(top);
+  return dirs;
 }
+const PUBLIC_DIR_INDEX = collectPublicDirectories();
 
 /**
  * Returns 'serve', 'deny', 'bad', 'pass' (not a file request: let the SPA fallback answer)
@@ -105,7 +119,7 @@ function classifyStaticPath(rawPath) {
   // A directory inside the allowlist requested without its trailing slash ("/survey",
   // "/visuals/blue-dimension-21600") redirects to its index. The target is built from the
   // normalized relative path, so "//survey" cannot become an off-site redirect.
-  if (PUBLIC_DIRS.has(top) && !decoded.endsWith('/') && isDirectory(rel)) return { redirect: `/${rel}/` };
+  if (PUBLIC_DIRS.has(top) && !decoded.endsWith('/') && PUBLIC_DIR_INDEX.has(rel)) return { redirect: `/${rel}/` };
   if (PUBLIC_DIRS.has(top) && rel.length > top.length) return 'serve';
   const last = rel.split('/').pop();
   return last.includes('.') ? 'deny' : 'pass';

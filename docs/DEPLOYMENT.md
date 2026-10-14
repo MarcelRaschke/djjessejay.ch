@@ -298,7 +298,16 @@ origin answers correctly, otherwise the site returns 404 during the switch.
      `.../server.js` and `.../.env` must return 404.
    - Probing from a workstation instead needs a temporary firewall rule for that one source IP;
      remove it right after the check.
-   - Do not continue until this check passes.
+   - `-k` above only skips trust so the content check works; it does not prove the certificate.
+     Validate TLS separately, without `-k`:
+     `curl -sS -o /dev/null -w '%{http_code}\n' --resolve djjessejay.ch:443:127.0.0.1 https://djjessejay.ch/`
+     must print 200 with no certificate error. If the origin uses a Cloudflare Origin CA certificate
+     (not publicly trusted), add `--cacert /path/to/cloudflare-origin-ca-root.pem`.
+   - Check name and expiry:
+     `openssl s_client -connect 127.0.0.1:443 -servername djjessejay.ch </dev/null 2>/dev/null | openssl x509 -noout -subject -ext subjectAltName -enddate -checkend 604800`
+     must list `djjessejay.ch` in the SAN and report "Certificate will not expire" (valid for at least 7 more days).
+     With the SSL mode at Full (strict), a failing check here means a 526 for every visitor after the DNS switch.
+   - Do not continue until all checks pass.
 
 3. **DNS Revert** (Cloudflare Dashboard → DNS → Records)
    - Delete the CNAME record for `djjessejay.ch`
