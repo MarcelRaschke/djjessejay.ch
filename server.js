@@ -10,6 +10,7 @@ const controlCenterRouter = require('./control-center/data-sources');
 const djjjSurveyRouter = require('./routes/djjj-survey');
 const { createHoneypotMiddleware } = require('./honeypot/honeypot-middleware');
 const { createHoneypotMonitor } = require('./honeypot/honeypot-monitor');
+const { createClientKeyGenerator } = require('./src/client-key');
 
 const app = express();
 
@@ -35,6 +36,15 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+// Behind the Cloudflare Tunnel every request arrives from cloudflared on the
+// loopback interface. Trusting loopback lets Express read x-forwarded-for at
+// all; the rate-limit key itself comes from createClientKeyGenerator, which
+// takes the leftmost entry — the one the wdjjj Worker writes — instead of
+// whichever hop happens to be last. Without this both limiters would share a
+// single bucket for the whole internet.
+app.set('trust proxy', 'loopback');
+const clientKey = createClientKeyGenerator(rateLimit.ipKeyGenerator);
+
 // Rate limiting for API endpoints
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -43,7 +53,8 @@ const apiLimiter = rateLimit({
     error: 'Too many requests, please try again after 15 minutes.'
   },
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
+  keyGenerator: clientKey
 });
 
 // Stricter rate limiting for AI proxy to bound upstream cost
@@ -52,7 +63,8 @@ const aiLimiter = rateLimit({
   max: 30,
   message: { error: 'Too many AI requests, please try again after 15 minutes.' },
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
+  keyGenerator: clientKey
 });
 
 // Apply rate limiting to API routes
