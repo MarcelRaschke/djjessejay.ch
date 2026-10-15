@@ -3,6 +3,7 @@
 const express = require('express');
 const nodemailer = require('nodemailer');
 const path = require('path');
+const fs = require('fs');
 const rateLimit = require('express-rate-limit');
 const cors = require('cors');
 const controlCenterRouter = require('./control-center/data-sources');
@@ -68,8 +69,77 @@ app.use('/api/control-center', controlCenterRouter);
 // rate-limited by the global /api/ limiter, honeypot-checked in the router.
 app.use('/api/djjj-survey', djjjSurveyRouter);
 
-// Static files
-app.use(express.static(__dirname, { dotfiles: 'ignore', index: false }));
+// Static files.
+// In production the origin only serves /api: the public site comes from GitHub Pages
+// through the wdjjj Worker, and the Worker forwards nothing else here. Static serving
+// is therefore off unless SERVE_STATIC=1 (local preview, `npm run dev`, or the
+// documented custom-server rollback). Even then only an explicit allowlist of public
+// site files is served; everything else in the repository stays unreachable.
+const SERVE_STATIC = process.env.SERVE_STATIC === '1';
+const PUBLIC_FILES = new Set([
+  'index.html', 'ivdj-supreme.html', 'hero-test.html', 'artist-profile.json', 'robots.txt',
+  'favicon.ico', 'favicon.svg', 'tailwind.css', 'jessejay.css', 'scripts.js',
+  'DJ-Jesse-Jay.jpg', 'DJPult.gif', 'img_contact_sound.svg', 'spacer.svg',
+]);
+const PUBLIC_DIRS = new Set(['css', 'js', 'assets', 'survey', 'pressekit', 'presskit', 'website', 'visuals', 'vendor']);
+const BLOCKED_EXT = /\.(?:sql|env|pem|key|log|jsonl|sh|py|ts|md|ya?ml|lock)$/i;
+const staticFiles = express.static(__dirname, { dotfiles: 'ignore', index: ['index.html'], redirect: false });
+
+// Directory index of the allowlisted trees, built once at startup so the request path never
+// touches the filesystem synchronously. Directories added later need a restart to get the
+// trailing-slash redirect; their files are still served by express.static.
+function collectPublicDirectories() {
+  const dirs = new Set();
+  const walk = (rel) => {
+    let entries;
+    try { entries = fs.readdirSync(path.join(__dirname, rel), { withFileTypes: true }); } catch { return; }
+    dirs.add(rel);
+    for (const entry of entries) {
+      if (entry.isDirectory() && !entry.name.startsWith('.')) walk(`${rel}/${entry.name}`);
+    }
+  };
+  for (const top of PUBLIC_DIRS) walk(top);
+  return dirs;
+}
+const PUBLIC_DIR_INDEX = collectPublicDirectories();
+
+/**
+ * Returns 'serve', 'deny', 'bad', 'pass' (not a file request: let the SPA fallback answer)
+ * or { redirect } for an allowlisted directory requested without its trailing slash.
+ */
+function classifyStaticPath(rawPath) {
+  let decoded;
+  try { decoded = decodeURIComponent(rawPath); } catch { return 'bad'; }
+  const rel = path.posix.normalize(decoded.replace(/\\/g, '/')).replace(/^\/+/, '');
+  if (rel === '' || rel === '.') return 'serve';
+  if (rel.startsWith('..') || rel.split('/').some((seg) => seg.startsWith('.'))) return 'deny';
+  if (BLOCKED_EXT.test(rel)) return 'deny';
+  const top = rel.split('/')[0];
+  if (PUBLIC_FILES.has(rel)) return 'serve';
+  // A directory inside the allowlist requested without its trailing slash ("/survey",
+  // "/visuals/blue-dimension-21600") redirects to its index. The target is built from the
+  // normalized relative path, so "//survey" cannot become an off-site redirect.
+  if (PUBLIC_DIRS.has(top) && !decoded.endsWith('/') && PUBLIC_DIR_INDEX.has(rel)) return { redirect: `/${rel}/` };
+  if (PUBLIC_DIRS.has(top) && rel.length > top.length) return 'serve';
+  const last = rel.split('/').pop();
+  return last.includes('.') ? 'deny' : 'pass';
+}
+
+if (SERVE_STATIC) {
+  app.use((req, res, next) => {
+    if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+    if (req.path === '/api' || req.path.startsWith('/api/')) return next();
+    const verdict = classifyStaticPath(req.path);
+    if (verdict === 'bad') return res.status(400).end();
+    if (verdict === 'deny') return res.status(404).end();
+    if (verdict === 'serve') return staticFiles(req, res, next);
+    if (verdict && verdict.redirect) {
+      const query = req.originalUrl.includes('?') ? req.originalUrl.slice(req.originalUrl.indexOf('?')) : '';
+      return res.redirect(301, verdict.redirect + query);
+    }
+    return next();
+  });
+}
 
 // Environment variables
 const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET_KEY || '';
@@ -314,9 +384,11 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// SPA fallback - serve index.html for any non-API GET
+// SPA fallback - serve index.html for any non-API GET (local preview only)
 app.use((req, res) => {
-  if (req.method === 'GET') {
+  if (req.method === 'GET' && !SERVE_STATIC) {
+    res.status(404).json({ error: 'Not found.' });
+  } else if (req.method === 'GET') {
     res.sendFile(path.join(__dirname, 'index.html'));
   } else {
     res.status(405).json({ error: 'Method not allowed.' });
