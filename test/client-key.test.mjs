@@ -14,7 +14,8 @@ import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 const { clientAddressFromHeaders, createClientKeyGenerator, normalizeAddress } = require("../src/client-key.js");
 
-const key = createClientKeyGenerator();
+const key = createClientKeyGenerator(undefined, { trustForwardedFor: true });
+const untrusted = createClientKeyGenerator();
 
 test("takes the address the Worker wrote, not the hop that appended last", () => {
   const headers = { "x-forwarded-for": "198.51.100.7, 162.158.0.1, 127.0.0.1" };
@@ -63,7 +64,7 @@ test("hands IPv6 to the normalizer so a client cannot walk its own prefix", () =
   const subnetKey = createClientKeyGenerator((ip) => {
     seen.push(ip);
     return ip.startsWith("2001:db8:") ? "2001:db8::/64" : ip;
-  });
+  }, { trustForwardedFor: true });
 
   const first = subnetKey({ headers: { "x-forwarded-for": "2001:db8::1" } });
   const second = subnetKey({ headers: { "x-forwarded-for": "2001:db8::2" } });
@@ -73,9 +74,32 @@ test("hands IPv6 to the normalizer so a client cannot walk its own prefix", () =
 });
 
 test("works without a normalizer, as when the dependency does not export one", () => {
-  const plain = createClientKeyGenerator(undefined);
+  const plain = createClientKeyGenerator(undefined, { trustForwardedFor: true });
 
   assert.equal(plain({ headers: { "x-forwarded-for": "198.51.100.7" } }), "198.51.100.7");
+});
+
+// Cloudflare appends the connecting address to an x-forwarded-for the caller already
+// sent, so under a Worker that passes client headers through, the leftmost entry is the
+// caller's. Reading it would hand out a fresh bucket per spoofed address.
+test("ignores the forwarded header entirely until the operator asserts the Worker rewrites it", () => {
+  const headers = { "x-forwarded-for": "1.1.1.1, 198.51.100.7" };
+
+  assert.equal(untrusted({ headers, ip: "127.0.0.1" }), "127.0.0.1");
+  assert.equal(
+    untrusted({ headers: { "x-forwarded-for": "2.2.2.2" }, ip: "127.0.0.1" }),
+    untrusted({ headers: { "x-forwarded-for": "3.3.3.3" }, ip: "127.0.0.1" }),
+    "spoofed addresses must not open separate buckets",
+  );
+});
+
+test("keeps an IPv4-mapped socket address out of the shared bucket", () => {
+  assert.equal(normalizeAddress("::ffff:198.51.100.7"), "198.51.100.7");
+  assert.equal(normalizeAddress("[::ffff:198.51.100.7]:51514"), "198.51.100.7");
+  assert.equal(untrusted({ headers: {}, ip: "::ffff:198.51.100.7" }), "198.51.100.7");
+  assert.notEqual(untrusted({ headers: {}, ip: "::ffff:198.51.100.7" }), "unknown");
+  // Mapped and plain forms of one address must not key two buckets.
+  assert.equal(untrusted({ headers: {}, ip: "::ffff:198.51.100.7" }), untrusted({ headers: {}, ip: "198.51.100.7" }));
 });
 
 test("accepts a repeated header array as Node delivers it", () => {

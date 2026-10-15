@@ -37,13 +37,16 @@ app.use(cors({
 }));
 
 // Behind the Cloudflare Tunnel every request arrives from cloudflared on the
-// loopback interface. Trusting loopback lets Express read x-forwarded-for at
-// all; the rate-limit key itself comes from createClientKeyGenerator, which
-// takes the leftmost entry — the one the wdjjj Worker writes — instead of
-// whichever hop happens to be last. Without this both limiters would share a
-// single bucket for the whole internet.
-app.set('trust proxy', 'loopback');
-const clientKey = createClientKeyGenerator(rateLimit.ipKeyGenerator);
+// loopback interface, so a key derived from the socket address is the same for
+// every visitor and both limiters below share one bucket for the whole
+// internet. The per-client identity is the leftmost x-forwarded-for entry, but
+// only once the deployed wdjjj Worker overwrites that header and Access keeps
+// everything else off the origin — see src/client-key.js. Neither is visible
+// from here, so the operator asserts both with TRUST_FORWARDED_FOR=1. Set it
+// too early and a client can rotate spoofed addresses through fresh buckets.
+const TRUST_FORWARDED_FOR = process.env.TRUST_FORWARDED_FOR === '1';
+app.set('trust proxy', TRUST_FORWARDED_FOR ? 'loopback' : false);
+const clientKey = createClientKeyGenerator(rateLimit.ipKeyGenerator, { trustForwardedFor: TRUST_FORWARDED_FOR });
 
 // Rate limiting for API endpoints
 const apiLimiter = rateLimit({
