@@ -30,6 +30,22 @@ const STRIP_RESPONSE_HEADERS = new Set([
   "age",
 ]);
 
+// Request headers forwarded to the API origin. The list is an allow-list on
+// purpose: the origin sits behind a Cloudflare Access service-token policy and
+// must never receive client-supplied `cf-access-*`, `cf-*`, cookie or
+// `x-forwarded-*` headers. Every entry below is read by the Express backend
+// (cors, honeypot middleware/monitor, body parsing).
+const API_FORWARD_REQUEST_HEADERS = new Set([
+  "accept",
+  "accept-language",
+  "authorization",
+  "content-type",
+  "origin",
+  "referer",
+  "user-agent",
+  "x-honeypot-token",
+]);
+
 const OWN_HEADERS = {
   "content-security-policy": [
     "default-src 'self'",
@@ -108,13 +124,32 @@ function withSecurityHeaders(response, upstream, originHost, originPrefix) {
   return new Response(upstream.body, { status: upstream.status, headers });
 }
 
+function hasOriginAccessCredentials(env) {
+  return Boolean(env && env.ORIGIN_ACCESS_CLIENT_ID && env.ORIGIN_ACCESS_CLIENT_SECRET);
+}
+
+// Builds the request headers for the API origin from scratch. Nothing the
+// client sent is forwarded unless it is in API_FORWARD_REQUEST_HEADERS, so a
+// client cannot inject its own Access credentials or spoof the client IP.
+function buildApiRequestHeaders(request, apiOriginHost, env) {
+  const headers = new Headers();
+  for (const [key, value] of request.headers) {
+    if (API_FORWARD_REQUEST_HEADERS.has(key.toLowerCase())) headers.set(key, value);
+  }
+  headers.set("host", apiOriginHost);
+  headers.set("x-forwarded-proto", "https");
+  const clientIp = request.headers.get("cf-connecting-ip");
+  if (clientIp) headers.set("x-forwarded-for", clientIp);
+  headers.set("cf-access-client-id", env.ORIGIN_ACCESS_CLIENT_ID);
+  headers.set("cf-access-client-secret", env.ORIGIN_ACCESS_CLIENT_SECRET);
+  return headers;
+}
+
 function proxyToApiOrigin(request, url, apiOriginHost, env) {
   const apiScheme = (env && env.API_ORIGIN_SCHEME) || "https";
   const apiOriginPort = (env && env.API_ORIGIN_PORT) || "";
   const target = new URL(`${apiScheme}://${apiOriginHost}${apiOriginPort ? ":" + apiOriginPort : ""}${url.pathname}${url.search}`);
-  const headers = new Headers(request.headers);
-  headers.set("host", apiOriginHost);
-  headers.delete("cf-");
+  const headers = buildApiRequestHeaders(request, apiOriginHost, env);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
   return fetch(target.toString(), {
@@ -153,7 +188,10 @@ export default {
     }
 
     if (url.pathname === "/__wdjjj/health") {
-      return new Response(JSON.stringify({ ok: true, proxy: "wdjjj", origin: originHost, originPrefix, version: "2026-09" }), {
+      // originAuth reports whether the Access service-token secrets are bound,
+      // never their values. The deploy workflow and scripts/deployment-checklist.sh
+      // assert "configured" before the service-token-only policy is applied.
+      return new Response(JSON.stringify({ ok: true, proxy: "wdjjj", origin: originHost, originPrefix, originAuth: hasOriginAccessCredentials(env) ? "configured" : "missing", version: "2026-09" }), {
         status: 200,
         headers: { ...OWN_HEADERS, "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
       });
@@ -169,6 +207,12 @@ export default {
       }
       if (request.method !== "GET" && request.method !== "HEAD" && request.method !== "POST") {
         return new Response("Method Not Allowed", { status: 405, headers: { ...OWN_HEADERS, allow: "GET, HEAD, POST", "cache-control": "no-store" } });
+      }
+      // Fail closed: the origin only accepts requests carrying this Worker's
+      // Access service token. Without both secrets the request would be
+      // rejected at Access anyway, so it is never sent.
+      if (!hasOriginAccessCredentials(env)) {
+        return new Response("API origin credentials not configured", { status: 502, headers: { ...OWN_HEADERS, "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
       }
       return proxyToApiOrigin(request, url, apiOriginHost, env);
     }
