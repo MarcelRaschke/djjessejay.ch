@@ -62,7 +62,29 @@ Falls `npm run deploy` mit `sh: wrangler: not found` fehlschlägt, direkt:
 npx wrangler deploy
 ```
 
-Termux-Hinweis: Wenn `npm install` unterbrochen wurde, `rm -rf node_modules && npm install` wiederholen. Binaries liegen in `node_modules/.bin/` — `npm run`-Scripts finden sie dort automatisch; `wrangler` direkt in der Shell funktioniert erst nach `npm install -g wrangler`.
+Termux-Hinweis: **Wrangler läuft nicht nativ unter Termux/Android.** `workerd` (Wranglers lokale Test-Engine) und teils `esbuild` publishen keine Android-Binaries — `npm install` schlägt still fehl bzw. `node_modules/.bin/wrangler` bleibt leer, daher `sh: wrangler: not found`. Diagnostic:
+
+```bash
+ls node_modules/.bin/ | grep wrangler   # leer = Installation fehlgeschlagen
+npm install 2>&1 | grep -iE "error|platform"
+```
+
+Funktionierende Wege von Android aus:
+
+**proot-Distribution (empfohlen):**
+
+```bash
+pkg install proot-distro
+proot-distro install debian
+proot-distro login debian
+apt update && apt install -y nodejs npm git
+git clone https://github.com/MarcelRaschke/djjessejay.ch
+cd djjessejay.ch/workers/skillgenerator
+npm install
+npx wrangler login && npx wrangler deploy
+```
+
+**Alternativ ohne Wrangler:** Deploy über die Cloudflare-REST-API mit `curl` und einem API-Token (`Workers Scripts:Edit`), oder vom Desktop/CI aus deployen.
 
 Hinweise:
 - `wrangler login` öffnet die Cloudflare-OAuth-Seite; unter Android wird der Default-Browser genutzt. Scheitert der Callback (`localhost:8976`), `wrangler login --browser=false` nutzen und die URL manuell öffnen.
