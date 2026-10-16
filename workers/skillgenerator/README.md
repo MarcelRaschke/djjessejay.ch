@@ -42,6 +42,10 @@ git clone https://github.com/MarcelRaschke/djjessejay.ch
 cd djjessejay.ch/workers/skillgenerator
 
 npm install
+
+# Falls "wrangler: not found": npx nutzen oder global installieren
+npm install -g wrangler     # optional; sonst überall npx wrangler verwenden
+
 npx wrangler login          # OAuth-Flow im Browser
 
 # Optional: CORS für das Frontend freigeben
@@ -49,8 +53,16 @@ npx wrangler login          # OAuth-Flow im Browser
 
 npx wrangler secret put OPENAI_API_KEY   # sonst läuft der Worker im Mock-Modus
 
-npm run deploy               # wrangler deploy
+npm run deploy               # entspricht: npx wrangler deploy
 ```
+
+Falls `npm run deploy` mit `sh: wrangler: not found` fehlschlägt, direkt:
+
+```bash
+npx wrangler deploy
+```
+
+Termux-Hinweis: Wenn `npm install` unterbrochen wurde, `rm -rf node_modules && npm install` wiederholen. Binaries liegen in `node_modules/.bin/` — `npm run`-Scripts finden sie dort automatisch; `wrangler` direkt in der Shell funktioniert erst nach `npm install -g wrangler`.
 
 Hinweise:
 - `wrangler login` öffnet die Cloudflare-OAuth-Seite; unter Android wird der Default-Browser genutzt. Scheitert der Callback (`localhost:8976`), `wrangler login --browser=false` nutzen und die URL manuell öffnen.
