@@ -51,15 +51,45 @@ jobs:
           }
           echo "Cloudflare deployment credentials are configured."
 
-      # NOTE: run 38246122897 (2026-10-12) uploaded the Worker but failed at
-      # trigger configuration: "A request to the Cloudflare API
-      # (/accounts/<id>/workers/scripts/wdjjj/routes) failed. No access to the
-      # specified resource." The Worker then has no bound routes and djjessejay.ch
-      # stays on the DNS fallback origin (HTTP 522). CLOUDFLARE_API_TOKEN needs
-      # Account permissions "Workers Scripts:Edit" AND "Workers Routes:Edit"
-      # (plus "Account Settings:Read"); a token with only script-edit uploads
-      # the code but cannot bind routes. See scripts/deployment-checklist.sh and
-      # DNS_CONFIG.md for the expected end state.
+      # KNOWN FAILURE MODE — unbound routes (open as of 2026-10-16)
+      #
+      # Runs 38222193150 (2026-10-12), 38246122897 (2026-10-12), 38563502591
+      # (2026-10-14) and 38808933425 (2026-10-15) all uploaded the Worker and
+      # then failed at trigger configuration:
+      #
+      #   Uploaded wdjjj
+      #   No targets deployed for wdjjj
+      #   Trigger configuration for "wdjjj" was only partially updated:
+      #     Routes:
+      #       - A request to .../workers/scripts/wdjjj/routes failed.
+      #         - No access to the specified resource.
+      #
+      # The script reaches the edge, the routes in infra/cloudflare/wrangler.toml
+      # do not. With no bound route the Worker never runs, every request falls
+      # through to the DNS origin, and the apex answers HTTP 522. A 522 response
+      # carries no "x-proxy: wdjjj" header, which is the quickest way to tell an
+      # unbound route from a Worker-side error.
+      #
+      # REQUIRED TOKEN SCOPE. Workers Routes is a ZONE permission, not an account
+      # permission. An earlier revision of this comment claimed otherwise, which
+      # is why repeated attempts to widen the token in the Account column did not
+      # resolve anything. CLOUDFLARE_API_TOKEN needs both of:
+      #
+      #   Account > Workers Scripts > Edit        (upload the script)
+      #   Zone    > Workers Routes  > Edit        (bind the route, per zone)
+      #
+      # The zone permission must be scoped to the djjessejay.ch zone specifically.
+      # Source: https://developers.cloudflare.com/workers/authorization/workers/
+      # ("API tokens need Zone > Workers Routes > Write, scoped to each affected
+      # zone.")
+      #
+      # ONE-TIME ALTERNATIVE. Per the same page, once a route is bound, later
+      # deployments need only Editor access as long as they do not add, update or
+      # remove that binding. Binding djjessejay.ch/* and www.djjessejay.ch/* once
+      # by hand in Workers & Pages > wdjjj > Settings > Domains & Routes therefore
+      # restores the site and unblocks this workflow without minting a new token.
+      #
+      # See DNS_CONFIG.md ("Live drift") for the current live-versus-target state.
       - name: Deploy wdjjj
         uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
         with:

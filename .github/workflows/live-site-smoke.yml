@@ -5,6 +5,10 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  # A push-only smoke test cannot see an outage that starts between pushes, and
+  # cannot see a recovery at all. The daily run closes both gaps.
+  schedule:
+    - cron: '37 6 * * *'
   workflow_dispatch:
     inputs:
       force_live_checks:
@@ -39,25 +43,87 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # An unreachable edge used to skip every assertion below and report
+      # success, so this workflow stayed green through the whole 2026-10 outage
+      # (see DNS_CONFIG.md, "Live drift"). An outage must now either be fixed or
+      # consciously acknowledged with an expiry date; it can no longer pass
+      # unnoticed.
+      #
+      # To acknowledge a known outage, set the repository variable
+      # LIVE_EDGE_OUTAGE_ACK_UNTIL to the UTC date the acknowledgement expires,
+      # in YYYY-MM-DD form (Settings > Secrets and variables > Actions >
+      # Variables). Up to and including that date the job warns and stays green;
+      # from the following day it fails again, so a forgotten outage resurfaces
+      # by itself. Delete the variable once the edge is restored.
       - name: Outage readiness gate
         id: readiness
         env:
           FORCE_LIVE_CHECKS: ${{ inputs.force_live_checks || 'false' }}
+          OUTAGE_ACK_UNTIL: ${{ vars.LIVE_EDGE_OUTAGE_ACK_UNTIL }}
         run: |
           set -euo pipefail
           health_ua="wdjjj-healthcheck/1.0 (+https://github.com/MarcelRaschke/djjessejay.ch ci smoke test)"
-          if [ "$FORCE_LIVE_CHECKS" = "true" ]; then
-            echo "ready=true" >> "$GITHUB_OUTPUT"
-            echo "Live checks forced by workflow_dispatch input."
-            exit 0
-          fi
-          if curl -fsS -m 15 -A "$health_ua" https://djjessejay.ch/__wdjjj/health >/dev/null 2>&1; then
+          health_url="https://djjessejay.ch/__wdjjj/health"
+          today="$(date -u +%Y-%m-%d)"
+
+          note() { echo "$1" >> "$GITHUB_STEP_SUMMARY"; }
+
+          if curl -fsS -m 15 -A "$health_ua" "$health_url" >/dev/null 2>&1; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
             echo "Live edge reachable; running full live assertions."
-          else
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::Live edge unreachable (health endpoint did not answer). Expected during the tracked DNS outage (see the live drift audit in DNS_CONFIG.md / PR #120). Live assertions are skipped so CI can stay green; strict checks resume automatically once the Worker and DNS are restored (M2/M3). Dispatch this workflow with force_live_checks=true to run strict checks anyway."
+            note "### Live edge: reachable"
+            note ""
+            note "Health endpoint answered. Full live assertions ran."
+            exit 0
           fi
+
+          # From here the edge is down.
+          note "### Live edge: UNREACHABLE"
+          note ""
+          note "\`$health_url\` did not answer (checked $today UTC)."
+          note ""
+          note "A 522 at the apex with no \`x-proxy: wdjjj\` header means the"
+          note "Worker never ran — look at the route binding, not the Worker code."
+          note "See DNS_CONFIG.md, section \"Live drift\"."
+
+          if [ "$FORCE_LIVE_CHECKS" = "true" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+            echo "::warning::Live edge unreachable, but force_live_checks=true was requested. Running strict assertions; they are expected to fail."
+            note ""
+            note "\`force_live_checks=true\` was set, so strict assertions ran anyway."
+            exit 0
+          fi
+
+          echo "ready=false" >> "$GITHUB_OUTPUT"
+
+          if [ -z "${OUTAGE_ACK_UNTIL:-}" ]; then
+            note ""
+            note "No acknowledgement is set, so this run fails."
+            note "Fix the edge, or set the repository variable"
+            note "\`LIVE_EDGE_OUTAGE_ACK_UNTIL\` to a YYYY-MM-DD expiry date."
+            echo "::error::Live edge unreachable and no outage acknowledgement is set. Restore the edge (see DNS_CONFIG.md, \"Live drift\"), or set the repository variable LIVE_EDGE_OUTAGE_ACK_UNTIL to a YYYY-MM-DD expiry date to accept the outage for a bounded period."
+            exit 1
+          fi
+
+          if ! printf '%s' "$OUTAGE_ACK_UNTIL" | grep -Eq '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'; then
+            note ""
+            note "The acknowledgement value is malformed, so this run fails."
+            echo "::error::LIVE_EDGE_OUTAGE_ACK_UNTIL must be a UTC date in YYYY-MM-DD form; got '$OUTAGE_ACK_UNTIL'."
+            exit 1
+          fi
+
+          # ISO dates compare correctly as strings.
+          if [ "$today" \> "$OUTAGE_ACK_UNTIL" ]; then
+            note ""
+            note "The acknowledgement expired on $OUTAGE_ACK_UNTIL, so this run fails."
+            echo "::error::Live edge is still unreachable and the outage acknowledgement expired on $OUTAGE_ACK_UNTIL. Restore the edge (see DNS_CONFIG.md, \"Live drift\") or extend LIVE_EDGE_OUTAGE_ACK_UNTIL deliberately."
+            exit 1
+          fi
+
+          note ""
+          note "Acknowledged outage, accepted until **$OUTAGE_ACK_UNTIL** (UTC)."
+          note "Live assertions were skipped. This run will start failing after that date."
+          echo "::warning::Live edge unreachable. Accepted under LIVE_EDGE_OUTAGE_ACK_UNTIL=$OUTAGE_ACK_UNTIL; live assertions skipped. This gate fails automatically once that date passes."
 
       - name: Health endpoint
         if: steps.readiness.outputs.ready == 'true'
