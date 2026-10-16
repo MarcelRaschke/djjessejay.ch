@@ -1,8 +1,43 @@
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX_REQUESTS = 30;
+const rateBuckets = new Map();
+
+const SECURITY_HEADERS = {
+  'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'",
+  'Referrer-Policy': 'no-referrer',
+  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+  'X-Content-Type-Options': 'nosniff',
+  'X-Robots-Tag': 'noindex, nofollow',
 };
+
+function corsHeaders(request, env) {
+  const allowed = typeof env.CORS_ALLOW_ORIGIN === 'string' && env.CORS_ALLOW_ORIGIN
+    ? env.CORS_ALLOW_ORIGIN
+    : new URL(request.url).origin;
+  return {
+    'Access-Control-Allow-Origin': allowed,
+    'Vary': 'Origin',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Max-Age': '86400',
+    ...SECURITY_HEADERS,
+  };
+}
+
+function rateLimit(request) {
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  const now = Date.now();
+  const bucket = rateBuckets.get(ip);
+  if (!bucket || now - bucket.start >= RATE_LIMIT_WINDOW_MS) {
+    rateBuckets.set(ip, { start: now, count: 1 });
+    return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS - 1 };
+  }
+  bucket.count += 1;
+  if (bucket.count > RATE_LIMIT_MAX_REQUESTS) {
+    return { allowed: false, remaining: 0 };
+  }
+  return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS - bucket.count };
+}
 
 const EXTRACTION_SYSTEM_PROMPT = `
 You are an expert AI career coach and technical recruiter. 
@@ -20,9 +55,25 @@ Return ONLY valid JSON matching this schema:
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    const headers = corsHeaders(request, env);
 
     if (request.method === 'OPTIONS') {
-      return new Response(null, { headers: corsHeaders });
+      return new Response(null, { headers });
+    }
+
+    const rl = rateLimit(request);
+    if (!rl.allowed) {
+      return new Response(JSON.stringify({ error: 'Rate limit exceeded' }), {
+        status: 429,
+        headers: {
+          ...headers,
+          'Content-Type': 'application/json',
+          'Retry-After': String(Math.ceil(RATE_LIMIT_WINDOW_MS / 1000)),
+          'X-RateLimit-Limit': String(RATE_LIMIT_MAX_REQUESTS),
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': String(Math.ceil((Date.now() + RATE_LIMIT_WINDOW_MS) / 1000)),
+        },
+      });
     }
 
     if (url.pathname === '/api/v1/extract-skills' && request.method === 'POST') {
@@ -41,7 +92,7 @@ export default {
             domain_keywords: ["Serverless", "Edge", "Hackathon"]
           };
           return new Response(JSON.stringify(mockData), { 
-            headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+            headers: { 'Content-Type': 'application/json', ...headers } 
           });
         }
 
@@ -70,13 +121,13 @@ export default {
         const extractedJson = JSON.parse(data.choices[0].message.content);
 
         return new Response(JSON.stringify(extractedJson), { 
-          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+          headers: { 'Content-Type': 'application/json', ...headers } 
         });
 
       } catch (error) {
         return new Response(JSON.stringify({ error: error.message }), { 
           status: 500, 
-          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+          headers: { 'Content-Type': 'application/json', ...headers } 
         });
       }
     }
@@ -102,20 +153,20 @@ export default {
         };
 
         return new Response(JSON.stringify(gapData), { 
-          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+          headers: { 'Content-Type': 'application/json', ...headers } 
         });
 
       } catch (error) {
         return new Response(JSON.stringify({ error: error.message }), { 
           status: 500, 
-          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+          headers: { 'Content-Type': 'application/json', ...headers } 
         });
       }
     }
 
     return new Response(JSON.stringify({ error: "Route not found" }), { 
       status: 404, 
-      headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+      headers: { 'Content-Type': 'application/json', ...headers } 
     });
   }
 };
