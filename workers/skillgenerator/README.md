@@ -84,12 +84,59 @@ npm install
 npx wrangler login && npx wrangler deploy
 ```
 
-**Alternativ ohne Wrangler:** Deploy über die Cloudflare-REST-API mit `curl` und einem API-Token (`Workers Scripts:Edit`), oder vom Desktop/CI aus deployen.
+**Alternativ ohne Wrangler:** Deploy über die Cloudflare-REST-API — siehe unten.
 
 Hinweise:
 - `wrangler login` öffnet die Cloudflare-OAuth-Seite; unter Android wird der Default-Browser genutzt. Scheitert der Callback (`localhost:8976`), `wrangler login --browser=false` nutzen und die URL manuell öffnen.
 - Statt `wrangler login` geht auch ein API-Token: `CLOUDFLARE_API_TOKEN` als Umgebungsvariable setzen (Token mit `Workers Scripts:Edit`-Scope).
 - `npm install` in Termux kann bei Speicherdruck hängen bleiben; `pkg install python` vorab hilft manchmal bei node-gyp-Builds (für diesen Worker nicht nötig — reines JS, keine nativen Deps außer Wrangler).
+
+## Deployment ohne Wrangler (reine curl-Variante)
+
+Für Termux (wo Wrangler nicht läuft) oder minimale Umgebungen. Voraussetzungen: `bash`, `curl`, `jq` (`pkg install curl jq` in Termux).
+
+1. API-Token erstellen: [Cloudflare-Dashboard → API-Tokens](https://dash.cloudflare.com/profile/api-tokens) → Vorlage „Edit Cloudflare Workers“ oder eigener Token mit **Workers Scripts:Edit**.
+2. Account-ID kopieren: Dashboard → **Workers & Pages → Account ID** (rechte Spalte).
+3. Dann:
+
+```bash
+export CF_API_TOKEN='dein-api-token'
+export CF_ACCOUNT_ID='deine-account-id'
+
+# Optional: Secret direkt mitdeployen (sonst läuft der Worker im Mock-Modus)
+export CF_OPENAI_API_KEY='sk-…'
+
+# Optional: CORS für das Frontend freigeben
+export CORS_ALLOW_ORIGIN='https://djjessejay.ch'
+
+bash scripts/deploy-api.sh
+```
+
+Das Script (`scripts/deploy-api.sh`):
+
+- lädt `src/skillgenerator.js` als ES-Modul per `PUT /workers/scripts/<name>` (Multipart) hoch,
+- setzt die Bindings aus `wrangler.jsonc` nach (`DEPLOYMENT_ENV`, optional `CORS_ALLOW_ORIGIN`, Observability),
+- setzt optional das Secret `OPENAI_API_KEY` per `PUT /workers/scripts/<name>/secrets`,
+- gibt am Ende die `workers.dev`-URL plus Smoke-Test-Befehle aus.
+
+Secrets hinterher ändern:
+
+```bash
+curl -X PUT "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/workers/scripts/cy8er-skillgenerator/secrets" \
+  -H "Authorization: Bearer $CF_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  --data '{"name":"OPENAI_API_KEY","text":"sk-…","type":"worker"}'
+```
+
+Rollback auf die letzte Version (z. B. bei fehlerhaftem Deploy):
+
+```bash
+# verfügbare Deployment-IDs anzeigen
+curl -s "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/workers/scripts/cy8er-skillgenerator/deployments" \
+  -H "Authorization: Bearer $CF_API_TOKEN" | jq '.result.deployments[].id'
+```
+
+Hinweis: Token und Key niemals in die Shell-History committen; `export` in der Session reicht, oder `.env`-Datei außerhalb des Repos mit `chmod 600`.
 
 ## Tests
 
