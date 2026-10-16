@@ -32,6 +32,31 @@ Ohne Key läuft der Worker im Mock-Modus (`use_mock: true` in der Request-Body e
 - `CORS_ALLOW_ORIGIN` — erlaubte Origin für Cross-Origin-Requests.
 - `DEPLOYMENT_ENV` — aktuell `preview`.
 
+## Deployment aus Termux (Android)
+
+```bash
+pkg update && pkg upgrade
+pkg install nodejs-lts git
+
+git clone https://github.com/MarcelRaschke/djjessejay.ch
+cd djjessejay.ch/workers/skillgenerator
+
+npm install
+npx wrangler login          # OAuth-Flow im Browser
+
+# Optional: CORS für das Frontend freigeben
+# -> in wrangler.jsonc: "CORS_ALLOW_ORIGIN": "https://djjessejay.ch"
+
+npx wrangler secret put OPENAI_API_KEY   # sonst läuft der Worker im Mock-Modus
+
+npm run deploy               # wrangler deploy
+```
+
+Hinweise:
+- `wrangler login` öffnet die Cloudflare-OAuth-Seite; unter Android wird der Default-Browser genutzt. Scheitert der Callback (`localhost:8976`), `wrangler login --browser=false` nutzen und die URL manuell öffnen.
+- Statt `wrangler login` geht auch ein API-Token: `CLOUDFLARE_API_TOKEN` als Umgebungsvariable setzen (Token mit `Workers Scripts:Edit`-Scope).
+- `npm install` in Termux kann bei Speicherdruck hängen bleiben; `pkg install python` vorab hilft manchmal bei node-gyp-Builds (für diesen Worker nicht nötig — reines JS, keine nativen Deps außer Wrangler).
+
 ## Tests
 
 ```bash
