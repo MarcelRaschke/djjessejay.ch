@@ -89,6 +89,55 @@ unset CLOUDFLARE_ACCOUNT_ID
 
 Deployment und Secret-Änderung verändern den Cloudflare-Account. Ohne konfigurierten `OPENAI_API_KEY` liefert die Extraktion Mock-Daten; ein erfolgreicher Upload belegt daher noch keine funktionierende OpenAI-Extraktion. Die von Wrangler ausgegebene Worker-URL anschließend mit einem CORS-Preflight und einer Gap-Analyse prüfen. Niemals Token oder Schlüssel als Klartextbefehle eingeben oder ins Repository schreiben.
 
+> **Entwurf: REST-Deployment nicht verwenden.** Der folgende aus PR #182 ausgelagerte Pfad enthält bekannte offene Fehler und ist noch nicht freigegeben. MIME-Typ, Secret-Typ, Credentials-Transport, workers.dev-Aktivierung und tatsächlicher Rollback müssen vor Nutzung korrigiert und geprüft werden.
+
+## Deployment ohne Wrangler (reine curl-Variante)
+
+Für Termux (wo Wrangler nicht läuft) oder minimale Umgebungen. Voraussetzungen: `bash`, `curl`, `jq` (`pkg install curl jq` in Termux).
+
+1. API-Token erstellen: [Cloudflare-Dashboard → API-Tokens](https://dash.cloudflare.com/profile/api-tokens) → Vorlage „Edit Cloudflare Workers“ oder eigener Token mit **Workers Scripts:Edit**.
+2. Account-ID kopieren: Dashboard → **Workers & Pages → Account ID** (rechte Spalte).
+3. Dann:
+
+```bash
+export CF_API_TOKEN='dein-api-token'
+export CF_ACCOUNT_ID='deine-account-id'
+
+# Optional: Secret direkt mitdeployen (sonst läuft der Worker im Mock-Modus)
+export CF_OPENAI_API_KEY='sk-…'
+
+# Optional: CORS für das Frontend freigeben
+export CORS_ALLOW_ORIGIN='https://djjessejay.ch'
+
+bash scripts/deploy-api.sh
+```
+
+Das Script (`scripts/deploy-api.sh`):
+
+- lädt `src/skillgenerator.js` als ES-Modul per `PUT /workers/scripts/<name>` (Multipart) hoch,
+- setzt die Bindings aus `wrangler.jsonc` nach (`DEPLOYMENT_ENV`, optional `CORS_ALLOW_ORIGIN`, Observability),
+- setzt optional das Secret `OPENAI_API_KEY` per `PUT /workers/scripts/<name>/secrets`,
+- gibt am Ende die `workers.dev`-URL plus Smoke-Test-Befehle aus.
+
+Secrets hinterher ändern:
+
+```bash
+curl -X PUT "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/workers/scripts/cy8er-skillgenerator/secrets" \
+  -H "Authorization: Bearer $CF_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  --data '{"name":"OPENAI_API_KEY","text":"sk-…","type":"worker"}'
+```
+
+Rollback auf die letzte Version (z. B. bei fehlerhaftem Deploy):
+
+```bash
+# verfügbare Deployment-IDs anzeigen
+curl -s "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/workers/scripts/cy8er-skillgenerator/deployments" \
+  -H "Authorization: Bearer $CF_API_TOKEN" | jq '.result.deployments[].id'
+```
+
+Hinweis: Token und Key niemals in die Shell-History committen; `export` in der Session reicht, oder `.env`-Datei außerhalb des Repos mit `chmod 600`.
+
 ## Tests
 
 ```bash
