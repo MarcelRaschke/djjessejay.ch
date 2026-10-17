@@ -1,0 +1,7 @@
+# OpenPGP Web Key Directory policy for djjessejay.ch
+# Spec: draft-koch-openpgp-webkey-service (OpenPGP Web Key Directory)
+# The presence of this file signals WKD support for this domain.
+# The mail-based Web Key Directory Update Protocol is NOT operated here.
+# Keys are published exclusively via the trusted repository pipeline
+# (scripts/wkd-publish.sh -> GitHub Pages deploy).
+# Therefore no submission-address file is provided.
