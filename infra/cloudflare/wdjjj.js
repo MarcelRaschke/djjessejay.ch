@@ -178,11 +178,19 @@ export default {
     }
 
     const cacheable = request.method === "GET" && url.search === "" && !request.headers.has("range");
-    const cache = caches.default;
+    // Cache is an optional optimization: failures must not take down the proxy.
+    let cache;
+    if (cacheable) {
+      try { cache = globalThis.caches?.default; } catch { /* Continue without cache. */ }
+    }
+    const readCache = async () => {
+      if (!cache) return undefined;
+      try { return await cache.match(cacheKey); } catch { return undefined; }
+    };
     const cacheKey = new Request(`https://${CANONICAL_HOST}${url.pathname}`, { method: "GET" });
 
     if (cacheable) {
-      const hit = await cache.match(cacheKey);
+      const hit = await readCache();
       if (hit) return hit;
     }
 
@@ -199,7 +207,7 @@ export default {
     try {
       upstream = await fetch(originUrl, { method: request.method, headers: originHeaders, redirect: "manual", signal: controller.signal });
     } catch {
-      const stale = await cache.match(cacheKey);
+      const stale = await readCache();
       if (stale) return stale;
       return errorPage(504, "Gateway Timeout", originHost, originPrefix);
     } finally {
@@ -207,14 +215,19 @@ export default {
     }
 
     if (upstream.status >= 500) {
-      const stale = await cache.match(cacheKey);
+      const stale = await readCache();
       if (stale) return stale;
       return errorPage(503, "Origin Service Unavailable", originHost, originPrefix);
     }
 
     const response = withSecurityHeaders(upstream, upstream, originHost, originPrefix);
     if (cacheable && upstream.status === 200 && !upstream.headers.has("set-cookie")) {
-      ctx.waitUntil(cache.put(cacheKey, response.clone()));
+      if (cache) {
+        try {
+          const write = Promise.resolve(cache.put(cacheKey, response.clone())).catch(() => {});
+          ctx.waitUntil(write);
+        } catch { /* Synchronous cache/context failures must not affect the response. */ }
+      }
     }
     return response;
   },
