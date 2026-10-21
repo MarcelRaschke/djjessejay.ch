@@ -55,6 +55,12 @@ const OWN_HEADERS = {
   "x-proxy": "wdjjj",
 };
 
+function withCacheStatus(response, status) {
+  const headers = new Headers(response.headers);
+  headers.set("x-proxy-cache", status);
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
+
 function toOriginPath(pathname, originPrefix) {
   let path = pathname || "/";
   if (path === originPrefix) path = "/";
@@ -191,7 +197,7 @@ export default {
 
     if (cacheable) {
       const hit = await readCache();
-      if (hit) return hit;
+      if (hit) return withCacheStatus(hit, "HIT");
     }
 
     const originUrl = new URL(`https://${originHost}${toOriginPath(url.pathname, originPrefix)}${url.search}`);
@@ -208,7 +214,7 @@ export default {
       upstream = await fetch(originUrl, { method: request.method, headers: originHeaders, redirect: "manual", signal: controller.signal });
     } catch {
       const stale = await readCache();
-      if (stale) return stale;
+      if (stale) return withCacheStatus(stale, "STALE");
       return errorPage(504, "Gateway Timeout", originHost, originPrefix);
     } finally {
       clearTimeout(timer);
@@ -216,7 +222,7 @@ export default {
 
     if (upstream.status >= 500) {
       const stale = await readCache();
-      if (stale) return stale;
+      if (stale) return withCacheStatus(stale, "STALE");
       return errorPage(503, "Origin Service Unavailable", originHost, originPrefix);
     }
 
@@ -229,6 +235,6 @@ export default {
         } catch { /* Synchronous cache/context failures must not affect the response. */ }
       }
     }
-    return response;
+    return withCacheStatus(response, cacheable && cache ? "MISS" : "BYPASS");
   },
 };

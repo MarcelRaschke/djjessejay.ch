@@ -47,6 +47,7 @@ for (const upstream of ['throw', 503]) test(`origin ${upstream} plus failed cach
 test('cache hit avoids origin', async t => {
   const { response, calls } = await exercise(t, { cache: { match: async () => new Response('cached') } });
   assert.equal(await response.text(), 'cached'); assert.equal(calls, 0);
+  assert.equal(response.headers.get('x-proxy-cache'), 'HIT');
 });
 for (const options of [{ method: 'HEAD' }, { request: '/?q=1' }, { range: 'bytes=0-3' }]) test(`uncacheable request never reads stale cache: ${JSON.stringify(options)}`, async t => {
   let matches = 0;
@@ -56,4 +57,22 @@ for (const options of [{ method: 'HEAD' }, { request: '/?q=1' }, { range: 'bytes
 test('failed execution context does not discard origin response', async t => {
   const { response } = await exercise(t, { ctxThrows: true, cache: { match: async () => undefined, put: async () => {} } });
   assert.equal(response.status, 200);
+});
+
+for (const [label, options, expected] of [
+  ['cache miss', { cache: { match: async () => undefined, put: async () => {} } }, 'MISS'],
+  ['missing cache', {}, 'BYPASS'],
+  ['query', { request: '/?q=1' }, 'BYPASS'],
+]) test(`cache status header: ${label}`, async t => {
+  const { response } = await exercise(t, options);
+  assert.equal(response.headers.get('x-proxy-cache'), expected);
+  assert.equal(await response.text(), 'origin content');
+});
+test('stale fallback replaces stored cache status', async t => {
+  let reads = 0;
+  const { response } = await exercise(t, { upstream: 503, cache: {
+    match: async () => ++reads === 1 ? undefined : new Response('stale content', { headers: { 'x-proxy-cache': 'MISS' } }),
+  } });
+  assert.equal(response.headers.get('x-proxy-cache'), 'STALE');
+  assert.equal(await response.text(), 'stale content');
 });
