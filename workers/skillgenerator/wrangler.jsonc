@@ -1,0 +1,15 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "cy8er-skillgenerator",
+  "main": "src/skillgenerator.js",
+  "compatibility_date": "2026-07-14",
+  "workers_dev": true,
+  "preview_urls": true,
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  "vars": {
+    "DEPLOYMENT_ENV": "preview"
+  }
+}
