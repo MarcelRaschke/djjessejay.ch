@@ -29,7 +29,8 @@ This feature establishes a fail-closed deployment gate for a Cloudflare Tunnel b
 11. CI has `contents: read` only and does not receive Cloudflare credentials.
 12. Failed validation blocks the deployment gate when the workflow check is configured as a required status check for `main`.
 13. The `wdjjj` Worker presents its own Access service token on every `/api` subrequest, never forwards a client-supplied `cf-access-*` header, and answers `502` instead of sending an unauthenticated request to the origin.
-14. The Worker deploy workflow refuses to upload while `ORIGIN_ACCESS_CLIENT_ID` or `ORIGIN_ACCESS_CLIENT_SECRET` is unbound.
+14. The Worker deploy workflow refuses to upload while `ORIGIN_ACCESS_CLIENT_ID` or `ORIGIN_ACCESS_CLIENT_SECRET` is unbound, and also when the `wdjjj` Worker is not found (HTTP 404), because its bindings cannot be verified then.
+15. The Worker never relays upstream `Set-Cookie` headers from `/api`, so a `CF_Authorization` cookie issued for the service token cannot reach a public caller.
 
 ## Required environment
 
@@ -97,10 +98,13 @@ different order takes `/api` down.
    on `/api` subrequests, with `redirect: manual` so the credentials never follow a
    redirect, and builds those subrequest headers from an allow-list: client-supplied
    `cf-access-*`, `cf-*`, `cookie` and `x-forwarded-*` headers are dropped, and
-   `x-forwarded-for` is derived from `cf-connecting-ip`. Without both secrets `/api`
+   `x-forwarded-for` is derived from `cf-connecting-ip`. `content-encoding` is on the
+   allow-list so the backend can inflate compressed request bodies. Upstream
+   `Set-Cookie` headers are never relayed to the caller. Without both secrets `/api`
    answers `502` and no request is sent to the origin (fail closed). The deploy
-   workflow refuses to upload the Worker while the secrets are unbound and asserts
-   `originAuth` after the upload.
+   workflow refuses to upload the Worker while the secrets are unbound or the Worker
+   does not exist yet (bind the secrets first), and asserts `originAuth` after the
+   upload.
 4. Run the setup with `CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID=<token id>`.
 5. Store the token ID as repository variable `CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID` so the
    deployment checklist can verify it.

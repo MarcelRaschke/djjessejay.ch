@@ -34,11 +34,14 @@ const STRIP_RESPONSE_HEADERS = new Set([
 // purpose: the origin sits behind a Cloudflare Access service-token policy and
 // must never receive client-supplied `cf-access-*`, `cf-*`, cookie or
 // `x-forwarded-*` headers. Every entry below is read by the Express backend
-// (cors, honeypot middleware/monitor, body parsing).
+// (cors, honeypot middleware/monitor, body parsing). `content-encoding` is
+// required because express.json/urlencoded inflate gzip/deflate/br bodies by
+// default; without it a compressed POST body would be parsed as plain text.
 const API_FORWARD_REQUEST_HEADERS = new Set([
   "accept",
   "accept-language",
   "authorization",
+  "content-encoding",
   "content-type",
   "origin",
   "referer",
@@ -170,6 +173,13 @@ function withApiSecurityHeaders(upstream) {
     const lower = key.toLowerCase();
     if (STRIP_RESPONSE_HEADERS.has(lower)) continue;
     if (lower === "content-length" || lower === "transfer-encoding") continue;
+    // Never hand upstream cookies to the public caller. Unless strict service
+    // token authentication is enabled on the Access organization, Access can
+    // answer a service-token request with a CF_Authorization cookie carrying
+    // the Worker's service identity; relaying it would let any API caller
+    // replay that identity against the protected origin. The Express backend
+    // sets no cookies of its own, so dropping all of them loses nothing.
+    if (lower === "set-cookie") continue;
     headers.set(key, value);
   }
   for (const [key, value] of Object.entries(OWN_HEADERS)) headers.set(key, value);

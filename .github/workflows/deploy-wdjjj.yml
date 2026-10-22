@@ -78,8 +78,11 @@ jobs:
             -H "Authorization: Bearer $CF_API_TOKEN" \
             "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/workers/scripts/wdjjj/secrets")"
           if [ "$response" = "404" ]; then
-            echo "::warning::Worker wdjjj does not exist yet; skipping secret binding check for the first deploy."
-            exit 0
+            # A missing Worker cannot have the secrets bound, so the upload would
+            # publish a fail-closed Worker (502 on /api) before the post-upload
+            # health check could notice. Bind the secrets first, then deploy.
+            echo "::error::Worker wdjjj was not found (HTTP 404), so its Access service-token secrets cannot be verified. Bind ORIGIN_ACCESS_CLIENT_ID and ORIGIN_ACCESS_CLIENT_SECRET (npx wrangler secret put <name>) before deploying."
+            exit 1
           fi
           if [ "$response" != "200" ]; then
             echo "::error::Cannot read Worker secret bindings (HTTP $response). Token needs Workers Scripts:Read."

@@ -102,6 +102,7 @@ test("forwards the headers the Express backend actually reads", async () => {
       {
         accept: "application/json",
         "accept-language": "de-CH",
+        "content-encoding": "gzip",
         "content-type": "application/json",
         origin: "https://djjessejay.ch",
         referer: "https://djjessejay.ch/kontakt",
@@ -116,6 +117,8 @@ test("forwards the headers the Express backend actually reads", async () => {
 
   assert.equal(sentHeader("accept"), "application/json");
   assert.equal(sentHeader("accept-language"), "de-CH");
+  // express.json/urlencoded inflate compressed bodies only when this survives.
+  assert.equal(sentHeader("content-encoding"), "gzip");
   assert.equal(sentHeader("content-type"), "application/json");
   assert.equal(sentHeader("origin"), "https://djjessejay.ch");
   assert.equal(sentHeader("referer"), "https://djjessejay.ch/kontakt");
@@ -135,6 +138,29 @@ test("derives x-forwarded-for from cf-connecting-ip and ignores a spoofed one", 
 
   assert.equal(sentHeader("x-forwarded-for"), "198.51.100.7");
   assert.equal(sentHeader("x-forwarded-proto"), "https");
+});
+
+test("never relays upstream Set-Cookie headers to the API caller", async () => {
+  // Access can answer a service-token request with a CF_Authorization cookie
+  // for the Worker's service identity; a public caller must never receive it.
+  globalThis.fetch = async (input, init = {}) => {
+    captured.push({ url: String(input), init });
+    return new Response("{}", {
+      status: 200,
+      headers: [
+        ["content-type", "application/json"],
+        ["set-cookie", "CF_Authorization=service-identity-jwt; Path=/; HttpOnly; Secure"],
+        ["set-cookie", "__cflb=sticky; Path=/"],
+      ],
+    });
+  };
+
+  const response = await worker.fetch(apiRequest(), { ...BASE_ENV }, ctx);
+
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("content-type"), "application/json");
+  assert.equal(response.headers.get("set-cookie"), null);
+  assert.deepEqual(response.headers.getSetCookie(), []);
 });
 
 test("fails closed when both Access secrets are missing", async () => {
