@@ -86,7 +86,7 @@ body::after { content:"97.5 MHz  •  BLUE DIMENSION  •  ZÜRICH  •  EST. 19
 }
 
 /* ============================================
-   BLUE DIMENSION IDENTITY LAYER — J•Ր MAIN SEAL
+   BLUE DIMENSION IDENTITY LAYER — J·J MAIN SEAL
    ============================================ */
 .hero-content {
   position:relative;
@@ -112,7 +112,7 @@ body::after { content:"97.5 MHz  •  BLUE DIMENSION  •  ZÜRICH  •  EST. 19
   opacity:.98;
 }
 .hero-content::after {
-  content:"PROGRESSIVE MUSIC ATTACK\A J•Ր  ·  cy8er c0wc0d3  ·  ⚜️{.:*M3•0N*:.)⚜️ @®†\A\A DJJESSEJAY.CH  ·  ZÜRICH, CH  ·  RADIO LORA 97.5\A AUTHORIZED  ·  EST. 1997  ·  BLUE DIMENSION";
+  content:"PROGRESSIVE MUSIC ATTACK\A J·J  ·  cy8er c0wc0d3  ·  ⚜️{.:*M3•0N*:.)⚜️ @®†\A\A DJJESSEJAY.CH  ·  ZÜRICH, CH  ·  RADIO LORA 97.5\A AUTHORIZED  ·  EST. 1997  ·  BLUE DIMENSION";
   white-space:pre;
   position:absolute;
   left:50%;
@@ -191,7 +191,11 @@ body::after { content:"97.5 MHz  •  BLUE DIMENSION  •  ZÜRICH  •  EST. 19
 .music-card-rose:hover { box-shadow:var(--bd-shadow),0 0 40px rgba(22,140,255,.12)!important; }
 .event-card-booking:hover { box-shadow:var(--bd-shadow),0 0 40px rgba(22,140,255,.12)!important; }
 footer::before {
-  content:"J•Ր";
+  /* Leerer Inhalt: die Wortmarke kommt ausschliesslich aus dem Vektor-Seal
+     darunter. Zuvor stand hier der Textglyph "J•Ր" (U+0550, armenisch), der
+     ueber dem SVG lag und auf Systemen ohne armenische Glyphenabdeckung als
+     Ersatzkaestchen gerendert wurde. */
+  content:"";
   display:block;
   width:78px;
   height:34px;

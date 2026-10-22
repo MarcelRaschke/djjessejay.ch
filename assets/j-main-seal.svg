@@ -1,6 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 420" role="img" aria-labelledby="title desc">
-<title id="title">J•Ր Main Seal</title>
-<desc id="desc">Golden yellow geometric J, central dot, and mirrored J emblem on transparent background.</desc>
+<!--
+  J·J MAIN SEAL — authoritative outline of the DJ Jesse Jay wordmark.
+
+  This file is the single source of truth for the mark's geometry. Every glyph
+  is a vector path; the file carries no <text>, no font-family and therefore no
+  dependency on a font being installed, loaded or having glyph coverage.
+
+  Canvas viewBox : 0 0 1000 420   (includes the mark's clear space)
+  Ink viewBox    : 90 55 820 365  (tight around the glyphs)
+
+  Consumers that need the mark ink-tight — favicon.svg, the header seal in
+  index.html — embed the three shapes below under viewBox="90 55 820 365"
+  instead of rescaling this file. Consumers that need the clear space keep
+  referencing this file as an image (see css/hero-animation.css).
+
+  Do not re-letter the mark with live text: the second glyph is a bespoke
+  outline, not a rotated or mirrored font glyph, and no typeface reproduces it.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 420" role="img" aria-labelledby="jjs-title jjs-desc">
+<title id="jjs-title">DJ Jesse Jay — J·J main seal</title>
+<desc id="jjs-desc">Golden yellow geometric J, a central dot, and the mirrored counter-J, drawn as vector outlines on a transparent background.</desc>
 <g fill="#FFD400">
   <path d="M90 250h105v55c0 31 17 46 47 46 31 0 47-17 47-49V55h105v251c0 72-48 114-150 114-99 0-154-42-154-125v-45z"/>
   <circle cx="500" cy="210" r="48"/>

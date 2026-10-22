@@ -37,7 +37,9 @@
     .top{position:sticky;top:0;z-index:20;background:rgba(2,8,18,.84);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}
     .nav{height:66px;display:flex;align-items:center;justify-content:space-between;gap:20px}
     .brand{display:flex;align-items:center;gap:12px;text-decoration:none;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
-    .seal{width:36px;height:36px;border:1px solid rgba(255,210,26,.55);border-radius:50%;display:grid;place-items:center;color:var(--gold);box-shadow:0 0 20px rgba(255,210,26,.12);font-weight:900}
+    .seal{width:36px;height:36px;border:1px solid rgba(255,210,26,.55);border-radius:50%;display:grid;place-items:center;color:var(--gold);box-shadow:0 0 20px rgba(255,210,26,.12)}
+    /* Wortmarke als Vektorpfade (assets/j-main-seal.svg): keine Font-, Glyph- oder Zeichensatzabhängigkeit */
+    .seal svg{width:21px;height:auto;display:block}
     .brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:.2em}
     nav{display:flex;gap:22px;font-size:12px;text-transform:uppercase;letter-spacing:.12em}
     nav a{text-decoration:none;color:var(--muted)}nav a:hover,nav a:focus{color:var(--cyan)}
@@ -129,7 +131,7 @@
 <header class="top">
   <div class="wrap nav">
     <a class="brand" href="#top" aria-label="DJ Jesse Jay home">
-      <span class="seal" aria-hidden="true">J•Ր</span>
+      <span class="seal" aria-hidden="true"><svg viewBox="90 55 820 365" fill="currentColor" focusable="false"><path d="M90 250h105v55c0 31 17 46 47 46 31 0 47-17 47-49V55h105v251c0 72-48 114-150 114-99 0-154-42-154-125v-45z"/><circle cx="500" cy="210" r="48"/><path d="M910 55H735c-83 0-137 49-137 125 0 76 54 125 137 125h70v-94h-70c-27 0-43-12-43-31 0-20 16-32 43-32h175V55z"/></svg></span>
       <span>DJ Jesse Jay<small>BLUE DIMENSION // 97.5</small></span>
     </a>
     <nav aria-label="Hauptnavigation">

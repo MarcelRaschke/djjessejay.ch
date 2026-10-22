@@ -20,6 +20,7 @@ This repository is a **hybrid deployment**: GitHub Pages for static assets + Exp
 - **Dynamic backend**: Express 5 server on custom origin `origin.djjessejay.ch` (origin IP intentionally not stored in the repository) — API endpoints, CORS, rate limiting, Nodemailer, WebSocket
 - **Routing**: Cloudflare Worker (`djjessejay-router`) — routes `/api/*` and `/ws` to custom server, all other requests to GitHub Pages
 - **DNS**: Single CNAME `djjessejay.ch` → `marcelraschke.github.io` (proxied by Cloudflare)
+- **Origin hostname**: `origin.djjessejay.ch` is a proxied CNAME to `<tunnel-id>.cfargotunnel.com`, created only by `scripts/cloudflare-tunnel-setup.js --apply`. It does not resolve before the tunnel is applied, so any SSH or HTTP access by that name fails until then. No A record for the origin IP is ever published.
 
 Backend deployment is separate from static deployment and requires manual coordination or a dedicated CI/CD process.
 
