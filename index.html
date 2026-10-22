@@ -35,13 +35,14 @@
     body:after{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,.48))}
     a{color:inherit}.wrap{width:min(var(--max),calc(100% - 32px));margin:auto}
     .top{position:sticky;top:0;z-index:20;background:rgba(2,8,18,.84);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}
-    .nav{height:66px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .nav{min-height:80px;padding:8px 0;display:flex;align-items:center;justify-content:space-between;gap:20px}
     .brand{display:flex;align-items:center;gap:12px;text-decoration:none;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
-    .seal{width:36px;height:36px;border:1px solid rgba(255,210,26,.55);border-radius:50%;display:grid;place-items:center;color:var(--gold);box-shadow:0 0 20px rgba(255,210,26,.12);font-weight:900}
+    .brand{flex-direction:column;align-items:flex-start;gap:2px;flex-shrink:0}
+    .brand-logo{display:block;width:150px;max-width:100%;height:55px;object-fit:contain;object-position:left center}
     .brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:.2em}
     nav{display:flex;gap:22px;font-size:12px;text-transform:uppercase;letter-spacing:.12em}
     nav a{text-decoration:none;color:var(--muted)}nav a:hover,nav a:focus{color:var(--cyan)}
-    .hero{min-height:calc(100vh - 66px);display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:60px;padding:72px 0}
+    .hero{min-height:calc(100vh - 80px);display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:60px;padding:72px 0}
     .eyebrow{font:11px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.2em;color:var(--cyan);text-transform:uppercase}
     h1{font-size:clamp(54px,9vw,112px);line-height:.9;letter-spacing:-.055em;margin:18px 0 28px;font-weight:900}
     h1 span{display:block;color:transparent;-webkit-text-stroke:1px rgba(237,250,255,.5)}
@@ -128,9 +129,9 @@
 <div class="aurora" aria-hidden="true"></div>
 <header class="top">
   <div class="wrap nav">
-    <a class="brand" href="#top" aria-label="DJ Jesse Jay home">
-      <span class="seal" aria-hidden="true">J•Ր</span>
-      <span>DJ Jesse Jay<small>BLUE DIMENSION // 97.5</small></span>
+    <a class="brand" href="#top" aria-label="DJ Jesse Jay – Startseite">
+      <img class="brand-logo" src="assets/dj-jesse-jay-logo.png" alt="DJ Jesse Jay" width="150" height="55">
+      <small>BLUE DIMENSION // 97.5</small>
     </a>
     <nav aria-label="Hauptnavigation">
       <a href="#signal">Signal</a><a href="#bio">Bio</a><a href="#sound">Sound</a><a href="#visuals">Visuals</a><a href="ivdj-supreme.html">iVDJ</a><a href="survey/">Umfrage</a>
