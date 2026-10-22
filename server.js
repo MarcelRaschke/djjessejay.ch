@@ -10,6 +10,7 @@ const controlCenterRouter = require('./control-center/data-sources');
 const djjjSurveyRouter = require('./routes/djjj-survey');
 const { createHoneypotMiddleware } = require('./honeypot/honeypot-middleware');
 const { createHoneypotMonitor } = require('./honeypot/honeypot-monitor');
+const { createClientKeyGenerator } = require('./src/client-key');
 
 const app = express();
 
@@ -35,6 +36,18 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+// Behind the Cloudflare Tunnel every request arrives from cloudflared on the
+// loopback interface, so a key derived from the socket address is the same for
+// every visitor and both limiters below share one bucket for the whole
+// internet. The per-client identity is the leftmost x-forwarded-for entry, but
+// only once the deployed wdjjj Worker overwrites that header and Access keeps
+// everything else off the origin — see src/client-key.js. Neither is visible
+// from here, so the operator asserts both with TRUST_FORWARDED_FOR=1. Set it
+// too early and a client can rotate spoofed addresses through fresh buckets.
+const TRUST_FORWARDED_FOR = process.env.TRUST_FORWARDED_FOR === '1';
+app.set('trust proxy', TRUST_FORWARDED_FOR ? 'loopback' : false);
+const clientKey = createClientKeyGenerator(rateLimit.ipKeyGenerator, { trustForwardedFor: TRUST_FORWARDED_FOR });
+
 // Rate limiting for API endpoints
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -43,7 +56,8 @@ const apiLimiter = rateLimit({
     error: 'Too many requests, please try again after 15 minutes.'
   },
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
+  keyGenerator: clientKey
 });
 
 // Stricter rate limiting for AI proxy to bound upstream cost
@@ -52,7 +66,8 @@ const aiLimiter = rateLimit({
   max: 30,
   message: { error: 'Too many AI requests, please try again after 15 minutes.' },
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
+  keyGenerator: clientKey
 });
 
 // Apply rate limiting to API routes
