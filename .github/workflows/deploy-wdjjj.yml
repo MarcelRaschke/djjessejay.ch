@@ -63,6 +63,46 @@ jobs:
           CF_WORKER_NAME: wdjjj
         run: node scripts/cloudflare-deploy-preflight.mjs
 
+      # The deployed Worker fails closed on /api when the Access service-token
+      # secrets are not bound (ORIGIN-PROTECTION-DEPLOYMENT.md, "Worker-only
+      # origin"). Deploying before they exist would take /api down, so the
+      # binding is checked BEFORE the upload, not after. Secret values are never
+      # returned by this endpoint; it lists names only.
+      - name: Verify Access service-token secrets are bound
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || env.CLOUDFLARE_ACCOUNT_ID_PUBLIC }}
+        run: |
+          set -euo pipefail
+          response="$(curl -sS -o /tmp/wdjjj-secrets.json -w '%{http_code}' \
+            -H "Authorization: Bearer $CF_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/workers/scripts/wdjjj/secrets")"
+          if [ "$response" = "404" ]; then
+            # A missing Worker cannot have the secrets bound, so the upload would
+            # publish a fail-closed Worker (502 on /api) before the post-upload
+            # health check could notice. Bind the secrets first, then deploy.
+            echo "::error::Worker wdjjj was not found (HTTP 404), so its Access service-token secrets cannot be verified. Bind ORIGIN_ACCESS_CLIENT_ID and ORIGIN_ACCESS_CLIENT_SECRET (npx wrangler secret put <name>) before deploying."
+            exit 1
+          fi
+          if [ "$response" != "200" ]; then
+            echo "::error::Cannot read Worker secret bindings (HTTP $response). Token needs Workers Scripts:Read."
+            exit 1
+          fi
+          for name in ORIGIN_ACCESS_CLIENT_ID ORIGIN_ACCESS_CLIENT_SECRET; do
+            node -e '
+              const fs = require("node:fs");
+              const name = process.argv[1];
+              const body = JSON.parse(fs.readFileSync("/tmp/wdjjj-secrets.json", "utf8"));
+              const names = (body.result || []).map((entry) => entry.name);
+              if (!names.includes(name)) {
+                console.error(`::error::Worker secret ${name} is not bound. Run: npx wrangler secret put ${name}`);
+                process.exit(1);
+              }
+            ' "$name"
+          done
+          rm -f /tmp/wdjjj-secrets.json
+          echo "Access service-token secrets are bound."
+
       - name: Record diagnostic-only completion
         if: inputs.diagnose_only == true
         run: echo 'Diagnostic-only run; no Worker upload or route change requested.' >> "$GITHUB_STEP_SUMMARY"
@@ -93,6 +133,9 @@ jobs:
               echo "$body"
               echo "$body" | grep -q '"ok":true'
               echo "$body" | grep -q '"proxy":"wdjjj"'
+              # Access service token must be bound at the live edge, or /api is
+              # fail-closed 502. The value itself is never exposed here.
+              echo "$body" | grep -q '"originAuth":"configured"'
               exit 0
             }
             sleep 10
