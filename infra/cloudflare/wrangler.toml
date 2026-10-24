@@ -16,10 +16,42 @@ enabled = true
 [vars]
 ORIGIN_HOST = "marcelraschke.github.io"
 ORIGIN_PREFIX = "/djjessejay.ch"
-# API backend origin for /api/* routing. API_ORIGIN_HOST is managed as a
-# Cloudflare remote secret (set via `wrangler secret put API_ORIGIN_HOST` or
-# the dashboard) and is deliberately NOT declared here. A local [vars] entry
-# with the same name replaces the remote secret on every deploy (Wrangler
-# warning observed in deploy-wdjjj run 38246122897, 2026-10-12) and would
-# silently disable /api/* routing at the live edge.
+# API backend origin for /api/* routing. API_ORIGIN_HOST is deliberately NOT
+# declared here, and it must be stored as a SECRET — not as a plain Variable.
+#
+# Why the distinction decides whether /api/* works:
+#
+#   `wrangler deploy` deletes every plain-text var on the Worker before it
+#   applies the [vars] below. A value set as a Variable in the dashboard is
+#   therefore erased by the next deploy whether or not this file mentions it.
+#   Secrets are never deleted by a deployment.
+#   https://developers.cloudflare.com/workers/wrangler/configuration/
+#   ("Wrangler will not delete your secrets ... unless you run
+#   `wrangler secret delete <key>`")
+#
+# That is what happened. deploy-wdjjj run 38246122897 (re-run 2026-10-14)
+# logged wrangler erasing the value, which only a Variable can suffer:
+#
+#   -    API_ORIGIN_HOST: "djjessejay.ch"
+#   +    API_ORIGIN_HOST: ""
+#
+# Empty, the Worker short-circuits every /api/* request to HTTP 502
+# "API origin not configured" (see wdjjj.js) — the live state on 2026-10-24.
+#
+# Do NOT restore the erased value. `djjessejay.ch` is the apex, which
+# ORIGIN-PROTECTION-DEPLOYMENT.md rules out explicitly ("Never use the apex
+# or `www`"). The documented value is the tunnel hostname:
+#
+#   npx wrangler secret put API_ORIGIN_HOST     # origin.djjessejay.ch
+#
+# Prerequisites, per ORIGIN-PROTECTION-DEPLOYMENT.md: the tunnel must have
+# been applied with `scripts/cloudflare-tunnel-setup.js --apply` (until then
+# origin.djjessejay.ch does not resolve — it did not on 2026-10-24), and the
+# Worker needs ORIGIN_ACCESS_CLIENT_ID and ORIGIN_ACCESS_CLIENT_SECRET as
+# secrets too, since the tunnel hostname accepts only the Worker's Access
+# service token.
+#
+# `keep_vars = true` would also stop the erasure, but it suppresses it for
+# every var and lets dashboard state drift away from this file. Prefer the
+# secret.
 API_ORIGIN_SCHEME = "https"
