@@ -1,0 +1,19 @@
+{
+  "updated": "2026-10-25",
+  "columns": ["block", "todo", "done"],
+  "cards": [
+    { "id": "token-routes", "col": "block", "title": "API-Token: Workers Routes → Edit für Zone djjessejay.ch", "note": "Route-Setzen schlägt fehl. Der Token braucht außerdem Worker-Skript-Rechte (HTTP 401, Code 10000)." },
+    { "id": "token-secret", "col": "block", "title": "GitHub-Secret CLOUDFLARE_API_TOKEN aktualisieren", "note": "Der Workflow liest den Wert aus GitHub, nicht aus dem Dashboard." },
+    { "id": "account-id", "col": "todo", "title": "Secret CLOUDFLARE_ACCOUNT_ID als Repository-Secret", "note": "Stand letzter Run: fehlte." },
+    { "id": "apex", "col": "todo", "title": "Apex djjessejay.ch: Ursprung prüfen", "note": "Antwortet mit 200, Herkunft der Antwort ungeklärt." },
+    { "id": "hermes", "col": "todo", "title": "hermes.cy8er.djjessejay.ch: 502", "note": "Kein Ursprung. Hermes-Repo fehlt." },
+    { "id": "pgp-workers-dev", "col": "todo", "title": "pgp-directory: workers_dev auf false", "note": "workers/pgp-directory/wrangler.jsonc hat workers_dev true." },
+    { "id": "wdjjj-build", "col": "todo", "title": "Cloudflare-Build für wdjjj von Git trennen", "note": "Workers Builds schlägt bei jedem Push fehl." },
+    { "id": "pages-djjj", "col": "todo", "title": "Cloudflare Pages „djjj“ prüfen oder abschalten", "note": "Schlägt auf jedem PR sofort fehl." },
+    { "id": "csp-acao", "col": "todo", "title": "Apex: CORS-Header und CSP prüfen", "note": "access-control-allow-origin: * auf HTML, CSP mit unsafe-inline." },
+    { "id": "main-red", "col": "todo", "title": "Rote Checks auf main beheben", "note": "Python Lint, AGENT-SEC, Sigstore, Live-Smoke." },
+    { "id": "pr138", "col": "done", "title": "PR #138 .nojekyll gemergt", "note": "Merge 10-08." },
+    { "id": "jekyll-off", "col": "done", "title": "Jekyll-Workflow deaktiviert", "note": "Verhindert Überschreiben der Pages-Seite bei Pushes." },
+    { "id": "dup-template", "col": "done", "title": "Doppelte PR-Vorlage entfernt (PR #132)", "note": "Nur noch .github/PULL_REQUEST_TEMPLATE.md." }
+  ]
+}
