@@ -31,9 +31,13 @@
       "ai": {
         "status": "ai-generated",
         "label": "KI-generiert",
-        "generator": null,
+        "generator": [
+          "ChatGPT",
+          "Gemini"
+        ],
         "evidence": false,
-        "declared": "2026-10-26, Auftraggeber"
+        "declared": "2026-10-26, Auftraggeber",
+        "generator_basis": "Auftraggeber nannte ChatGPT und Gemini insgesamt (2026-10-26). Zuordnung pro Bild offen."
       },
       "rights": {
         "status": "unklaert",
@@ -65,9 +69,13 @@
       "ai": {
         "status": "ai-generated",
         "label": "KI-generiert",
-        "generator": null,
+        "generator": [
+          "ChatGPT",
+          "Gemini"
+        ],
         "evidence": false,
-        "declared": "2026-10-26, Auftraggeber"
+        "declared": "2026-10-26, Auftraggeber",
+        "generator_basis": "Auftraggeber nannte ChatGPT und Gemini insgesamt (2026-10-26). Zuordnung pro Bild offen."
       },
       "rights": {
         "status": "unklaert",
@@ -99,9 +107,13 @@
       "ai": {
         "status": "ai-generated",
         "label": "KI-generiert",
-        "generator": null,
+        "generator": [
+          "ChatGPT",
+          "Gemini"
+        ],
         "evidence": false,
-        "declared": "2026-10-26, Auftraggeber"
+        "declared": "2026-10-26, Auftraggeber",
+        "generator_basis": "Auftraggeber nannte ChatGPT und Gemini insgesamt (2026-10-26). Zuordnung pro Bild offen."
       },
       "rights": {
         "status": "unklaert",
@@ -131,9 +143,12 @@
       "ai": {
         "status": "ai-generated",
         "label": "KI-generiert",
-        "generator": null,
+        "generator": [
+          "Gemini"
+        ],
         "evidence": false,
-        "declared": "2026-10-26, Auftraggeber"
+        "declared": "2026-10-26, Auftraggeber",
+        "generator_basis": "Sichtbare Markierung im Bild; Auftraggeber nannte ChatGPT und Gemini insgesamt. Zuordnung bestätigen."
       },
       "rights": {
         "status": "unklaert",
@@ -165,9 +180,13 @@
       "ai": {
         "status": "ai-generated",
         "label": "KI-generiert",
-        "generator": null,
+        "generator": [
+          "ChatGPT",
+          "Gemini"
+        ],
         "evidence": false,
-        "declared": "2026-10-26, Auftraggeber"
+        "declared": "2026-10-26, Auftraggeber",
+        "generator_basis": "Auftraggeber nannte ChatGPT und Gemini insgesamt (2026-10-26). Zuordnung pro Bild offen."
       },
       "rights": {
         "status": "unklaert",
@@ -197,9 +216,12 @@
       "ai": {
         "status": "ai-generated",
         "label": "KI-generiert",
-        "generator": null,
+        "generator": [
+          "Gemini"
+        ],
         "evidence": false,
-        "declared": "2026-10-26, Auftraggeber"
+        "declared": "2026-10-26, Auftraggeber",
+        "generator_basis": "Sichtbare Markierung im Bild; Auftraggeber nannte ChatGPT und Gemini insgesamt. Zuordnung bestätigen."
       },
       "rights": {
         "status": "unklaert",
@@ -232,9 +254,13 @@
       "ai": {
         "status": "ai-generated",
         "label": "KI-generiert",
-        "generator": null,
+        "generator": [
+          "ChatGPT",
+          "Gemini"
+        ],
         "evidence": false,
-        "declared": "2026-10-26, Auftraggeber"
+        "declared": "2026-10-26, Auftraggeber",
+        "generator_basis": "Auftraggeber nannte ChatGPT und Gemini insgesamt (2026-10-26). Zuordnung pro Bild offen."
       },
       "rights": {
         "status": "unklaert",
@@ -266,9 +292,13 @@
       "ai": {
         "status": "ai-generated",
         "label": "KI-generiert",
-        "generator": null,
+        "generator": [
+          "ChatGPT",
+          "Gemini"
+        ],
         "evidence": false,
-        "declared": "2026-10-26, Auftraggeber"
+        "declared": "2026-10-26, Auftraggeber",
+        "generator_basis": "Auftraggeber nannte ChatGPT und Gemini insgesamt (2026-10-26). Zuordnung pro Bild offen."
       },
       "rights": {
         "status": "unklaert",
@@ -298,9 +328,13 @@
       "ai": {
         "status": "ai-generated",
         "label": "KI-generiert",
-        "generator": null,
+        "generator": [
+          "ChatGPT",
+          "Gemini"
+        ],
         "evidence": false,
-        "declared": "2026-10-26, Auftraggeber"
+        "declared": "2026-10-26, Auftraggeber",
+        "generator_basis": "Auftraggeber nannte ChatGPT und Gemini insgesamt (2026-10-26). Zuordnung pro Bild offen."
       },
       "rights": {
         "status": "unklaert",
@@ -330,9 +364,13 @@
       "ai": {
         "status": "ai-generated",
         "label": "KI-generiert",
-        "generator": null,
+        "generator": [
+          "ChatGPT",
+          "Gemini"
+        ],
         "evidence": false,
-        "declared": "2026-10-26, Auftraggeber"
+        "declared": "2026-10-26, Auftraggeber",
+        "generator_basis": "Auftraggeber nannte ChatGPT und Gemini insgesamt (2026-10-26). Zuordnung pro Bild offen."
       },
       "rights": {
         "status": "unklaert",
@@ -361,9 +399,13 @@
       "ai": {
         "status": "ai-generated",
         "label": "KI-generiert",
-        "generator": null,
+        "generator": [
+          "ChatGPT",
+          "Gemini"
+        ],
         "evidence": false,
-        "declared": "2026-10-26, Auftraggeber"
+        "declared": "2026-10-26, Auftraggeber",
+        "generator_basis": "Auftraggeber nannte ChatGPT und Gemini insgesamt (2026-10-26). Zuordnung pro Bild offen."
       },
       "rights": {
         "status": "unklaert",
@@ -391,9 +433,13 @@
       "ai": {
         "status": "ai-generated",
         "label": "KI-generiert",
-        "generator": null,
+        "generator": [
+          "ChatGPT",
+          "Gemini"
+        ],
         "evidence": false,
-        "declared": "2026-10-26, Auftraggeber"
+        "declared": "2026-10-26, Auftraggeber",
+        "generator_basis": "Auftraggeber nannte ChatGPT und Gemini insgesamt (2026-10-26). Zuordnung pro Bild offen."
       },
       "rights": {
         "status": "unklaert",
@@ -421,9 +467,13 @@
       "ai": {
         "status": "ai-generated",
         "label": "KI-generiert",
-        "generator": null,
+        "generator": [
+          "ChatGPT",
+          "Gemini"
+        ],
         "evidence": false,
-        "declared": "2026-10-26, Auftraggeber"
+        "declared": "2026-10-26, Auftraggeber",
+        "generator_basis": "Auftraggeber nannte ChatGPT und Gemini insgesamt (2026-10-26). Zuordnung pro Bild offen."
       },
       "rights": {
         "status": "unklaert",
@@ -451,9 +501,13 @@
       "ai": {
         "status": "ai-generated",
         "label": "KI-generiert",
-        "generator": null,
+        "generator": [
+          "ChatGPT",
+          "Gemini"
+        ],
         "evidence": false,
-        "declared": "2026-10-26, Auftraggeber"
+        "declared": "2026-10-26, Auftraggeber",
+        "generator_basis": "Auftraggeber nannte ChatGPT und Gemini insgesamt (2026-10-26). Zuordnung pro Bild offen."
       },
       "rights": {
         "status": "unklaert",

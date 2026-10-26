@@ -10,7 +10,8 @@ Quelle der Wahrheit ist `data/assets.json`. Prüfung: `npm run check:assets`.
 4. Generierte Bilder sind kein Beleg für Biografie, Termine oder Zugehörigkeiten (`CLAUDE.md`, Abschnitt Authority). `ai.evidence` bleibt `false`. Konzeptgrafiken dürfen nicht wie Terminankündigungen wirken.
 5. Rechte: Mit `rights.status` = `unklaert` ist die Anzeige auf der eigenen Seite erlaubt, sofern Kennzeichnung und Alt-Text vorliegen. Weitergabe (Presskit, `og:image`, Downloads) setzt `geklaert` und einen eingetragenen `holder` voraus (siehe `presskit/README.md`).
 6. Status `hold`: Die Datei wird nicht eingecheckt, weil das Repository öffentlich ist und das Deployment das Root-Verzeichnis veröffentlicht. `planned_path` ist reserviert. Liegt dort trotzdem eine Datei, schlägt die Prüfung fehl.
-7. `ai.status` = `unverified` heisst: Herkunft nicht dokumentiert. Vor einer Herkunftsangabe auf der Seite klären und auf `ai-generated` setzen oder die Notiz begründet belassen.
+7. `ai.generator` nennt die verwendeten Werkzeuge als Liste. Deren Nutzungsbedingungen entscheiden mit über die Weitergabe. `ai.generator_basis` vermerkt, woher die Zuordnung stammt.
+8. `ai.status` = `unverified` heisst: Herkunft nicht dokumentiert. Vor einer Herkunftsangabe auf der Seite klären und auf `ai-generated` setzen oder die Notiz begründet belassen.
 
 ## Neues Bild aufnehmen
 

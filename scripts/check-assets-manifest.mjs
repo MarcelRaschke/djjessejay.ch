@@ -67,6 +67,12 @@ for (const a of manifest.assets) {
   if (!AI_STATUSES.has(a.ai?.status)) fail(id, `ai.status "${a.ai?.status}" ungültig`);
   if (a.ai?.evidence !== false) fail(id, 'ai.evidence muss false sein');
   if (a.ai?.status === 'ai-generated' && !nonEmpty(a.ai?.label)) fail(id, 'ai.label fehlt');
+  if (a.ai?.status === 'ai-generated') {
+    const g = a.ai?.generator;
+    if (!Array.isArray(g) || g.length === 0 || !g.every(nonEmpty)) {
+      fail(id, 'ai.generator muss eine nicht leere Liste von Werkzeugnamen sein');
+    }
+  }
 
   if (!RIGHTS_STATUSES.has(a.rights?.status)) fail(id, `rights.status "${a.rights?.status}" ungültig`);
   if (a.rights?.status === 'geklaert' && !nonEmpty(a.rights?.holder)) {
