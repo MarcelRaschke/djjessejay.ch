@@ -1,0 +1,503 @@
+{
+  "version": 1,
+  "updated": "2026-10-26",
+  "policy": {
+    "doc": "docs/AI-KENNZEICHNUNG.md",
+    "ai_label": "KI-generiert",
+    "check": "npm run check:assets",
+    "rights_gate": "Weitergabe (Presskit, og:image, Downloads) erst bei rights.status geklaert und gesetztem holder.",
+    "evidence": "Generierte Bilder sind kein Beleg für Biografie, Termine oder Zugehörigkeiten."
+  },
+  "assets": [
+    {
+      "id": "jj-coin",
+      "path": "assets/img/brand/jj-coin.webp",
+      "planned_path": null,
+      "status": "candidate",
+      "role": "Logo; Quelle für Favicon und App-Icon",
+      "alt": "J·J-Münze: gelbes J, Punkt und gespiegeltes J auf blauem Grund, umgeben von einem leuchtenden Ring mit Skala.",
+      "width": 1536,
+      "height": 1536,
+      "bytes": 257404,
+      "sha256": "1aac5386b8bbec2789fbb8a94773ca03d1ca2f5d7af781266f715f6d25b0d832",
+      "source": {
+        "upload": "1000122733.jpg",
+        "format": "JPEG",
+        "width": 1536,
+        "height": 1536,
+        "bytes": 410503,
+        "sha256": "cb381fd59789be92d1d03fd1f6a510dcaeba86ae0501956bf046c16869ec6aaa"
+      },
+      "ai": {
+        "status": "ai-generated",
+        "label": "KI-generiert",
+        "generator": null,
+        "evidence": false,
+        "declared": "2026-10-26, Auftraggeber"
+      },
+      "rights": {
+        "status": "unklaert",
+        "holder": null
+      },
+      "notes": [
+        "Für Favicon-Set als SVG nachbauen statt Raster ausliefern."
+      ]
+    },
+    {
+      "id": "vinyl-emblem",
+      "path": "assets/img/brand/vinyl-emblem.webp",
+      "planned_path": null,
+      "status": "candidate",
+      "role": "Logo; Logopaket im Presskit",
+      "alt": "Emblem mit blauer Schallplatte und Tonarm, J·J auf dem Label, darunter DJ Jesse Jay, Progressive Music Attack, Zürich, Est. 1997.",
+      "width": 1536,
+      "height": 1536,
+      "bytes": 190108,
+      "sha256": "1ee19a6a5b176460125e09882ef3a5088b2c8689e563179a9f100967f5eb7a11",
+      "source": {
+        "upload": "1000122734.jpg",
+        "format": "JPEG",
+        "width": 1536,
+        "height": 1536,
+        "bytes": 307720,
+        "sha256": "3254aa207fa3c02d920fd68c8e9f0ed12918aec97a4d40399a23cf9675bd82a3"
+      },
+      "ai": {
+        "status": "ai-generated",
+        "label": "KI-generiert",
+        "generator": null,
+        "evidence": false,
+        "declared": "2026-10-26, Auftraggeber"
+      },
+      "rights": {
+        "status": "unklaert",
+        "holder": null
+      },
+      "notes": [
+        "Als SVG nachbauen, bevor es im Presskit-Logopaket landet."
+      ]
+    },
+    {
+      "id": "vinyl-jj",
+      "path": "assets/img/brand/vinyl-jj.webp",
+      "planned_path": null,
+      "status": "candidate",
+      "role": "Hero- oder Header-Hintergrund",
+      "alt": "Blaue Schallplatte in Nahaufnahme mit gelbem J·J auf dem Label.",
+      "width": 760,
+      "height": 427,
+      "bytes": 72002,
+      "sha256": "4f3d43db696341de7f8bf092f001c4af91bf4af7325cd3a52703858489242e65",
+      "source": {
+        "upload": "1000122906.jpg",
+        "format": "JPEG",
+        "width": 760,
+        "height": 427,
+        "bytes": 109597,
+        "sha256": "049ebd7b68367a3b51816ca9d50f4b0d7863bd26fc05a119d8d3f52fe3b2ac50"
+      },
+      "ai": {
+        "status": "ai-generated",
+        "label": "KI-generiert",
+        "generator": null,
+        "evidence": false,
+        "declared": "2026-10-26, Auftraggeber"
+      },
+      "rights": {
+        "status": "unklaert",
+        "holder": null
+      },
+      "notes": []
+    },
+    {
+      "id": "banner-mixer",
+      "path": "assets/img/brand/banner-mixer.webp",
+      "planned_path": null,
+      "status": "candidate",
+      "role": "Banner",
+      "alt": "Blaues DJ-Mischpult mit Plattentellern und dem Schriftzug DJ Jesse Jay mit gelbem Logo.",
+      "width": 1536,
+      "height": 645,
+      "bytes": 114956,
+      "sha256": "73d913cba43b26bed23d88ac70ae8cd0befc51e52336f38f235340ac59947413",
+      "source": {
+        "upload": "1000122743.jpg",
+        "format": "JPEG",
+        "width": 1536,
+        "height": 645,
+        "bytes": 172276,
+        "sha256": "5234d06b19f7eb06d892821c4acb3df3cd32ba0fadf0986d2e17c8b62d8e6e2d"
+      },
+      "ai": {
+        "status": "ai-generated",
+        "label": "KI-generiert",
+        "generator": null,
+        "evidence": false,
+        "declared": "2026-10-26, Auftraggeber"
+      },
+      "rights": {
+        "status": "unklaert",
+        "holder": null
+      },
+      "notes": [
+        "Sichtbare Generator-Markierung unten rechts im Bild."
+      ]
+    },
+    {
+      "id": "card-neon",
+      "path": "assets/img/brand/card-neon.webp",
+      "planned_path": null,
+      "status": "candidate",
+      "role": "Visitenkarte; Social Preview",
+      "alt": "Leuchtend blaue Pixel-Visitenkarte mit DJ Jesse Jay, Progressive Music Attack, djjessejay.ch, Zürich und Radio LoRa 97.5.",
+      "width": 760,
+      "height": 428,
+      "bytes": 53028,
+      "sha256": "3dc7fe55491dcf4e43c862ebb5db919b6faa2047f79dcf2a0320ec3d5135d005",
+      "source": {
+        "upload": "1000122903.jpg",
+        "format": "JPEG",
+        "width": 760,
+        "height": 428,
+        "bytes": 109370,
+        "sha256": "9c52a9b43c6236a458afc1bc83fba925fddbd2917b48620be00978742dbb8465"
+      },
+      "ai": {
+        "status": "ai-generated",
+        "label": "KI-generiert",
+        "generator": null,
+        "evidence": false,
+        "declared": "2026-10-26, Auftraggeber"
+      },
+      "rights": {
+        "status": "unklaert",
+        "holder": null
+      },
+      "notes": []
+    },
+    {
+      "id": "origami-portrait",
+      "path": "assets/img/portrait/origami-portrait.webp",
+      "planned_path": null,
+      "status": "candidate",
+      "role": "Profilbild (stilisiert)",
+      "alt": "Stilisiertes Porträt eines lächelnden Mannes, als Papier-Origami aus Dreiecksfacetten in Beige und Jeansblau gestaltet.",
+      "width": 1458,
+      "height": 1536,
+      "bytes": 225598,
+      "sha256": "be18a70895796275eee5df9a5eef75f1265bab9ca0c2fe177616a7b6d468c8c3",
+      "source": {
+        "upload": "1000122744.jpg",
+        "format": "JPEG",
+        "width": 1458,
+        "height": 1536,
+        "bytes": 364489,
+        "sha256": "4ba3b762a906a1a9224abf453c22f133e0801e56bb7a739fc8658a72585cfa86"
+      },
+      "ai": {
+        "status": "ai-generated",
+        "label": "KI-generiert",
+        "generator": null,
+        "evidence": false,
+        "declared": "2026-10-26, Auftraggeber"
+      },
+      "rights": {
+        "status": "unklaert",
+        "holder": null
+      },
+      "notes": [
+        "Kein Pressefoto: Das Presskit braucht echte Fotos mit mindestens 3000 px.",
+        "Sichtbare Generator-Markierung unten rechts im Bild."
+      ]
+    },
+    {
+      "id": "cy8er-space-night-poster",
+      "path": "assets/img/social/cy8er-space-night-poster.webp",
+      "planned_path": null,
+      "status": "concept",
+      "role": "Konzeptplakat; og:image-Kandidat nach Zuschnitt auf 1200x630",
+      "alt": "Konzeptplakat Blue Dimension Cy8er Space Night: Bühne mit J·J-Logo und Publikum vor der nächtlichen Zürcher Altstadt, darunter eine Liste elektronischer Genres.",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 261906,
+      "sha256": "b34fe5ff074b728813ae893c8f261307fa6081b85bd615f56c7aa452ce81ff3b",
+      "source": {
+        "upload": "1000122742.jpg",
+        "format": "JPEG",
+        "width": 1536,
+        "height": 1024,
+        "bytes": 382027,
+        "sha256": "7de98bfb6311c02b8da334d12f65bc2a65b9ba7b8969af44a8617c57edd70543"
+      },
+      "ai": {
+        "status": "ai-generated",
+        "label": "KI-generiert",
+        "generator": null,
+        "evidence": false,
+        "declared": "2026-10-26, Auftraggeber"
+      },
+      "rights": {
+        "status": "unklaert",
+        "holder": null
+      },
+      "notes": [
+        "Wirkt wie eine Terminankündigung (SAT, Doors 18:00). Nur als Konzeptgrafik zeigen, nicht als Event (CLAUDE.md: keine ungeprüften Termine)."
+      ]
+    },
+    {
+      "id": "twodivision-credit",
+      "path": "assets/img/credits/twodivision-credit.webp",
+      "planned_path": null,
+      "status": "candidate",
+      "role": "Footer-Credit",
+      "alt": "Schriftzug designed by TwoDivision & @®† in Silber und Gelb auf dunklem Grund.",
+      "width": 1536,
+      "height": 512,
+      "bytes": 49300,
+      "sha256": "e3d4c43dd1fe42be4ce23803654e35d6c1cc72026fe534f51d0607181f9558bc",
+      "source": {
+        "upload": "1000122735.jpg",
+        "format": "JPEG",
+        "width": 1536,
+        "height": 512,
+        "bytes": 91337,
+        "sha256": "81ccf6a50743b8047d04a5db7fb17b094d9fadccc545bbe007869c9ab0a25cc1"
+      },
+      "ai": {
+        "status": "ai-generated",
+        "label": "KI-generiert",
+        "generator": null,
+        "evidence": false,
+        "declared": "2026-10-26, Auftraggeber"
+      },
+      "rights": {
+        "status": "unklaert",
+        "holder": null
+      },
+      "notes": []
+    },
+    {
+      "id": "archiv-rekonstruktion",
+      "path": "assets/img/lab/archiv-rekonstruktion.webp",
+      "planned_path": null,
+      "status": "candidate",
+      "role": "About- oder Lab-Bereich",
+      "alt": "Pixelkunst-Szene: ein Roboter und ein Mensch rekonstruieren das DJ-Jesse-Jay-Archiv vor einer grossen Bildschirmwand, rechts ein Club mit Discokugel.",
+      "width": 760,
+      "height": 428,
+      "bytes": 146082,
+      "sha256": "08d93b39e183cf58dc7c8ec0b8993c8f1d12625c445fcef5a1c72cf675b9ed05",
+      "source": {
+        "upload": "1000122824.png",
+        "format": "PNG",
+        "width": 760,
+        "height": 428,
+        "bytes": 647505,
+        "sha256": "b201fcd36634fc8b3d66eaaeb8e7763262185115e41e161b83c3b9498cf160d7"
+      },
+      "ai": {
+        "status": "ai-generated",
+        "label": "KI-generiert",
+        "generator": null,
+        "evidence": false,
+        "declared": "2026-10-26, Auftraggeber"
+      },
+      "rights": {
+        "status": "unklaert",
+        "holder": null
+      },
+      "notes": []
+    },
+    {
+      "id": "infografik-elektronische-musik",
+      "path": "assets/img/reference/infografik-elektronische-musik.webp",
+      "planned_path": null,
+      "status": "reference",
+      "role": "Gestaltungsreferenz; Umsetzung als HTML und SVG geplant",
+      "alt": "Infografik Elektronische Musik, von der Idee zum Erlebnis: Rollen, Produktionsprozess in neun Schritten, Studio, Klangsynthese und Musikstile.",
+      "width": 1536,
+      "height": 864,
+      "bytes": 400540,
+      "sha256": "55c89ade2f30d92974352f4d9768ad9f1a1b73ef309a5466f07a41d6fc2ac731",
+      "source": {
+        "upload": "1000122745.jpg",
+        "format": "JPEG",
+        "width": 1536,
+        "height": 864,
+        "bytes": 513718,
+        "sha256": "a92f2425446b903e969dd779fbaf4faedeb53c02e6712d5f00e60895c9a3ffcc"
+      },
+      "ai": {
+        "status": "ai-generated",
+        "label": "KI-generiert",
+        "generator": null,
+        "evidence": false,
+        "declared": "2026-10-26, Auftraggeber"
+      },
+      "rights": {
+        "status": "unklaert",
+        "holder": null
+      },
+      "notes": [
+        "Als reines Bild nicht barrierefrei und der Text nicht indexierbar.",
+        "Enthält Symbole von Streaming-Diensten."
+      ]
+    },
+    {
+      "id": "ibm-370-szene-1",
+      "path": null,
+      "planned_path": "assets/img/lab/ibm-370-szene-1.webp",
+      "status": "hold",
+      "role": "Freigabe offen; Datei nicht eingecheckt",
+      "alt": "Pixelkunst-Szene eines IBM-System/370-Rechenzentrums mit Figuren und Bandlaufwerken.",
+      "source": {
+        "upload": "1000122891.png",
+        "format": "PNG",
+        "width": 1448,
+        "height": 1086,
+        "bytes": 2216338,
+        "sha256": "b21e81b2c50d6820783c9840f78e683a2260d027e4e8a8e254ea674d2a1bb8b5"
+      },
+      "ai": {
+        "status": "ai-generated",
+        "label": "KI-generiert",
+        "generator": null,
+        "evidence": false,
+        "declared": "2026-10-26, Auftraggeber"
+      },
+      "rights": {
+        "status": "unklaert",
+        "holder": null
+      },
+      "notes": [
+        "Freigabe offen. Das Repository ist öffentlich und das Deployment veröffentlicht das Root-Verzeichnis."
+      ]
+    },
+    {
+      "id": "ibm-370-szene-2",
+      "path": null,
+      "planned_path": "assets/img/lab/ibm-370-szene-2.webp",
+      "status": "hold",
+      "role": "Freigabe offen; Datei nicht eingecheckt",
+      "alt": "Breite Pixelkunst-Szene eines IBM-System/370-Rechenzentrums mit Figuren in mehreren Etagen.",
+      "source": {
+        "upload": "1000122899.png",
+        "format": "PNG",
+        "width": 1672,
+        "height": 941,
+        "bytes": 2423237,
+        "sha256": "9b245196f551ed280bb94c0d5d1df9dfabf7ba4fdd7e820046d0c0f1df2b5946"
+      },
+      "ai": {
+        "status": "ai-generated",
+        "label": "KI-generiert",
+        "generator": null,
+        "evidence": false,
+        "declared": "2026-10-26, Auftraggeber"
+      },
+      "rights": {
+        "status": "unklaert",
+        "holder": null
+      },
+      "notes": [
+        "Freigabe offen. Das Repository ist öffentlich und das Deployment veröffentlicht das Root-Verzeichnis."
+      ]
+    },
+    {
+      "id": "ibm-370-szene-3",
+      "path": null,
+      "planned_path": "assets/img/lab/ibm-370-szene-3.webp",
+      "status": "hold",
+      "role": "Freigabe offen; Datei nicht eingecheckt",
+      "alt": "Pixelkunst-Szene eines IBM-System/370-Rechenzentrums mit Figuren und Bandlaufwerken.",
+      "source": {
+        "upload": "1000122905.png",
+        "format": "PNG",
+        "width": 760,
+        "height": 428,
+        "bytes": 657680,
+        "sha256": "bd161835606ca6affeaedecd5d8b7090ee26b56e34b0d2f6fc29aae048746ec8"
+      },
+      "ai": {
+        "status": "ai-generated",
+        "label": "KI-generiert",
+        "generator": null,
+        "evidence": false,
+        "declared": "2026-10-26, Auftraggeber"
+      },
+      "rights": {
+        "status": "unklaert",
+        "holder": null
+      },
+      "notes": [
+        "Freigabe offen. Das Repository ist öffentlich und das Deployment veröffentlicht das Root-Verzeichnis."
+      ]
+    },
+    {
+      "id": "djjjcoin-infografik",
+      "path": null,
+      "planned_path": "assets/img/reference/djjjcoin-infografik.webp",
+      "status": "hold",
+      "role": "Freigabe offen; Datei nicht eingecheckt",
+      "alt": "Infografik Wie funktioniert djjjcoin: Grundidee, Blockchain, Transaktionen, Netzwerk, Mining und Geldpolitik.",
+      "source": {
+        "upload": "1000122746.jpg",
+        "format": "JPEG",
+        "width": 1536,
+        "height": 864,
+        "bytes": 361382,
+        "sha256": "0b86ed68e46c5b2acda5f5f82e48b5d94f5aab13f85d080be6214f40b5061c90"
+      },
+      "ai": {
+        "status": "ai-generated",
+        "label": "KI-generiert",
+        "generator": null,
+        "evidence": false,
+        "declared": "2026-10-26, Auftraggeber"
+      },
+      "rights": {
+        "status": "unklaert",
+        "holder": null
+      },
+      "notes": [
+        "Freigabe offen. Das Repository ist öffentlich und das Deployment veröffentlicht das Root-Verzeichnis."
+      ]
+    },
+    {
+      "id": "reference-visual-matrix",
+      "path": "assets/blue-dimension-reference-visual.svg",
+      "planned_path": null,
+      "status": "reference",
+      "role": "Gestaltungsreferenz für Visuals v2",
+      "alt": "Neon-Referenzgrafik: Tunnelringe, Zürcher Skyline als Balken, Vinyl-Signal, Wellenform und Perspektivgitter.",
+      "width": 1600,
+      "height": 900,
+      "bytes": 4955,
+      "sha256": "b1bf0484eaa1f5951f10e128a1046ab04ce8b4826afb70d57a3a0972cd3f8e77",
+      "source": {
+        "upload": "1000122908.png",
+        "format": "PNG",
+        "width": 1600,
+        "height": 900,
+        "bytes": 479104,
+        "sha256": "275110cca70e3c3e1f5fcf66f7e0b0ffbe2ac05e54952a89a227abff0938a8f2"
+      },
+      "ai": {
+        "status": "unverified",
+        "label": null,
+        "generator": null,
+        "evidence": false,
+        "declared": null
+      },
+      "rights": {
+        "status": "unklaert",
+        "holder": null
+      },
+      "notes": [
+        "Vektorquelle liegt im Repository; das hochgeladene PNG ist ihr Render und wurde nicht eingecheckt.",
+        "KI-Beteiligung bei der Erstellung der SVG ist nicht dokumentiert und vom Auftraggeber zu bestätigen.",
+        "Im Bild überdeckt der Kreis oben links das Wort ZÜRICH; Korrektur gehört in die SVG-Quelle."
+      ]
+    }
+  ]
+}

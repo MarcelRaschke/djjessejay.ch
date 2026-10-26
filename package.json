@@ -14,6 +14,7 @@
     "check:agent-boundary": "bash scripts/check-mcp-boundary.sh",
     "check:agent-security": "bash scripts/check-agent-security-boundary.sh",
     "check:fauli-boundary": "bash scripts/check-fauli-boundary.sh",
+    "check:assets": "node scripts/check-assets-manifest.mjs",
     "render:master": "node render-farm/render-farm-master.js",
     "build:html": "node scripts/replace-recaptcha-key.mjs",
     "db:init": "node --no-warnings scripts/db-init.mjs",
