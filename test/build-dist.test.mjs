@@ -74,7 +74,7 @@ test('checkDist meldet verbotene Dateien', () => {
     }
     const problems = checkDist(dist).join('\n');
     for (const f of ['guestbook.sql', 'server.js', '.env.local', '.mcp.json', 'infra/cloudflare/wdjjj.js', 'events.xml', 'README.md']) {
-      assert.match(problems, new RegExp(f.replace(/[.]/g, '\\.')));
+      assert.ok(problems.includes(f), `${f} nicht gemeldet`);
     }
   } finally {
     rmSync(dist, { recursive: true, force: true });
