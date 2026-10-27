@@ -143,6 +143,38 @@ jobs:
           echo "Cloudflare Worker health check failed" >&2
           exit 1
 
+      # /__wdjjj/health above is answered by the Worker itself: it shows that
+      # the Access service-token secrets are bound, not that the origin accepts
+      # them. /api/health is proxied to Express with the token, so Express's own
+      # answer proves the token works end to end. Reading the status code alone
+      # is not enough because the SPA fallback in server.js answers unknown GET
+      # paths with index.html, so the body must be Express's health payload.
+      # This runs after the upload and does not roll the Worker back; a red run
+      # here means /api is down or rejected, not that the deploy was skipped.
+      - name: Verify API origin through the Worker
+        if: inputs.diagnose_only != true
+        run: |
+          set -euo pipefail
+          code="000"
+          for attempt in 1 2 3 4 5 6; do
+            code="$(curl -sS -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36" -o /tmp/wdjjj-api-health.json -w '%{http_code}' https://djjessejay.ch/api/health || true)"
+            echo "attempt $attempt: GET /api/health -> HTTP $code"
+            if [ "$code" = "200" ] && grep -q '"status":"healthy"' /tmp/wdjjj-api-health.json; then
+              rm -f /tmp/wdjjj-api-health.json
+              echo "API origin answered through the Worker."
+              exit 0
+            fi
+            sleep 10
+          done
+          case "$code" in
+            403) hint="Access rejected the service token (wrong, revoked or not in the policy)." ;;
+            502) hint="The Worker has no service-token secrets bound, or the origin is unreachable." ;;
+            200) hint="HTTP 200 but not Express's health payload; the request did not reach the API." ;;
+            *) hint="The origin or tunnel is not answering (see docs/CLOUDFLARE-DEPLOY-RECOVERY.md)." ;;
+          esac
+          echo "::error::GET /api/health through the Worker did not return Express's health payload (last HTTP $code). $hint"
+          exit 1
+
       - name: Verify apex
         if: inputs.diagnose_only != true
         run: |

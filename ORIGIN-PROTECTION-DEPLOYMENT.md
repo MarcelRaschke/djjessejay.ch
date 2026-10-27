@@ -104,7 +104,11 @@ different order takes `/api` down.
    answers `502` and no request is sent to the origin (fail closed). The deploy
    workflow refuses to upload the Worker while the secrets are unbound or the Worker
    does not exist yet (bind the secrets first), and asserts `originAuth` after the
-   upload.
+   upload. `originAuth` only shows that the secrets are bound, so the workflow then
+   requests `/api/health` through `djjessejay.ch` and requires Express's own health
+   payload (`"status":"healthy"`, not just HTTP 200). That check runs after the
+   upload and does not roll the Worker back: a red run means `/api` is down or the
+   token is rejected (403), not that the deploy was skipped.
 4. Run the setup with `CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID=<token id>`.
 5. Store the token ID as repository variable `CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID` so the
    deployment checklist can verify it.
