@@ -349,7 +349,7 @@ export const controlCenterRoutes: FastifyPluginAsync = async (app) => {
     if (body.data.status === 'published' && !canPublish(request)) return reply.code(403).send({ error: 'admin_required_to_publish' });
     if (await operationAlreadyUsed(body.data.operationId)) return reply.code(409).send({ error: 'operation_id_reused' });
     const { operationId, startsAt, ...rest } = body.data;
-    const values = { ...rest, startsAt: startsAt ? new Date(startsAt) : startsAt ?? null };
+    const values = { ...rest, startsAt: startsAt ? new Date(startsAt) : null };
     try {
       const [created] = await db.transaction(async (tx) => {
         const rows = await tx.insert(events).values(values).returning();
