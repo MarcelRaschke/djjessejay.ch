@@ -50,30 +50,18 @@ jobs:
           TURNSTILE_SITE_KEY: ${{ vars.TURNSTILE_SITE_KEY }}
         run: npm run build:html
 
-      - name: Remove large/unnecessary files before upload
-        run: |
-          # Remove database dumps (SQL/XML archives)
-          rm -f *.sql *.xml
-          # Remove video files (large legacy assets)
-          rm -f *.mov *.mp4 *.webm
-          # Remove Flash files (non-functional)
-          rm -f *.swf
-          # Remove old HTML versions (not needed for deploy)
-          rm -f home.html home.htm
-          # Remove web scraper utility (not site content)
-          rm -rf web_scraper
-          # Remove markdown docs and license (not served, just metadata)
-          rm -f *.md CONTRIBUTING.md CODE_OF_CONDUCT.md LICENSE
-          # Remove legacy files
-          rm -f michi.swf get_flashplayer_88_31.gif
-          # Remove node_modules (not needed for static deployment)
-          rm -rf node_modules
+      # Allow-List statt Sperrliste: nur public.manifest.json landet in dist/.
+      # Server-Code, Dumps, infra/, db/, Agent-Konfiguration bleiben ausserhalb.
+      - name: Build static site (allow-list)
+        run: npm run build
+
+      - name: Verify dist (forbidden files, broken references)
+        run: npm run check:dist
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with:
-          # Upload minimal, optimized site directory
-          path: '.'
+          path: 'dist'
 
       - name: Deploy to GitHub Pages
         id: deployment
