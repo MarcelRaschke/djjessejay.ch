@@ -111,6 +111,9 @@
     .hero h1 .since-line{display:block;margin-top:.25em;font-size:.36em;line-height:1.25;letter-spacing:.16em;color:var(--gold);-webkit-text-stroke:0;background:none;animation:none}
     .lead strong{color:var(--cyan);letter-spacing:.03em}
     .featured-mix iframe{display:block;max-width:100%;margin-top:18px;border:0;border-radius:4px;background:#071827}
+    .player-consent{margin-top:18px;padding:22px;border:1px solid var(--line);background:var(--panel2)}
+    .player-consent p{margin:0 0 14px}
+    button.btn{cursor:pointer;font-family:inherit}
     .sound-links{margin-top:16px!important}
     .sound-links a{color:var(--cyan);text-underline-offset:4px}
     .sound-more{display:flex;flex-direction:column;align-items:flex-start}
@@ -180,15 +183,16 @@
         <article class="card wide featured-mix">
           <h3>Blue Dimension — Radio LoRa 97.5</h3>
           <p>DJ Jesse Jay &amp; Juicy J · dokumentierte Playlist von 2025 · sechs Aufnahmen.</p>
-          <iframe
-            title="SoundCloud Player: DJ Jesse Jay und Juicy J — Blue Dimension Radio LoRa 97.5"
-            src="https://w.soundcloud.com/player/?url=https%3A%2F%2Fsoundcloud.com%2Fjessejay%2Fsets%2Fjesse-jay-juicy-j-blue-dimension-radio-lora-975&amp;color=%2300d9ff&amp;auto_play=false&amp;show_artwork=false&amp;show_comments=false"
-            width="100%" height="220" loading="lazy" allow="autoplay" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+          <div id="blue-dimension-player" class="player-consent">
+            <p>Der SoundCloud-Player wird aus Datenschutzgründen erst nach deiner Zustimmung geladen.</p>
+            <button type="button" class="btn primary" id="load-soundcloud">SoundCloud-Player laden</button>
+          </div>
           <p class="sound-links"><a href="https://soundcloud.com/jessejay/sets/jesse-jay-juicy-j-blue-dimension-radio-lora-975" rel="noopener noreferrer" target="_blank">Auf SoundCloud anhören (Alternative zum Player)</a></p>
         </article>
         <article class="card sound-more">
           <h3>Vinyl-Wurzeln. Echte Club-Sets.</h3>
           <p>Deep House, Progressive House und Techno aus Zürich und darüber hinaus.</p>
+          <p class="sound-links"><a href="https://soundcloud.com/jessejay/blue-dimension-space-night-26" rel="noopener noreferrer" target="_blank">Blue Dimension — Space Night · 26.03.2026</a></p>
           <p class="sound-links"><a href="https://soundcloud.com/jessejay/jesse-jay-im-club-schlaflos-16112018-mp3" rel="noopener noreferrer" target="_blank">Live im Club Schlaflos · 16.11.2018</a></p>
           <p class="sound-links"><a href="https://soundcloud.com/jessejay" rel="noopener noreferrer" target="_blank">Alle Sets auf SoundCloud</a></p>
         </article>
@@ -221,15 +225,6 @@
     </div>
   </section>
 
-  <section id="visuals">
-    <div class="wrap">
-      <div class="section-head"><div><div class="kicker">04 // Visual system</div><h2>Signal architecture</h2></div></div>
-      <div class="grid">
-        <article class="card wide"><h3>Blue Dimension</h3><p>Deep Navy, Electric Cyan, Neon Blue, Metallic Silver und Golden Yellow bilden die visuelle Sprache für Signal, Radiowellen, Vinyl und audio-reaktive Strukturen.</p></article>
-        <article class="card"><h3>Provenance</h3><p>Die Website folgt der Repository-Regel: Evidence → Canonical Profile → Structured Data → Website.</p></article>
-      </div>
-    </div>
-  </section>
   <section id="booking">
     <div class="wrap">
       <div class="section-head"><div><div class="kicker">05 // Contact</div><h2>DJ Jesse Jay buchen</h2></div><span class="mono kicker">ZÜRICH / CH</span></div>
@@ -244,6 +239,15 @@
           <p>DJ Jesse Jay · Zürich Underground seit 1997 · Progressive House / Techno / Deep House / Organic House.</p>
           <p class="sound-links"><a href="#sound">Sets anhören</a> · <a href="#bio">Biografie lesen</a></p>
         </article>
+      </div>
+    </div>
+  </section>
+  <section id="visuals">
+    <div class="wrap">
+      <div class="section-head"><div><div class="kicker">04 // Visual system</div><h2>Signal architecture</h2></div></div>
+      <div class="grid">
+        <article class="card wide"><h3>Blue Dimension</h3><p>Deep Navy, Electric Cyan, Neon Blue, Metallic Silver und Golden Yellow bilden die visuelle Sprache für Signal, Radiowellen, Vinyl und audio-reaktive Strukturen.</p></article>
+        <article class="card"><h3>Provenance</h3><p>Die Website folgt der Repository-Regel: Evidence → Canonical Profile → Structured Data → Website.</p></article>
       </div>
     </div>
   </section>
@@ -268,6 +272,24 @@
 <a class="to-top" href="#top" aria-label="Zurück nach oben">↑</a>
 <script>
 (function(){
+  var button=document.getElementById('load-soundcloud');
+  var container=document.getElementById('blue-dimension-player');
+  if(!button||!container)return;
+  button.addEventListener('click',function(){
+    if(container.querySelector('iframe'))return;
+    var player=document.createElement('iframe');
+    player.title='SoundCloud Player: DJ Jesse Jay und Juicy J — Blue Dimension Radio LoRa 97.5';
+    player.src='https://w.soundcloud.com/player/?url=https%3A%2F%2Fsoundcloud.com%2Fjessejay%2Fsets%2Fjesse-jay-juicy-j-blue-dimension-radio-lora-975&color=%2300d9ff&auto_play=false&show_artwork=false&show_comments=false';
+    player.width='100%';
+    player.height='220';
+    player.loading='lazy';
+    player.allow='autoplay';
+    player.referrerPolicy='strict-origin-when-cross-origin';
+    container.replaceChildren(player);
+    player.focus();
+  });
+})();
+(function(){
   if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   document.querySelectorAll('main section:not(.hero)').forEach(function(s){
     s.classList.add('reveal');
@@ -284,8 +306,11 @@
     var h=document.documentElement,max=h.scrollHeight-h.clientHeight;
     bar.style.width=(max>0?(h.scrollTop/max)*100:0)+'%';
     top.classList.toggle('show',h.scrollTop>600);
-    var cur=-1,y=h.scrollTop+140;
-    sections.forEach(function(s,i){if(s.offsetTop<=y)cur=i});
+    var cur=-1,y=h.scrollTop+140,bestOffset=-Infinity;
+    sections.forEach(function(s,i){
+      var offset=s.offsetTop;
+      if(offset<=y&&offset>=bestOffset){cur=i;bestOffset=offset;}
+    });
     navlinks.forEach(function(a,i){a.classList.toggle('active',i===cur)});
   }
   addEventListener('scroll',onScroll,{passive:true});onScroll();
