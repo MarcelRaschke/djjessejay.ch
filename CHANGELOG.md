@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Security
+- Worker `wdjjj` baut `/api`-Subrequest-Header aus einer Allow-List und sendet das Cloudflare-Access-Service-Token (`ORIGIN_ACCESS_CLIENT_ID`, `ORIGIN_ACCESS_CLIENT_SECRET`) mit; fehlt eines, antwortet er 502. `/__wdjjj/health` meldet `originAuth`, und `deploy-wdjjj.yml` prüft nach dem Upload `/api/health` durch den Worker.
+
 ### Changed
 - Bot-Schutz des Kontaktformulars von Google reCAPTCHA v3 auf Cloudflare Turnstile umgestellt (`lib/turnstile.js`, `TURNSTILE_SECRET_KEY`, Repository-Variable `TURNSTILE_SITE_KEY`). Prüfung fail closed inklusive Hostname und Action; keine Google-Cookies mehr.
 - `/api/contact` schreibt Name und E-Mail nicht mehr ins Erfolgs-Log.
