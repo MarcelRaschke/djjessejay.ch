@@ -64,7 +64,7 @@ when `HONEYPOT_ALERTS=true`; hits are logged regardless.
 ## Configuration
 
 Provide these variables to the Node process. `server.js` does not load a `.env` file, so
-use whatever already supplies `SMTP_*` / `RECAPTCHA_*` (Plesk app settings, systemd
+use whatever already supplies `SMTP_*` / `TURNSTILE_*` (Plesk app settings, systemd
 `EnvironmentFile=`, PM2 ecosystem file, or `node --env-file=.env server.js`):
 
 ```bash
