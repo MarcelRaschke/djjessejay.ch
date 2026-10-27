@@ -13,10 +13,10 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, '[provenance-finalize]') }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '24'
           cache: npm
@@ -57,7 +57,7 @@ jobs:
             http://127.0.0.1:8000/index.html
           test -s archive/review/index-canonical.png
       - name: Upload visual review artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: index-canonical-visual-review
           path: archive/review/index-canonical.png
