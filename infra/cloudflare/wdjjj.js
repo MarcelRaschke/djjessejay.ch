@@ -90,6 +90,14 @@ function splitParams(url) {
   return { cleaned, functional };
 }
 
+// Constant-time string comparison for the purge token check.
+function timingSafeEqual(a, b) {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
 function rewriteLocation(location, originHost, originPrefix) {
   try {
     const target = new URL(location, `https://${originHost}`);
@@ -174,6 +182,7 @@ export default {
     const url = new URL(request.url);
     const originHost = (env && env.ORIGIN_HOST) || ORIGIN_HOST_DEFAULT;
     const originPrefix = (env && env.ORIGIN_PREFIX) || ORIGIN_PREFIX_DEFAULT;
+    const cacheVersion = (env && env.CACHE_VERSION) || "v1";
 
     if (url.hostname === `www.${CANONICAL_HOST}`) {
       return Response.redirect(`https://${CANONICAL_HOST}${url.pathname}${url.search}`, 301);
@@ -181,6 +190,37 @@ export default {
 
     if (url.pathname === "/__wdjjj/health") {
       return new Response(JSON.stringify({ ok: true, proxy: "wdjjj", origin: originHost, originPrefix, version: "2026-10" }), {
+        status: 200,
+        headers: { ...OWN_HEADERS, "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
+      });
+    }
+
+    // Deploy pipeline purge hook: static.yml POSTs the deployed path list
+    // after a Pages deploy so the edge cache does not serve stale content for
+    // up to s-maxage. Guarded by the PURGE_TOKEN worker secret.
+    if (url.pathname === "/__wdjjj/purge") {
+      const token = (env && env.PURGE_TOKEN) || "";
+      const provided = request.headers.get("x-purge-token") || "";
+      if (!token || !timingSafeEqual(token, provided)) {
+        return new Response("Forbidden", { status: 403, headers: { ...OWN_HEADERS, "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
+      }
+      if (request.method !== "POST") {
+        return new Response("Method Not Allowed", { status: 405, headers: { ...OWN_HEADERS, allow: "POST", "cache-control": "no-store" } });
+      }
+      let paths = [];
+      try {
+        const payload = await request.json();
+        if (Array.isArray(payload && payload.paths)) paths = payload.paths;
+      } catch {
+        paths = [];
+      }
+      const valid = paths
+        .filter((p) => typeof p === "string" && p.startsWith("/") && !p.includes("..") && p.length < 1024)
+        .slice(0, 256);
+      const results = await Promise.all(
+        valid.map((p) => caches.default.delete(new Request(`https://${CANONICAL_HOST}/${cacheVersion}${p}`, { method: "GET" })))
+      );
+      return new Response(JSON.stringify({ ok: true, requested: valid.length, purged: results.filter(Boolean).length }), {
         status: 200,
         headers: { ...OWN_HEADERS, "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
       });
@@ -209,9 +249,6 @@ export default {
     // keep the request uncached and are forwarded unchanged.
     const { cleaned: cleanedUrl, functional } = splitParams(url);
     const cacheable = request.method === "GET" && !functional && !request.headers.has("range");
-    // CACHE_VERSION is part of every cache key. deploy-wdjjj.yml rolls it on
-    // each worker deploy, which invalidates the edge cache in one step.
-    const cacheVersion = (env && env.CACHE_VERSION) || "v1";
     const cache = caches.default;
     const cacheKey = new Request(`https://${CANONICAL_HOST}/${cacheVersion}${url.pathname}`, { method: "GET" });
 
