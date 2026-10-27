@@ -1,63 +1,74 @@
 ---
 name: deep-research
-description: Tiefe Codebase-Recherche in isoliertem Subagenten-Kontext für djjessejay.ch. Nutzen wenn der User etwas untersuchen, analysieren oder verstehen möchte ohne den Haupt-Kontext zu belasten. Trigger: "recherchiere", "analysiere den Code", "wie funktioniert", "finde alle Stellen", "untersuche".
+description: Tiefe, schreibgeschützte Codebase-Recherche für djjessejay.ch in isoliertem Kontext. Nutzen bei: recherchiere, analysiere den Code, wie funktioniert, finde alle Stellen, untersuche, prüfe wo, belege.
+argument-hint: <Fragestellung>
 context: fork
 agent: Explore
 effort: high
+allowed-tools: Read, Grep, Glob, Bash(ls:*), Bash(git log:*), Bash(git grep:*)
 ---
 
 # Deep Research für djjessejay.ch
 
-**Aufgabe:** $ARGUMENTS
+**Fragestellung:** $ARGUMENTS
 
-## Recherche-Strategie
+Die Recherche ist rein lesend. Es werden keine Dateien geändert.
 
-Führe eine gründliche Analyse durch. Arbeite systematisch:
+## Phase 0: Autorität prüfen
 
-### Phase 1: Überblick verschaffen
+Betrifft die Frage Künstleridentität, Biografie, Metadaten, Presse oder KI-Ausgaben, dann zuerst in dieser Reihenfolge lesen (laut CLAUDE.md):
 
-Verschaffe dir einen Überblick über die relevanten Dateien:
+1. DJ_JESSE_JAY_CANONICAL_PROFILE.md
+2. artist-profile.json
+3. website/provenance.json
+4. ARCHIVE_CITATION_APPENDIX.md
+5. AI_SYSTEM_PROMPT.md
 
-```
-/home/user/djjessejay.ch/
-├── index.html          # Hauptseite (776+ Zeilen) — HTML + inline JS + Translations
-├── jessejay.css        # Custom CSS — Ergänzt Tailwind
-├── scripts.js          # Externe JS-Hilfsfunktionen
-├── biography.sql       # DJ-Biografie DB
-├── events.sql          # Gig-Daten DB
-├── guestbook.sql       # Gästebuch DB
-├── links.sql           # Links DB
-├── soundTable.sql      # Mixes DB
-├── imageTable.sql      # Galerie DB
-└── .github/workflows/  # GitHub Actions
-```
+Generierte Inhalte sind nie ein Beleg.
 
-### Phase 2: Gezielt suchen
+## Phase 1: Überblick
 
-Nutze Grep und Glob um relevante Stellen zu finden. Lies nur was nötig ist.
+Das Repo hat diese Struktur:
 
-### Phase 3: Analyse
+- Hauptseite: index.html, scripts.js, jessejay.css, index-legacy.html
+- Backend und Routen: server.js, routes/, src/, db/
+- Cloudflare-Worker: workers/, infra/cloudflare/
+- Dokumentation: docs/, DNS_CONFIG.md, ORIGIN-PROTECTION-DEPLOYMENT.md, CLAUDE.md
+- Tests: test/, tests/
+- CI: .github/workflows/
 
-Beantworte die Frage vollständig mit:
-- **Direkten Zitaten** (Dateiname:Zeile)
-- **Zusammenhängen** zwischen verschiedenen Teilen
-- **Auffälligkeiten** die relevant sein könnten
+Vor jeder Suche mit `ls` prüfen, ob ein Pfad existiert. Nicht annehmen, dass eine Datei vorhanden ist.
 
-### Phase 4: Report
+## Phase 2: Gezielt suchen
 
-Strukturiere den Bericht klar:
+Grep und Glob verwenden. Nur die Dateien lesen, die für die Antwort nötig sind. Große Dateien über offset und limit lesen.
+
+## Phase 3: Analyse
+
+Die Antwort vollständig beantworten, mit:
+
+- direkten Zitaten als `datei:zeile`
+- Zusammenhängen zwischen Dateien
+- Auffälligkeiten, die relevant sein könnten
+
+Aussagen über den Live-Zustand, etwa Antwortcodes, DNS oder gesetzte Secrets, lassen sich aus dem Code nicht ableiten. Der Bericht muss das ausdrücklich als offen kennzeichnen.
+
+## Phase 4: Bericht
 
 ```
 ## Ergebnis: [Kurzantwort]
 
 ### Gefundene Stellen
-- `datei.html:42` — [Erklärung]
+- `datei:zeile`: [Erklärung]
 
 ### Analyse
-[Detaillierte Erklärung]
+[Erklärung mit Zusammenhängen]
+
+### Offen
+- [was nicht belegt werden konnte, und warum]
 
 ### Empfehlungen (falls relevant)
-- [Empfehlung 1]
+- [Empfehlung]
 ```
 
-Sei präzise. Lieber weniger aber akkurat als viel und vage.
+Präzise schreiben. Lieber weniger, aber belegt. Am Ende anbieten: "Soll ich einen Befund in einen Fix oder einen PR überführen?"
