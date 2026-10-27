@@ -13,6 +13,18 @@ const API_TIMEOUT_MS = 30000;
 const UPSTREAM_TIMEOUT_MS = 8000;
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 
+// Query parameters that never influence static origin content. They are
+// stripped before the cache decision so tracking links (utm_*, fbclid, ...)
+// hit the edge cache instead of the GitHub Pages origin. Requests with any
+// other (functional) parameter still bypass the cache and reach the origin.
+const TRACKED_PARAM_PATTERNS = [
+  /^utm_[a-z]+$/i,
+  /^(fbclid|gclid|gbraid|wbraid|msclkid|twclid|ttclid|ysclid)$/i,
+  /^mc_[a-z]+$/i,
+  /^_ga(_[a-z0-9]+)?$/i,
+  /^(ref|referrer|source)$/i,
+];
+
 const STRIP_RESPONSE_HEADERS = new Set([
   "content-security-policy",
   "content-security-policy-report-only",
@@ -61,6 +73,21 @@ function toOriginPath(pathname, originPrefix) {
   else if (path.startsWith(originPrefix + "/")) path = path.slice(originPrefix.length);
   if (!path.startsWith("/")) path = "/" + path;
   return originPrefix + (path === "/" ? "/" : path);
+}
+
+// Splits query parameters into tracked (dropped before origin fetch and
+// ignored for caching) and functional (cache bypass, forwarded as-is).
+function splitParams(url) {
+  const cleaned = new URL(url.toString());
+  let functional = false;
+  for (const key of [...cleaned.searchParams.keys()]) {
+    if (TRACKED_PARAM_PATTERNS.some((re) => re.test(key))) {
+      cleaned.searchParams.delete(key);
+    } else {
+      functional = true;
+    }
+  }
+  return { cleaned, functional };
 }
 
 function rewriteLocation(location, originHost, originPrefix) {
@@ -153,7 +180,7 @@ export default {
     }
 
     if (url.pathname === "/__wdjjj/health") {
-      return new Response(JSON.stringify({ ok: true, proxy: "wdjjj", origin: originHost, originPrefix, version: "2026-09" }), {
+      return new Response(JSON.stringify({ ok: true, proxy: "wdjjj", origin: originHost, originPrefix, version: "2026-10" }), {
         status: 200,
         headers: { ...OWN_HEADERS, "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
       });
@@ -177,16 +204,23 @@ export default {
       return new Response("Method Not Allowed", { status: 405, headers: { ...OWN_HEADERS, allow: "GET, HEAD", "cache-control": "no-store" } });
     }
 
-    const cacheable = request.method === "GET" && url.search === "" && !request.headers.has("range");
+    // Tracked query parameters (utm_*, fbclid, ...) are dropped: they neither
+    // block the cache nor are forwarded to the origin. Functional parameters
+    // keep the request uncached and are forwarded unchanged.
+    const { cleaned: cleanedUrl, functional } = splitParams(url);
+    const cacheable = request.method === "GET" && !functional && !request.headers.has("range");
+    // CACHE_VERSION is part of every cache key. deploy-wdjjj.yml rolls it on
+    // each worker deploy, which invalidates the edge cache in one step.
+    const cacheVersion = (env && env.CACHE_VERSION) || "v1";
     const cache = caches.default;
-    const cacheKey = new Request(`https://${CANONICAL_HOST}${url.pathname}`, { method: "GET" });
+    const cacheKey = new Request(`https://${CANONICAL_HOST}/${cacheVersion}${url.pathname}`, { method: "GET" });
 
     if (cacheable) {
       const hit = await cache.match(cacheKey);
       if (hit) return hit;
     }
 
-    const originUrl = new URL(`https://${originHost}${toOriginPath(url.pathname, originPrefix)}${url.search}`);
+    const originUrl = new URL(`https://${originHost}${toOriginPath(url.pathname, originPrefix)}${cleanedUrl.search}`);
     const originHeaders = new Headers({ "user-agent": "wdjjj/2.0 (+https://djjessejay.ch)" });
     const accept = request.headers.get("accept");
     const range = request.headers.get("range");
