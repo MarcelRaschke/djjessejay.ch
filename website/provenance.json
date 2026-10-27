@@ -271,7 +271,7 @@
         "precision": "day"
       },
       "observed_time": "2026-08-23",
-      "confidence": 0.0,
+      "confidence": 0,
       "status": "unreviewed",
       "sourceClass": "P8",
       "sources": [
@@ -341,6 +341,76 @@
         "repo:website/provenance.json"
       ],
       "review_state": "human_review_recommended"
+    },
+    {
+      "id": "claim:blue-dimension-playlist-2025",
+      "subject": "artist:dj-jesse-jay",
+      "predicate": "PUBLISHED_PLAYLIST",
+      "value": {
+        "title": "Jesse Jay & Juicy J @ Blue Dimension Radio LoRa 97,5",
+        "trackCount": 6,
+        "published": "2025-09-02"
+      },
+      "valid_time": {
+        "start": "2025-09-02",
+        "end": null,
+        "precision": "day"
+      },
+      "observed_time": "2026-10-27",
+      "confidence": 0.85,
+      "status": "supported",
+      "sourceClass": "P5",
+      "sources": [
+        "https://m.soundcloud.com/jessejay/sets/jesse-jay-juicy-j-blue-dimension-radio-lora-975"
+      ],
+      "review_state": "human_review_required"
+    },
+    {
+      "id": "claim:schlaflos-live-recording-2018",
+      "subject": "artist:dj-jesse-jay",
+      "predicate": "PUBLISHED_LIVE_SET",
+      "value": {
+        "title": "Jesse Jay im Club-Schlaflos 16.11.2018",
+        "venue": "Club Schlaflos",
+        "performanceDate": "2018-11-16",
+        "published": "2018-11-18"
+      },
+      "valid_time": {
+        "start": "2018-11-16",
+        "end": null,
+        "precision": "day"
+      },
+      "observed_time": "2026-10-27",
+      "confidence": 0.8,
+      "status": "supported",
+      "sourceClass": "P5",
+      "sources": [
+        "https://soundcloud.com/jessejay/jesse-jay-im-club-schlaflos-16112018-mp3"
+      ],
+      "review_state": "human_review_required"
+    },
+    {
+      "id": "claim:blue-dimension-space-night-2026",
+      "subject": "artist:dj-jesse-jay",
+      "predicate": "PUBLISHED_SET",
+      "value": {
+        "title": "Blue Dimension - Space Night 26.03.26, Jesse Jay all night long",
+        "performanceDate": "2026-03-26",
+        "published": "2026-03-30"
+      },
+      "valid_time": {
+        "start": "2026-03-26",
+        "end": null,
+        "precision": "day"
+      },
+      "observed_time": "2026-10-27",
+      "confidence": 0.82,
+      "status": "supported",
+      "sourceClass": "P5",
+      "sources": [
+        "https://m.soundcloud.com/jessejay/blue-dimension-space-night-26"
+      ],
+      "review_state": "human_review_required"
     }
   ],
   "knownConflicts": [
