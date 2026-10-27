@@ -9,6 +9,7 @@ const controlCenterRouter = require('./control-center/data-sources');
 const djjjSurveyRouter = require('./routes/djjj-survey');
 const { createHoneypotMiddleware } = require('./honeypot/honeypot-middleware');
 const { createHoneypotMonitor } = require('./honeypot/honeypot-monitor');
+const { verifyTurnstile, parseHostnames } = require('./lib/turnstile');
 
 const app = express();
 
@@ -72,8 +73,9 @@ app.use('/api/djjj-survey', djjjSurveyRouter);
 app.use(express.static(__dirname, { dotfiles: 'ignore', index: false }));
 
 // Environment variables
-const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET_KEY || '';
-const SCORE_THRESHOLD = Number(process.env.RECAPTCHA_SCORE_THRESHOLD) || 0.5;
+const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET_KEY || '';
+const TURNSTILE_HOSTNAMES = parseHostnames(process.env.TURNSTILE_HOSTNAMES || 'djjessejay.ch,www.djjessejay.ch');
+const TURNSTILE_ACTION = 'contact';
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || '';
 const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-5-20250929';
 const ANTHROPIC_MAX_TOKENS = Number(process.env.ANTHROPIC_MAX_TOKENS) || 1024;
@@ -111,31 +113,6 @@ function sanitizeInput(str, maxLength = MAX_FIELD_LENGTH) {
   sanitized = sanitized.replace(/[<>\"'%&;()]/g, '');
   // Limit length
   return sanitized.substring(0, maxLength);
-}
-
-async function verifyRecaptcha(token) {
-  if (!token) {
-    throw new Error('reCAPTCHA token is required');
-  }
-  
-  const params = new URLSearchParams({ 
-    secret: RECAPTCHA_SECRET, 
-    response: token 
-  });
-  
-  const res = await fetch('https://www.google.com/recaptcha/api/siteverify', {
-    method: 'POST',
-    body: params,
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }
-  });
-  
-  if (!res.ok) {
-    throw new Error(`reCAPTCHA verification failed with status ${res.status}`);
-  }
-  
-  return res.json();
 }
 
 async function sendContactEmail({ name, email, message }) {
@@ -176,7 +153,7 @@ app.post('/api/contact', async (req, res) => {
     const name = sanitizeInput(req.body.name);
     const email = sanitizeInput(req.body.email);
     const message = sanitizeInput(req.body.message);
-    const token = req.body['g-recaptcha-response'];
+    const token = req.body['cf-turnstile-response'];
 
     // Validate required fields
     if (!name || !email || !message) {
@@ -190,35 +167,22 @@ app.post('/api/contact', async (req, res) => {
       return res.status(400).json({ error: 'Invalid email address format.' });
     }
 
-    // Validate reCAPTCHA token
-    if (!token) {
-      return res.status(400).json({ error: 'reCAPTCHA token is missing.' });
-    }
-
-    // Validate reCAPTCHA configuration
-    if (!RECAPTCHA_SECRET) {
-      console.error('RECAPTCHA_SECRET_KEY is not configured');
-      return res.status(500).json({ error: 'Server configuration error.' });
-    }
-
-    // Verify reCAPTCHA
-    let captcha;
-    try {
-      captcha = await verifyRecaptcha(token);
-    } catch (err) {
-      console.error('reCAPTCHA verification error:', err.message);
-      return res.status(502).json({ error: 'reCAPTCHA verification service unavailable.' });
-    }
-
-    // Check reCAPTCHA result
-    if (!captcha.success) {
-      console.warn('reCAPTCHA failed:', { success: captcha.success, score: captcha.score });
-      return res.status(403).json({ error: 'Bot traffic detected.' });
-    }
-
-    if (typeof captcha.score !== 'number' || captcha.score < SCORE_THRESHOLD) {
-      console.warn('reCAPTCHA score too low:', { score: captcha.score, threshold: SCORE_THRESHOLD });
-      return res.status(403).json({ error: 'Bot traffic detected.' });
+    // Verify Cloudflare Turnstile (fail closed)
+    const captcha = await verifyTurnstile({
+      secret: TURNSTILE_SECRET,
+      token,
+      hostnames: TURNSTILE_HOSTNAMES,
+      action: TURNSTILE_ACTION,
+    });
+    if (!captcha.ok) {
+      console.warn('Turnstile rejected contact submission:', captcha.reason);
+      const messages = {
+        400: 'Bot check missing. Please reload the page and try again.',
+        403: 'Bot check failed. Please reload the page and try again.',
+        500: 'Server configuration error.',
+        502: 'Bot check service unavailable. Please try again later.',
+      };
+      return res.status(captcha.status).json({ error: messages[captcha.status] || 'Bot check failed.' });
     }
 
     // Send email notification
@@ -233,7 +197,7 @@ app.post('/api/contact', async (req, res) => {
       }
     }
 
-    console.log('Contact submission successful:', { name, email, score: captcha.score });
+    console.log('Contact submission successful');
     res.json({ success: true, message: 'Your message has been sent successfully.' });
     
   } catch (err) {
@@ -336,7 +300,7 @@ const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, () => {
   console.log(`Server listening on http://localhost:${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`reCAPTCHA enabled: ${!!RECAPTCHA_SECRET}`);
+  console.log(`Turnstile enabled: ${!!TURNSTILE_SECRET}`);
   console.log(`AI proxy enabled: ${!!ANTHROPIC_API_KEY}`);
   console.log(`SMTP enabled: ${!!(process.env.SMTP_HOST && process.env.SMTP_USER)}`);
 });
