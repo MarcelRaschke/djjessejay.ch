@@ -82,7 +82,10 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || env.CLOUDFLARE_ACCOUNT_ID_PUBLIC }}
           wranglerVersion: "4.145.0"
           workingDirectory: infra/cloudflare
-          command: deploy
+          # CACHE_VERSION is part of every edge cache key in wdjjj.js. Rolling
+          # it with each deploy invalidates the worker cache atomically instead
+          # of waiting for the s-maxage TTL to expire.
+          command: deploy --var CACHE_VERSION:${{ github.sha }}
 
       - name: Verify Worker health
         if: inputs.diagnose_only != true
