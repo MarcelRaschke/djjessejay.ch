@@ -22,9 +22,9 @@
     <meta name="twitter:image" content="https://djjessejay.ch/DJ-Jesse-Jay.jpg">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <!-- Content Security Policy -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://api.anthropic.com https://www.google.com/recaptcha/; img-src 'self' data:; frame-src https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/">
-    <!-- Google reCAPTCHA v3 -->
-    <script src="https://www.google.com/recaptcha/api.js?render=YOUR_RECAPTCHA_SITE_KEY" async defer></script>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://api.anthropic.com; img-src 'self' data:; frame-src https://challenges.cloudflare.com">
+    <!-- Cloudflare Turnstile (Bot-Schutz ohne Google-Cookies) -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <!-- Tailwind CSS (local build) -->
     <link rel="stylesheet" href="tailwind.css" integrity="sha384-qxsTu5eQzvwilYNPZ++HmqcRTSFm08jjw4P3MIdEMeyOyGnCi4m1Wx9AlPchJD7n" crossorigin="anonymous">
     <link rel="stylesheet" href="css/hero-animation.css">
@@ -489,6 +489,7 @@
                         Ich akzeptiere die <a href="#privacy" class="text-cyan-400 hover:underline">Datenschutzbestimmungen</a>.
                     </label>
                 </div>
+                <div class="cf-turnstile mt-5" data-sitekey="YOUR_TURNSTILE_SITE_KEY" data-action="contact" data-theme="dark"></div>
                 <div class="flex flex-col sm:flex-row gap-4 mt-6">
                     <button type="submit" class="w-full sm:w-1/2 bg-gradient-to-r from-rose-500 to-cyan-500 text-white font-bold py-3 px-8 rounded-full text-lg cursor-pointer transition-all hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/50" data-translate="send">Senden</button>
                     <button type="button" id="refine-message-btn" class="w-full sm:w-1/2 flex items-center justify-center gap-2 bg-slate-600 text-white font-bold py-3 px-8 rounded-full text-lg cursor-pointer transition-all hover:scale-105 hover:bg-slate-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled data-translate="ai-refine-btn">✨ Nachricht verbessern</button>
@@ -952,8 +953,6 @@
         function acceptCookies() { localStorage.setItem('cookies-accepted', 'true'); document.getElementById('cookie-banner').classList.remove('show'); }
         function declineCookies() { localStorage.setItem('cookies-accepted', 'false'); document.getElementById('cookie-banner').classList.remove('show'); }
         
-        const RECAPTCHA_SITE_KEY = 'YOUR_RECAPTCHA_SITE_KEY';
-
         async function handleFormSubmit(event) {
             event.preventDefault();
             const form = event.target;
@@ -973,7 +972,7 @@
                             name: document.getElementById('name').value,
                             email: document.getElementById('email').value,
                             message: document.getElementById('message').value,
-                            'g-recaptcha-response': token || '',
+                            'cf-turnstile-response': token,
                         }),
                     });
                     if (res.ok) {
@@ -992,15 +991,16 @@
                 }
             };
 
-            if (typeof grecaptcha !== 'undefined') {
-                grecaptcha.ready(() => {
-                    grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'contact' })
-                        .then(token => doSubmit(token))
-                        .catch(() => doSubmit());
-                });
-            } else {
-                doSubmit();
+            // Turnstile schreibt das Token in das versteckte Feld cf-turnstile-response.
+            const token = (form.querySelector('[name="cf-turnstile-response"]') || {}).value || '';
+            if (!token) {
+                errorMsg.textContent = 'Bitte warten, bis die Bot-Prüfung abgeschlossen ist.';
+                errorMsg.classList.remove('hidden');
+                return;
             }
+            await doSubmit(token);
+            // Ein Token gilt nur einmal: Widget für den nächsten Versand zurücksetzen.
+            if (typeof turnstile !== 'undefined') turnstile.reset(form.querySelector('.cf-turnstile'));
         }
 
         function initSmoothScrolling() {

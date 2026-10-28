@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+- Bot-Schutz des Kontaktformulars von Google reCAPTCHA v3 auf Cloudflare Turnstile umgestellt (`lib/turnstile.js`, `TURNSTILE_SECRET_KEY`, Repository-Variable `TURNSTILE_SITE_KEY`). Prüfung fail closed inklusive Hostname und Action; keine Google-Cookies mehr.
+- `/api/contact` schreibt Name und E-Mail nicht mehr ins Erfolgs-Log.
+
+### Fixed
+- CSP von `index-legacy.html` erlaubt `connect-src 'self'`; der Formular-Versand an `/api/contact` war bisher vom Browser blockiert.
+
+### Removed
+- `scripts/replace-recaptcha-key.mjs`, ersetzt durch `scripts/inject-site-keys.mjs`.
+
 ### Added
 - Pull request template
 - CI workflow for Python 3.13 and Node 24
