@@ -17,7 +17,7 @@ jobs:
         run: |
           probe() {
             local name="$1" url="$2" code
-            code="$(curl -sS -L -m 20 -o /dev/null -w '%{http_code}' "$url" 2>/dev/null || echo 000)"
+            code="$(curl -sS -L -m 20 -o /dev/null -w '%{http_code}' "$url" 2>/dev/null)" || code=000
             echo "| $name | \`$url\` | $code |" >> "$GITHUB_STEP_SUMMARY"
           }
           {
