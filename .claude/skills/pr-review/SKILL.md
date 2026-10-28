@@ -1,10 +1,8 @@
 ---
 name: pr-review
 description: Pull-Request-Review für djjessejay.ch mit Live-Kontext (Dynamic Context Injection). Nutzen wenn der User "PR reviewen", "Pull Request prüfen", "was ändert dieser PR", "review PR" oder eine PR-Nummer nennt.
-argument-hint: "[PR-Nummer]"
 context: fork
 agent: Explore
-effort: high
 allowed-tools: Bash(git *), Bash(gh *)
 ---
 
