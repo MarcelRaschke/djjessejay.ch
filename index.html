@@ -37,7 +37,9 @@
     .top{position:sticky;top:0;z-index:20;background:rgba(2,8,18,.84);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}
     .nav{height:66px;display:flex;align-items:center;justify-content:space-between;gap:20px}
     .brand{display:flex;align-items:center;gap:12px;text-decoration:none;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
-    .seal{width:36px;height:36px;border:1px solid rgba(255,210,26,.55);border-radius:50%;display:grid;place-items:center;color:var(--gold);box-shadow:0 0 20px rgba(255,210,26,.12);font-weight:900}
+    .seal{width:36px;height:36px;border:1px solid rgba(255,210,26,.55);border-radius:50%;display:grid;place-items:center;color:var(--gold);box-shadow:0 0 20px rgba(255,210,26,.12)}
+    /* Wortmarke als Vektorpfade (assets/j-main-seal.svg): keine Font-, Glyph- oder Zeichensatzabhängigkeit */
+    .seal svg{width:21px;height:auto;display:block}
     .brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:.2em}
     nav{display:flex;gap:22px;font-size:12px;text-transform:uppercase;letter-spacing:.12em}
     nav a{text-decoration:none;color:var(--muted)}nav a:hover,nav a:focus{color:var(--cyan)}
@@ -104,6 +106,16 @@
     .to-top:hover{border-color:rgba(0,217,255,.6);box-shadow:0 0 22px rgba(0,217,255,.3)}
     footer a{color:var(--silver);text-decoration:none;transition:color .18s ease}footer a:hover{color:var(--cyan)}
     .section-head h2{background:linear-gradient(120deg,#edfaff 30%,#9fd8ff 55%,#edfaff 80%);-webkit-background-clip:text;background-clip:text;color:transparent}
+    section[id]{scroll-margin-top:96px}
+    .hero h1{font-size:clamp(48px,8vw,94px)}
+    .hero h1 .since-line{display:block;margin-top:.25em;font-size:.36em;line-height:1.25;letter-spacing:.16em;color:var(--gold);-webkit-text-stroke:0;background:none;animation:none}
+    .lead strong{color:var(--cyan);letter-spacing:.03em}
+    .featured-mix iframe{display:block;max-width:100%;margin-top:18px;border:0;border-radius:4px;background:#071827}
+    .sound-links{margin-top:16px!important}
+    .sound-links a{color:var(--cyan);text-underline-offset:4px}
+    .sound-more{display:flex;flex-direction:column;align-items:flex-start}
+    .sound-more .sound-links{margin-top:20px!important}
+    .booking-lead .actions{margin-top:24px}
     @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}.ticker-track{animation:none}}
     @media(max-width:820px){.nav{height:auto;flex-direction:column;align-items:flex-start;gap:10px;padding:12px 0}nav{flex-wrap:wrap;gap:14px}.hero{grid-template-columns:1fr;padding-top:48px}.signal{max-width:520px;margin:auto}.bio{grid-template-columns:1fr}.card,.card.wide{grid-column:span 12}.signal-panel{grid-template-columns:1fr 1fr}}
     @media(max-width:480px){.wrap{width:min(var(--max),calc(100% - 22px))}section{padding:64px 0}.signal-panel{grid-template-columns:1fr 1fr}.metric{padding:15px}.metric strong{font-size:26px}}
@@ -129,11 +141,11 @@
 <header class="top">
   <div class="wrap nav">
     <a class="brand" href="#top" aria-label="DJ Jesse Jay home">
-      <span class="seal" aria-hidden="true">J•Ր</span>
+      <span class="seal" aria-hidden="true"><svg viewBox="90 55 820 365" fill="currentColor" focusable="false"><path d="M90 250h105v55c0 31 17 46 47 46 31 0 47-17 47-49V55h105v251c0 72-48 114-150 114-99 0-154-42-154-125v-45z"/><circle cx="500" cy="210" r="48"/><path d="M910 55H735c-83 0-137 49-137 125 0 76 54 125 137 125h70v-94h-70c-27 0-43-12-43-31 0-20 16-32 43-32h175V55z"/></svg></span>
       <span>DJ Jesse Jay<small>BLUE DIMENSION // 97.5</small></span>
     </a>
     <nav aria-label="Hauptnavigation">
-      <a href="#signal">Signal</a><a href="#bio">Bio</a><a href="#sound">Sound</a><a href="#visuals">Visuals</a><a href="ivdj-supreme.html">iVDJ</a><a href="survey/">Umfrage</a>
+      <a href="#sound">Musik</a><a href="#bio">Geschichte</a><a href="#booking">Booking</a><a href="#visuals">Blue Dimension</a><a href="ivdj-supreme.html">iVDJ Lab</a>
     </nav>
   </div>
 </header>
@@ -141,14 +153,13 @@
 <main id="top">
   <section class="hero wrap">
     <div>
-      <div class="eyebrow">Zürich Underground // Active since 1997</div>
-      <h1>BLUE<br><span>DIMENSION</span></h1>
-      <p class="lead">DJ Jesse Jay — elektronische Musik zwischen Vinyl-Kultur, Clubsound und dem Blue-Dimension-Signal.</p>
+      <div class="eyebrow">Zürich Underground · Vinyl Roots</div>
+      <h1>DJ JESSE<br>JAY<span class="since-line">SINCE 1997</span></h1>
+      <p class="lead"><strong>BLUE DIMENSION</strong> — Progressive House, Techno, Deep House und Organic House. Vinylgeprägter Clubsound zwischen Tiefe, Rhythmus und hypnotischen Spannungsbögen.</p>
       <div class="actions">
-        <a class="btn primary" href="https://soundcloud.com/jessejay" rel="noopener">SoundCloud</a>
-        <a class="btn" href="#bio">Profil öffnen</a>
-        <a class="btn" href="ivdj-supreme.html">iVDJ Workstation</a>
-        <a class="btn" href="survey/">DJJJ-Umfrage</a>
+        <a class="btn primary" href="#sound">Set anhören</a>
+        <a class="btn" href="#booking">Booking anfragen</a>
+        <a class="btn" href="#bio">Künstlerprofil</a>
       </div>
     </div>
     <div class="signal" aria-label="Blue Dimension Signal 97.5">
@@ -162,11 +173,34 @@
     </div>
   </div>
 
+  <section id="sound">
+    <div class="wrap">
+      <div class="section-head"><div><div class="kicker">01 // Music first</div><h2>DJ-Sets &amp; Radiosessions</h2></div><span class="mono kicker">LISTEN / BLUE DIMENSION</span></div>
+      <div class="grid">
+        <article class="card wide featured-mix">
+          <h3>Blue Dimension — Radio LoRa 97.5</h3>
+          <p>DJ Jesse Jay &amp; Juicy J · dokumentierte Playlist von 2025 · sechs Aufnahmen.</p>
+          <iframe
+            title="SoundCloud Player: DJ Jesse Jay und Juicy J — Blue Dimension Radio LoRa 97.5"
+            src="https://w.soundcloud.com/player/?url=https%3A%2F%2Fsoundcloud.com%2Fjessejay%2Fsets%2Fjesse-jay-juicy-j-blue-dimension-radio-lora-975&amp;color=%2300d9ff&amp;auto_play=false&amp;show_artwork=false&amp;show_comments=false"
+            width="100%" height="220" loading="lazy" allow="autoplay" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+          <p class="sound-links"><a href="https://soundcloud.com/jessejay/sets/jesse-jay-juicy-j-blue-dimension-radio-lora-975" rel="noopener noreferrer" target="_blank">Auf SoundCloud anhören (Alternative zum Player)</a></p>
+        </article>
+        <article class="card sound-more">
+          <h3>Vinyl-Wurzeln. Echte Club-Sets.</h3>
+          <p>Deep House, Progressive House und Techno aus Zürich und darüber hinaus.</p>
+          <p class="sound-links"><a href="https://soundcloud.com/jessejay/jesse-jay-im-club-schlaflos-16112018-mp3" rel="noopener noreferrer" target="_blank">Live im Club Schlaflos · 16.11.2018</a></p>
+          <p class="sound-links"><a href="https://soundcloud.com/jessejay" rel="noopener noreferrer" target="_blank">Alle Sets auf SoundCloud</a></p>
+        </article>
+      </div>
+    </div>
+  </section>
+
   <section id="signal">
     <div class="wrap">
-      <div class="section-head"><div><div class="kicker">01 // Transmission</div><h2>Signal 97.5</h2></div><span class="mono kicker">BLUE DIMENSION</span></div>
+      <div class="section-head"><div><div class="kicker">02 // Transmission</div><h2>Signal 97.5</h2></div><span class="mono kicker">BLUE DIMENSION</span></div>
       <div class="signal-panel">
-        <div class="metric"><strong>97.5</strong><span>Signal identity</span></div>
+        <div class="metric"><strong>97.5</strong><span>Branding-Motiv (kein Live-Sendestatus)</span></div>
         <div class="metric"><strong>1997</strong><span>Active since</span></div>
       </div>
     </div>
@@ -174,7 +208,7 @@
 
   <section id="bio">
     <div class="wrap">
-      <div class="section-head"><div><div class="kicker">02 // Identity</div><h2>DJ Jesse Jay</h2></div><span class="mono kicker">ZÜRICH / CH</span></div>
+      <div class="section-head"><div><div class="kicker">03 // Identity</div><h2>DJ Jesse Jay</h2></div><span class="mono kicker">ZÜRICH / CH</span></div>
       <div class="bio">
         <img class="portrait" src="DJ-Jesse-Jay.jpg" alt="DJ Jesse Jay" width="660" height="745" loading="lazy">
         <div class="grid">
@@ -183,17 +217,6 @@
           <article class="card"><h3>Radio</h3><p>Die dokumentierte Radio-Geschichte verbindet Galaxy Space Night mit der heutigen Blue-Dimension-Identität.</p></article>
           <article class="card"><h3>Archive</h3><p>Öffentliche Claims und Metadaten werden im Repository versioniert und mit Provenance-Informationen geführt.</p></article>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="sound">
-    <div class="wrap">
-      <div class="section-head"><div><div class="kicker">03 // Sound system</div><h2>Club language</h2></div></div>
-      <div class="grid">
-        <article class="card"><h3>Progressive House</h3><p>Langform, Bewegung, Tiefe und Übergänge.</p></article>
-        <article class="card"><h3>Techno</h3><p>Rhythmus, Druck und reduzierte Maschinenästhetik.</p></article>
-        <article class="card"><h3>Deep / Organic</h3><p>Atmosphäre, Textur und organische Bewegung.</p></article>
       </div>
     </div>
   </section>
@@ -207,9 +230,26 @@
       </div>
     </div>
   </section>
+  <section id="booking">
+    <div class="wrap">
+      <div class="section-head"><div><div class="kicker">05 // Contact</div><h2>DJ Jesse Jay buchen</h2></div><span class="mono kicker">ZÜRICH / CH</span></div>
+      <div class="grid">
+        <article class="card wide booking-lead">
+          <h3>Clubnight, Festival, Radio oder audiovisuelles Format?</h3>
+          <p>Für Booking-Anfragen direkt Kontakt aufnehmen. Angaben zu Datum, Veranstaltungsort, Setdauer und gewünschter musikalischer Ausrichtung helfen bei der Abstimmung.</p>
+          <div class="actions"><a class="btn primary" href="mailto:info@djjessejay.ch?subject=Booking%20Anfrage%20%E2%80%94%20DJ%20Jesse%20Jay">Booking-Anfrage per E-Mail</a></div>
+        </article>
+        <article class="card">
+          <h3>Artist &amp; Sound</h3>
+          <p>DJ Jesse Jay · Zürich Underground seit 1997 · Progressive House / Techno / Deep House / Organic House.</p>
+          <p class="sound-links"><a href="#sound">Sets anhören</a> · <a href="#bio">Biografie lesen</a></p>
+        </article>
+      </div>
+    </div>
+  </section>
   <section id="impressum">
     <div class="wrap">
-      <div class="section-head"><div><div class="kicker">05 // Legal</div><h2>Impressum</h2></div><span class="mono kicker">CH / UWG</span></div>
+      <div class="section-head"><div><div class="kicker">06 // Legal</div><h2>Impressum</h2></div><span class="mono kicker">CH / UWG</span></div>
       <div class="grid">
         <article class="card wide"><h3>Angaben gemäss gesetzlicher Vorgaben</h3><p>Michael Fellner<br>Wallisellenstrasse 12<br>8600 Dübendorf<br>Schweiz</p></article>
         <article class="card"><h3>Kontakt</h3><p>E-Mail: <a href="mailto:info@djjessejay.ch">info@djjessejay.ch</a></p></article>
@@ -221,7 +261,7 @@
 <footer>
   <div class="wrap foot">
     <span>DJ JESSE JAY — ZÜRICH — EST. 1997</span>
-    <span><a href="#impressum">Impressum</a></span>
+    <span><a href="#booking">Booking</a> · <a href="#impressum">Impressum</a></span>
     <span class="mono">BLUE DIMENSION // SIGNAL 97.5</span>
   </div>
 </footer>

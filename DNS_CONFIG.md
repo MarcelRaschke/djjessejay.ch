@@ -2,6 +2,71 @@
 
 This document contains the authoritative DNS zone configuration for the djjessejay.ch domain, configured for **Hybrid deployment: GitHub Pages (static) + Custom Server (API/WebSocket) via Cloudflare Worker routing**.
 
+## Live drift — OPEN (verified 2026-10-16)
+
+The records and routes documented below describe the TARGET state. They are not
+what the edge is serving right now. Read this section before trusting anything
+further down, and before changing site code to work around a symptom.
+
+### Observed
+
+| Probe | Expected | Observed 2026-10-16 05:31 UTC |
+| --- | --- | --- |
+| `https://djjessejay.ch/` | 200 from GitHub Pages via Worker | **522**, `cf-ray` present, no `x-proxy` header |
+| `https://djjessejay.ch/DJ-Jesse-Jay.jpg` | 200 | **522** |
+| `https://djjessejay.ch/__wdjjj/health` | `{"ok":true,"proxy":"wdjjj"}` | unreachable |
+| `https://www.djjessejay.ch/` | 301 to apex | 301 to apex (working) |
+| `https://marcelraschke.github.io/djjessejay.ch/` | 200 | 200, `server: GitHub.com` |
+
+### Cause 1 — Worker route is not bound
+
+`wdjjj` exists in the account and its code is current (`modified_on`
+2026-10-15T21:19:33Z), but it has no route attached. Every `deploy-wdjjj` run
+since 2026-10-12 uploads the script and then fails at trigger configuration with
+`No access to the specified resource` on `/workers/scripts/wdjjj/routes`, leaving
+`No targets deployed for wdjjj`.
+
+The missing credential is a ZONE permission, `Zone > Workers Routes > Edit`,
+scoped to the djjessejay.ch zone — not an account permission. See the extended
+note in `.github/workflows/deploy-wdjjj.yml`.
+
+Diagnostic shortcut: the Worker stamps every response with `x-proxy: wdjjj`. If a
+response from the apex lacks that header, the Worker did not run at all, and the
+problem is the route binding rather than the Worker code.
+
+### Cause 2 — Apex record has not been migrated
+
+The apex is documented below as a proxied CNAME to `marcelraschke.github.io`. The
+live behaviour contradicts that: GitHub Pages answers normally, so a proxied
+record pointing at it could at worst produce a GitHub 404, never a 522. HTTP 522
+is a connection timeout between Cloudflare and the origin, so the apex is still
+resolving to the unreachable Express host (`ORIGIN_IP`) rather than to GitHub
+Pages. A TLS problem would surface as 525/526, not 522, so Full (Strict) is not
+the cause.
+
+Confirm in the Cloudflare dashboard under DNS > Records: the apex should be a
+single proxied CNAME to `marcelraschke.github.io`, with no A or AAAA record
+alongside it.
+
+### Why CI did not catch this
+
+`live-site-smoke.yml` previously skipped all live assertions whenever the health
+endpoint was unreachable, so the workflow reported success throughout the outage
+(for example the run on 2026-10-16 at 02:15 UTC, with the apex returning 522).
+That gate now fails unless an explicit, dated acknowledgement is set; see
+`LIVE_EDGE_OUTAGE_ACK_UNTIL` in that workflow.
+
+### Exit criteria
+
+1. `Zone > Workers Routes > Edit` added to `CLOUDFLARE_API_TOKEN`, or the two
+   routes bound once by hand in Workers & Pages > wdjjj > Settings >
+   Domains & Routes.
+2. Apex is a single proxied CNAME to `marcelraschke.github.io`, no A/AAAA.
+3. `deploy-wdjjj` green, including its own apex, header and POST assertions.
+4. `curl -sI https://djjessejay.ch/` returns 200 and carries `x-proxy: wdjjj`.
+5. `LIVE_EDGE_OUTAGE_ACK_UNTIL` removed from the repository variables.
+6. This section replaced by a dated note recording the restore.
+
 ## Domain Overview
 
 > **ORIGIN_IP**: Platzhalter für die öffentliche IPv4 des Express-Backends. Die Adresse steht bewusst nicht im Repository. Quelle für Betrieb und Rollback: Control Panel des Hosting-Anbieters (Server-Übersicht) oder der Passwort-Manager der Betreiber. Nicht in Issues, PRs oder Logs kopieren.
@@ -12,7 +77,7 @@ This document contains the authoritative DNS zone configuration for the djjessej
 - **API/WebSocket**: Custom Server (IPv4: `ORIGIN_IP`)
 - **Routing Layer**: Cloudflare Worker (`djjessejay-router`)
 - **CDN/Proxy**: Cloudflare (DDoS protection, caching, SSL termination)
-- **Last Updated**: 22.08.2026
+- **Last Updated**: 16.10.2026 (live drift recorded; target state unchanged since 22.08.2026)
 
 ## Architecture Overview
 
