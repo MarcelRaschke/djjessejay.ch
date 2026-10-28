@@ -1,6 +1,8 @@
 ---
 name: performance-audit
 description: Performance-Analyse für djjessejay.ch — Asset-Größen, Tailwind-Optimierung, Ladezeiten, ungenutzte CSS-Klassen, externe Ressourcen. Nutzen wenn der User "Performance", "langsam", "Ladezeit", "Optimierung", "Bundle-Größe", "Tailwind purge" oder "schneller machen" sagt.
+allowed-tools: Read, Grep, Glob, Bash(du *), Bash(find *), Bash(wc *)
+effort: high
 ---
 
 # Performance-Audit: djjessejay.ch
