@@ -289,7 +289,12 @@ origin answers correctly, otherwise the site returns 404 during the switch.
      `sudo systemctl daemon-reload && sudo systemctl restart djjessejay`.
    - PM2: `SERVE_STATIC=1 pm2 restart djjessejay --update-env`.
    - Only the public site allowlist in `server.js` is served, never repository internals.
-   - Ensure the application listens on ports 80/443 and the SSL certificate is valid.
+   - `server.js` serves plain HTTP only, on `PORT` (default 3000). It does not terminate TLS.
+     Put a TLS terminator in front of it, for example nginx or Caddy, listening on 443 with a
+     valid certificate and forwarding to `127.0.0.1:$PORT`. This repository does not configure
+     that proxy; the operator sets it up and confirms the certificate before step 2.
+   - If the proxy expects another upstream port, set `PORT` in the systemd unit
+     (`Environment=PORT=<port>`) or in the PM2 environment, then restart.
 
 2. **Verify the origin before switching traffic**
    - The firewall only admits Cloudflare ranges, so run the probe on the origin itself
