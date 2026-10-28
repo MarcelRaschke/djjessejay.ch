@@ -219,6 +219,8 @@ pm2 restart server.js
   WorkingDirectory=/path/to/app
   ExecStart=/usr/bin/node server.js
   Restart=on-failure
+  # API only by default. Only for the custom-server rollback below:
+  # Environment=SERVE_STATIC=1
 
   [Install]
   WantedBy=multi-user.target
@@ -279,25 +281,56 @@ If the hybrid GitHub Pages + Cloudflare Worker deployment fails and you need to 
 
 ### Rollback Steps
 
-1. **DNS Revert** (Cloudflare Dashboard → DNS → Records)
+Prepare and verify the origin first. DNS and the Worker change only after the
+origin answers correctly, otherwise the site returns 404 during the switch.
+
+1. **Prepare the origin** (static serving is off by default)
+   - systemd: uncomment `Environment=SERVE_STATIC=1` in `djjessejay.service`, then
+     `sudo systemctl daemon-reload && sudo systemctl restart djjessejay`.
+   - PM2: `SERVE_STATIC=1 pm2 restart djjessejay --update-env`.
+   - Only the public site allowlist in `server.js` is served, never repository internals.
+   - `server.js` serves plain HTTP only, on `PORT` (default 3000). It does not terminate TLS.
+     Put a TLS terminator in front of it, for example nginx or Caddy, listening on 443 with a
+     valid certificate and forwarding to `127.0.0.1:$PORT`. This repository does not configure
+     that proxy; the operator sets it up and confirms the certificate before step 2.
+   - If the proxy expects another upstream port, set `PORT` in the systemd unit
+     (`Environment=PORT=<port>`) or in the PM2 environment, then restart.
+
+2. **Verify the origin before switching traffic**
+   - The firewall only admits Cloudflare ranges, so run the probe on the origin itself
+     (SSH in as the admin user), not from a workstation:
+     `curl -k --resolve djjessejay.ch:443:127.0.0.1 https://djjessejay.ch/` must return the site (200),
+     `.../server.js` and `.../.env` must return 404.
+   - Probing from a workstation instead needs a temporary firewall rule for that one source IP;
+     remove it right after the check.
+   - `-k` above only skips trust so the content check works; it does not prove the certificate.
+     Validate TLS separately, without `-k`:
+     `curl -sS -o /dev/null -w '%{http_code}\n' --resolve djjessejay.ch:443:127.0.0.1 https://djjessejay.ch/`
+     must print 200 with no certificate error. If the origin uses a Cloudflare Origin CA certificate
+     (not publicly trusted), add `--cacert /path/to/cloudflare-origin-ca-root.pem`.
+   - Check name and expiry:
+     `openssl s_client -connect 127.0.0.1:443 -servername djjessejay.ch </dev/null 2>/dev/null | openssl x509 -noout -subject -ext subjectAltName -enddate -checkend 604800`
+     must list `djjessejay.ch` in the SAN and report "Certificate will not expire" (valid for at least 7 more days).
+     With the SSL mode at Full (strict), a failing check here means a 526 for every visitor after the DNS switch.
+   - Do not continue until all checks pass.
+
+3. **DNS Revert** (Cloudflare Dashboard → DNS → Records)
    - Delete the CNAME record for `djjessejay.ch`
-   - Restore the original A record: `djjessejay.ch` → `ORIGIN_IP` (Proxied)
+   - Restore the A record: `djjessejay.ch` → `ORIGIN_IP` (Proxied)
    - DNS propagation: ~10-30 minutes
 
-2. **Cloudflare Worker Disable**
+4. **Cloudflare Worker Disable**
    - Cloudflare Dashboard → Workers & Pages
    - Delete or disable the `djjessejay-router` Worker
    - Remove route binding: `djjessejay.ch/*`
+   - Test: `curl -I https://djjessejay.ch/` (should be served by the custom server)
 
-3. **Custom Server Verification**
-   - Ensure application is running on `ORIGIN_IP` (ports 80/443)
-   - Verify SSL certificate is valid
-   - Test: `curl -k https://djjessejay.ch/` (should load the static site from custom server)
-
-4. **GitHub Pages Disable** (optional)
+5. **GitHub Pages Disable** (optional)
    - Repository → Settings → Pages
    - Disable GitHub Pages
    - This prevents confusion if DNS resolves to both sources
+
+`ORIGIN_IP`: see the note at the top of this document.
 
 ### Rollback Timing
 - Full rollback should be complete within 30-45 minutes (DNS propagation + verification)

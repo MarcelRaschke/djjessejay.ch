@@ -108,13 +108,33 @@ function withSecurityHeaders(response, upstream, originHost, originPrefix) {
   return new Response(upstream.body, { status: upstream.status, headers });
 }
 
+// Client headers the Express origin reads. Everything else is dropped, so a caller
+// cannot inject x-forwarded-for or cf-access-* headers toward the origin.
+const API_FORWARDED_HEADERS = ["accept", "accept-language", "authorization", "content-type", "cf-connecting-ip", "origin", "user-agent"];
+
+function buildApiOriginHeaders(request, apiOriginHost, env) {
+  const headers = new Headers();
+  for (const name of API_FORWARDED_HEADERS) {
+    const value = request.headers.get(name);
+    if (value !== null) headers.set(name, value);
+  }
+  headers.set("host", apiOriginHost);
+  // Cloudflare sets cf-connecting-ip itself, so this is the connecting client's address.
+  // The origin's rate limiter reads x-forwarded-for, so it is rebuilt from that value.
+  const clientAddress = request.headers.get("cf-connecting-ip");
+  if (clientAddress) headers.set("x-forwarded-for", clientAddress);
+  if (env && env.ORIGIN_ACCESS_CLIENT_ID && env.ORIGIN_ACCESS_CLIENT_SECRET) {
+    headers.set("cf-access-client-id", env.ORIGIN_ACCESS_CLIENT_ID);
+    headers.set("cf-access-client-secret", env.ORIGIN_ACCESS_CLIENT_SECRET);
+  }
+  return headers;
+}
+
 function proxyToApiOrigin(request, url, apiOriginHost, env) {
   const apiScheme = (env && env.API_ORIGIN_SCHEME) || "https";
   const apiOriginPort = (env && env.API_ORIGIN_PORT) || "";
   const target = new URL(`${apiScheme}://${apiOriginHost}${apiOriginPort ? ":" + apiOriginPort : ""}${url.pathname}${url.search}`);
-  const headers = new Headers(request.headers);
-  headers.set("host", apiOriginHost);
-  headers.delete("cf-");
+  const headers = buildApiOriginHeaders(request, apiOriginHost, env);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
   return fetch(target.toString(), {
