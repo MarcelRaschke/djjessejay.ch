@@ -365,7 +365,8 @@ app.get('/api/health', (req, res) => {
 
 // SPA fallback - serve index.html for any non-API GET (local preview only)
 app.use((req, res) => {
-  if (req.method === 'GET' && !SERVE_STATIC) {
+  const isApiPath = req.path === '/api' || req.path.startsWith('/api/');
+  if (req.method === 'GET' && (!SERVE_STATIC || isApiPath)) {
     res.status(404).json({ error: 'Not found.' });
   } else if (req.method === 'GET') {
     res.sendFile(path.join(__dirname, 'index.html'));

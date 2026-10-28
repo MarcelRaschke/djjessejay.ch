@@ -46,6 +46,10 @@ test('repository internals stay unreachable, also percent-encoded', async () => 
   }
 });
 
+test('an unknown GET under /api is never answered with the site', async () => {
+  assert.equal((await get('/api/contact')).status, 404);
+});
+
 test('an allowlisted directory without trailing slash redirects to its index', async () => {
   const r = await get('/survey?ref=x');
   assert.equal(r.status, 301);
