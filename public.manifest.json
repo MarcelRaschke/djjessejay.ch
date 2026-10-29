@@ -1,0 +1,34 @@
+{
+  "$comment": "Allow-List für die statische Auslieferung (GitHub Pages / Cloudflare). Nur hier gelistete Pfade landen in dist/. Alles andere bleibt im Repo und ist nie öffentlich. Prüfung: npm run build && npm run check:dist",
+  "outDir": "dist",
+  "files": [
+    "index.html",
+    "ivdj-supreme.html",
+    "index-legacy.html",
+    "hero-test.html",
+    "favicon.svg",
+    "favicon.ico",
+    "DJ-Jesse-Jay.jpg",
+    "DJPult.gif",
+    "robots.txt",
+    "tailwind.css",
+    ".nojekyll"
+  ],
+  "dirs": [
+    "assets",
+    "css",
+    "js",
+    "vendor/three",
+    "website",
+    "presskit",
+    "Hotze",
+    "survey",
+    "visuals"
+  ],
+  "excludeInDirs": [
+    "*.md",
+    "package.json",
+    "package-lock.json",
+    ".env*"
+  ]
+}

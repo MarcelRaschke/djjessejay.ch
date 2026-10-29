@@ -4,12 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Security
+- GitHub Pages lädt nur noch `dist/` hoch, gebaut aus der Allow-List `public.manifest.json` (`npm run build`). Server-Code, `infra/`, `db/`, `docs/`, Agent-Konfiguration und Dumps sind nicht mehr über die Live-Domain erreichbar.
+- `npm run check:dist` bricht den Deploy ab bei verbotenen Dateien oder Links, die nicht in `dist/` existieren.
+- Runbook für Schlüsselrotation und Historienbereinigung: `docs/P0-HISTORY-PURGE.md`.
+
 ### Changed
 - Bot-Schutz des Kontaktformulars von Google reCAPTCHA v3 auf Cloudflare Turnstile umgestellt (`lib/turnstile.js`, `TURNSTILE_SECRET_KEY`, Repository-Variable `TURNSTILE_SITE_KEY`). Prüfung fail closed inklusive Hostname und Action; keine Google-Cookies mehr.
 - `/api/contact` schreibt Name und E-Mail nicht mehr ins Erfolgs-Log.
 
 ### Fixed
 - CSP von `index-legacy.html` erlaubt `connect-src 'self'`; der Formular-Versand an `/api/contact` war bisher vom Browser blockiert.
+- Presskit-Download auf `index-legacy.html` zeigt auf `presskit/presskit.zip` statt auf eine nicht existierende Datei.
 
 ### Removed
 - `scripts/replace-recaptcha-key.mjs`, ersetzt durch `scripts/inject-site-keys.mjs`.
