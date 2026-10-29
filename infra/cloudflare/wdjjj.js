@@ -55,6 +55,12 @@ const OWN_HEADERS = {
   "x-proxy": "wdjjj",
 };
 
+function withCacheStatus(response, status) {
+  const headers = new Headers(response.headers);
+  headers.set("x-proxy-cache", status);
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
+
 function toOriginPath(pathname, originPrefix) {
   let path = pathname || "/";
   if (path === originPrefix) path = "/";
@@ -178,12 +184,20 @@ export default {
     }
 
     const cacheable = request.method === "GET" && url.search === "" && !request.headers.has("range");
-    const cache = caches.default;
+    // Cache is an optional optimization: failures must not take down the proxy.
+    let cache;
+    if (cacheable) {
+      try { cache = globalThis.caches?.default; } catch { /* Continue without cache. */ }
+    }
+    const readCache = async () => {
+      if (!cache) return undefined;
+      try { return await cache.match(cacheKey); } catch { return undefined; }
+    };
     const cacheKey = new Request(`https://${CANONICAL_HOST}${url.pathname}`, { method: "GET" });
 
     if (cacheable) {
-      const hit = await cache.match(cacheKey);
-      if (hit) return hit;
+      const hit = await readCache();
+      if (hit) return withCacheStatus(hit, "HIT");
     }
 
     const originUrl = new URL(`https://${originHost}${toOriginPath(url.pathname, originPrefix)}${url.search}`);
@@ -199,23 +213,28 @@ export default {
     try {
       upstream = await fetch(originUrl, { method: request.method, headers: originHeaders, redirect: "manual", signal: controller.signal });
     } catch {
-      const stale = await cache.match(cacheKey);
-      if (stale) return stale;
+      const stale = await readCache();
+      if (stale) return withCacheStatus(stale, "STALE");
       return errorPage(504, "Gateway Timeout", originHost, originPrefix);
     } finally {
       clearTimeout(timer);
     }
 
     if (upstream.status >= 500) {
-      const stale = await cache.match(cacheKey);
-      if (stale) return stale;
+      const stale = await readCache();
+      if (stale) return withCacheStatus(stale, "STALE");
       return errorPage(503, "Origin Service Unavailable", originHost, originPrefix);
     }
 
     const response = withSecurityHeaders(upstream, upstream, originHost, originPrefix);
     if (cacheable && upstream.status === 200 && !upstream.headers.has("set-cookie")) {
-      ctx.waitUntil(cache.put(cacheKey, response.clone()));
+      if (cache) {
+        try {
+          const write = Promise.resolve(cache.put(cacheKey, response.clone())).catch(() => {});
+          ctx.waitUntil(write);
+        } catch { /* Synchronous cache/context failures must not affect the response. */ }
+      }
     }
-    return response;
+    return withCacheStatus(response, cacheable && cache ? "MISS" : "BYPASS");
   },
 };
