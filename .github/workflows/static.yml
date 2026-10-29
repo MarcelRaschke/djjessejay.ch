@@ -1,5 +1,4 @@
 # Build & Deploy to GitHub Pages
-# Rerun triggered 2026-08-08 to test runner availability after 11h+ queue timeout
 name: Build & Deploy
 
 on:
@@ -22,7 +21,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Single deploy job since we're just deploying
   deploy:
     environment:
       name: github-pages
@@ -50,30 +48,33 @@ jobs:
           TURNSTILE_SITE_KEY: ${{ vars.TURNSTILE_SITE_KEY }}
         run: npm run build:html
 
-      - name: Remove large/unnecessary files before upload
+      # Allowlist bundle: only files that are part of the public site are
+      # deployed. Replaces the previous root-level rm blacklist, which left
+      # docs/, scripts/, infra/, honeypot/, policy/, server.js, .env.example
+      # and more publicly reachable on Pages. When adding new public assets,
+      # extend the lists below (this failure mode is intentional).
+      - name: Assemble deploy bundle (allowlist)
         run: |
-          # Remove database dumps (SQL/XML archives)
-          rm -f *.sql *.xml
-          # Remove video files (large legacy assets)
-          rm -f *.mov *.mp4 *.webm
-          # Remove Flash files (non-functional)
-          rm -f *.swf
-          # Remove old HTML versions (not needed for deploy)
-          rm -f home.html home.htm
-          # Remove web scraper utility (not site content)
-          rm -rf web_scraper
-          # Remove markdown docs and license (not served, just metadata)
-          rm -f *.md CONTRIBUTING.md CODE_OF_CONDUCT.md LICENSE
-          # Remove legacy files
-          rm -f michi.swf get_flashplayer_88_31.gif
-          # Remove node_modules (not needed for static deployment)
-          rm -rf node_modules
+          set -euo pipefail
+          mkdir -p dist/assets dist/css dist/js
+          # Linked pages
+          cp index.html ivdj-supreme.html index-legacy.html hero-test.html dist/
+          # Base assets referenced by the pages
+          cp favicon.svg favicon.ico spacer.svg img_contact_sound.svg dist/
+          cp jessejay.css scripts.js tailwind.css dist/
+          cp DJ-Jesse-Jay.jpg DJPult.gif dist/
+          cp robots.txt .nojekyll dist/
+          # Asset directories (referenced by index-legacy / hero-test)
+          cp assets/*.svg dist/assets/
+          cp css/*.css dist/css/
+          cp js/*.js dist/js/
+          echo "Deploy bundle contents:"
+          find dist -type f | sort
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with:
-          # Upload minimal, optimized site directory
-          path: '.'
+          path: ./dist
 
       - name: Deploy to GitHub Pages
         id: deployment
