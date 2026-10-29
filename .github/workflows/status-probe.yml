@@ -1,0 +1,33 @@
+name: Status probe
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Probe public endpoints
+        run: |
+          probe() {
+            local name="$1" url="$2" code
+            code="$(curl -sS -L -m 20 -o /dev/null -w '%{http_code}' "$url" 2>/dev/null)" || code=000
+            echo "| $name | \`$url\` | $code |" >> "$GITHUB_STEP_SUMMARY"
+          }
+          {
+            echo "## Status probe $(date -u +'%Y-%m-%d %H:%M UTC')"
+            echo ""
+            echo "| Ziel | URL | HTTP |"
+            echo "|---|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+          probe "Apex" "https://djjessejay.ch/"
+          probe "www" "https://www.djjessejay.ch/"
+          probe "Worker health" "https://djjessejay.ch/__wdjjj/health"
+          probe "GitHub Pages origin" "https://marcelraschke.github.io/djjessejay.ch/"
+          probe "Hermes" "https://hermes.cy8er.djjessejay.ch/"
