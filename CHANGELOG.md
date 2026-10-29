@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - `/api/contact` schreibt Name und E-Mail nicht mehr ins Erfolgs-Log.
 
 ### Fixed
+- Datenschutzerklärung auf `index-legacy.html` beschreibt die Bot-Abwehr durch Cloudflare Turnstile (Anbieter, verarbeitete Merkmale, Zweck, Rechtsgrundlage, Data Privacy Framework) in DE, EN, FR und IT.
 - CSP von `index-legacy.html` erlaubt `connect-src 'self'`; der Formular-Versand an `/api/contact` war bisher vom Browser blockiert.
 
 ### Removed

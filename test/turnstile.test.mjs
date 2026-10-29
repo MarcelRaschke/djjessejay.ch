@@ -82,3 +82,12 @@ test('Repo: kein reCAPTCHA mehr in Server, Seiten und Workflow', () => {
   assert.match(legacy, /frame-src https:\/\/challenges\.cloudflare\.com/);
   assert.match(readFileSync(join(ROOT, 'server.js'), 'utf8'), /req\.body\['cf-turnstile-response'\]/);
 });
+
+test('Datenschutzerklärung nennt Cloudflare Turnstile in allen Sprachen', () => {
+  const legacy = readFileSync(join(ROOT, 'index-legacy.html'), 'utf8');
+  assert.match(legacy, /data-translate="privacy-bot-p1"/);
+  for (const lang of ['de', 'en', 'fr', 'it']) {
+    const block = legacy.split(`            ${lang}: {\n`)[1] || '';
+    assert.match(block.slice(0, 4000), /'privacy-bot-p1': '[^']*Cloudflare Turnstile[^']*turnstile-privacy-policy[^']*'/, lang);
+  }
+});
