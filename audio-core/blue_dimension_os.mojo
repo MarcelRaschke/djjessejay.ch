@@ -23,7 +23,6 @@ def to_dbfs(linear: Float32) -> Float32:
     return 20.0 * (log(linear) / LN10)
 
 
-
 struct TrackMetadata:
     var title: String
     var bpm: Float32
