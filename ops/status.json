@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-25",
+  "updated": "2026-10-29",
   "columns": ["block", "todo", "done"],
   "cards": [
     { "id": "token-routes", "col": "block", "title": "API-Token: Workers Routes → Edit für Zone djjessejay.ch", "note": "Route-Setzen schlägt fehl. Der Token braucht außerdem Worker-Skript-Rechte (HTTP 401, Code 10000)." },
@@ -8,7 +8,7 @@
     { "id": "apex", "col": "todo", "title": "Apex djjessejay.ch: Ursprung prüfen", "note": "Antwortet mit 200, Herkunft der Antwort ungeklärt." },
     { "id": "hermes", "col": "todo", "title": "hermes.cy8er.djjessejay.ch: 502", "note": "Kein Ursprung. Hermes-Repo fehlt." },
     { "id": "pgp-workers-dev", "col": "todo", "title": "pgp-directory: workers_dev auf false", "note": "workers/pgp-directory/wrangler.jsonc hat workers_dev true." },
-    { "id": "wdjjj-build", "col": "todo", "title": "Cloudflare-Build für wdjjj von Git trennen", "note": "Workers Builds schlägt bei jedem Push fehl." },
+    { "id": "wdjjj-build", "col": "todo", "title": "Cloudflare-Build für wdjjj von Git trennen", "note": "Workers Builds schlägt bei jedem Push fehl, solange die Git-Verbindung besteht. Im Dashboard: wdjjj → Settings → Builds." },
     { "id": "pages-djjj", "col": "todo", "title": "Cloudflare Pages „djjj“ prüfen oder abschalten", "note": "Schlägt auf jedem PR sofort fehl." },
     { "id": "csp-acao", "col": "todo", "title": "Apex: CORS-Header und CSP prüfen", "note": "access-control-allow-origin: * auf HTML, CSP mit unsafe-inline." },
     { "id": "main-red", "col": "todo", "title": "Rote Checks auf main beheben", "note": "Python Lint, AGENT-SEC, Sigstore, Live-Smoke." },
