@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DjJesseJay · Banner Loop</title>
+<meta name="description" content="Binär-Schriftzug DjJesseJay im BPM-Takt, 124 oder 132 BPM">
+<link rel="stylesheet" href="binary.css">
+<script src="binary.js" defer></script>
+</head>
+<body>
+<main class="viewport">
+  <div class="stage stage--banner" data-loop>
+    <div class="layer stars" aria-hidden="true"></div>
+    <div class="layer sun" aria-hidden="true"></div>
+    <div class="layer floor" aria-hidden="true"></div>
+    <div class="layer scan" aria-hidden="true"></div>
+    <header class="head">
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 100 100" role="img" aria-label="JJ Kreislogo"><circle class="ring" cx="50" cy="50" r="46"/><g class="jj"><path d="M28 28 H46 V60 Q46 74 32 74 H26"/><path d="M28 28 H46 V60 Q46 74 32 74 H26" transform="rotate(180 50 50)"/></g></svg>
+        <div class="meta">
+          <p class="kicker">DJ JESSE JAY</p>
+          <p data-status aria-live="off">124 BPM · STEP 01/10 · BEAT 1/4</p>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="beats" aria-hidden="true"><span class="beat"></span><span class="beat"></span><span class="beat"></span><span class="beat"></span></div>
+        <div class="ctl-group" role="group" aria-label="Tempo">
+          <button type="button" class="ctl" data-bpm="124" aria-pressed="true">124 BPM · DEEP</button>
+          <button type="button" class="ctl" data-bpm="132" aria-pressed="false">132 BPM · TECHNO</button>
+          <button type="button" class="ctl ctl--plain" data-toggle>PAUSE</button>
+        </div>
+      </div>
+    </header>
+    <div class="bits bits--cols" data-word="DjJesseJay" role="img" aria-label="DjJesseJay in Binärdarstellung (ASCII, 8 Bit pro Zeichen)"></div>
+    <div class="mark">
+      <h1>DjJesseJay</h1>
+      <p>BLUE DIMENSION</p>
+    </div>
+    <div class="layer vignette" aria-hidden="true"></div>
+  </div>
+</main>
+</body>
+</html>
