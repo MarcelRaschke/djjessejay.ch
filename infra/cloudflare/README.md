@@ -28,7 +28,7 @@ Prerequisite: `djjessejay.ch` is delegated to Cloudflare DNS and the Worker rout
 
 ## Workers Builds preview configuration
 
-The Worker source and `wrangler.toml` live in `infra/cloudflare/`, while the connected repository builds from its root. Preview builds therefore use an empty build command and `npx wrangler preview --config infra/cloudflare/wrangler.toml` as the preview command. Wrangler bundles `wdjjj.js` during preview deployment; this Worker has no separate compilation step. The Cloudflare dashboard previously had `Go` as the preview build command, which failed before Wrangler could run. This setting was corrected on 2026-11-01. Rollback is to restore the prior preview build and deploy commands in the Worker Builds settings; it would restore the known failed behavior. The production build configuration is separate and was not changed here.
+The Worker source and `wrangler.toml` live in `infra/cloudflare/`, while the connected repository builds from its root. Preview builds need an empty build command and `npx wrangler preview --config infra/cloudflare/wrangler.toml` as the preview command. Wrangler bundles `wdjjj.js` during preview deployment; this Worker has no separate compilation step. The Cloudflare setting previously contained `Go`, which failed before Wrangler could run. A PATCH to the preview configuration returned success on 2026-11-01, but a subsequent GET returned 404. At that point the account API also listed no `wdjjj` script or Worker route for the domain. The preview change therefore has **not** been verified in a new build. Production build settings were not changed. Do not infer live deployment from the successful PATCH response alone.
 
 ## Smoke test
 
