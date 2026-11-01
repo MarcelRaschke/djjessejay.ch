@@ -36,6 +36,14 @@ With the Worker and routes absent, `wdjjj` was restored from reviewed `main` com
 
 After routing, the health endpoint and homepage returned HTTP 200, the homepage exposed `x-proxy: wdjjj`, CSP, HSTS, `x-content-type-options` and `referrer-policy`, `www` returned 301 to the apex, and POST on `/` returned 405. `/api/health` returned 502 `API origin not configured`; the prior secret must be restored from an authorized source before API routing can pass. The independent [live smoke run 41353945126](https://github.com/MarcelRaschke/djjessejay.ch/actions/runs/41353945126) passed health, apex, www and static-method checks, then failed because it expected 405 for DELETE on `/api/health`. The reviewed Worker checks for the missing API origin before rejecting that method, so the response is 502. The security-header step was skipped by that failure; headers were checked directly. Security impact is limited to restoring the reviewed Worker and two HTTP routes; no repository Worker code was changed. Rollback is to remove only the two route IDs above, leaving the Worker un-routed for diagnosis. Residual risks are the missing API origin secret, the failed API-method smoke check and the unverified Workers Builds preview configuration.
 
+## API origin configuration on 2026-11-01
+
+The intended API hostname `origin.djjessejay.ch` is documented in `ORIGIN-PROTECTION-DEPLOYMENT.md`. The `wdjjj` Worker received `API_ORIGIN_HOST=origin.djjessejay.ch` as a Cloudflare `secret_text` binding, and a follow-up API read confirmed the binding name and type. The value is deliberately absent from `wrangler.toml` so future Wrangler deployments do not replace the remote binding.
+
+This sets the routing target but does not make the API operational. A same-day control-plane check found no `origin.djjessejay.ch` DNS record, active Cloudflare Tunnel, Access app for that hostname, or Access service token. The current reviewed Worker also does not forward Access service-token headers. Do not publish an origin DNS record without the protected Tunnel/Access path and a connected Express backend. The `server.js` backend currently serves static files in addition to `/api`, so its origin-only exposure needs review as well. A sandbox `curl` attempt could not reach the outbound proxy, so the new live `/api/health` response was not verified.
+
+Security impact: the Worker now attempts `/api` subrequests to the configured hostname; the origin hostname has no DNS target yet. Public site routes and Worker source were not changed. Provenance: the hostname comes from the repository deployment contract, while current Cloudflare resource state was read from the account API. Rollback: remove only the `API_ORIGIN_HOST` Worker secret. Residual risk: `/api` remains unavailable until the protected backend path is deployed and verified; live behavior after the secret update is untested from this sandbox.
+
 ## Smoke test
 
 ```bash
