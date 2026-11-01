@@ -8,6 +8,7 @@ on:
       - ".github/workflows/deploy-wdjjj.yml"
       - "scripts/cloudflare-deploy-preflight.mjs"
       - "test/cloudflare-deploy-preflight.test.mjs"
+      - "test/worker-origin-access.test.mjs"
   workflow_dispatch:
     inputs:
       diagnose_only:
@@ -54,6 +55,9 @@ jobs:
 
       - name: Validate Worker syntax
         run: node --check infra/cloudflare/wdjjj.js
+
+      - name: Verify API origin Access boundary
+        run: node --test test/worker-origin-access.test.mjs
 
       - name: Verify Cloudflare token and target Worker access
         env:

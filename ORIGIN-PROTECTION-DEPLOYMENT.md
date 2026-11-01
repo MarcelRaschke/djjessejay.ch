@@ -12,6 +12,16 @@ This feature establishes a fail-closed deployment gate for a Cloudflare Tunnel b
 - `.github/workflows/origin-protection-ci-block.yml` — pull-request/main gate.
 - `ORIGIN-PROTECTION-DEPLOYMENT.md` — deployment contract.
 
+## Cloudflare state on 2026-11-01
+
+The account now contains a remotely managed `djjessejay-origin` Tunnel (`9794cff6-1f09-444c-a2df-5dcb48370c90`). Its only upstream ingress is `origin.djjessejay.ch` with path `^/api(?:/.*)?$` to `http://127.0.0.1:3000`; all other requests get `http_status:404`. DNS record `04c54d8bb8bc0562596b6f63fd2f4380` is a proxied CNAME to `9794cff6-1f09-444c-a2df-5dcb48370c90.cfargotunnel.com`.
+
+Access app `da8c4507-9ab7-4b1d-928e-69aac3d733ad` covers only `origin.djjessejay.ch`. Its sole `non_identity` policy admits service-token ID `7e7386b4-5f7f-44a2-a435-10d29994f7a0` (expires 2027-11-01). The token's client ID and secret are bound to `wdjjj` as `ORIGIN_ACCESS_CLIENT_ID` and `ORIGIN_ACCESS_CLIENT_SECRET`; their values are not recorded here. A control-plane read confirmed the CNAME, tunnel ingress, Access policy, and Worker binding names. An unauthenticated GET to `https://origin.djjessejay.ch/api/health` returned 403, while the public homepage and Worker health returned 200.
+
+**The tunnel is inactive with zero connector connections.** GitHub Pages hosts static files and cannot run `server.js` or `cloudflared`. The operator selected an existing Hosttech/VPS server, but its SSH hostname and access are not available in this environment yet. The current production Worker also does not forward its Access service token: `/api/health` through the public hostname returns 403. The Worker change in this branch prepares that forwarding for human review; it must not be treated as deployed. Even after review and deployment, the API remains unavailable until the Express service and connector are running on the VPS.
+
+Security impact: the origin hostname is published only behind Access, and Tunnel ingress restricts the exposed path to `/api`. Provenance impact: no DJ Jesse Jay archive claims changed. Validation: Cloudflare API readback, unauthenticated Access denial, public-site HTTP probes, and `test/worker-origin-access.test.mjs`. Rollback: delete the origin CNAME, then the Access app and Tunnel if unused; remove the two Access secrets from `wdjjj` and revoke the service token. Keep the public Worker routes intact. Residual risk: the API is unavailable, and the connector plus direct-origin exposure cannot yet be verified.
+
 ## Security invariants
 
 1. `main` is not modified directly by this feature branch.

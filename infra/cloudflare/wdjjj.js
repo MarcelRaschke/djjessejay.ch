@@ -12,6 +12,11 @@ const ORIGIN_PREFIX_DEFAULT = "/djjessejay.ch";
 const API_TIMEOUT_MS = 30000;
 const UPSTREAM_TIMEOUT_MS = 8000;
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
+const API_ORIGIN_HOST = "origin.djjessejay.ch";
+const API_FORWARD_REQUEST_HEADERS = new Set([
+  "accept", "accept-language", "authorization", "content-type", "origin",
+  "referer", "user-agent", "x-honeypot-token",
+]);
 
 const STRIP_RESPONSE_HEADERS = new Set([
   "content-security-policy",
@@ -110,11 +115,20 @@ function withSecurityHeaders(response, upstream, originHost, originPrefix) {
 
 function proxyToApiOrigin(request, url, apiOriginHost, env) {
   const apiScheme = (env && env.API_ORIGIN_SCHEME) || "https";
+  if (apiScheme !== "https" || apiOriginHost !== API_ORIGIN_HOST) {
+    return new Response("API origin configuration invalid", { status: 502, headers: { ...OWN_HEADERS, "cache-control": "no-store" } });
+  }
   const apiOriginPort = (env && env.API_ORIGIN_PORT) || "";
   const target = new URL(`${apiScheme}://${apiOriginHost}${apiOriginPort ? ":" + apiOriginPort : ""}${url.pathname}${url.search}`);
-  const headers = new Headers(request.headers);
+  // Only forward application headers. Never trust client-supplied Access or
+  // proxy identity headers, and never send the service token to a redirect.
+  const headers = new Headers();
+  for (const [name, value] of request.headers) {
+    if (API_FORWARD_REQUEST_HEADERS.has(name.toLowerCase())) headers.set(name, value);
+  }
   headers.set("host", apiOriginHost);
-  headers.delete("cf-");
+  headers.set("cf-access-client-id", env.ORIGIN_ACCESS_CLIENT_ID);
+  headers.set("cf-access-client-secret", env.ORIGIN_ACCESS_CLIENT_SECRET);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
   return fetch(target.toString(), {
@@ -169,6 +183,9 @@ export default {
       }
       if (request.method !== "GET" && request.method !== "HEAD" && request.method !== "POST") {
         return new Response("Method Not Allowed", { status: 405, headers: { ...OWN_HEADERS, allow: "GET, HEAD, POST", "cache-control": "no-store" } });
+      }
+      if (!env?.ORIGIN_ACCESS_CLIENT_ID || !env?.ORIGIN_ACCESS_CLIENT_SECRET) {
+        return new Response("API origin credentials not configured", { status: 502, headers: { ...OWN_HEADERS, "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
       }
       return proxyToApiOrigin(request, url, apiOriginHost, env);
     }
