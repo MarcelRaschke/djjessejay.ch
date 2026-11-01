@@ -63,6 +63,15 @@
     .kicker{color:var(--cyan);font:10px ui-monospace,monospace;letter-spacing:.18em;text-transform:uppercase}.section-head h2{margin:4px 0 0;font-size:clamp(28px,4vw,48px);letter-spacing:-.035em}
     .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}.card{grid-column:span 4;padding:24px;border:1px solid var(--line);background:linear-gradient(145deg,rgba(7,24,39,.88),rgba(3,12,22,.76));position:relative;overflow:hidden}.card.wide{grid-column:span 8}.card:before{content:"";position:absolute;left:0;top:0;width:2px;height:100%;background:linear-gradient(var(--gold),transparent,var(--cyan))}
     .card h3{margin:0 0 8px;font-size:17px}.card p{margin:0;color:var(--muted)}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+    .artwork-section{padding:40px 0}
+    .artwork{margin:32px 0 0}
+    .artwork-section .artwork{margin:0}
+    .artwork a{display:block;text-decoration:none}
+    .artwork img{display:block;width:100%;height:auto;object-fit:contain;border:1px solid var(--line);background:var(--bg)}
+    .artwork figcaption{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px 20px;margin-top:12px;color:var(--muted);font-size:12px}
+    .artwork figcaption a{display:inline;text-decoration:underline;text-underline-offset:3px;color:var(--silver)}
+    .artwork--seal{max-width:560px;margin:32px auto 0}
+    .artwork--credit{margin:0 0 32px}
     .portrait{width:100%;height:100%;min-height:360px;object-fit:cover;filter:saturate(.7) contrast(1.08);border:1px solid var(--line)}
     .bio{display:grid;grid-template-columns:.8fr 1.2fr;gap:30px;align-items:stretch}
     .signal-panel{display:grid;grid-template-columns:1fr 1fr;gap:16px}.metric{padding:22px;border:1px solid var(--line);background:rgba(6,17,29,.58)}.metric strong{display:block;font-size:34px;color:var(--gold);line-height:1}.metric span{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.12em}
@@ -167,6 +176,17 @@
     </div>
   </section>
 
+  <section id="artwork-blue-vinyl" class="artwork-section" aria-label="Blue Vinyl">
+    <div class="wrap">
+      <figure class="artwork">
+        <a href="assets/artwork/blue-vinyl.png" aria-label="Blue Vinyl in voller Größe öffnen">
+          <img src="assets/artwork/blue-vinyl.png" alt="Blaue Schallplatte mit gelbem Signet und leuchtenden Lichtreflexen" width="1280" height="720" loading="lazy" decoding="async">
+        </a>
+        <figcaption><span>Blue Vinyl</span><a href="assets/artwork/blue-vinyl.png">Bild in voller Größe</a></figcaption>
+      </figure>
+    </div>
+  </section>
+
   <div class="ticker" aria-hidden="true">
     <div class="ticker-track">
       <span><b>///</b> Zürich Underground</span><span><b>97.5</b> Blue Dimension Signal</span><span><b>EST.</b> 1997</span><span>Vinyl-Kultur</span><span>Progressive House</span><span>Techno</span><span>Deep House</span><span><b>///</b> Zürich Underground</span><span><b>97.5</b> Blue Dimension Signal</span><span><b>EST.</b> 1997</span><span>Vinyl-Kultur</span><span>Progressive House</span><span>Techno</span><span>Deep House</span>
@@ -193,6 +213,18 @@
           <p class="sound-links"><a href="https://soundcloud.com/jessejay" rel="noopener noreferrer" target="_blank">Alle Sets auf SoundCloud</a></p>
         </article>
       </div>
+      <figure class="artwork">
+        <a href="assets/artwork/dj-mixer.jpg" aria-label="DJ Jesse Jay · Mixing Desk in voller Größe öffnen">
+          <img src="assets/artwork/dj-mixer.jpg" alt="Dunkelblaues Mischpult mit silbernem und gelbem DJ-Jesse-Jay-Schriftzug" width="1280" height="538" loading="lazy" decoding="async">
+        </a>
+        <figcaption><span>DJ Jesse Jay · Mixing Desk</span><a href="assets/artwork/dj-mixer.jpg">Bild in voller Größe</a></figcaption>
+      </figure>
+      <figure class="artwork">
+        <a href="assets/artwork/genre-router.png" aria-label="Genre Router · Konzeptgrafik in voller Größe öffnen">
+          <img src="assets/artwork/genre-router.png" alt="Genre-Router-Konzeptgrafik mit drei Pfaden für Acid-Techno, House-Deep-Tech und Cinematic-Pop-Ballad" width="1280" height="768" loading="lazy" decoding="async">
+        </a>
+        <figcaption><span>Genre Router · Konzeptgrafik</span><a href="assets/artwork/genre-router.png">Bild in voller Größe</a></figcaption>
+      </figure>
     </div>
   </section>
 
@@ -203,6 +235,12 @@
         <div class="metric"><strong>97.5</strong><span>Branding-Motiv (kein Live-Sendestatus)</span></div>
         <div class="metric"><strong>1997</strong><span>Active since</span></div>
       </div>
+      <figure class="artwork">
+        <a href="assets/artwork/signal-975.png" aria-label="Signal 97.5 · Artwork in voller Größe öffnen">
+          <img src="assets/artwork/signal-975.png" alt="97.5 als bunte Baustein-Illustration mit Zürcher Motiven, Radiowellen und Musiksymbolen" width="1280" height="720" loading="lazy" decoding="async">
+        </a>
+        <figcaption><span>Signal 97.5 · Artwork</span><a href="assets/artwork/signal-975.png">Bild in voller Größe</a></figcaption>
+      </figure>
     </div>
   </section>
 
@@ -221,6 +259,17 @@
     </div>
   </section>
 
+  <section id="artwork-dj-jesse-jay-sign" class="artwork-section" aria-label="DJ Jesse Jay · Visual Identity">
+    <div class="wrap">
+      <figure class="artwork">
+        <a href="assets/artwork/dj-jesse-jay-sign.png" aria-label="DJ Jesse Jay · Visual Identity in voller Größe öffnen">
+          <img src="assets/artwork/dj-jesse-jay-sign.png" alt="Blau leuchtendes DJ-Jesse-Jay-Schild im Pixelstil" width="1280" height="720" loading="lazy" decoding="async">
+        </a>
+        <figcaption><span>DJ Jesse Jay · Visual Identity</span><a href="assets/artwork/dj-jesse-jay-sign.png">Bild in voller Größe</a></figcaption>
+      </figure>
+    </div>
+  </section>
+
   <section id="visuals">
     <div class="wrap">
       <div class="section-head"><div><div class="kicker">04 // Visual system</div><h2>Signal architecture</h2></div></div>
@@ -228,6 +277,12 @@
         <article class="card wide"><h3>Blue Dimension</h3><p>Deep Navy, Electric Cyan, Neon Blue, Metallic Silver und Golden Yellow bilden die visuelle Sprache für Signal, Radiowellen, Vinyl und audio-reaktive Strukturen.</p></article>
         <article class="card"><h3>Provenance</h3><p>Die Website folgt der Repository-Regel: Evidence → Canonical Profile → Structured Data → Website.</p></article>
       </div>
+      <figure class="artwork artwork--seal">
+        <a href="assets/artwork/blue-gold-seal.jpg" aria-label="Blue Dimension · Signet in voller Größe öffnen">
+          <img src="assets/artwork/blue-gold-seal.jpg" alt="Rundes blaues Signet mit goldenen Zeichen und leuchtendem Ring" width="1280" height="1280" loading="lazy" decoding="async">
+        </a>
+        <figcaption><span>Blue Dimension · Signet</span><a href="assets/artwork/blue-gold-seal.jpg">Bild in voller Größe</a></figcaption>
+      </figure>
     </div>
   </section>
   <section id="booking">
@@ -259,6 +314,14 @@
 </main>
 
 <footer>
+  <div class="wrap">
+    <figure class="artwork artwork--credit">
+      <a href="assets/artwork/twodivision-banner.png" aria-label="TwoDivision · Design-Artwork in voller Größe öffnen">
+        <img src="assets/artwork/twodivision-banner.png" alt="Design-Banner mit dem Schriftzug designed by TwoDivision" width="1280" height="426" loading="lazy" decoding="async">
+      </a>
+      <figcaption><span>TwoDivision · Design-Artwork</span><a href="assets/artwork/twodivision-banner.png">Bild in voller Größe</a></figcaption>
+    </figure>
+  </div>
   <div class="wrap foot">
     <span>DJ JESSE JAY — ZÜRICH — EST. 1997</span>
     <span><a href="#booking">Booking</a> · <a href="#impressum">Impressum</a></span>
@@ -269,7 +332,7 @@
 <script>
 (function(){
   if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-  document.querySelectorAll('main section:not(.hero)').forEach(function(s){
+  document.querySelectorAll('main section:not(.hero):not(.artwork-section)').forEach(function(s){
     s.classList.add('reveal');
     new IntersectionObserver(function(entries,obs){
       entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target)}});
