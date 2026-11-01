@@ -30,6 +30,12 @@ Prerequisite: `djjessejay.ch` is delegated to Cloudflare DNS and the Worker rout
 
 The Worker source and `wrangler.toml` live in `infra/cloudflare/`, while the connected repository builds from its root. Preview builds need an empty build command and `npx wrangler preview --config infra/cloudflare/wrangler.toml` as the preview command. Wrangler bundles `wdjjj.js` during preview deployment; this Worker has no separate compilation step. The Cloudflare setting previously contained `Go`, which failed before Wrangler could run. A PATCH to the preview configuration returned success on 2026-11-01, but a subsequent GET returned 404. At that point the account API also listed no `wdjjj` script or Worker route for the domain. The preview change therefore has **not** been verified in a new build. Production build settings were not changed. Do not infer live deployment from the successful PATCH response alone.
 
+## Production restoration on 2026-11-01
+
+With the Worker and routes absent, `wdjjj` was restored from reviewed `main` commit `b3143a5c1b6c76c58f2ed8d9cd609b70c55c8fd2` (Worker source SHA-256 `1ffb7b2dd862572d9c32a3d1fc4adbb79587cfb154fc7a21e8703e0a9054abf8`). The upload used the public variables from `wrangler.toml` and did not set the unavailable `API_ORIGIN_HOST` secret. The active zone has route `djjessejay.ch/*` (`ccebf9faeef743dca9abc455a67ddfe7`) and route `www.djjessejay.ch/*` (`5c556cf7fe2746eb8b50615e4cc6def1`), both pointing to `wdjjj`. No wildcard route was added.
+
+After routing, the health endpoint and homepage returned HTTP 200, the homepage exposed `x-proxy: wdjjj`, CSP, HSTS, `x-content-type-options` and `referrer-policy`, `www` returned 301 to the apex, and POST on `/` returned 405. `/api/health` returned 502 `API origin not configured`; the prior secret must be restored from an authorized source before API routing can pass. Security impact is limited to restoring the reviewed Worker and two HTTP routes; no repository Worker code was changed. Rollback is to remove only the two route IDs above, leaving the Worker un-routed for diagnosis. Residual risks are the missing API origin secret and the unverified Workers Builds preview configuration.
+
 ## Smoke test
 
 ```bash
