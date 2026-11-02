@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - CSP von `index-legacy.html` erlaubt `connect-src 'self'`; der Formular-Versand an `/api/contact` war bisher vom Browser blockiert.
+- CSP des Cloudflare Workers `wdjjj` von Google reCAPTCHA auf Cloudflare Turnstile umgestellt (`challenges.cloudflare.com`); Google Fonts und `api.anthropic.com` aus der Frontend-CSP entfernt, da `index.html` keine externen Fonts lädt und der Anthropic-Proxy serverseitig läuft.
 
 ### Removed
 - `scripts/replace-recaptcha-key.mjs`, ersetzt durch `scripts/inject-site-keys.mjs`.
