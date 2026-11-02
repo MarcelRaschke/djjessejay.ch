@@ -70,20 +70,8 @@ jobs:
           rm -rf node_modules
 
       - name: Upload artifact
-        # Do not go back to v3. This repository requires every action to be
-        # pinned to a full-length commit SHA, and that rule is also applied to
-        # the nested references inside a composite action. v3
-        # (56afc609e74202658d3ffba0e8f6dda462b719fa) calls
-        # `actions/upload-artifact@v4` unpinned, which cannot be pinned from
-        # here, so every deploy aborted in "Prepare all required actions":
-        #
-        #   The action actions/upload-artifact@v4 is not allowed in
-        #   MarcelRaschke/djjessejay.ch because all actions must be pinned to a
-        #   full-length commit SHA.
-        #
-        # v4.0.0 pins it to actions/upload-artifact@ea165f8d (v4.6.2) — same
-        # artifact major as before, so behaviour is unchanged; only the
-        # reference became pinnable. Inputs are identical.
+        # v4 pins its nested upload-artifact action; v3 violates the SHA policy.
+        # Existing inputs remain valid. v4 also excludes hidden files/directories.
         uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
         with:
           # Upload minimal, optimized site directory
