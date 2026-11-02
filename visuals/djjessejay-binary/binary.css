@@ -1,0 +1,173 @@
+/* DjJesseJay Binary Neon — gemeinsame Styles für alle Formate.
+   Vanilla, keine Abhängigkeiten, keine Inline-Styles: läuft unter der
+   bestehenden Site-CSP (style-src 'self', font-src 'self'). */
+
+@font-face { font-family: "JetBrains Mono"; font-weight: 400; font-display: swap; src: url("fonts/jetbrains-mono-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "JetBrains Mono"; font-weight: 700; font-display: swap; src: url("fonts/jetbrains-mono-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Orbitron"; font-weight: 900; font-display: swap; src: url("fonts/orbitron-latin-900-normal.woff2") format("woff2"); }
+
+:root {
+  --magenta: #ff2fd0;
+  --cyan: #22e5ff;
+  --violet: #7a2cff;
+  --ground: #07051a;
+  --ink: #e9e6ff;
+  --muted: #a9a3d6;
+  --dim: #8d86c4;
+  --off-ink: #3a3566;
+  --off-line: #241f4a;
+  --glow: 28px;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+  --display: "Orbitron", "JetBrains Mono", sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #000; color: var(--ink); font-family: var(--mono); }
+
+/* Viewport: Bühne zentriert und auf Fenstergrösse skaliert (--scale setzt binary.js) */
+.viewport { position: fixed; inset: 0; overflow: hidden; background: #000; }
+.stage {
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%) scale(var(--scale, 1));
+  overflow: hidden; isolation: isolate;
+  background-color: var(--ground);
+  background-image:
+    radial-gradient(120% 70% at 50% 108%, rgba(255, 47, 208, .30) 0%, rgba(255, 47, 208, 0) 55%),
+    radial-gradient(55% 50% at 6% 0%, rgba(34, 229, 255, .16) 0%, rgba(34, 229, 255, 0) 60%),
+    radial-gradient(45% 40% at 96% 8%, rgba(122, 44, 255, .18) 0%, rgba(122, 44, 255, 0) 60%),
+    linear-gradient(180deg, #050314 0%, #0b0626 55%, #1a0838 100%);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+  display: flex; flex-direction: column;
+}
+.raw .viewport { position: static; overflow: visible; }
+.raw .stage { position: relative; left: 0; top: 0; transform: none; }
+
+.stage--poster { width: 1080px; height: 1350px; padding: 72px 72px 0; gap: 44px; }
+.stage--banner { width: 1920px; height: 1080px; padding: 64px 112px 0; gap: 40px; }
+.stage--avatar { width: 1080px; height: 1080px; align-items: center; justify-content: center; }
+
+/* Hintergrund-Ebenen */
+.layer { position: absolute; pointer-events: none; }
+.stars {
+  left: 0; right: 0; top: 0; height: 62%; opacity: .55;
+  background-image: radial-gradient(#fff 1px, transparent 1.6px), radial-gradient(var(--cyan) 1px, transparent 1.6px), radial-gradient(var(--magenta) .8px, transparent 1.4px);
+  background-size: 140px 140px, 230px 230px, 310px 310px;
+  background-position: 0 0, 70px 110px, 160px 40px;
+  -webkit-mask-image: linear-gradient(#000, transparent); mask-image: linear-gradient(#000, transparent);
+}
+.sun {
+  left: 50%; bottom: 120px; width: 440px; height: 440px; margin-left: -220px; border-radius: 50%;
+  opacity: .32; box-shadow: 0 0 70px rgba(255, 47, 208, .6);
+  background: linear-gradient(180deg, #ffd36e 0%, #ff6aa8 42%, var(--magenta) 68%, var(--violet) 100%);
+  --stripes: linear-gradient(180deg, #000 50%, transparent 50% 54%, #000 54% 62%, transparent 62% 67%, #000 67% 74%, transparent 74% 80%, #000 80% 86%, transparent 86% 93%, #000 93%);
+  -webkit-mask-image: var(--stripes); mask-image: var(--stripes);
+  transition: box-shadow 120ms linear, opacity 120ms linear;
+}
+.floor {
+  left: -50%; right: -50%; bottom: -40px; height: 340px; opacity: .7;
+  background-image: linear-gradient(rgba(255, 47, 208, .55) 2px, transparent 2px), linear-gradient(90deg, rgba(255, 47, 208, .55) 2px, transparent 2px);
+  background-size: 80px 52px;
+  transform: perspective(460px) rotateX(64deg); transform-origin: 50% 100%;
+  -webkit-mask-image: linear-gradient(transparent, #000 45%); mask-image: linear-gradient(transparent, #000 45%);
+}
+.scan { inset: 0; background: repeating-linear-gradient(0deg, rgba(255, 255, 255, .035) 0 1px, transparent 1px 4px); }
+.vignette { inset: 0; background: radial-gradient(ellipse 75% 70% at 50% 45%, transparent 55%, rgba(0, 0, 0, .6) 100%); }
+
+/* Kopfzeile */
+.head { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+.brand { display: flex; align-items: center; gap: 28px; }
+.meta { display: flex; flex-direction: column; gap: 8px; margin: 0; }
+.meta p { margin: 0; font-size: 16px; letter-spacing: .24em; color: var(--muted); }
+.meta .kicker { font-size: 20px; letter-spacing: .32em; color: var(--cyan); }
+.meta--right { text-align: right; }
+
+/* JJ-Kreislogo (SVG, punktsymmetrisch) */
+.logo { width: 112px; height: 112px; flex: none; overflow: visible; filter: drop-shadow(0 0 calc(var(--glow) / 2) var(--cyan)); }
+.logo .ring { fill: none; stroke: var(--cyan); stroke-width: 3; }
+.logo .jj { fill: none; stroke: #fff; stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 6px var(--magenta)); }
+.stage--avatar .logo { width: 820px; height: 820px; position: relative; }
+.stage--avatar .logo .ring { stroke-width: 1.2; }
+.stage--avatar .logo .jj { stroke-width: 7; filter: drop-shadow(0 0 4px var(--magenta)) drop-shadow(0 0 14px var(--magenta)); }
+
+/* Bit-Raster */
+.bits { position: relative; display: flex; }
+.bits--rows { flex-direction: column; gap: 14px; }
+.bits--cols { justify-content: center; gap: 36px; }
+.byte { display: flex; align-items: center; --c: var(--cyan); }
+.byte.is-upper { --c: var(--magenta); }
+.bits--rows .byte { gap: 22px; }
+.bits--cols .byte { flex-direction: column; gap: 10px; }
+.byte__idx { width: 34px; font-size: 16px; color: #5d5790; }
+.byte__cells { display: flex; gap: 10px; }
+.bits--cols .byte__cells { flex-direction: column; }
+.cell {
+  width: 56px; height: 56px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+  font-size: 22px; color: var(--off-ink); border: 2px solid var(--off-line);
+  transition: opacity 90ms linear, box-shadow 90ms linear;
+}
+.bits--cols .cell { width: 50px; height: 50px; font-size: 20px; }
+.cell.on { color: var(--ground); font-weight: 700; border-color: transparent; background: var(--c); box-shadow: 0 0 calc(var(--glow) * .6) var(--c); }
+.byte__hex { width: 72px; font-size: 18px; color: var(--dim); }
+.bits--cols .byte__hex { width: auto; font-size: 16px; }
+.byte__ch {
+  font-family: var(--display); font-weight: 900; font-size: 44px; line-height: 1; color: #fff;
+  text-shadow: 0 0 calc(var(--glow) / 2) var(--c), 0 0 var(--glow) var(--c);
+}
+.bits--cols .byte__ch { margin-top: 6px; }
+
+/* Avatar: Matrix als gedämpfte Punkt-Textur hinter dem Logo */
+.bits--dots { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); gap: 14px; opacity: .4; }
+.bits--dots .byte { flex-direction: column; }
+.bits--dots .byte__cells { flex-direction: column; gap: 14px; }
+.bits--dots .cell { width: 34px; height: 34px; border-radius: 50%; font-size: 0; }
+.bits--dots .byte__idx, .bits--dots .byte__hex, .bits--dots .byte__ch { display: none; }
+
+/* Wortmarke */
+.mark { position: relative; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.mark h1 {
+  margin: 0; font-family: var(--display); font-weight: 900; font-size: 128px; letter-spacing: .02em; line-height: 1; color: #fff;
+  --shift: 3px;
+  text-shadow: calc(var(--shift) * -1) 0 0 rgba(34, 229, 255, .55), var(--shift) 0 0 rgba(255, 47, 208, .55),
+    0 0 calc(var(--glow) / 2) var(--magenta), 0 0 var(--glow) var(--magenta), 0 0 calc(var(--glow) * 2) var(--cyan);
+  transition: text-shadow 120ms linear;
+}
+.stage--poster .mark h1 { font-size: 96px; }
+.mark p { margin: 0; font-size: 20px; letter-spacing: .6em; color: var(--cyan); }
+
+/* Loop: Playhead-Zustände (binary.js setzt data-d = Abstand zum Playhead) */
+.is-looping .byte { opacity: .24; transition: opacity 90ms linear; }
+.is-looping .byte[data-d="0"] { opacity: 1; --glow: 56px; }
+.is-looping .byte[data-d="1"] { opacity: .72; }
+.is-looping .byte[data-d="2"] { opacity: .48; }
+.is-looping.kick .sun { opacity: .46; box-shadow: 0 0 140px rgba(255, 47, 208, .6); }
+.is-looping.kick .mark h1 { --shift: 5px; --glow: 42px; }
+.is-looping.kick .logo { filter: drop-shadow(0 0 22px var(--cyan)); }
+
+.beats { display: flex; gap: 10px; }
+.beat { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--off-ink); }
+.beat.on { border-color: transparent; background: var(--magenta); box-shadow: 0 0 14px var(--magenta); }
+.controls { display: flex; align-items: center; gap: 28px; }
+.ctl-group { display: flex; gap: 10px; }
+.ctl {
+  font: 16px/1 var(--mono); letter-spacing: .14em; min-height: 48px; padding: 0 20px; border-radius: 8px; cursor: pointer;
+  background: transparent; color: var(--ink); border: 2px solid var(--cyan);
+}
+.ctl[aria-pressed="true"] { background: var(--cyan); color: var(--ground); }
+.ctl--plain { border-color: var(--off-ink); }
+.ctl:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+
+/* Galerie */
+.gallery { min-height: 100%; padding: 48px 24px; display: flex; flex-direction: column; align-items: center; gap: 32px; background: var(--ground); }
+.gallery h1 { margin: 0; font-family: var(--display); font-weight: 900; font-size: clamp(32px, 6vw, 64px); text-shadow: 0 0 14px var(--magenta), 0 0 28px var(--magenta); }
+.gallery ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; width: min(960px, 100%); }
+.gallery a { display: block; padding: 20px; border: 2px solid var(--cyan); border-radius: 10px; color: var(--ink); text-decoration: none; }
+.gallery a:hover, .gallery a:focus-visible { background: rgba(34, 229, 255, .1); outline: none; }
+.gallery strong { display: block; font-size: 18px; letter-spacing: .12em; color: var(--cyan); }
+.gallery span { font-size: 14px; color: var(--muted); }
+.gallery .note { max-width: 960px; font-size: 13px; color: var(--dim); line-height: 1.6; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cell, .byte, .sun, .mark h1 { transition: none; }
+}
