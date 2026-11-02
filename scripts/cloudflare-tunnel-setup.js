@@ -306,6 +306,12 @@ async function run(cfg, flags, api, log = console.log) {
   if (reused) {
     const conf = await api('GET', `/accounts/${cfg.accountId}/cfd_tunnel/${reused.id}/configurations`);
     snapshot = (conf && conf.config) || {};
+    // The live origin tunnel intentionally exposes only /api. Reconciliation
+    // below manages host-only rules; adding one beside a path-scoped rule
+    // would make the rest of the Express app reachable through this hostname.
+    if (Array.isArray(snapshot.ingress) && snapshot.ingress.some((r) => r.hostname === cfg.publicHostname && r.path)) {
+      throw new Error(`Tunnel ${cfg.tunnelName} has path-scoped ingress for ${cfg.publicHostname}; refusing to add a broader host-only rule`);
+    }
     log(`  tunnel ${cfg.tunnelName}: reuse ${reused.id}`);
   } else {
     log(`  tunnel ${cfg.tunnelName}: ${flags.apply ? 'will create' : 'would create'}`);

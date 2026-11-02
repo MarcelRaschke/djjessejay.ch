@@ -146,6 +146,18 @@ test('a missing exact rule is inserted before a shadowing wildcard', () => {
     ['^/metrics$', 'origin.djjessejay.ch', '*.djjessejay.ch', 'catch-all']);
 });
 
+test('setup refuses to broaden an existing path-scoped origin ingress', async () => {
+  const f = fakeApi({
+    tunnels: [{ id: 'old', remote_config: true }],
+    config: { ingress: [
+      { hostname: 'origin.djjessejay.ch', path: '^/api(?:/.*)?$', service: 'http://127.0.0.1:3000' },
+      { service: 'http_status:404' },
+    ] },
+  });
+  await assert.rejects(run(readConfig(BASE_ENV, { access: false }), APPLY, f.api, quiet), /refusing to add a broader host-only rule/);
+  assert.deepEqual(mutations(f.calls), []);
+});
+
 test('a zone from another account is refused before any change', async () => {
   const f = fakeApi({ zoneAccount: 'other' });
   await assert.rejects(run(readConfig(BASE_ENV, { access: false }), APPLY, f.api, quiet), /does not belong to CLOUDFLARE_ACCOUNT_ID/);
