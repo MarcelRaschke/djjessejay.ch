@@ -52,21 +52,31 @@ ORIGIN_PREFIX = "/djjessejay.ch"
 #      secrets.
 #   3. Make the Worker FORWARD those two secrets as the cf-access-client-id /
 #      cf-access-client-secret headers on its /api subrequests, and deploy it.
-#   4. Only then run `scripts/cloudflare-tunnel-setup.js --apply`.
+#   4. Run `scripts/cloudflare-tunnel-setup.js --apply`.
+#   5. Install and run `cloudflared` on the origin host with the tunnel token.
+#      --apply deliberately does not print that token and does not start a
+#      connector, so a fresh tunnel resolves in DNS while the backend stays
+#      unreachable until this step is done (ORIGIN-PROTECTION-DEPLOYMENT.md,
+#      "The script intentionally does not print the tunnel token").
 #
-# Why the tunnel is last: one --apply run creates the tunnel, the Access app,
-# ITS SERVICE-TOKEN-ONLY POLICY and the DNS record together (see the mutate
-# phase of that script). The moment origin.djjessejay.ch resolves, it is
-# already closed to anything that does not present the token. Run it before
-# step 3 and EVERY /api request fails at Access — turning today's honest 502
-# ("API origin not configured") into a 403 that looks like a credentials
-# problem rather than a missing code path.
+# Why the tunnel comes after step 3: one --apply run creates the tunnel, the
+# Access app, ITS SERVICE-TOKEN-ONLY POLICY and the DNS record together (see
+# the mutate phase of that script). The moment origin.djjessejay.ch resolves,
+# it is already closed to anything that does not present the token. Run it
+# before step 3 and EVERY /api request fails at Access — turning today's
+# honest 502 ("API origin not configured") into a 403 that looks like a
+# credentials problem rather than a missing code path.
 #
-# STEP 3 DOES NOT EXIST YET. proxyToApiOrigin() in wdjjj.js reads neither
-# secret, and no revision of the Worker has ever sent those headers, so
-# setting the secrets authenticates nothing on its own.
-# ORIGIN-PROTECTION-DEPLOYMENT.md attributes that forwarding to PR #160, but
-# #160 was closed without merging and carries an unrelated change.
+# STEP 3 IS NOT IN THE DEPLOYED WORKER. proxyToApiOrigin() on main reads
+# neither secret, so setting them authenticates nothing today.
+#
+# It is, however, already written. ORIGIN-PROTECTION-DEPLOYMENT.md points at
+# PR #160, which was closed WITHOUT merging but does carry the
+# implementation: its head a21bb520 changes wdjjj.js (+58/-4) to strip any
+# inbound cf-access-* headers and set cf-access-client-id /
+# cf-access-client-secret from the two secrets, and adds
+# test/wdjjj-api-auth.test.mjs (+108) covering it. Reviving that branch is
+# the shorter path to step 3 than writing it again.
 #
 # API_ORIGIN_HOST itself can be set at any point; it takes effect once
 # origin.djjessejay.ch resolves, which is step 4.
