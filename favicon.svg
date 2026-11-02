@@ -15,7 +15,7 @@
      Previously two Arial <text> glyphs: the mark changed shape on every system
      without Arial, and the counter-J was a horizontal mirror rather than the
      seal's bespoke outline. Nested viewBox is the seal's ink box. -->
-<g fill="#ffd21a" filter="url(#shadow)">
+<g fill="#FFD400" filter="url(#shadow)">
 <svg x="63" y="99" width="130" height="58" viewBox="90 55 820 365" overflow="visible">
   <path d="M90 250h105v55c0 31 17 46 47 46 31 0 47-17 47-49V55h105v251c0 72-48 114-150 114-99 0-154-42-154-125v-45z"/>
   <circle cx="500" cy="210" r="48"/>
