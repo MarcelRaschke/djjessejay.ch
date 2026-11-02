@@ -44,12 +44,30 @@ ORIGIN_PREFIX = "/djjessejay.ch"
 #
 #   npx wrangler secret put API_ORIGIN_HOST     # origin.djjessejay.ch
 #
-# Prerequisites, per ORIGIN-PROTECTION-DEPLOYMENT.md: the tunnel must have
-# been applied with `scripts/cloudflare-tunnel-setup.js --apply` (until then
-# origin.djjessejay.ch does not resolve — it did not on 2026-10-24), and the
-# Worker needs ORIGIN_ACCESS_CLIENT_ID and ORIGIN_ACCESS_CLIENT_SECRET as
-# secrets too, since the tunnel hostname accepts only the Worker's Access
-# service token.
+# Prerequisites, per ORIGIN-PROTECTION-DEPLOYMENT.md, in this order:
+#
+#   1. The tunnel must have been applied with
+#      `scripts/cloudflare-tunnel-setup.js --apply`. Until then
+#      origin.djjessejay.ch does not resolve (it did not on 2026-11-02).
+#   2. ORIGIN_ACCESS_CLIENT_ID and ORIGIN_ACCESS_CLIENT_SECRET must be set as
+#      Worker secrets, because the tunnel hostname is publicly resolvable and
+#      accepts only the Worker's Access service token.
+#   3. The Worker must actually FORWARD those two secrets as the
+#      cf-access-client-id / cf-access-client-secret headers on its /api
+#      subrequests.
+#
+# Step 3 DOES NOT EXIST YET. proxyToApiOrigin() in wdjjj.js does not read
+# either secret, so setting them authenticates nothing on its own.
+# ORIGIN-PROTECTION-DEPLOYMENT.md step 3 attributes that forwarding to
+# PR #160, but #160 was closed without merging and carries an unrelated
+# change, so no revision of the Worker has ever sent those headers.
+#
+# The ordering matters and is not cosmetic: applying the service-token-only
+# Access policy while step 3 is missing makes EVERY /api request fail at
+# Access. That turns today's honest 502 ("API origin not configured") into a
+# 403 that looks like a credentials problem rather than a missing code path.
+# Implement the forwarding first, or keep the Access policy unapplied until
+# it exists.
 #
 # `keep_vars = true` would also stop the erasure, but it suppresses it for
 # every var and lets dashboard state drift away from this file. Prefer the
