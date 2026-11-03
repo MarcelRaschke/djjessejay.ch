@@ -70,8 +70,17 @@ jobs:
           rm -rf node_modules
 
       - name: Upload artifact
-        # v4 pins its nested upload-artifact action; v3 violates the SHA policy.
-        # Existing inputs remain valid. v4 also excludes hidden files/directories.
+        # v3 called actions/upload-artifact@v4 unpinned. A nested reference in a
+        # composite action cannot be pinned from here, so it failed this repo's
+        # full-length-SHA policy and every Pages deploy aborted in "Prepare all
+        # required actions". v4.0.0 pins it to
+        # actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 (v4.6.2).
+        #
+        # Not behaviour-neutral: v4.0.0 also tars with --exclude=".[^/]*", so every
+        # dot-path is dropped, and it has no input to turn that off. Verified safe
+        # for this site: no underscore-prefixed paths exist, and no dot-path is
+        # served. If one is ever needed (.well-known/security.txt, an ACME
+        # challenge), move to v5, which adds include-hidden-files.
         uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
         with:
           # Upload minimal, optimized site directory
