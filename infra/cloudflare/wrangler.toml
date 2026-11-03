@@ -67,16 +67,24 @@ ORIGIN_PREFIX = "/djjessejay.ch"
 # honest 502 ("API origin not configured") into a 403 that looks like a
 # credentials problem rather than a missing code path.
 #
-# STEP 3 IS NOT IN THE DEPLOYED WORKER. proxyToApiOrigin() on main reads
-# neither secret, so setting them authenticates nothing today.
+# Step 3 is now IN THE REPOSITORY. proxyToApiOrigin() strips any inbound
+# cf-access-* header and sets cf-access-client-id / cf-access-client-secret
+# from the two secrets; test/wdjjj-api-auth.test.mjs covers it. The code was
+# ported from PR #160 (head a21bb520), which carried it on a branch that was
+# closed without merging.
 #
-# It is, however, already written. ORIGIN-PROTECTION-DEPLOYMENT.md points at
-# PR #160, which was closed WITHOUT merging but does carry the
-# implementation: its head a21bb520 changes wdjjj.js (+58/-4) to strip any
-# inbound cf-access-* headers and set cf-access-client-id /
-# cf-access-client-secret from the two secrets, and adds
-# test/wdjjj-api-auth.test.mjs (+108) covering it. Reviving that branch is
-# the shorter path to step 3 than writing it again.
+# It is in the repository, which is not the same as in the running Worker.
+# wrangler deploy has to succeed for that, and deploy-wdjjj has failed on
+# every run since 2026-10-22 because the CLOUDFLARE_API_TOKEN repo secret is
+# expired (the preflight reports tokenStatus: "expired").
+#
+# The forwarding FAILS CLOSED. Without ORIGIN_ACCESS_CLIENT_ID and
+# ORIGIN_ACCESS_CLIENT_SECRET the Worker answers /api/* with 502
+# "API origin credentials not configured" instead of sending an
+# unauthenticated subrequest. So once this deploys, both secrets must exist
+# or /api/* changes from Access's 403 to that 502. It also refuses any scheme
+# other than https and any host other than origin.<zone>, so a mistyped
+# API_ORIGIN_HOST cannot leak the token elsewhere.
 #
 # API_ORIGIN_HOST itself can be set at any point; it takes effect once
 # origin.djjessejay.ch resolves, which is step 4.
