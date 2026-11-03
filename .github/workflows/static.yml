@@ -76,11 +76,12 @@ jobs:
         # required actions". v4.0.0 pins it to
         # actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 (v4.6.2).
         #
-        # Not behaviour-neutral: v4.0.0 also tars with --exclude=".[^/]*", so every
-        # dot-path is dropped, and it has no input to turn that off. Verified safe
-        # for this site: no underscore-prefixed paths exist, and no dot-path is
-        # served. If one is ever needed (.well-known/security.txt, an ACME
-        # challenge), move to v5, which adds include-hidden-files.
+        # Not behaviour-neutral: v4.0.0 also tars with --exclude=".[^/]*", so no
+        # path beginning with a dot reaches the artifact, and v4.0.0 has no input
+        # to turn that off. Checked before merging: nothing this site serves lives
+        # under a dot-path. Before adding one — .well-known/security.txt, an ACME
+        # challenge — move to v5, which adds include-hidden-files, and set it to
+        # true. Otherwise the deploy drops it silently, with a green run.
         uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
         with:
           # Upload minimal, optimized site directory
