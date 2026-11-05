@@ -2,12 +2,14 @@
 """Draft-only v9 packager. No network, uploads, tags or release mutations."""
 import argparse
 import hashlib
+from html.parser import HTMLParser
 import io
 import json
 from pathlib import Path
 import subprocess
 import tempfile
 import zipfile
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 PAYLOAD = [
@@ -147,7 +149,101 @@ def validate():
         )
         require("NOT READY" in text, "appendix readiness hold missing")
     # Neo4j execution is a separate gate, not claimed by this validator.
+    validate_public(ledger)
     return ledger
+
+
+class PublicAppendix(HTMLParser):
+    """Validate the deployable HTML without executing it."""
+
+    def __init__(self):
+        super().__init__()
+        self.links = []
+        self.rows = []
+        self.row = None
+        self.cell = None
+
+    def handle_starttag(self, tag, attrs):
+        require(tag not in {"script", "style", "iframe"}, "active HTML")
+        for name, value in attrs:
+            require(
+                not name.startswith("on") and name != "style",
+                "inline behavior or style",
+            )
+            if name in {"href", "src"}:
+                require(bool(value), "empty link")
+                self.links.append(value)
+        if tag == "tr":
+            self.row = []
+        if tag == "td":
+            self.cell = ""
+
+    def handle_data(self, data):
+        if self.cell is not None:
+            self.cell += data
+
+    def handle_endtag(self, tag):
+        if tag == "td":
+            self.row.append(self.cell)
+            self.cell = None
+        if tag == "tr":
+            if self.row:
+                self.rows.append(self.row)
+            self.row = None
+
+
+def validate_public(ledger):
+    path = ROOT / "presskit/ARCHIVE_CITATION_APPENDIX.html"
+    parser = PublicAppendix()
+    parser.feed(path.read_text(encoding="utf-8"))
+    rows = {r[0]: r for r in parser.rows}
+    require(
+        set(rows) == {c["id"] for c in ledger["claims"]},
+        "public appendix claim inventory mismatch",
+    )
+    markdown = (ROOT / "presskit/ARCHIVE_CITATION_APPENDIX.md").read_text(
+        encoding="utf-8",
+    )
+    for claim in ledger["claims"]:
+        label = claim["status"] + " / " + claim["sourceClass"]
+        row = rows[claim["id"]]
+        require(row[1] == label, "public appendix status/class drift")
+        require(
+            "human review required" in row[3],
+            "public appendix review hold missing",
+        )
+        require(
+            "| " + claim["id"] + " | " + label + " |" in markdown,
+            "Markdown appendix status/class drift",
+        )
+        require(
+            all(s in row[2] for s in claim["sources"]),
+            "public appendix source mapping drift",
+        )
+    for source in ledger["sources"]:
+        if source["url"]:
+            require(
+                source["url"] in parser.links
+                and source["url"] in markdown,
+                "appendix source URL drift",
+            )
+    for link in parser.links:
+        url = urlsplit(link)
+        if url.scheme:
+            require(url.scheme == "https", "unsafe public link")
+        else:
+            require(not url.netloc, "scheme-relative public link")
+            target = (path.parent / url.path).resolve()
+            require(
+                target.is_relative_to(ROOT) and target.is_file(),
+                "missing or unsafe local appendix target: " + link,
+            )
+    for name in [
+        "website/archive-status.json", "website/provenance.json",
+        "website/schema.org.jsonld",
+    ]:
+        read_json(name)
+    print("PASS: public appendix, source/status parity and JSON targets.")
 
 
 def git(*args):
@@ -244,6 +340,8 @@ def build(output):
         + hashlib.sha256(manifest_bytes).hexdigest() + "  MANIFEST.json\n",
         encoding="utf-8",
     )
+    print("ZIP bytes:", len(data))
+    print("ZIP SHA-256:", hashlib.sha256(data).hexdigest())
     print(
         "PASS: references, status, graph, appendix coverage, deterministic "
         "ZIP, SHA-256, sizes and tamper rejection."
@@ -256,8 +354,10 @@ def build(output):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--check", action="store_true")
-    parser.add_argument("--output", type=Path)
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--check", action="store_true")
+    mode.add_argument("--site-check", action="store_true")
+    mode.add_argument("--output", type=Path)
     parser.add_argument("--rc", action="store_true")
     args = parser.parse_args()
     if args.rc:
@@ -265,13 +365,15 @@ def main():
             "RC publication is held: independent receipts and human release "
             "gates are incomplete. Draft packaging cannot authorize a release."
         )
-    if args.check:
+    if args.site_check:
+        validate()
+    elif args.check:
         with tempfile.TemporaryDirectory(prefix="djjj-v9-check-") as directory:
             build(Path(directory))
     elif args.output:
         build(args.output.resolve())
     else:
-        parser.error("choose --check or --output DIRECTORY")
+        parser.error("choose --check, --site-check or --output DIRECTORY")
 
 
 if __name__ == "__main__":

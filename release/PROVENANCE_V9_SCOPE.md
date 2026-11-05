@@ -19,7 +19,7 @@ Resident Advisor event 896816 was retrieved via search on 2026-11-05 (possibly c
 
 ## Deployment
 
-The current static workflow preserves presskit HTML and website JSON. Root Markdown is removed. The appendix HTML is the public representation; the root Markdown file is a compatibility pointer. Verify the actual built bundle and published content after review/merge, including website/archive-status.json, website/provenance.json and presskit/ARCHIVE_CITATION_APPENDIX.html. A general HTTP 200 is insufficient: compare actual bytes/content and expected v9 markers.
+CI and the static deployment workflow share scripts/prepare-pages-content.sh. The CI bundle job builds CSS, applies the actual Pages cleanup and checks the retained public appendix, JSON targets, and source/status parity. The deployment workflow repeats this check immediately before upload. Root Markdown is removed. The appendix HTML is the public representation; the root Markdown file is a compatibility pointer. Verify the actual built bundle and published content after review/merge, including website/archive-status.json, website/provenance.json and presskit/ARCHIVE_CITATION_APPENDIX.html. A general HTTP 200 is insufficient: compare actual bytes/content and expected v9 markers.
 
 Main already contains the upload-pages-artifact v4 SHA fix; do not reopen closed #229. PR #213 was closed at maintainer request; this PR imports candidate provenance only, not its player/navigation UI changes.
 
@@ -40,4 +40,4 @@ Main already contains the upload-pages-artifact v4 SHA fix; do not reopen closed
 5. Verify candidate files in the deployed bundle and public endpoints; record actual deployed commit.
 6. Build clean committed payload, independently verify ZIP manifest and checksum, review release readiness, then create the exact tag and attach assets.
 
-Rollback: revert this PR; no routing, credentials, policy gates or deployments are modified.
+Rollback: revert this PR. Deployment checks are added; routing, credentials and existing policy gates are unchanged. No live deployment is performed by this PR.
