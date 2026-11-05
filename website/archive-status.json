@@ -1,0 +1,197 @@
+{
+  "schemaVersion": "1.0.0",
+  "releaseTarget": "v9",
+  "tag": "v9public-provenance-rc",
+  "assessedAt": "2026-11-05",
+  "baselineCommit": "420614ddd6b79896a35196026f96620b1c906caa",
+  "readiness": "NOT_READY",
+  "ledger": "provenance.json",
+  "appendix": "../presskit/ARCHIVE_CITATION_APPENDIX.html",
+  "claimCount": 15,
+  "verifiedArchiveReceiptCount": 0,
+  "archiveReceipts": [],
+  "claims": [
+    {
+      "id": "claim:artist-name",
+      "status": "supported",
+      "review_state": "human_review_required",
+      "sources": [
+        "repo:index.html",
+        "repo:CLAUDE.md",
+        "soundcloud:jessejay"
+      ],
+      "sourceResolution": "resolved",
+      "archiveStatus": "MISSING"
+    },
+    {
+      "id": "claim:civil-name",
+      "status": "supported",
+      "review_state": "human_review_required",
+      "sources": [
+        "repo:index.html",
+        "repo:CLAUDE.md",
+        "repo:canonical-profile"
+      ],
+      "sourceResolution": "resolved",
+      "archiveStatus": "MISSING"
+    },
+    {
+      "id": "claim:location",
+      "status": "supported",
+      "review_state": "human_review_required",
+      "sources": [
+        "repo:index.html",
+        "soundcloud:jessejay"
+      ],
+      "sourceResolution": "resolved",
+      "archiveStatus": "MISSING"
+    },
+    {
+      "id": "claim:active-since",
+      "status": "supported",
+      "review_state": "human_review_required",
+      "sources": [
+        "repo:index.html",
+        "soundcloud:jessejay",
+        "repo:canonical-profile"
+      ],
+      "sourceResolution": "resolved",
+      "archiveStatus": "MISSING"
+    },
+    {
+      "id": "claim:radio-association",
+      "status": "supported",
+      "review_state": "human_review_required",
+      "sources": [
+        "repo:index.html",
+        "soundcloud:jessejay",
+        "soundcloud:blue-dimension-2026",
+        "repo:canonical-profile"
+      ],
+      "sourceResolution": "partial",
+      "archiveStatus": "MISSING"
+    },
+    {
+      "id": "claim:galaxy-space-night",
+      "status": "supported",
+      "review_state": "human_review_required",
+      "sources": [
+        "soundcloud:galaxy-space-night",
+        "residentadvisor:event-896816"
+      ],
+      "sourceResolution": "partial",
+      "archiveStatus": "MISSING"
+    },
+    {
+      "id": "claim:blue-dimension",
+      "status": "supported",
+      "review_state": "human_review_required",
+      "sources": [
+        "repo:index.html",
+        "soundcloud:blue-dimension-2026",
+        "repo:canonical-profile"
+      ],
+      "sourceResolution": "partial",
+      "archiveStatus": "MISSING"
+    },
+    {
+      "id": "claim:radio-since-2001",
+      "status": "probable",
+      "review_state": "human_review_required",
+      "sources": [
+        "repo:historical-biography",
+        "soundcloud:jessejay",
+        "repo:canonical-profile"
+      ],
+      "sourceResolution": "partial",
+      "archiveStatus": "MISSING"
+    },
+    {
+      "id": "claim:current-radio-schedule",
+      "status": "unreviewed",
+      "review_state": "human_review_required",
+      "sources": [
+        "radio-lora:blue-dimension-url-404-2026-08-09"
+      ],
+      "sourceResolution": "partial",
+      "archiveStatus": "MISSING"
+    },
+    {
+      "id": "claim:identity-positioning",
+      "status": "supported",
+      "review_state": "human_review_required",
+      "sources": [
+        "repo:AGENTS.md",
+        "repo:docs/GOVERNANCE.md",
+        "repo:website/provenance.json"
+      ],
+      "sourceResolution": "resolved",
+      "archiveStatus": "MISSING"
+    },
+    {
+      "id": "claim:identity-line",
+      "status": "supported",
+      "review_state": "human_review_required",
+      "sources": [
+        "repo:AGENTS.md",
+        "repo:docs/GOVERNANCE.md",
+        "repo:website/provenance.json"
+      ],
+      "sourceResolution": "resolved",
+      "archiveStatus": "MISSING"
+    },
+    {
+      "id": "claim:extended-identity-line",
+      "status": "supported",
+      "review_state": "human_review_required",
+      "sources": [
+        "repo:AGENTS.md",
+        "repo:docs/GOVERNANCE.md",
+        "repo:website/provenance.json"
+      ],
+      "sourceResolution": "resolved",
+      "archiveStatus": "MISSING"
+    },
+    {
+      "id": "claim:blue-dimension-playlist-2025",
+      "status": "unreviewed",
+      "review_state": "human_review_required",
+      "sources": [
+        "source:blue-dimension-playlist-2025"
+      ],
+      "sourceResolution": "resolved",
+      "archiveStatus": "MISSING"
+    },
+    {
+      "id": "claim:schlaflos-live-recording-2018",
+      "status": "unreviewed",
+      "review_state": "human_review_required",
+      "sources": [
+        "source:schlaflos-live-recording-2018"
+      ],
+      "sourceResolution": "resolved",
+      "archiveStatus": "MISSING"
+    },
+    {
+      "id": "claim:blue-dimension-space-night-2026",
+      "status": "unreviewed",
+      "review_state": "human_review_required",
+      "sources": [
+        "source:blue-dimension-space-night-2026"
+      ],
+      "sourceResolution": "resolved",
+      "archiveStatus": "MISSING"
+    }
+  ],
+  "blockers": [
+    "No independently verified archive captures",
+    "Unresolved historical source references",
+    "Human evidence/CODEOWNERS review pending",
+    "Candidate v9 publication and end-to-end content verification pending",
+    "Release ZIP and manifest require packaging and independent checksum verification"
+  ],
+  "limitations": [
+    "This is a preparation snapshot; current live deployment does not prove these candidate files are published.",
+    "Zero verified receipts in this ledger is not proof that no public captures exist."
+  ]
+}
