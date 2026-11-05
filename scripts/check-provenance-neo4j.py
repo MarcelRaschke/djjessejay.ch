@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import secrets
 import subprocess
+import tempfile
 import time
 import uuid
 
@@ -53,7 +54,8 @@ def main():
     try:
         run([
             "docker", "run", "--detach", "--name", name,
-            "--network", "none", "--memory", "2g", "--cpus", "2",
+            "--network", "none", "--hostname", "localhost",
+            "--memory", "2g", "--cpus", "2",
             "--env", "NEO4J_AUTH",
             "--env", "NEO4J_server_memory_heap_initial__size=256m",
             "--env", "NEO4J_server_memory_heap_max__size=512m",
@@ -124,6 +126,19 @@ def main():
             capture_output=True, text=True, check=False,
         )
         print((logs.stdout + logs.stderr).replace(password, "[REDACTED]"))
+        print(run([
+            "docker", "inspect", "--format",
+            "{{json .State}}", name,
+        ]).replace(password, "[REDACTED]"))
+        with tempfile.TemporaryDirectory(prefix="v9-neo4j-log-") as directory:
+            subprocess.run(
+                ["docker", "cp", name + ":/logs", directory],
+                capture_output=True, check=False,
+            )
+            debug = Path(directory) / "logs/debug.log"
+            if debug.is_file():
+                tail = debug.read_text(encoding="utf-8").splitlines()[-100:]
+                print("\n".join(tail).replace(password, "[REDACTED]"))
         raise
     finally:
         subprocess.run(
