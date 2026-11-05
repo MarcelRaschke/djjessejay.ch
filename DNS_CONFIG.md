@@ -2,70 +2,84 @@
 
 This document contains the authoritative DNS zone configuration for the djjessejay.ch domain, configured for **Hybrid deployment: GitHub Pages (static) + Custom Server (API/WebSocket) via Cloudflare Worker routing**.
 
-## Live drift — OPEN (verified 2026-10-16)
+## Live drift — RESTORED at the apex (verified 2026-11-05)
 
-The records and routes documented below describe the TARGET state. They are not
-what the edge is serving right now. Read this section before trusting anything
-further down, and before changing site code to work around a symptom.
+The apex outage first recorded here on 2026-10-16 is over. The records and
+routes documented below again describe what the edge serves for static content.
+Two things are still open and are listed at the end of this section.
 
-### Observed
+### What was wrong, and what fixed it
 
-| Probe | Expected | Observed 2026-10-16 05:31 UTC |
+| Phase | Symptom | Cause | Resolved |
+| --- | --- | --- | --- |
+| 2026-10-16 to 2026-11-02 | apex `522`, no `x-proxy` header | Worker routes not bound; the token lacked `Zone > Workers Routes > Edit` | routes are bound — the apex now answers 200 and carries `x-proxy: wdjjj` |
+| 2026-11-02 to 2026-11-05 | apex `301` to `http://origin.djjessejay.ch/`, then `403` | the repository's GitHub Pages **Custom domain** field was set to `origin.djjessejay.ch` | field cleared |
+
+The second phase is the one worth remembering, because every component was
+healthy throughout it. `marcelraschke.github.io/djjessejay.ch/` answered `301`
+with `location: http://origin.djjessejay.ch/`; the Worker relayed that Location
+unchanged, which is what `rewriteLocation()` does by design once the upstream
+hostname is not the origin host. `/__wdjjj/health` stayed green the whole time.
+So a green Worker health endpoint does not mean the site is being served, and
+an apex redirect to an unexpected host is worth checking against Settings >
+Pages before anything in `infra/cloudflare/`.
+
+A deploy cannot fix it either: a `Build & Deploy` run on 2026-11-05 02:09 UTC
+finished `success` and the redirect survived it. With `actions/deploy-pages` the
+Custom domain lives in the repository settings, not in the published artifact, so
+an artifact without a `CNAME` file neither sets nor clears it. The mechanism by
+which a missing `CNAME` drops the domain applies to the branch-based publishing
+source, not to this one.
+
+### Verified 2026-11-05 03:20 UTC
+
+| Probe | Expected | Observed |
 | --- | --- | --- |
-| `https://djjessejay.ch/` | 200 from GitHub Pages via Worker | **522**, `cf-ray` present, no `x-proxy` header |
-| `https://djjessejay.ch/DJ-Jesse-Jay.jpg` | 200 | **522** |
-| `https://djjessejay.ch/__wdjjj/health` | `{"ok":true,"proxy":"wdjjj"}` | unreachable |
-| `https://www.djjessejay.ch/` | 301 to apex | 301 to apex (working) |
-| `https://marcelraschke.github.io/djjessejay.ch/` | 200 | 200, `server: GitHub.com` |
+| `https://djjessejay.ch/` | 200 via Worker | 200, `x-proxy: wdjjj`, `server: cloudflare` |
+| `https://djjessejay.ch/index.html` | 200 | 200 |
+| `https://djjessejay.ch/favicon.svg` | 200 | 200 |
+| `https://djjessejay.ch/assets/j-main-seal.svg` | 200 | 200 |
+| `https://djjessejay.ch/__wdjjj/health` | `{"ok":true,"proxy":"wdjjj"}` | `{"ok":true,"proxy":"wdjjj","origin":"marcelraschke.github.io","originPrefix":"/djjessejay.ch","version":"2026-09"}` |
+| `https://www.djjessejay.ch/` | 301 to apex | 301 to apex, then 200 |
+| `https://marcelraschke.github.io/djjessejay.ch/` | 200 | 200 |
+| apex resolution | proxied by Cloudflare | 104.21.53.115, 172.67.212.61 |
 
-### Cause 1 — Worker route is not bound
+The apex resolving to Cloudflare addresses confirms the record is proxied. Whether
+it is a single CNAME with no A or AAAA record alongside it cannot be read from
+outside the account; confirm that in DNS > Records when convenient.
 
-`wdjjj` exists in the account and its code is current (`modified_on`
-2026-10-15T21:19:33Z), but it has no route attached. Every `deploy-wdjjj` run
-since 2026-10-12 uploads the script and then fails at trigger configuration with
-`No access to the specified resource` on `/workers/scripts/wdjjj/routes`, leaving
-`No targets deployed for wdjjj`.
+### Why CI did not catch the first outage, and did catch the second
 
-The missing credential is a ZONE permission, `Zone > Workers Routes > Edit`,
-scoped to the djjessejay.ch zone — not an account permission. See the extended
-note in `.github/workflows/deploy-wdjjj.yml`.
-
-Diagnostic shortcut: the Worker stamps every response with `x-proxy: wdjjj`. If a
-response from the apex lacks that header, the Worker did not run at all, and the
-problem is the route binding rather than the Worker code.
-
-### Cause 2 — Apex record has not been migrated
-
-The apex is documented below as a proxied CNAME to `marcelraschke.github.io`. The
-live behaviour contradicts that: GitHub Pages answers normally, so a proxied
-record pointing at it could at worst produce a GitHub 404, never a 522. HTTP 522
-is a connection timeout between Cloudflare and the origin, so the apex is still
-resolving to the unreachable Express host (`ORIGIN_IP`) rather than to GitHub
-Pages. A TLS problem would surface as 525/526, not 522, so Full (Strict) is not
-the cause.
-
-Confirm in the Cloudflare dashboard under DNS > Records: the apex should be a
-single proxied CNAME to `marcelraschke.github.io`, with no A or AAAA record
-alongside it.
-
-### Why CI did not catch this
-
-`live-site-smoke.yml` previously skipped all live assertions whenever the health
-endpoint was unreachable, so the workflow reported success throughout the outage
+`live-site-smoke.yml` used to skip every live assertion whenever the health
+endpoint was unreachable, so it reported success throughout the 2026-10 outage
 (for example the run on 2026-10-16 at 02:15 UTC, with the apex returning 522).
-That gate now fails unless an explicit, dated acknowledgement is set; see
-`LIVE_EDGE_OUTAGE_ACK_UNTIL` in that workflow.
+Since that gate was rebuilt, an outage must be fixed or acknowledged with a dated
+expiry.
 
-### Exit criteria
+It then did its job twice over. The scheduled runs failed every day from
+2026-10-22 to 2026-11-01, turned green by themselves on 2026-11-02 06:49 UTC when
+the routes came up, and failed again on 2026-11-03 and 2026-11-04 at 06:42 UTC —
+both times at `Apex returns a successful response`, with `Outage readiness gate`
+and `Health endpoint` passing first. That step order is what separated "Worker
+dead" from "Worker alive, site not served".
 
-1. `Zone > Workers Routes > Edit` added to `CLOUDFLARE_API_TOKEN`, or the two
-   routes bound once by hand in Workers & Pages > wdjjj > Settings >
-   Domains & Routes.
-2. Apex is a single proxied CNAME to `marcelraschke.github.io`, no A/AAAA.
-3. `deploy-wdjjj` green, including its own apex, header and POST assertions.
-4. `curl -sI https://djjessejay.ch/` returns 200 and carries `x-proxy: wdjjj`.
-5. `LIVE_EDGE_OUTAGE_ACK_UNTIL` removed from the repository variables.
-6. This section replaced by a dated note recording the restore.
+### Still open
+
+1. `deploy-wdjjj` is red on every run since 2026-10-22. The preflight reports
+   `tokenStatus: "expired"`, `writePermissionVerified: false` — the
+   `CLOUDFLARE_API_TOKEN` repository secret has expired. Until it is replaced the
+   Worker cannot be deployed at all, so no change under `infra/cloudflare/` can
+   reach production. Token requirements are in
+   `.github/workflows/deploy-wdjjj.yml` and `ORIGIN-PROTECTION-DEPLOYMENT.md`;
+   `-f diagnose_only=true` verifies a new token without uploading anything.
+2. The repository variable `LIVE_EDGE_OUTAGE_ACK_UNTIL` may still be set. It only
+   takes effect while the health endpoint is unreachable, but it then keeps the
+   next outage green up to its expiry date, so it should be deleted now that the
+   edge is restored (Settings > Secrets and variables > Actions > Variables).
+3. `/api/*` answers `403` with Cloudflare Access's error page. The tunnel is up
+   and `API_ORIGIN_HOST` is set, but the deployed Worker sends no Access service
+   token, so Access rejects the subrequest. See the ordered prerequisites in
+   `infra/cloudflare/wrangler.toml`.
 
 ## Domain Overview
 
