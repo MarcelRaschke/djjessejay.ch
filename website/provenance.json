@@ -545,9 +545,7 @@
       "id": "claim:blue-dimension-playlist-2025",
       "subject": "artist:dj-jesse-jay",
       "predicate": "PUBLISHED_PLAYLIST",
-      "value": {
-        "title": "Jesse Jay & Juicy J @ Blue Dimension Radio LoRa 97,5"
-      },
+      "value": "Jesse Jay & Juicy J @ Blue Dimension Radio LoRa 97,5",
       "valid_time": {
         "start": "2025-09-02",
         "end": null,
@@ -572,9 +570,7 @@
       "id": "claim:schlaflos-live-recording-2018",
       "subject": "artist:dj-jesse-jay",
       "predicate": "PUBLISHED_LIVE_SET",
-      "value": {
-        "title": "Jesse Jay im Club-Schlaflos 16.11.2018"
-      },
+      "value": "Jesse Jay im Club-Schlaflos 16.11.2018",
       "valid_time": {
         "start": "2018-11-16",
         "end": null,
@@ -599,9 +595,7 @@
       "id": "claim:blue-dimension-space-night-2026",
       "subject": "artist:dj-jesse-jay",
       "predicate": "PUBLISHED_SET",
-      "value": {
-        "title": "Blue Dimension - Space Night 26.03.26, Jesse Jay all night long"
-      },
+      "value": "Blue Dimension - Space Night 26.03.26, Jesse Jay all night long",
       "valid_time": {
         "start": "2026-03-26",
         "end": null,
