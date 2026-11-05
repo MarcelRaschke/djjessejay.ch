@@ -129,6 +129,24 @@ jobs:
         with:
           node-version: '24'
 
+      # Beide Schritte liefen vor der Aufteilung in diesem Job vor dem Upload und
+      # muessen das weiter tun. Sie brauchen kein Credential und keinen
+      # erreichbaren Edge, haengen also NICHT am `verify`-Job — ein laufender
+      # Ausfall darf eine Notfall-Wiederherstellung nicht blockieren.
+      #
+      # Was sie verhindern: `node --check` einen syntaktisch kaputten Upload, und
+      # der Test "active Worker name still matches the checked target" einen
+      # Upload unter anderem Namen. Der Preflight prueft Zugriff auf das
+      # hartkodierte wdjjj; steht in wrangler.toml ein anderer `name`, deployt
+      # Wrangler an einem anderen Ziel, und die Live-Assertions koennen das nicht
+      # sehen. Ohne diese Schritte waere das ein Umgehen der Pruefung im Sinne
+      # von AGENTS.md ("Disable or bypass CI").
+      - name: Test deployment preflight
+        run: node --test test/cloudflare-deploy-preflight.test.mjs
+
+      - name: Validate Worker syntax
+        run: node --check infra/cloudflare/wdjjj.js
+
       - name: Verify Cloudflare token and target Worker access
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
