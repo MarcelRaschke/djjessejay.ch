@@ -13,15 +13,23 @@
   instead of rescaling this file. Consumers that need the clear space keep
   referencing this file as an image (see css/hero-animation.css).
 
-  Do not re-letter the mark with live text: the second glyph is a bespoke
-  outline, not a rotated or mirrored font glyph, and no typeface reproduces it.
+  The second glyph is the FIRST ONE ROTATED 180 degrees about the centre dot
+  at (500, 210), which is the exact centre of the canvas. That is what makes
+  the dot the mark's pivot. Derive it as (x, y) -> (1000 - x, 420 - y); do not
+  redraw it by hand and do not substitute a horizontal mirror, which is a
+  different shape.
+
+  Do not re-letter the mark with live text either. It has been written as
+  "J<bullet>U+0550" (Armenian capital reh) because that letter approximates the
+  rotated J, but systems without Armenian coverage render a replacement box,
+  and the letterform is only an approximation of the real geometry.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 420" role="img" aria-labelledby="jjs-title jjs-desc">
 <title id="jjs-title">DJ Jesse Jay — J·J main seal</title>
-<desc id="jjs-desc">Golden yellow geometric J, a central dot, and the mirrored counter-J, drawn as vector outlines on a transparent background.</desc>
+<desc id="jjs-desc">Golden yellow geometric J, a central dot acting as pivot, and the same J rotated 180 degrees about that dot, drawn as vector outlines on a transparent background.</desc>
 <g fill="#FFD400">
   <path d="M90 250h105v55c0 31 17 46 47 46 31 0 47-17 47-49V55h105v251c0 72-48 114-150 114-99 0-154-42-154-125v-45z"/>
   <circle cx="500" cy="210" r="48"/>
-  <path d="M910 55H735c-83 0-137 49-137 125 0 76 54 125 137 125h70v-94h-70c-27 0-43-12-43-31 0-20 16-32 43-32h175V55z"/>
+  <path d="M910 170L805 170L805 115C805 84 788 69 758 69C727 69 711 86 711 118L711 365L606 365L606 114C606 42 654 0 756 0C855 0 910 42 910 125L910 170Z"/>
 </g>
 </svg>
