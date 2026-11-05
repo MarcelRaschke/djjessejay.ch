@@ -39,7 +39,8 @@ def main():
     ])
     command = [
         "docker", "exec", "-i", "--env", "NEO4J_PASSWORD", name,
-        "cypher-shell", "-u", "neo4j", "-d", "neo4j",
+        "cypher-shell", "-a", "bolt://localhost:7687",
+        "-u", "neo4j", "-d", "neo4j",
         "--format", "plain", "--non-interactive",
     ]
 
@@ -64,9 +65,17 @@ def main():
             try:
                 query("RETURN 1 AS ready;")
                 break
-            except subprocess.CalledProcessError:
-                if time.monotonic() > deadline:
-                    raise RuntimeError("Neo4j startup timed out")
+            except subprocess.CalledProcessError as error:
+                running = run([
+                    "docker", "inspect", "--format",
+                    "{{.State.Running}}", name,
+                ])
+                if running != "true" or time.monotonic() > deadline:
+                    raise RuntimeError(
+                        "Neo4j unavailable: " + error.stderr.replace(
+                            password, "[REDACTED]",
+                        )
+                    ) from None
                 time.sleep(3)
         empty = rows("MATCH (n) RETURN count(n) AS nodes;")
         if empty != [{"nodes": "0"}]:
@@ -109,6 +118,13 @@ def main():
             "cypherSha256": hashlib.sha256(cypher.encode()).hexdigest(),
             "notIndependentEvidence": True,
         }, indent=2))
+    except Exception:
+        logs = subprocess.run(
+            ["docker", "logs", "--tail", "80", name],
+            capture_output=True, text=True, check=False,
+        )
+        print((logs.stdout + logs.stderr).replace(password, "[REDACTED]"))
+        raise
     finally:
         subprocess.run(
             ["docker", "rm", "--force", name],
