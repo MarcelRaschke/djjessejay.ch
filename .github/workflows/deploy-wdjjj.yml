@@ -97,48 +97,9 @@ jobs:
       - name: Validate Worker syntax
         run: node --check infra/cloudflare/wdjjj.js
 
-      - name: Verify Worker health
+      - name: Verify live edge
         if: inputs.diagnose_only != true
-        run: |
-          set -euo pipefail
-          for attempt in 1 2 3 4 5 6; do
-            body="$(curl -fsS -A "wdjjj-healthcheck/1.0 (+https://github.com/MarcelRaschke/djjessejay.ch ci smoke test)" https://djjessejay.ch/__wdjjj/health)" && {
-              echo "$body"
-              echo "$body" | grep -q '"ok":true'
-              echo "$body" | grep -q '"proxy":"wdjjj"'
-              exit 0
-            }
-            sleep 10
-          done
-          echo "Cloudflare Worker health check failed" >&2
-          exit 1
-
-      - name: Verify apex
-        if: inputs.diagnose_only != true
-        run: |
-          set -euo pipefail
-          code="$(curl -sS -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36" -L --retry 5 --retry-delay 3 -o /dev/null -w '%{http_code}' https://djjessejay.ch/)"
-          echo "Apex HTTP status: $code"
-          test "$code" = "200"
-
-      - name: Verify security headers
-        if: inputs.diagnose_only != true
-        run: |
-          set -euo pipefail
-          headers="$(curl -sS -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36" --retry 5 --retry-delay 3 -D - -o /dev/null https://djjessejay.ch/)"
-          echo "$headers"
-          echo "$headers" | grep -qi '^strict-transport-security:'
-          echo "$headers" | grep -qi '^content-security-policy:'
-          echo "$headers" | grep -qi '^x-content-type-options: nosniff'
-          echo "$headers" | grep -qi '^referrer-policy:'
-
-      - name: Verify POST rejection
-        if: inputs.diagnose_only != true
-        run: |
-          set -euo pipefail
-          code="$(curl -sS -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36" --retry 5 --retry-delay 3 -o /dev/null -w '%{http_code}' -X POST https://djjessejay.ch/)"
-          echo "POST HTTP status: $code"
-          test "$code" = "405"
+        run: ./scripts/verify-live-edge.sh
 
       - name: Note the deploy path
         if: always()
@@ -193,3 +154,12 @@ jobs:
           wranglerVersion: "4.145.0"
           workingDirectory: infra/cloudflare
           command: deploy
+
+      # Muss NACH dem Upload laufen, und zwar in diesem Job. Die beiden Jobs
+      # sind nebenläufig, der `verify`-Job prüft also womöglich noch den
+      # vorherigen Worker. Ohne diesen Schritt könnte ein Notfall-Deploy einen
+      # kaputten Worker hochladen und trotzdem grün melden — das wäre ein
+      # Umgehen der Prüfung im Sinne von AGENTS.md ("Disable or bypass CI").
+      - name: Verify live edge after upload
+        if: inputs.diagnose_only != true
+        run: ./scripts/verify-live-edge.sh
