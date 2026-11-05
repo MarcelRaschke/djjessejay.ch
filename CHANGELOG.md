@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Provenance
+- Prepare v9 source registry, honest archive-status JSON, aligned citation appendix with public HTML, and derived assertion graph. Add draft-only packaging with ZIP hash/size verification; independent archive receipts and human review remain pending.
+
 ### Changed
 - Bot-Schutz des Kontaktformulars von Google reCAPTCHA v3 auf Cloudflare Turnstile umgestellt (`lib/turnstile.js`, `TURNSTILE_SECRET_KEY`, Repository-Variable `TURNSTILE_SITE_KEY`). Prüfung fail closed inklusive Hostname und Action; keine Google-Cookies mehr.
 - `/api/contact` schreibt Name und E-Mail nicht mehr ins Erfolgs-Log.
