@@ -1,3 +1,38 @@
+# wdjjj — Verifikation der Live-Lage, und ein Deploy-Pfad auf Anforderung.
+#
+# Dieser Workflow deployt auf Push nicht mehr. Der reguläre Deploy soll bei
+# Cloudflare über Workers Builds laufen: die GitHub-App "Cloudflare Workers and
+# Pages" ist auf dem Repository installiert, Cloudflare deployt bei jedem Push
+# auf main selbst. Dann liegt kein Cloudflare-Credential in GitHub, das ablaufen
+# kann — die Vertrauensrichtung ist umgedreht, Cloudflare hält eine
+# GitHub-Verbindung statt GitHub ein Cloudflare-Geheimnis.
+#
+# NOCH NICHT WIRKSAM. Workers Builds für wdjjj existiert, scheitert aber seit
+# 2026-10-13 an seinem Build-Kommando. Bis die drei Felder unten einmal im
+# Dashboard korrigiert sind, deployt den Worker nichts automatisch — weder
+# dieser Workflow noch Workers Builds. Bis dahin bleibt der Notfallpfad
+# (deploy_with_token=true) der einzige Weg, und er braucht ein gültiges Token.
+#
+# Warum überhaupt: ein handgemachtes API-Token mit TTL hat den Deploy vom
+# 2026-10-22 bis mindestens 2026-11-05 blockiert (`tokenStatus: "expired"`),
+# und das war der zweite Ausfall dieser Art. Siehe
+# docs/CLOUDFLARE-DEPLOY-RECOVERY.md und DNS_CONFIG.md.
+#
+# Was Workers Builds braucht (einmalig im Dashboard, Workers & Pages > wdjjj >
+# Settings > Build):
+#   Root directory   infra/cloudflare
+#   Build command    (leer)
+#   Deploy command   npx wrangler deploy
+# Das Deploy-Kommando ruft Wrangler, also bleibt infra/cloudflare/wrangler.toml
+# die Quelle der Konfiguration; die Dashboard-Einstellung liefert nur den
+# Auslöser. Vor dieser Korrektur stand dort `gobuild`, ein Kommando, das nicht
+# existiert, weshalb jeder Lauf seit 2026-10-13 abbrach.
+#
+# Grenze dieses Workflows, ausdrücklich: der `verify`-Job prüft die LIVE-Lage,
+# er sperrt keinen Deploy ab. Bei einem Push laufen Workers Builds und dieser
+# Workflow nebeneinander, die Assertions können also noch den vorherigen Worker
+# treffen. Der Dauerzustand wird vom täglichen Live Site Smoke geprüft.
+
 name: Deploy wdjjj
 
 on:
@@ -10,12 +45,16 @@ on:
       - "test/cloudflare-deploy-preflight.test.mjs"
   workflow_dispatch:
     inputs:
+      deploy_with_token:
+        description: 'Zusätzlich über das CLOUDFLARE_API_TOKEN deployen (Notfallpfad; regulär deployt Workers Builds)'
+        type: boolean
+        default: false
       diagnose_only:
-        description: 'Verify Cloudflare authentication and Worker read access without deploying'
+        description: 'Nur Cloudflare-Authentisierung und Worker-Lesezugriff prüfen, nicht deployen'
         type: boolean
         default: false
       token_kind:
-        description: 'Cloudflare API token kind (auto tries user then account verification)'
+        description: 'Art des Cloudflare-API-Tokens (auto prüft user, dann account)'
         type: choice
         options: [auto, user, account]
         default: auto
@@ -34,8 +73,11 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    name: Deploy Cloudflare Worker
+  # Braucht kein Credential. Deshalb kann dieser Job nicht an einem abgelaufenen
+  # Token scheitern, und ein rotes Ergebnis hier bedeutet wirklich, dass am Edge
+  # etwas nicht stimmt.
+  verify:
+    name: Verify Worker syntax and live edge
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -54,35 +96,6 @@ jobs:
 
       - name: Validate Worker syntax
         run: node --check infra/cloudflare/wdjjj.js
-
-      - name: Verify Cloudflare token and target Worker access
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || env.CLOUDFLARE_ACCOUNT_ID_PUBLIC }}
-          CLOUDFLARE_TOKEN_KIND: ${{ inputs.token_kind || vars.CLOUDFLARE_TOKEN_KIND || 'auto' }}
-          CF_WORKER_NAME: wdjjj
-        run: node scripts/cloudflare-deploy-preflight.mjs
-
-      - name: Record diagnostic-only completion
-        if: inputs.diagnose_only == true
-        run: echo 'Diagnostic-only run; no Worker upload or route change requested.' >> "$GITHUB_STEP_SUMMARY"
-
-      # The 2026-10-17 run 39072704053 failed at Worker service authentication
-      # (10000), before a successful upload or route change was recorded.
-      # Earlier runs also failed to bind routes. These are distinct failure
-      # stages: a missing x-proxy header alone does not establish route state.
-      # The preflight above verifies token status and target read access only.
-      # Deployment still needs edit access to wdjjj and Zone > Workers Routes
-      # Write for affected route changes. See docs/CLOUDFLARE-DEPLOY-RECOVERY.md.
-      - name: Deploy wdjjj
-        if: inputs.diagnose_only != true
-        uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || env.CLOUDFLARE_ACCOUNT_ID_PUBLIC }}
-          wranglerVersion: "4.145.0"
-          workingDirectory: infra/cloudflare
-          command: deploy
 
       - name: Verify Worker health
         if: inputs.diagnose_only != true
@@ -126,3 +139,57 @@ jobs:
           code="$(curl -sS -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36" --retry 5 --retry-delay 3 -o /dev/null -w '%{http_code}' -X POST https://djjessejay.ch/)"
           echo "POST HTTP status: $code"
           test "$code" = "405"
+
+      - name: Note the deploy path
+        if: always()
+        run: |
+          {
+            echo '### Deploy-Pfad'
+            echo
+            echo 'Dieser Job deployt nicht. Der reguläre Deploy läuft bei Cloudflare über Workers Builds.'
+            echo 'Ein grünes Ergebnis hier heisst: der Edge antwortet korrekt — nicht, dass gerade deployt wurde.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # Notfallpfad. Läuft nur auf ausdrückliche Anforderung, nie auf Push, damit ein
+  # abgelaufenes Token nicht länger jeden Commit rot färbt.
+  deploy-with-token:
+    name: Deploy via CLOUDFLARE_API_TOKEN (on request)
+    if: github.event_name == 'workflow_dispatch' && (inputs.deploy_with_token == true || inputs.diagnose_only == true)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+
+      - name: Verify Cloudflare token and target Worker access
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || env.CLOUDFLARE_ACCOUNT_ID_PUBLIC }}
+          CLOUDFLARE_TOKEN_KIND: ${{ inputs.token_kind || vars.CLOUDFLARE_TOKEN_KIND || 'auto' }}
+          CF_WORKER_NAME: wdjjj
+        run: node scripts/cloudflare-deploy-preflight.mjs
+
+      - name: Record diagnostic-only completion
+        if: inputs.diagnose_only == true
+        run: echo 'Diagnostic-only run; no Worker upload or route change requested.' >> "$GITHUB_STEP_SUMMARY"
+
+      # Die Berechtigungen bleiben dieselben wie bisher: Edit-Zugriff auf wdjjj
+      # und Zone > Workers Routes > Edit für Routenänderungen. Der Preflight oben
+      # prüft nur Tokenstatus und Lesezugriff; ein Deploy kann danach noch an
+      # fehlenden Schreibrechten scheitern.
+      - name: Deploy wdjjj
+        if: inputs.diagnose_only != true
+        uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || env.CLOUDFLARE_ACCOUNT_ID_PUBLIC }}
+          wranglerVersion: "4.145.0"
+          workingDirectory: infra/cloudflare
+          command: deploy
