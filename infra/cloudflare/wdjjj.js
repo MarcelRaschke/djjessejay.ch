@@ -108,13 +108,19 @@ function withSecurityHeaders(response, upstream, originHost, originPrefix) {
   return new Response(upstream.body, { status: upstream.status, headers });
 }
 
+// The service token may only be sent to this host (fail closed on any other value).
+const API_ORIGIN_HOST_ALLOWED = `origin.${CANONICAL_HOST}`;
+
 function proxyToApiOrigin(request, url, apiOriginHost, env) {
   const apiScheme = (env && env.API_ORIGIN_SCHEME) || "https";
   const apiOriginPort = (env && env.API_ORIGIN_PORT) || "";
   const target = new URL(`${apiScheme}://${apiOriginHost}${apiOriginPort ? ":" + apiOriginPort : ""}${url.pathname}${url.search}`);
   const headers = new Headers(request.headers);
   headers.set("host", apiOriginHost);
-  headers.delete("cf-");
+  // Never forward client-supplied Access credentials; only the Worker's own service token.
+  for (const name of ["cf-access-client-id", "cf-access-client-secret", "cf-access-jwt-assertion", "cf-access-token"]) headers.delete(name);
+  headers.set("cf-access-client-id", env.ORIGIN_ACCESS_CLIENT_ID);
+  headers.set("cf-access-client-secret", env.ORIGIN_ACCESS_CLIENT_SECRET);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
   return fetch(target.toString(), {
@@ -166,6 +172,16 @@ export default {
     if (isApiPath) {
       if (!apiOriginHost) {
         return new Response("API origin not configured", { status: 502, headers: { ...OWN_HEADERS, "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
+      }
+      // Fail closed: without the service token the origin's Access app rejects the request anyway.
+      if (!env.ORIGIN_ACCESS_CLIENT_ID || !env.ORIGIN_ACCESS_CLIENT_SECRET) {
+        return new Response("API origin credentials not configured", { status: 502, headers: { ...OWN_HEADERS, "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
+      }
+      if ((env.API_ORIGIN_SCHEME || "https") !== "https") {
+        return new Response("API origin must use https", { status: 502, headers: { ...OWN_HEADERS, "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
+      }
+      if (String(apiOriginHost).toLowerCase() !== API_ORIGIN_HOST_ALLOWED) {
+        return new Response("API origin host not allowed", { status: 502, headers: { ...OWN_HEADERS, "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
       }
       if (request.method !== "GET" && request.method !== "HEAD" && request.method !== "POST") {
         return new Response("Method Not Allowed", { status: 405, headers: { ...OWN_HEADERS, allow: "GET, HEAD, POST", "cache-control": "no-store" } });
