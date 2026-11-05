@@ -1,0 +1,993 @@
+{
+  "format": "djjj-assertion-graph-v1",
+  "releaseTarget": "v9",
+  "derivedFrom": "website/provenance.json",
+  "baselineCommit": "420614ddd6b79896a35196026f96620b1c906caa",
+  "notIndependentEvidence": true,
+  "nodeCount": 30,
+  "edgeCount": 36,
+  "nodes": [
+    {
+      "id": "repo:index.html",
+      "label": "Source",
+      "properties": {
+        "id": "repo:index.html",
+        "url": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/index.html",
+        "sourceClass": "P6",
+        "resolution": "resolved",
+        "reviewedAt": "2026-11-05",
+        "contentVerification": "repository_file",
+        "note": "Versioned first-party repository statement; not independent corroboration.",
+        "origin": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/website/provenance.json",
+        "archiveReceipts": []
+      }
+    },
+    {
+      "id": "repo:CLAUDE.md",
+      "label": "Source",
+      "properties": {
+        "id": "repo:CLAUDE.md",
+        "url": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/CLAUDE.md",
+        "sourceClass": "P6",
+        "resolution": "resolved",
+        "reviewedAt": "2026-11-05",
+        "contentVerification": "repository_file",
+        "note": "Versioned first-party repository statement; not independent corroboration.",
+        "origin": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/website/provenance.json",
+        "archiveReceipts": []
+      }
+    },
+    {
+      "id": "soundcloud:jessejay",
+      "label": "Source",
+      "properties": {
+        "id": "soundcloud:jessejay",
+        "url": "https://soundcloud.com/jessejay",
+        "sourceClass": "P5",
+        "resolution": "resolved",
+        "reviewedAt": "2026-11-05",
+        "contentVerification": "not_reverified",
+        "note": "Artist-controlled profile; fetch restricted during this review. No current verification or archive receipt.",
+        "origin": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/website/provenance.json",
+        "archiveReceipts": []
+      }
+    },
+    {
+      "id": "soundcloud:blue-dimension-2026",
+      "label": "Source",
+      "properties": {
+        "id": "soundcloud:blue-dimension-2026",
+        "url": null,
+        "sourceClass": "P8",
+        "resolution": "unresolved",
+        "reviewedAt": "2026-11-05",
+        "contentVerification": "not_reverified",
+        "note": "Exact original source not recoverable; historical reference preserved, not independent evidence.",
+        "origin": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/website/provenance.json",
+        "archiveReceipts": []
+      }
+    },
+    {
+      "id": "soundcloud:galaxy-space-night",
+      "label": "Source",
+      "properties": {
+        "id": "soundcloud:galaxy-space-night",
+        "url": null,
+        "sourceClass": "P8",
+        "resolution": "unresolved",
+        "reviewedAt": "2026-11-05",
+        "contentVerification": "not_reverified",
+        "note": "Exact original source not recoverable; historical reference preserved, not independent evidence.",
+        "origin": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/website/provenance.json",
+        "archiveReceipts": []
+      }
+    },
+    {
+      "id": "residentadvisor:event-896816",
+      "label": "Source",
+      "properties": {
+        "id": "residentadvisor:event-896816",
+        "url": "https://ra.co/events/896816",
+        "sourceClass": "P3",
+        "resolution": "resolved",
+        "reviewedAt": "2026-11-05",
+        "contentVerification": "retrieved_via_search_service",
+        "note": "Retrieved page lists DJ Jesse Jay (GSN ZH) for 2016-11-05 at Kapitel Bollwerk, Bern. No independent archive capture verified.",
+        "origin": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/website/provenance.json",
+        "archiveReceipts": []
+      }
+    },
+    {
+      "id": "repo:historical-biography",
+      "label": "Source",
+      "properties": {
+        "id": "repo:historical-biography",
+        "url": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/DJ_JESSE_JAY_CANONICAL_PROFILE.md",
+        "sourceClass": "P6",
+        "resolution": "partial",
+        "reviewedAt": "2026-11-05",
+        "contentVerification": "not_reverified",
+        "note": "Current canonical profile preserves the historical claim; original biography capture remains unidentified.",
+        "origin": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/website/provenance.json",
+        "archiveReceipts": []
+      }
+    },
+    {
+      "id": "radio-lora:blue-dimension-url-404-2026-08-09",
+      "label": "Source",
+      "properties": {
+        "id": "radio-lora:blue-dimension-url-404-2026-08-09",
+        "url": null,
+        "sourceClass": "P8",
+        "resolution": "unresolved",
+        "reviewedAt": "2026-11-05",
+        "contentVerification": "not_reverified",
+        "note": "Exact original source not recoverable; historical reference preserved, not independent evidence.",
+        "origin": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/website/provenance.json",
+        "archiveReceipts": []
+      }
+    },
+    {
+      "id": "repo:AGENTS.md",
+      "label": "Source",
+      "properties": {
+        "id": "repo:AGENTS.md",
+        "url": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/AGENTS.md",
+        "sourceClass": "P6",
+        "resolution": "resolved",
+        "reviewedAt": "2026-11-05",
+        "contentVerification": "repository_file",
+        "note": "Versioned first-party repository statement; not independent corroboration.",
+        "origin": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/website/provenance.json",
+        "archiveReceipts": []
+      }
+    },
+    {
+      "id": "repo:docs/GOVERNANCE.md",
+      "label": "Source",
+      "properties": {
+        "id": "repo:docs/GOVERNANCE.md",
+        "url": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/docs/GOVERNANCE.md",
+        "sourceClass": "P6",
+        "resolution": "resolved",
+        "reviewedAt": "2026-11-05",
+        "contentVerification": "repository_file",
+        "note": "Versioned first-party repository statement; not independent corroboration.",
+        "origin": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/website/provenance.json",
+        "archiveReceipts": []
+      }
+    },
+    {
+      "id": "repo:website/provenance.json",
+      "label": "Source",
+      "properties": {
+        "id": "repo:website/provenance.json",
+        "url": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/website/provenance.json",
+        "sourceClass": "P6",
+        "resolution": "resolved",
+        "reviewedAt": "2026-11-05",
+        "contentVerification": "repository_file",
+        "note": "Versioned first-party repository statement; not independent corroboration.",
+        "origin": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/website/provenance.json",
+        "archiveReceipts": []
+      }
+    },
+    {
+      "id": "repo:canonical-profile",
+      "label": "Source",
+      "properties": {
+        "id": "repo:canonical-profile",
+        "url": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/DJ_JESSE_JAY_CANONICAL_PROFILE.md",
+        "sourceClass": "P6",
+        "resolution": "resolved",
+        "contentVerification": "repository_file",
+        "reviewedAt": "2026-11-05",
+        "note": "First-party identity authority, not independent evidence.",
+        "archiveReceipts": []
+      }
+    },
+    {
+      "id": "source:blue-dimension-playlist-2025",
+      "label": "Source",
+      "properties": {
+        "id": "source:blue-dimension-playlist-2025",
+        "url": "https://soundcloud.com/jessejay/sets/jesse-jay-juicy-j-blue-dimension-radio-lora-975",
+        "sourceClass": "P5",
+        "resolution": "resolved",
+        "contentVerification": "not_reverified",
+        "reviewedAt": "2026-11-05",
+        "note": "Candidate imported from closed, unmerged PR #213. Title/date require primary-source review; no track count or publication-date assertion adopted.",
+        "origin": "https://github.com/MarcelRaschke/djjessejay.ch/pull/213/files",
+        "archiveReceipts": []
+      }
+    },
+    {
+      "id": "source:schlaflos-live-recording-2018",
+      "label": "Source",
+      "properties": {
+        "id": "source:schlaflos-live-recording-2018",
+        "url": "https://soundcloud.com/jessejay/jesse-jay-im-club-schlaflos-16112018-mp3",
+        "sourceClass": "P5",
+        "resolution": "resolved",
+        "contentVerification": "not_reverified",
+        "reviewedAt": "2026-11-05",
+        "note": "Candidate imported from closed, unmerged PR #213. Title/date require primary-source review; no track count or publication-date assertion adopted.",
+        "origin": "https://github.com/MarcelRaschke/djjessejay.ch/pull/213/files",
+        "archiveReceipts": []
+      }
+    },
+    {
+      "id": "source:blue-dimension-space-night-2026",
+      "label": "Source",
+      "properties": {
+        "id": "source:blue-dimension-space-night-2026",
+        "url": "https://soundcloud.com/jessejay/blue-dimension-space-night-26",
+        "sourceClass": "P5",
+        "resolution": "resolved",
+        "contentVerification": "not_reverified",
+        "reviewedAt": "2026-11-05",
+        "note": "Candidate imported from closed, unmerged PR #213. Title/date require primary-source review; no track count or publication-date assertion adopted.",
+        "origin": "https://github.com/MarcelRaschke/djjessejay.ch/pull/213/files",
+        "archiveReceipts": []
+      }
+    },
+    {
+      "id": "claim:artist-name",
+      "label": "Claim",
+      "properties": {
+        "id": "claim:artist-name",
+        "subject": "artist:dj-jesse-jay",
+        "predicate": "USES_ALIAS",
+        "value": "DJ Jesse Jay",
+        "valid_time": {
+          "start": null,
+          "end": null,
+          "precision": "unknown"
+        },
+        "observed_time": "2026-08-23",
+        "confidence": 0.8,
+        "status": "supported",
+        "sourceClass": "P5",
+        "sources": [
+          "repo:index.html",
+          "repo:CLAUDE.md",
+          "soundcloud:jessejay"
+        ],
+        "review_state": "human_review_required",
+        "assessmentHistory": [
+          {
+            "recordedIn": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/website/provenance.json",
+            "status": "verified",
+            "sourceClass": "P4",
+            "confidence": 0.95,
+            "review_state": "reviewed",
+            "observed_time": "2026-08-23"
+          }
+        ],
+        "sourceResolution": "resolved",
+        "lastAssessment": {
+          "date": "2026-11-05",
+          "method": "source-reference normalization; historical observed_time preserved",
+          "independentlyArchived": false
+        }
+      }
+    },
+    {
+      "id": "claim:civil-name",
+      "label": "Claim",
+      "properties": {
+        "id": "claim:civil-name",
+        "subject": "artist:dj-jesse-jay",
+        "predicate": "HAS_PUBLIC_CIVIL_NAME_REFERENCE",
+        "value": "Michael Fellner",
+        "valid_time": {
+          "start": null,
+          "end": null,
+          "precision": "unknown"
+        },
+        "observed_time": "2026-08-23",
+        "confidence": 0.7,
+        "status": "supported",
+        "sourceClass": "P6",
+        "sources": [
+          "repo:index.html",
+          "repo:CLAUDE.md",
+          "repo:canonical-profile"
+        ],
+        "review_state": "human_review_required",
+        "assessmentHistory": [
+          {
+            "recordedIn": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/website/provenance.json",
+            "status": "supported",
+            "sourceClass": "P6",
+            "confidence": 0.7,
+            "review_state": "human_review_recommended",
+            "observed_time": "2026-08-23"
+          }
+        ],
+        "sourceResolution": "resolved",
+        "lastAssessment": {
+          "date": "2026-11-05",
+          "method": "source-reference normalization; historical observed_time preserved",
+          "independentlyArchived": false
+        }
+      }
+    },
+    {
+      "id": "claim:location",
+      "label": "Claim",
+      "properties": {
+        "id": "claim:location",
+        "subject": "artist:dj-jesse-jay",
+        "predicate": "LOCATED_IN",
+        "value": "Zürich, Switzerland",
+        "valid_time": {
+          "start": null,
+          "end": null,
+          "precision": "unknown"
+        },
+        "observed_time": "2026-08-23",
+        "confidence": 0.8,
+        "status": "supported",
+        "sourceClass": "P5",
+        "sources": [
+          "repo:index.html",
+          "soundcloud:jessejay"
+        ],
+        "review_state": "human_review_required",
+        "assessmentHistory": [
+          {
+            "recordedIn": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/website/provenance.json",
+            "status": "supported",
+            "sourceClass": "P4",
+            "confidence": 0.8,
+            "review_state": "reviewed",
+            "observed_time": "2026-08-23"
+          }
+        ],
+        "sourceResolution": "resolved",
+        "lastAssessment": {
+          "date": "2026-11-05",
+          "method": "source-reference normalization; historical observed_time preserved",
+          "independentlyArchived": false
+        }
+      }
+    },
+    {
+      "id": "claim:active-since",
+      "label": "Claim",
+      "properties": {
+        "id": "claim:active-since",
+        "subject": "artist:dj-jesse-jay",
+        "predicate": "ACTIVE_SINCE",
+        "value": 1997,
+        "valid_time": {
+          "start": "1997",
+          "end": null,
+          "precision": "year"
+        },
+        "observed_time": "2026-08-23",
+        "confidence": 0.78,
+        "status": "supported",
+        "sourceClass": "P5",
+        "sources": [
+          "repo:index.html",
+          "soundcloud:jessejay",
+          "repo:canonical-profile"
+        ],
+        "review_state": "human_review_required",
+        "assessmentHistory": [
+          {
+            "recordedIn": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/website/provenance.json",
+            "status": "supported",
+            "sourceClass": "P5",
+            "confidence": 0.78,
+            "review_state": "human_review_recommended",
+            "observed_time": "2026-08-23"
+          }
+        ],
+        "sourceResolution": "resolved",
+        "lastAssessment": {
+          "date": "2026-11-05",
+          "method": "source-reference normalization; historical observed_time preserved",
+          "independentlyArchived": false
+        }
+      }
+    },
+    {
+      "id": "claim:radio-association",
+      "label": "Claim",
+      "properties": {
+        "id": "claim:radio-association",
+        "subject": "artist:dj-jesse-jay",
+        "predicate": "ASSOCIATED_WITH",
+        "value": "Radio LoRa",
+        "valid_time": {
+          "start": null,
+          "end": null,
+          "precision": "unknown"
+        },
+        "observed_time": "2026-08-23",
+        "confidence": 0.74,
+        "status": "supported",
+        "sourceClass": "P5",
+        "sources": [
+          "repo:index.html",
+          "soundcloud:jessejay",
+          "soundcloud:blue-dimension-2026",
+          "repo:canonical-profile"
+        ],
+        "review_state": "human_review_required",
+        "assessmentHistory": [
+          {
+            "recordedIn": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/website/provenance.json",
+            "status": "supported",
+            "sourceClass": "P5",
+            "confidence": 0.74,
+            "review_state": "human_review_recommended",
+            "observed_time": "2026-08-23"
+          }
+        ],
+        "sourceResolution": "partial",
+        "lastAssessment": {
+          "date": "2026-11-05",
+          "method": "source-reference normalization; historical observed_time preserved",
+          "independentlyArchived": false
+        }
+      }
+    },
+    {
+      "id": "claim:galaxy-space-night",
+      "label": "Claim",
+      "properties": {
+        "id": "claim:galaxy-space-night",
+        "subject": "artist:dj-jesse-jay",
+        "predicate": "ASSOCIATED_WITH",
+        "value": "Galaxy Space Night",
+        "valid_time": {
+          "start": null,
+          "end": null,
+          "precision": "unknown"
+        },
+        "observed_time": "2026-08-23",
+        "confidence": 0.82,
+        "status": "supported",
+        "sourceClass": "P3",
+        "sources": [
+          "soundcloud:galaxy-space-night",
+          "residentadvisor:event-896816"
+        ],
+        "review_state": "human_review_required",
+        "assessmentHistory": [
+          {
+            "recordedIn": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/website/provenance.json",
+            "status": "supported",
+            "sourceClass": "P3",
+            "confidence": 0.82,
+            "review_state": "reviewed",
+            "observed_time": "2026-08-23"
+          }
+        ],
+        "sourceResolution": "partial",
+        "lastAssessment": {
+          "date": "2026-11-05",
+          "method": "source-reference normalization; historical observed_time preserved",
+          "independentlyArchived": false
+        }
+      }
+    },
+    {
+      "id": "claim:blue-dimension",
+      "label": "Claim",
+      "properties": {
+        "id": "claim:blue-dimension",
+        "subject": "artist:dj-jesse-jay",
+        "predicate": "PRESENTS",
+        "value": "Blue Dimension",
+        "valid_time": {
+          "start": null,
+          "end": null,
+          "precision": "unknown"
+        },
+        "observed_time": "2026-08-23",
+        "confidence": 0.76,
+        "status": "supported",
+        "sourceClass": "P5",
+        "sources": [
+          "repo:index.html",
+          "soundcloud:blue-dimension-2026",
+          "repo:canonical-profile"
+        ],
+        "review_state": "human_review_required",
+        "assessmentHistory": [
+          {
+            "recordedIn": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/website/provenance.json",
+            "status": "supported",
+            "sourceClass": "P5",
+            "confidence": 0.76,
+            "review_state": "human_review_recommended",
+            "observed_time": "2026-08-23"
+          }
+        ],
+        "sourceResolution": "partial",
+        "lastAssessment": {
+          "date": "2026-11-05",
+          "method": "source-reference normalization; historical observed_time preserved",
+          "independentlyArchived": false
+        }
+      }
+    },
+    {
+      "id": "claim:radio-since-2001",
+      "label": "Claim",
+      "properties": {
+        "id": "claim:radio-since-2001",
+        "subject": "artist:dj-jesse-jay",
+        "predicate": "RADIO_ACTIVITY_SINCE",
+        "value": 2001,
+        "valid_time": {
+          "start": "2001",
+          "end": null,
+          "precision": "year"
+        },
+        "observed_time": "2026-08-23",
+        "confidence": 0.55,
+        "status": "probable",
+        "sourceClass": "P5",
+        "sources": [
+          "repo:historical-biography",
+          "soundcloud:jessejay",
+          "repo:canonical-profile"
+        ],
+        "review_state": "human_review_required",
+        "assessmentHistory": [
+          {
+            "recordedIn": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/website/provenance.json",
+            "status": "probable",
+            "sourceClass": "P5",
+            "confidence": 0.55,
+            "review_state": "human_review_required",
+            "observed_time": "2026-08-23"
+          }
+        ],
+        "sourceResolution": "partial",
+        "lastAssessment": {
+          "date": "2026-11-05",
+          "method": "source-reference normalization; historical observed_time preserved",
+          "independentlyArchived": false
+        }
+      }
+    },
+    {
+      "id": "claim:current-radio-schedule",
+      "label": "Claim",
+      "properties": {
+        "id": "claim:current-radio-schedule",
+        "subject": "show:blue-dimension",
+        "predicate": "HAS_CURRENT_PUBLIC_SCHEDULE",
+        "value": null,
+        "valid_time": {
+          "start": "2026-08-09",
+          "end": null,
+          "precision": "day"
+        },
+        "observed_time": "2026-08-23",
+        "confidence": 0,
+        "status": "unreviewed",
+        "sourceClass": "P8",
+        "sources": [
+          "radio-lora:blue-dimension-url-404-2026-08-09"
+        ],
+        "review_state": "human_review_required",
+        "assessmentHistory": [
+          {
+            "recordedIn": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/website/provenance.json",
+            "status": "unreviewed",
+            "sourceClass": "P8",
+            "confidence": 0,
+            "review_state": "human_review_required",
+            "observed_time": "2026-08-23"
+          }
+        ],
+        "sourceResolution": "partial",
+        "lastAssessment": {
+          "date": "2026-11-05",
+          "method": "source-reference normalization; historical observed_time preserved",
+          "independentlyArchived": false
+        }
+      }
+    },
+    {
+      "id": "claim:identity-positioning",
+      "label": "Claim",
+      "properties": {
+        "id": "claim:identity-positioning",
+        "subject": "artist:dj-jesse-jay",
+        "predicate": "HAS_POSITIONING_STATEMENT",
+        "value": "long-term regional underground electronic DJ, radio-linked archive node and provenance-oriented cultural identity",
+        "valid_time": {
+          "start": "2026-08-21",
+          "end": null,
+          "precision": "day"
+        },
+        "observed_time": "2026-08-23",
+        "confidence": 0.72,
+        "status": "supported",
+        "sourceClass": "P6",
+        "sources": [
+          "repo:AGENTS.md",
+          "repo:docs/GOVERNANCE.md",
+          "repo:website/provenance.json"
+        ],
+        "review_state": "human_review_required",
+        "assessmentHistory": [
+          {
+            "recordedIn": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/website/provenance.json",
+            "status": "supported",
+            "sourceClass": "P6",
+            "confidence": 0.72,
+            "review_state": "human_review_recommended",
+            "observed_time": "2026-08-23"
+          }
+        ],
+        "sourceResolution": "resolved",
+        "lastAssessment": {
+          "date": "2026-11-05",
+          "method": "source-reference normalization; historical observed_time preserved",
+          "independentlyArchived": false
+        }
+      }
+    },
+    {
+      "id": "claim:identity-line",
+      "label": "Claim",
+      "properties": {
+        "id": "claim:identity-line",
+        "subject": "artist:dj-jesse-jay",
+        "predicate": "HAS_PUBLIC_IDENTITY_LINE",
+        "value": "DJ Jesse Jay — Zürich Underground Electronic Sound since 1997",
+        "valid_time": {
+          "start": "2026-08-21",
+          "end": null,
+          "precision": "day"
+        },
+        "observed_time": "2026-08-23",
+        "confidence": 0.72,
+        "status": "supported",
+        "sourceClass": "P6",
+        "sources": [
+          "repo:AGENTS.md",
+          "repo:docs/GOVERNANCE.md",
+          "repo:website/provenance.json"
+        ],
+        "review_state": "human_review_required",
+        "assessmentHistory": [
+          {
+            "recordedIn": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/website/provenance.json",
+            "status": "supported",
+            "sourceClass": "P6",
+            "confidence": 0.72,
+            "review_state": "human_review_recommended",
+            "observed_time": "2026-08-23"
+          }
+        ],
+        "sourceResolution": "resolved",
+        "lastAssessment": {
+          "date": "2026-11-05",
+          "method": "source-reference normalization; historical observed_time preserved",
+          "independentlyArchived": false
+        }
+      }
+    },
+    {
+      "id": "claim:extended-identity-line",
+      "label": "Claim",
+      "properties": {
+        "id": "claim:extended-identity-line",
+        "subject": "artist:dj-jesse-jay",
+        "predicate": "HAS_PUBLIC_IDENTITY_LINE",
+        "value": "Club memory. Radio signal. Cyber provenance. Since 1997.",
+        "valid_time": {
+          "start": "2026-08-21",
+          "end": null,
+          "precision": "day"
+        },
+        "observed_time": "2026-08-23",
+        "confidence": 0.72,
+        "status": "supported",
+        "sourceClass": "P6",
+        "sources": [
+          "repo:AGENTS.md",
+          "repo:docs/GOVERNANCE.md",
+          "repo:website/provenance.json"
+        ],
+        "review_state": "human_review_required",
+        "assessmentHistory": [
+          {
+            "recordedIn": "https://github.com/MarcelRaschke/djjessejay.ch/blob/420614ddd6b79896a35196026f96620b1c906caa/website/provenance.json",
+            "status": "supported",
+            "sourceClass": "P6",
+            "confidence": 0.72,
+            "review_state": "human_review_recommended",
+            "observed_time": "2026-08-23"
+          }
+        ],
+        "sourceResolution": "resolved",
+        "lastAssessment": {
+          "date": "2026-11-05",
+          "method": "source-reference normalization; historical observed_time preserved",
+          "independentlyArchived": false
+        }
+      }
+    },
+    {
+      "id": "claim:blue-dimension-playlist-2025",
+      "label": "Claim",
+      "properties": {
+        "id": "claim:blue-dimension-playlist-2025",
+        "subject": "artist:dj-jesse-jay",
+        "predicate": "PUBLISHED_PLAYLIST",
+        "value": "Jesse Jay & Juicy J @ Blue Dimension Radio LoRa 97,5",
+        "valid_time": {
+          "start": "2025-09-02",
+          "end": null,
+          "precision": "day"
+        },
+        "observed_time": "2026-10-27",
+        "confidence": 0,
+        "status": "unreviewed",
+        "sourceClass": "P5",
+        "sources": [
+          "source:blue-dimension-playlist-2025"
+        ],
+        "review_state": "human_review_required",
+        "sourceResolution": "resolved",
+        "lastAssessment": {
+          "date": "2026-11-05",
+          "method": "imported candidate from PR #213; observed_time and valid_time are inherited, not newly verified",
+          "independentlyArchived": false
+        }
+      }
+    },
+    {
+      "id": "claim:schlaflos-live-recording-2018",
+      "label": "Claim",
+      "properties": {
+        "id": "claim:schlaflos-live-recording-2018",
+        "subject": "artist:dj-jesse-jay",
+        "predicate": "PUBLISHED_LIVE_SET",
+        "value": "Jesse Jay im Club-Schlaflos 16.11.2018",
+        "valid_time": {
+          "start": "2018-11-16",
+          "end": null,
+          "precision": "day"
+        },
+        "observed_time": "2026-10-27",
+        "confidence": 0,
+        "status": "unreviewed",
+        "sourceClass": "P5",
+        "sources": [
+          "source:schlaflos-live-recording-2018"
+        ],
+        "review_state": "human_review_required",
+        "sourceResolution": "resolved",
+        "lastAssessment": {
+          "date": "2026-11-05",
+          "method": "imported candidate from PR #213; observed_time and valid_time are inherited, not newly verified",
+          "independentlyArchived": false
+        }
+      }
+    },
+    {
+      "id": "claim:blue-dimension-space-night-2026",
+      "label": "Claim",
+      "properties": {
+        "id": "claim:blue-dimension-space-night-2026",
+        "subject": "artist:dj-jesse-jay",
+        "predicate": "PUBLISHED_SET",
+        "value": "Blue Dimension - Space Night 26.03.26, Jesse Jay all night long",
+        "valid_time": {
+          "start": "2026-03-26",
+          "end": null,
+          "precision": "day"
+        },
+        "observed_time": "2026-10-27",
+        "confidence": 0,
+        "status": "unreviewed",
+        "sourceClass": "P5",
+        "sources": [
+          "source:blue-dimension-space-night-2026"
+        ],
+        "review_state": "human_review_required",
+        "sourceResolution": "resolved",
+        "lastAssessment": {
+          "date": "2026-11-05",
+          "method": "imported candidate from PR #213; observed_time and valid_time are inherited, not newly verified",
+          "independentlyArchived": false
+        }
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "claim:artist-name",
+      "to": "repo:index.html",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:artist-name",
+      "to": "repo:CLAUDE.md",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:artist-name",
+      "to": "soundcloud:jessejay",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:civil-name",
+      "to": "repo:index.html",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:civil-name",
+      "to": "repo:CLAUDE.md",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:civil-name",
+      "to": "repo:canonical-profile",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:location",
+      "to": "repo:index.html",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:location",
+      "to": "soundcloud:jessejay",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:active-since",
+      "to": "repo:index.html",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:active-since",
+      "to": "soundcloud:jessejay",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:active-since",
+      "to": "repo:canonical-profile",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:radio-association",
+      "to": "repo:index.html",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:radio-association",
+      "to": "soundcloud:jessejay",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:radio-association",
+      "to": "soundcloud:blue-dimension-2026",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:radio-association",
+      "to": "repo:canonical-profile",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:galaxy-space-night",
+      "to": "soundcloud:galaxy-space-night",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:galaxy-space-night",
+      "to": "residentadvisor:event-896816",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:blue-dimension",
+      "to": "repo:index.html",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:blue-dimension",
+      "to": "soundcloud:blue-dimension-2026",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:blue-dimension",
+      "to": "repo:canonical-profile",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:radio-since-2001",
+      "to": "repo:historical-biography",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:radio-since-2001",
+      "to": "soundcloud:jessejay",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:radio-since-2001",
+      "to": "repo:canonical-profile",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:current-radio-schedule",
+      "to": "radio-lora:blue-dimension-url-404-2026-08-09",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:identity-positioning",
+      "to": "repo:AGENTS.md",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:identity-positioning",
+      "to": "repo:docs/GOVERNANCE.md",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:identity-positioning",
+      "to": "repo:website/provenance.json",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:identity-line",
+      "to": "repo:AGENTS.md",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:identity-line",
+      "to": "repo:docs/GOVERNANCE.md",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:identity-line",
+      "to": "repo:website/provenance.json",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:extended-identity-line",
+      "to": "repo:AGENTS.md",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:extended-identity-line",
+      "to": "repo:docs/GOVERNANCE.md",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:extended-identity-line",
+      "to": "repo:website/provenance.json",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:blue-dimension-playlist-2025",
+      "to": "source:blue-dimension-playlist-2025",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:schlaflos-live-recording-2018",
+      "to": "source:schlaflos-live-recording-2018",
+      "type": "CITES"
+    },
+    {
+      "from": "claim:blue-dimension-space-night-2026",
+      "to": "source:blue-dimension-space-night-2026",
+      "type": "CITES"
+    }
+  ]
+}

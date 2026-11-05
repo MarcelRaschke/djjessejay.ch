@@ -41,24 +41,11 @@ Visual language: Deep Navy, Electric Cyan, Neon Blue, Metallic Silver, Golden Ye
 
 ## Provenance classes
 
-- **P0** independently archived evidence / immutable receipts
-- **P1** versioned first-party repository evidence
-- **P2** first-party external publication
-- **P3** credible third-party reference
-- **P4** unverified claim
+The authoritative P0–P8 definitions are in `archive/schema.yml` and `website/provenance.json`. First-party repository statements are P6; artist-controlled external publications are P5; event database records are P3. A profile is not P4 merely because it exists. P0 requires an independently verified third-party archive capture.
 
 ## Current evidence summary
 
-| Claim | Status | Evidence class |
-|---|---|---|
-| DJ Jesse Jay / Zürich | verified first-party + external platform | P1/P2 |
-| active since 1997 | first-party repeated claim | P1/P2 |
-| Michael Fellner | first-party repository metadata | P1 |
-| Radio LoRa association | corroborated by recordings and project metadata | P1/P2/P3 |
-| Galaxy Space Night association | corroborated by recordings and Resident Advisor event record | P1/P2/P3 |
-| Blue Dimension identity | current recordings + repository metadata | P1/P2 |
-| Radio association since 2001 | historical first-party claim, corroborated by long-lived profile text | P1/P2; retain qualification |
-| exact weekly/biweekly schedule | time-sensitive; do not hard-code without current station evidence | pending current verification |
+See [v9 citation appendix](presskit/ARCHIVE_CITATION_APPENDIX.md) for per-claim sources and limitations. Identity and history remain first-party statements unless specifically corroborated. The artist-name assessment is supported, not independently verified; radio since 2001 remains historical first-party. Current radio schedule remains unreviewed. No P0 capture is verified in this preparation.
 
 ## Do not infer
 

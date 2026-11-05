@@ -91,3 +91,40 @@ jobs:
           node-version: '24'
       - name: Enforce FAULI_BOUNDARY_INVARIANT I1-I6
         run: npm run check:fauli-boundary
+
+  provenance-v9-bundle:
+    name: v9 Draft Package and Pages Bundle
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Build and independently read draft package
+        run: |
+          python3 scripts/package-provenance-v9.py --output "$RUNNER_TEMP/v9-package"
+          cd "$RUNNER_TEMP/v9-package"
+          sha256sum -c SHA256SUMS
+          unzip -t djjj-v9-provenance-DRAFT.zip
+      - name: Install and build Pages CSS
+        run: |
+          npm ci
+          npm run build:css
+      - name: Apply actual Pages cleanup
+        run: bash scripts/prepare-pages-content.sh
+      - name: Validate retained public content
+        run: python3 scripts/package-provenance-v9.py --site-check
+
+  provenance-v9-neo4j:
+    name: v9 Neo4j Snapshot Roundtrip
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Import snapshot twice and compare all metadata
+        run: python3 scripts/check-provenance-neo4j.py
