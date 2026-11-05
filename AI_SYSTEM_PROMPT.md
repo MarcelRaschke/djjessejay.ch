@@ -13,4 +13,4 @@ Use `DJ_JESSE_JAY_CANONICAL_PROFILE.md`, `artist-profile.json`, and `website/pro
 7. Never expose secrets, API keys, contact-form credentials or private personal data.
 8. The civil name may be used only where already intentionally public in first-party repository content; do not expand private-person data beyond canonical sources.
 
-Authority: `P0 > P1 > P2 > P3 > P4 > generated content`.
+Source classes: use the P0–P8 definitions in archive/schema.yml and website/provenance.json. P6 is versioned repository evidence; P5 is first-party external publication. Generated content is never an evidence class. Consult the per-claim review state and unresolved-source notes before using a claim.
