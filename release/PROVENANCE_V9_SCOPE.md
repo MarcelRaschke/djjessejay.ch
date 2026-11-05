@@ -8,7 +8,7 @@ Status: NOT READY. This change prepares reviewable artifacts; it does not certif
 
 - 15 ledger claims and a source registry preserving historical observations and original reference IDs.
 - New source-linked archive status; canonical Markdown appendix and a static HTML counterpart.
-- Deterministic assertion graph (15 claims, 15 sources, 36 CITES edges), JSON plus standalone Cypher. The graph does not promote assertions to facts. Import in an empty review database using cypher-shell; a real Neo4j import has not yet been tested.
+- Deterministic assertion graph (15 claims, 15 sources, 36 CITES edges), JSON plus standalone Cypher. The graph does not promote assertions to facts. The CI roundtrip imports this logical snapshot twice into an empty isolated Neo4j 2026.10.1 Community container and compares every node property and edge. The job records the actual image digest and snapshot hashes. This is not a binary database backup; successful execution must be evidenced by the PR checks.
 - Draft ZIP packager with per-file UTF-8 byte sizes and SHA-256, ZIP readback validation, and an explicit RC hold.
 
 ## Evidence review
@@ -35,7 +35,7 @@ Main already contains the upload-pages-artifact v4 SHA fix; do not reopen closed
 
 1. Resolve historical references, verify candidate source contents, and obtain human evidence review.
 2. Retrieve real independent archive captures with original URL, capture URL/time and integrity evidence. Define required capture coverage explicitly; no invented 6/6 target.
-3. Test Neo4j import and compare node/edge counts and all assertion metadata.
+3. Require a successful Neo4j roundtrip for the release commit: node/edge counts, all assertion metadata and repeat-import idempotence.
 4. Passing CI, human CODEOWNERS review, resolved conversations, and authorized merge.
 5. Verify candidate files in the deployed bundle and public endpoints; record actual deployed commit.
 6. Build clean committed payload, independently verify ZIP manifest and checksum, review release readiness, then create the exact tag and attach assets.

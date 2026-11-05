@@ -117,3 +117,14 @@ jobs:
         run: bash scripts/prepare-pages-content.sh
       - name: Validate retained public content
         run: python3 scripts/package-provenance-v9.py --site-check
+
+  provenance-v9-neo4j:
+    name: v9 Neo4j Snapshot Roundtrip
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Import snapshot twice and compare all metadata
+        run: python3 scripts/check-provenance-neo4j.py
