@@ -108,16 +108,27 @@ function withSecurityHeaders(response, upstream, originHost, originPrefix) {
   return new Response(upstream.body, { status: upstream.status, headers });
 }
 
-// The service token may only be sent to this host (fail closed on any other value).
+// The only host that may receive the Access service token. The deploy workflow probes
+// exactly this host for the Access denial, so it must not be widened silently.
 const API_ORIGIN_HOST_ALLOWED = `origin.${CANONICAL_HOST}`;
 
+function isAllowedApiOriginHost(host) {
+  return typeof host === "string" && host.toLowerCase() === API_ORIGIN_HOST_ALLOWED;
+}
+
 function proxyToApiOrigin(request, url, apiOriginHost, env) {
-  const apiScheme = (env && env.API_ORIGIN_SCHEME) || "https";
-  const apiOriginPort = (env && env.API_ORIGIN_PORT) || "";
-  const target = new URL(`${apiScheme}://${apiOriginHost}${apiOriginPort ? ":" + apiOriginPort : ""}${url.pathname}${url.search}`);
+  const target = new URL("https://placeholder.invalid/");
+  // Build from validated parts only: no port or userinfo can sneak in.
+  target.hostname = apiOriginHost;
+  target.pathname = url.pathname;
+  target.search = url.search;
+  if (target.hostname !== apiOriginHost.toLowerCase() || target.port || target.username || target.password) {
+    return Promise.resolve(new Response("API origin host not allowed", { status: 502, headers: { ...OWN_HEADERS, "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } }));
+  }
   const headers = new Headers(request.headers);
   headers.set("host", apiOriginHost);
-  // Never forward client-supplied Access credentials; only the Worker's own service token.
+  // Never forward client-supplied Access credentials; send only the Worker's own
+  // service token, which is the only identity the origin's Access app admits.
   for (const name of ["cf-access-client-id", "cf-access-client-secret", "cf-access-jwt-assertion", "cf-access-token"]) headers.delete(name);
   headers.set("cf-access-client-id", env.ORIGIN_ACCESS_CLIENT_ID);
   headers.set("cf-access-client-secret", env.ORIGIN_ACCESS_CLIENT_SECRET);
@@ -141,11 +152,32 @@ function withApiSecurityHeaders(upstream) {
     const lower = key.toLowerCase();
     if (STRIP_RESPONSE_HEADERS.has(lower)) continue;
     if (lower === "content-length" || lower === "transfer-encoding") continue;
+    if (lower === "set-cookie") continue;
     headers.set(key, value);
+  }
+  // Cookies are re-added one by one (Headers.set would fold them into one) and
+  // the Access session cookies minted for the Worker's service token are
+  // dropped, so they never reach the browser.
+  for (const cookie of upstreamSetCookies(upstream.headers)) {
+    if (isAccessCookie(cookie)) continue;
+    headers.append("set-cookie", cookie);
   }
   for (const [key, value] of Object.entries(OWN_HEADERS)) headers.set(key, value);
   headers.set("cache-control", "no-store");
   return new Response(upstream.body, { status: upstream.status, headers });
+}
+
+const ACCESS_COOKIE_NAMES = new Set(["cf_authorization", "cf_appsession", "cf_binding"]);
+
+function upstreamSetCookies(upstreamHeaders) {
+  if (typeof upstreamHeaders.getSetCookie === "function") return upstreamHeaders.getSetCookie();
+  const single = upstreamHeaders.get("set-cookie");
+  return single ? [single] : [];
+}
+
+function isAccessCookie(cookie) {
+  const name = cookie.split("=", 1)[0].trim().toLowerCase();
+  return ACCESS_COOKIE_NAMES.has(name);
 }
 
 export default {
@@ -173,14 +205,20 @@ export default {
       if (!apiOriginHost) {
         return new Response("API origin not configured", { status: 502, headers: { ...OWN_HEADERS, "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
       }
-      // Fail closed: without the service token the origin's Access app rejects the request anyway.
+      // Fail closed: without the service token the origin's Access app would reject the
+      // request anyway; answer here instead of sending an unauthenticated subrequest.
       if (!env.ORIGIN_ACCESS_CLIENT_ID || !env.ORIGIN_ACCESS_CLIENT_SECRET) {
         return new Response("API origin credentials not configured", { status: 502, headers: { ...OWN_HEADERS, "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
       }
-      if ((env.API_ORIGIN_SCHEME || "https") !== "https") {
+      // The service token must never travel over plaintext; Always Use HTTPS does not apply
+      // to Worker subrequests, so refuse any other scheme instead of downgrading.
+      const apiScheme = (env && env.API_ORIGIN_SCHEME) || "https";
+      if (apiScheme !== "https") {
         return new Response("API origin must use https", { status: 502, headers: { ...OWN_HEADERS, "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
       }
-      if (String(apiOriginHost).toLowerCase() !== API_ORIGIN_HOST_ALLOWED) {
+      // The service token may only go to origin.djjessejay.ch: a mistyped or tampered
+      // API_ORIGIN_HOST fails closed.
+      if (!isAllowedApiOriginHost(apiOriginHost)) {
         return new Response("API origin host not allowed", { status: 502, headers: { ...OWN_HEADERS, "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
       }
       if (request.method !== "GET" && request.method !== "HEAD" && request.method !== "POST") {
