@@ -1,0 +1,2999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BLUE DIMENSION // Reference Visual Matrix — Night Drive Radio Zürich</title>
+<meta name="description" content="Blue Dimension — night drive radio from Zürich. Signal 97.5 MHz, est. 1997. The reference visual matrix: identity system, live signal, lineup and archive." />
+<meta name="theme-color" content="#03060E" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2303060E'/%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='%232DE1F4' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='5' fill='none' stroke='%23FF2D7E' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='1.8' fill='%23F5B33C'/%3E%3C/svg%3E" />
+<script>document.documentElement.classList.add("js");</script>
+<meta property="og:title" content="BLUE DIMENSION // Reference Visual Matrix" />
+<meta property="og:description" content="Night drive radio from Zürich. Signal 97.5 MHz. Est. 1997." />
+<meta property="og:type" content="website" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Michroma&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet" />
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   BLUE DIMENSION // REFERENCE VISUAL MATRIX
+   Identity stylesheet — v4.2
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── 1. TOKENS ─────────────────────────────────────────────── */
+:root {
+  /* hull */
+  --void:      #03060E;
+  --deep:      #060B1A;
+  --hull:      #0A1226;
+  --hull-2:    #0E1930;
+
+  /* signal */
+  --cyan:      #2DE1F4;
+  --cyan-2:    #12A6C4;
+  --cyan-3:    #4C6FFF;
+
+  /* identity */
+  --magenta:   #FF2D7E;
+  --violet:    #8B5CF6;
+
+  /* pilot */
+  --amber:     #F5B33C;
+
+  /* type */
+  --paper:     #DCE9F5;
+  --muted:     #7E93AC;
+  --faint:     #4A5C74;
+
+  /* lines */
+  --line:      rgba(45, 225, 244, .16);
+  --line-2:    rgba(45, 225, 244, .30);
+  --line-dim:  rgba(126, 147, 172, .16);
+
+  /* glow */
+  --g-cy:   0 0 10px rgba(45,225,244,.55), 0 0 28px rgba(45,225,244,.22);
+  --g-mg:   0 0 10px rgba(255,45,126,.55), 0 0 28px rgba(255,45,126,.22);
+  --g-am:   0 0 10px rgba(245,179,60,.6);
+
+  /* fonts */
+  --f-display: "Michroma", "Eurostile", "Bank Gothic", "Avenir Next Condensed", system-ui, sans-serif;
+  --f-mono:    "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* metrics */
+  --pad: clamp(20px, 5vw, 72px);
+  --maxw: 1440px;
+  --hud-h: 64px;
+}
+
+/* ─── 2. RESET ──────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--hud-h) + 24px);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--void);
+  color: var(--paper);
+  font-family: var(--f-mono);
+  font-size: 15px;
+  line-height: 1.65;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(1100px 700px at 12% -8%,  rgba(45,225,244,.10), transparent 62%),
+    radial-gradient(900px 600px at 88% 8%,    rgba(255,45,126,.08), transparent 60%),
+    radial-gradient(1200px 800px at 50% 110%, rgba(139,92,246,.08), transparent 64%),
+    linear-gradient(180deg, var(--void) 0%, var(--deep) 45%, var(--void) 100%);
+}
+
+h1, h2, h3, p, dl, dd, ul, ol, figure { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+canvas { display: block; }
+b, strong { font-weight: 500; }
+
+:focus-visible {
+  outline: 1px solid var(--cyan);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.svg-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+.mono { font-family: var(--f-mono); }
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--pad); position: relative; z-index: 2; }
+
+/* ─── 3. FILM OVERLAYS ──────────────────────────────────────── */
+.fx-scanlines,
+.fx-grain,
+.fx-vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 90;
+}
+
+.fx-scanlines {
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(255,255,255,.028) 0 1px,
+    transparent 1px 3px
+  );
+  opacity: .55;
+  mix-blend-mode: overlay;
+}
+
+.fx-grain {
+  opacity: .16;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+}
+
+.fx-vignette {
+  background: radial-gradient(120% 90% at 50% 45%, transparent 52%, rgba(0,0,0,.62) 100%);
+}
+
+/* ─── 4. SVG MOTIF STROKES ─────────────────────────────────── */
+.svg-art { width: 100%; height: 100%; display: block; }
+.svg-art--bleed { overflow: visible; }
+
+.motif { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.st-cy { stroke: var(--cyan); stroke-width: 2.4; filter: drop-shadow(0 0 5px rgba(45,225,244,.55)); }
+.st-bl { stroke: var(--cyan-3); stroke-width: 1.6; opacity: .75; filter: drop-shadow(0 0 5px rgba(76,111,255,.45)); }
+.st-mg { stroke: var(--magenta); stroke-width: 3; filter: drop-shadow(0 0 7px rgba(255,45,126,.75)); }
+.st-am { stroke: var(--amber); stroke-width: 2; filter: drop-shadow(0 0 6px rgba(245,179,60,.65)); }
+.st-thin { stroke-width: 1.3; opacity: .8; }
+.st-fill { fill: currentColor; }
+.st-dim { stroke: var(--cyan); stroke-width: 1.2; opacity: .38; fill: none; }
+.motif .st-am.st-fill { color: var(--amber); fill: var(--amber); }
+.motif__sweep { transform-origin: 120px 120px; animation: sweep 6.5s linear infinite; }
+.motif__wheels circle { transform-box: fill-box; transform-origin: center; }
+
+@keyframes sweep {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ─── 5. HUD NAV ────────────────────────────────────────────── */
+.hud {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--hud-h);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 0 var(--pad);
+  background: linear-gradient(180deg, rgba(3,6,14,.94) 0%, rgba(3,6,14,.72) 70%, transparent 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+
+.hud__brand { display: flex; align-items: baseline; gap: 12px; flex-shrink: 0; }
+.hud__mark {
+  font-family: var(--f-display);
+  font-size: 15px;
+  letter-spacing: .12em;
+  color: var(--cyan);
+  text-shadow: var(--g-cy);
+}
+.hud__slash { color: var(--magenta); text-shadow: var(--g-mg); }
+.hud__word {
+  font-family: var(--f-display);
+  font-size: 11px;
+  letter-spacing: .3em;
+  color: var(--paper);
+  opacity: .78;
+}
+
+.hud__nav { display: flex; gap: 26px; }
+.hud__nav a {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 6px 0;
+  position: relative;
+  transition: color .25s ease;
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+.hud__nav a i { font-style: normal; font-size: 9px; color: var(--faint); transition: color .25s ease; }
+.hud__nav a span { transition: opacity .25s ease; }
+.hud__nav a::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 0; height: 1px;
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+  transition: width .3s cubic-bezier(.2,.8,.2,1);
+}
+.hud__nav a:hover { color: var(--paper); }
+.hud__nav a:hover i { color: var(--magenta); }
+.hud__nav a:hover::after { width: 100%; }
+.hud__nav a.is-active { color: var(--cyan); }
+.hud__nav a.is-active i { color: var(--magenta); }
+.hud__nav a.is-active::after { width: 100%; }
+
+.hud__right { display: flex; align-items: center; gap: 18px; flex-shrink: 0; }
+.hud__clock { display: flex; align-items: baseline; gap: 8px; font-size: 11px; letter-spacing: .18em; }
+.hud__clocklabel { color: var(--faint); }
+.hud__clock time { color: var(--cyan); text-shadow: 0 0 8px rgba(45,225,244,.45); }
+
+/* ─── 6. BUTTONS ────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  padding: 11px 20px;
+  border: 1px solid var(--line-2);
+  border-radius: 2px;
+  background: rgba(10,18,38,.5);
+  color: var(--paper);
+  transition: border-color .25s ease, background .25s ease, box-shadow .25s ease, color .25s ease;
+  white-space: nowrap;
+}
+.btn:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  box-shadow: 0 0 16px rgba(45,225,244,.18), inset 0 0 18px rgba(45,225,244,.06);
+}
+.btn--primary { border-color: var(--cyan); color: var(--cyan); box-shadow: var(--g-cy); }
+.btn--primary:hover { background: rgba(45,225,244,.1); }
+.btn--ghost { color: var(--muted); }
+.btn--ghost:hover { color: var(--magenta); border-color: var(--magenta); box-shadow: 0 0 16px rgba(255,45,126,.16); }
+.btn--wide { width: 100%; justify-content: center; }
+
+.btn__dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--faint);
+  transition: background .3s ease, box-shadow .3s ease;
+}
+.btn[aria-pressed="true"] .btn__dot {
+  background: var(--magenta);
+  box-shadow: 0 0 10px var(--magenta);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+.btn[aria-pressed="true"] { border-color: var(--magenta); color: var(--magenta); box-shadow: var(--g-mg); }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: .45; transform: scale(.82); }
+}
+
+/* ─── 7. HERO ───────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: calc(var(--hud-h) + 34px) var(--pad) 22px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.hero__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.hero__top {
+  position: relative;
+  z-index: 3;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 420px);
+  gap: clamp(24px, 4vw, 64px);
+  align-items: start;
+}
+.hero__col { position: relative; min-width: 0; }
+.hero__col--right { padding-top: clamp(108px, 14vh, 168px); }
+
+.hero__brand { max-width: 640px; position: relative; z-index: 2; }
+
+.hero__title {
+  font-family: var(--f-display);
+  font-weight: 400;
+  font-size: clamp(34px, 6.4vw, 92px);
+  line-height: 1.02;
+  letter-spacing: .1em;
+  margin: 0 0 14px;
+}
+.hero__word { display: block; }
+.hero__word:last-child {
+  color: transparent;
+  -webkit-text-stroke: 1.4px var(--cyan);
+  text-shadow: 0 0 22px rgba(45,225,244,.45);
+}
+
+.hero__meta {
+  font-size: 11px;
+  letter-spacing: .32em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.hero__meta::before {
+  content: "";
+  display: inline-block;
+  width: 44px; height: 1px;
+  vertical-align: middle;
+  margin-right: 14px;
+  background: var(--magenta);
+  box-shadow: 0 0 8px var(--magenta);
+}
+
+.hero__radar {
+  position: absolute;
+  left: clamp(-56px, -3.4vw, -8px);
+  top: clamp(148px, 19vh, 214px);
+  width: clamp(178px, 17vw, 254px);
+  aspect-ratio: 1;
+  opacity: .95;
+  z-index: 1;
+}
+.hero__radar .svg-art { animation: breathe 7s ease-in-out infinite; }
+.hero__radar-read {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 14px;
+  font-size: 9px;
+  letter-spacing: .16em;
+  color: var(--faint);
+  margin-top: 8px;
+  padding: 0 4px;
+}
+.hero__radar-read span { white-space: nowrap; }
+
+@keyframes breathe {
+  0%, 100% { opacity: .78; filter: saturate(.9); }
+  50%      { opacity: 1;   filter: saturate(1.25); }
+}
+
+.hero__figure {
+  position: absolute;
+  right: clamp(-24px, -1vw, 0px);
+  top: 0;
+  width: clamp(126px, 13vw, 196px);
+  aspect-ratio: 1;
+  opacity: .85;
+  z-index: 1;
+}
+.hero__figure .svg-art { animation: breathe 9s ease-in-out infinite reverse; }
+
+.hero__statement {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+}
+
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.eyebrow__idx {
+  color: var(--magenta);
+  text-shadow: var(--g-mg);
+  font-weight: 700;
+}
+.eyebrow::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--line-2), transparent);
+}
+
+.hero__lede {
+  color: var(--paper);
+  opacity: .85;
+  font-size: 14px;
+  line-height: 1.8;
+  margin-bottom: 22px;
+  max-width: 46ch;
+  text-shadow: 0 2px 14px rgba(3,6,14,.92), 0 0 26px rgba(3,6,14,.7);
+}
+
+.hero__actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 26px; }
+
+.hero__specs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.hero__specs dt {
+  font-size: 9px;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 3px;
+}
+.hero__specs dd {
+  font-size: 12px;
+  letter-spacing: .06em;
+  color: var(--cyan);
+  text-shadow: 0 0 10px rgba(45,225,244,.3);
+}
+
+/* stage: spectrum + vehicle + wave */
+.hero__stage {
+  position: relative;
+  z-index: 2;
+  height: clamp(276px, 34vh, 380px);
+  margin: 0 calc(var(--pad) * -1);
+  pointer-events: none;
+}
+.hero__spectrum {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 26%;
+  width: 100%;
+  height: 70%;
+}
+.hero__wave {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 1%;
+  width: 100%;
+  height: 26%;
+}
+.hero__vehicle {
+  position: absolute;
+  left: 50%;
+  bottom: 17%;
+  transform: translateX(-50%);
+  width: min(440px, 34vw);
+  height: auto;
+  aspect-ratio: 700 / 350;
+  filter: drop-shadow(0 0 26px rgba(255,45,126,.34));
+}
+.hero__vehicle .motif__wheels circle { animation: roll 9s linear infinite; }
+.hero__vehicle .st-am { animation: headlamp 4.5s ease-in-out infinite; }
+
+@keyframes roll { to { transform: rotate(360deg); } }
+@keyframes headlamp {
+  0%, 100% { opacity: .18; }
+  50%      { opacity: .5; }
+}
+
+.hero__foot {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  font-size: 9.5px;
+  letter-spacing: .26em;
+  color: var(--faint);
+  padding-top: 14px;
+  border-top: 1px solid var(--line-dim);
+}
+.hero__coords { color: var(--faint); }
+.hero__accent { color: var(--amber); text-shadow: 0 0 12px rgba(245,179,60,.35); }
+.hero__scroll { display: flex; align-items: center; gap: 10px; }
+.hero__scroll-line {
+  display: inline-block;
+  width: 54px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cyan));
+  box-shadow: 0 0 8px var(--cyan);
+  position: relative;
+  overflow: hidden;
+}
+.hero__scroll-line::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--paper);
+  animation: scrollrun 2.4s ease-in-out infinite;
+}
+@keyframes scrollrun {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ─── 8. SECTION SHELL ──────────────────────────────────────── */
+.section { position: relative; z-index: 2; padding: clamp(80px, 12vh, 150px) 0; }
+
+.sechead { max-width: 760px; margin-bottom: clamp(38px, 5vh, 64px); }
+.sectitle {
+  font-family: var(--f-display);
+  font-weight: 400;
+  font-size: clamp(24px, 3.4vw, 46px);
+  line-height: 1.14;
+  letter-spacing: .03em;
+  margin-bottom: 18px;
+}
+.sectitle em {
+  font-style: normal;
+  color: transparent;
+  -webkit-text-stroke: 1.1px var(--magenta);
+  text-shadow: 0 0 20px rgba(255,45,126,.4);
+}
+.sechead__note {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.85;
+  max-width: 62ch;
+}
+
+/* ─── 9. PANELS ─────────────────────────────────────────────── */
+.panel {
+  position: relative;
+  border: 1px solid var(--line);
+  background: linear-gradient(160deg, rgba(10,18,38,.72), rgba(6,11,26,.55));
+  padding: 22px;
+  border-radius: 3px;
+}
+.panel::before {
+  content: "";
+  position: absolute;
+  top: -1px; left: -1px;
+  width: 26px; height: 26px;
+  border-top: 1px solid var(--cyan);
+  border-left: 1px solid var(--cyan);
+  opacity: .7;
+}
+.panel::after {
+  content: "";
+  position: absolute;
+  bottom: -1px; right: -1px;
+  width: 26px; height: 26px;
+  border-bottom: 1px solid var(--magenta);
+  border-right: 1px solid var(--magenta);
+  opacity: .55;
+}
+.panel__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--line-dim);
+}
+.panel__tag {
+  font-size: 9.5px;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.panel__state {
+  font-size: 9.5px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border: 1px solid var(--line-dim);
+  padding: 3px 9px;
+  border-radius: 2px;
+}
+.panel__state--live { color: var(--magenta); border-color: rgba(255,45,126,.4); text-shadow: var(--g-mg); }
+.panel__foot {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-dim);
+  font-size: 9px;
+  letter-spacing: .2em;
+  color: var(--faint);
+}
+
+/* ─── 10. SIGNAL ────────────────────────────────────────────── */
+.signal-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.readout {
+  padding: 6px 0 22px;
+  text-align: center;
+}
+.readout__freq {
+  font-family: var(--f-display);
+  font-size: clamp(46px, 7vw, 76px);
+  line-height: 1;
+  letter-spacing: .02em;
+  color: var(--cyan);
+  text-shadow: var(--g-cy);
+  font-variant-numeric: tabular-nums;
+}
+.readout__freq em {
+  font-style: normal;
+  font-size: 13px;
+  letter-spacing: .24em;
+  color: var(--muted);
+  margin-left: 10px;
+  text-shadow: none;
+}
+.readout__sub {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 9.5px;
+  letter-spacing: .26em;
+  color: var(--faint);
+}
+.readout__sub .sep { width: 4px; height: 4px; background: var(--magenta); border-radius: 50%; box-shadow: var(--g-mg); }
+
+.tuner { position: relative; display: block; margin: 0 0 22px; }
+.tuner__scale {
+  position: relative;
+  display: block;
+  height: 13px;
+  font-size: 9px;
+  letter-spacing: .12em;
+  color: var(--faint);
+  margin-bottom: 8px;
+}
+.tuner__scale i {
+  position: absolute;
+  left: var(--p);
+  transform: translateX(-50%);
+  font-style: normal;
+}
+.tuner__scale i:nth-child(3) { color: var(--magenta); }
+
+.tuner input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 30px;
+  background: transparent;
+  cursor: pointer;
+  display: block;
+}
+.tuner input[type="range"]::-webkit-slider-runnable-track {
+  height: 2px;
+  background: linear-gradient(90deg, var(--cyan), var(--cyan-3) 50%, var(--magenta));
+  box-shadow: 0 0 10px rgba(45,225,244,.3);
+}
+.tuner input[type="range"]::-moz-range-track {
+  height: 2px;
+  background: linear-gradient(90deg, var(--cyan), var(--cyan-3) 50%, var(--magenta));
+}
+.tuner input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 4px;
+  height: 26px;
+  margin-top: -12px;
+  border-radius: 1px;
+  background: var(--paper);
+  box-shadow: 0 0 12px rgba(220,233,245,.9);
+}
+.tuner input[type="range"]::-moz-range-thumb {
+  width: 4px; height: 26px;
+  border: 0; border-radius: 1px;
+  background: var(--paper);
+  box-shadow: 0 0 12px rgba(220,233,245,.9);
+}
+.tuner__cursor {
+  position: absolute;
+  top: 20px;
+  left: 47.5%;
+  width: 1px; height: 20px;
+  background: var(--magenta);
+  box-shadow: 0 0 8px var(--magenta);
+  pointer-events: none;
+  transform: translateX(-50%);
+  transition: left .06s linear;
+}
+
+.modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 18px; }
+.mode {
+  font-size: 9.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  padding: 10px 4px;
+  border: 1px solid var(--line-dim);
+  border-radius: 2px;
+  color: var(--muted);
+  transition: all .25s ease;
+}
+.mode:hover { color: var(--paper); border-color: var(--line-2); }
+.mode.is-active {
+  color: var(--cyan);
+  border-color: var(--cyan);
+  background: rgba(45,225,244,.07);
+  box-shadow: inset 0 0 16px rgba(45,225,244,.08);
+}
+
+.meter {
+  position: relative;
+  border: 1px solid var(--line-dim);
+  background: rgba(3,6,14,.55);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.meter canvas { width: 100%; height: 260px; }
+.meter__hud {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 12px;
+  font-size: 9px;
+  letter-spacing: .2em;
+  color: var(--faint);
+  pointer-events: none;
+}
+.meter__hud b { color: var(--cyan); font-weight: 400; }
+
+.meter__legend {
+  display: flex;
+  gap: 20px;
+  margin-top: 14px;
+  font-size: 9px;
+  letter-spacing: .2em;
+  color: var(--faint);
+}
+.meter__legend li { display: flex; align-items: center; gap: 8px; }
+.sw { width: 10px; height: 10px; border-radius: 1px; display: inline-block; }
+.sw--cy { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+.sw--mg { background: var(--magenta); box-shadow: 0 0 8px var(--magenta); }
+.sw--am { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+
+.sigstats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line-dim);
+}
+.sigstats span {
+  display: block;
+  font-size: 8.5px;
+  letter-spacing: .24em;
+  color: var(--faint);
+  margin-bottom: 5px;
+}
+.sigstats b {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: .1em;
+  color: var(--paper);
+}
+
+/* ─── 11. LINEUP ────────────────────────────────────────────── */
+.lineup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 40px;
+}
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border: 1px solid var(--line);
+  background: linear-gradient(165deg, rgba(10,18,38,.7), rgba(6,11,26,.45));
+  padding: 26px 22px 22px;
+  border-radius: 3px;
+  transition: border-color .3s ease, transform .3s ease, box-shadow .3s ease;
+  overflow: hidden;
+}
+.card:hover {
+  border-color: var(--line-2);
+  transform: translateY(-4px);
+  box-shadow: 0 18px 46px rgba(0,0,0,.5), 0 0 30px rgba(45,225,244,.06);
+}
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 1px;
+  background: linear-gradient(90deg, var(--cyan), transparent 60%);
+  opacity: .5;
+}
+.card__num {
+  position: absolute;
+  top: 16px; right: 20px;
+  font-family: var(--f-display);
+  font-size: 26px;
+  color: rgba(45,225,244,.16);
+}
+.card__title {
+  font-family: var(--f-display);
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: .1em;
+  margin-bottom: 12px;
+}
+.card__meta {
+  font-size: 9px;
+  letter-spacing: .18em;
+  color: var(--magenta);
+  margin-bottom: 14px;
+}
+.card__body { font-size: 13px; line-height: 1.8; color: var(--muted); margin-bottom: 18px; }
+.card__tag { margin-top: auto; }
+.card__tag {
+  display: inline-block;
+  font-size: 8.5px;
+  letter-spacing: .24em;
+  padding: 4px 10px;
+  border: 1px solid var(--line-2);
+  border-radius: 2px;
+  color: var(--cyan);
+}
+
+.schedule { border: 1px solid var(--line); border-radius: 3px; overflow: hidden; }
+.schedule__row {
+  display: grid;
+  grid-template-columns: 110px 1.4fr 1fr 1.2fr 110px;
+  gap: 14px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line-dim);
+  font-size: 11.5px;
+  letter-spacing: .08em;
+  color: var(--muted);
+  align-items: center;
+}
+.schedule__row:last-child { border-bottom: 0; }
+.schedule__row--head {
+  font-size: 9px;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--faint);
+  background: rgba(45,225,244,.03);
+}
+.sch-title { color: var(--paper); letter-spacing: .12em; }
+.sch-live { font-size: 9px; letter-spacing: .2em; color: var(--faint); text-align: right; }
+.sch-live.is-now {
+  color: var(--magenta);
+  text-shadow: var(--g-mg);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+/* ─── 12. MATRIX ────────────────────────────────────────────── */
+.matrix-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+.panel--motifs { grid-column: span 2; }
+.panel--rules { grid-column: span 2; }
+
+.swatches { display: flex; flex-direction: column; gap: 8px; }
+.swatch {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line-dim);
+  border-radius: 2px;
+  transition: border-color .25s ease, background .25s ease;
+}
+.swatch:hover { border-color: var(--cyan); background: rgba(45,225,244,.05); }
+.swatch i {
+  width: 34px; height: 34px;
+  background: var(--c);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 2px;
+  box-shadow: 0 0 18px color-mix(in srgb, var(--c) 45%, transparent);
+  flex-shrink: 0;
+}
+.swatch__name { flex: 1; text-align: left; font-size: 12.5px; letter-spacing: .1em; }
+.swatch__hex { font-size: 10px; letter-spacing: .14em; color: var(--faint); }
+
+.specimen { display: flex; gap: 20px; align-items: center; padding-bottom: 20px; }
+.specimen + .specimen { padding-top: 20px; border-top: 1px solid var(--line-dim); }
+.specimen__sample {
+  font-family: var(--f-display);
+  font-size: 68px;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1.2px var(--cyan);
+  text-shadow: 0 0 24px rgba(45,225,244,.35);
+  flex-shrink: 0;
+}
+.specimen--mono .specimen__sample {
+  -webkit-text-stroke: 1px var(--magenta);
+  text-shadow: 0 0 22px rgba(255,45,126,.3);
+}
+.specimen__meta { min-width: 0; }
+.specimen__name {
+  font-family: var(--f-display);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: .1em;
+  margin-bottom: 4px;
+}
+.specimen__desc { font-size: 9.5px; letter-spacing: .18em; color: var(--magenta); margin-bottom: 10px; }
+.specimen__line { font-size: 11px; line-height: 1.8; color: var(--muted); letter-spacing: .06em; }
+
+.motifgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+}
+.motifcard {
+  border: 1px solid var(--line-dim);
+  border-radius: 2px;
+  padding: 16px 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color .3s ease, background .3s ease;
+}
+.motifcard:hover { border-color: var(--line-2); background: rgba(45,225,244,.03); }
+.motifcard .svg-art { width: 100%; height: 96px; overflow: visible; }
+.motifcard figcaption {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 10px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--paper);
+}
+.motifcard figcaption span { color: var(--faint); font-size: 9px; }
+
+.rules {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 44px;
+  counter-reset: rule;
+}
+.rules li {
+  position: relative;
+  padding-left: 34px;
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--muted);
+  counter-increment: rule;
+}
+.rules li::before {
+  content: counter(rule, decimal-leading-zero);
+  position: absolute;
+  left: 0; top: 1px;
+  font-size: 10px;
+  letter-spacing: .1em;
+  color: var(--cyan);
+  opacity: .75;
+}
+.rules b { color: var(--paper); font-weight: 500; }
+
+/* ─── 13. ARCHIVE ───────────────────────────────────────────── */
+.log { border: 1px solid var(--line); border-radius: 3px; overflow: hidden; }
+.log__row {
+  display: grid;
+  grid-template-columns: 120px 80px 1fr 100px 100px;
+  gap: 14px;
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--line-dim);
+  font-size: 11.5px;
+  letter-spacing: .06em;
+  color: var(--muted);
+  align-items: center;
+  transition: background .25s ease, color .25s ease;
+}
+.log__row:last-child { border-bottom: 0; }
+.log__row:not(.log__row--head):hover { background: rgba(45,225,244,.035); color: var(--paper); }
+.log__row--head {
+  font-size: 9px;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--faint);
+  background: rgba(45,225,244,.03);
+}
+.log__t { color: var(--paper); letter-spacing: .1em; }
+.log__hash { color: var(--magenta); }
+
+.cta {
+  margin-top: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 22px 24px;
+  border: 1px dashed var(--line-2);
+  border-radius: 3px;
+}
+.cta p { font-size: 9.5px; letter-spacing: .22em; color: var(--faint); }
+
+/* ─── 14. FOOTER ────────────────────────────────────────────── */
+.foot {
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+  padding: 70px 0 30px;
+  border-top: 1px solid var(--line);
+  background: linear-gradient(180deg, transparent, rgba(45,225,244,.035));
+}
+.foot__word {
+  font-family: var(--f-display);
+  font-size: clamp(26px, 5.6vw, 88px);
+  line-height: .9;
+  letter-spacing: .04em;
+  text-align: center;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(45,225,244,.32);
+  margin-bottom: 50px;
+  white-space: nowrap;
+}
+.foot__cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 30px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--line-dim);
+}
+.foot__col p {
+  font-size: 12px;
+  line-height: 2;
+  color: var(--muted);
+  margin-top: 12px;
+}
+.foot__col a { color: var(--cyan); transition: color .25s ease; }
+.foot__col a:hover { color: var(--magenta); }
+.foot__base {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-top: 24px;
+  font-size: 9px;
+  letter-spacing: .22em;
+  color: var(--faint);
+}
+
+/* ─── 15. TOAST ─────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 34px;
+  transform: translate(-50%, 20px);
+  padding: 11px 20px;
+  border: 1px solid var(--cyan);
+  border-radius: 2px;
+  background: rgba(6,11,26,.96);
+  color: var(--cyan);
+  font-size: 10px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  box-shadow: var(--g-cy);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s ease, transform .3s ease;
+  z-index: 120;
+}
+.toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+
+/* ─── 16. REVEAL ────────────────────────────────────────────── */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1);
+}
+.js .reveal.is-in { opacity: 1; transform: none; }
+
+/* ─── 17. RESPONSIVE ────────────────────────────────────────── */
+@media (max-width: 1240px) {
+  .hud__word { display: none; }
+  .hud__nav { gap: 18px; }
+}
+
+@media (max-width: 1080px) {
+  .hero__top {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  .hero__col--right { padding-top: 0; }
+  .hero__statement { width: min(460px, 100%); }
+  .hero__radar {
+    position: static;
+    width: 200px;
+    margin: 26px 0 8px;
+    opacity: .85;
+  }
+  .hero__figure { display: none; }
+  .signal-grid { grid-template-columns: 1fr; }
+  .matrix-layout { grid-template-columns: 1fr; }
+  .panel--motifs, .panel--rules { grid-column: auto; }
+  .rules { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 900px) {
+  .hud__clock { display: none; }
+}
+
+@media (max-width: 760px) {
+  :root { --hud-h: 56px; }
+  .hud { gap: 10px; padding: 0 18px; }
+  .hud__nav { gap: 16px; }
+  .hud__nav a { font-size: 10px; letter-spacing: .1em; }
+  .hud__nav a span { display: none; }
+  .hud__nav a i { font-size: 11px; letter-spacing: .06em; }
+  .hud__nav a.is-active i { color: var(--magenta); }
+  .btn { padding: 10px 15px; font-size: 10px; letter-spacing: .16em; }
+  .hero { min-height: auto; padding-bottom: 30px; }
+  .hero__radar { width: 172px; }
+  .hero__radar-read { font-size: 7.5px; letter-spacing: .08em; gap: 2px 9px; }
+  .hero__stage { height: 300px; }
+  .hero__spectrum { bottom: 24%; height: 62%; }
+  .hero__vehicle { width: 74vw; bottom: 21%; }
+  .hero__foot { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .hero__scroll { display: none; }
+  .schedule__row { grid-template-columns: 64px 1fr 88px; font-size: 10.5px; }
+  .schedule__row > *:nth-child(3),
+  .schedule__row > *:nth-child(4) { display: none; }
+  .log__row { grid-template-columns: 88px 60px 1fr; font-size: 10.5px; }
+  .log__row > *:nth-child(4),
+  .log__row > *:nth-child(5) { display: none; }
+  .sigstats { grid-template-columns: repeat(2, 1fr); }
+  .specimen { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .specimen__sample { font-size: 46px; }
+  .foot__word { white-space: normal; }
+  .cta { flex-direction: column; align-items: flex-start; }
+}
+
+@media (max-width: 560px) {
+  .hud__nav { gap: 12px; }
+  .meter canvas { height: 210px; }
+  .meter__legend { flex-direction: column; gap: 8px; }
+  .modes { grid-template-columns: 1fr; }
+  .readout__freq { font-size: 52px; }
+}
+
+/* ─── 18. REDUCED MOTION ────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+  .js .reveal { opacity: 1; transform: none; }
+}
+
+/* ─── 19. PRINT ─────────────────────────────────────────────── */
+@media print {
+  .hud, .fx-scanlines, .fx-grain, .fx-vignette, .hero__bg, .toast { display: none !important; }
+  body { background: #fff; color: #000; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════ SVG GRADIENT DEFS ══════════════════════════ -->
+<svg class="svg-defs" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="grad-sweep" x1="120" y1="120" x2="210" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2DE1F4" stop-opacity=".55" />
+      <stop offset="1" stop-color="#2DE1F4" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+</svg>
+
+<!-- ══════════════════════════ FILM OVERLAYS ══════════════════════════ -->
+<div class="fx-scanlines" aria-hidden="true"></div>
+<div class="fx-grain" aria-hidden="true"></div>
+<div class="fx-vignette" aria-hidden="true"></div>
+
+<!-- ══════════════════════════ HUD NAV ══════════════════════════ -->
+<header class="hud" id="hud">
+  <a class="hud__brand" href="#top" aria-label="Blue Dimension — home">
+    <span class="hud__mark">BD<span class="hud__slash">//</span></span>
+    <span class="hud__word">BLUE&nbsp;DIMENSION</span>
+  </a>
+
+  <nav class="hud__nav" aria-label="Primary">
+    <a href="#signal" data-nav><i>01</i><span>Signal</span></a>
+    <a href="#lineup" data-nav><i>02</i><span>Lineup</span></a>
+    <a href="#matrix" data-nav><i>03</i><span>Matrix</span></a>
+    <a href="#archive" data-nav><i>04</i><span>Archive</span></a>
+  </nav>
+
+  <div class="hud__right">
+    <div class="hud__clock" aria-label="Zürich local time">
+      <span class="hud__clocklabel">ZRH</span>
+      <time id="zrh-clock" datetime="">--:--:--</time>
+    </div>
+    <button class="btn btn--live" id="hud-tune" data-tune aria-pressed="false">
+      <span class="btn__dot" aria-hidden="true"></span>
+      <span class="btn__label" data-tune-label>Tune&nbsp;In</span>
+    </button>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ══════════════════════════ HERO ══════════════════════════ -->
+<section class="hero">
+  <canvas class="hero__bg" id="fx-grid" aria-hidden="true"></canvas>
+
+  <div class="hero__top">
+    <div class="hero__col hero__col--left">
+      <div class="hero__brand">
+        <h1 class="hero__title">
+          <span class="hero__word">BLUE</span>
+          <span class="hero__word">DIMENSION</span>
+        </h1>
+        <p class="hero__meta">ZÜRICH · SIGNAL 97.5 MHz · EST. 1997</p>
+      </div>
+
+      <!-- RADAR DISC -->
+      <div class="hero__radar" aria-hidden="true">
+        <svg class="svg-art" viewBox="0 0 240 240">
+          <g class="motif">
+            <circle class="st-cy" cx="120" cy="120" r="104" />
+            <circle class="st-bl" cx="120" cy="120" r="80" />
+            <circle class="st-mg" cx="120" cy="120" r="52" />
+            <g class="st-dim">
+              <path d="M120 2 V24 M120 216 V238 M2 120 H24 M216 120 H238" />
+              <path d="M120 44 V54 M120 186 V196 M44 120 H54 M186 120 H196" />
+            </g>
+            <g class="motif__sweep">
+              <path d="M120 120 L120 16 A104 104 0 0 1 194 47 Z" fill="url(#grad-sweep)" />
+              <path class="st-cy" d="M120 120 L120 16" />
+            </g>
+            <circle class="st-am st-fill" cx="120" cy="120" r="9" />
+          </g>
+        </svg>
+        <div class="hero__radar-read mono">
+          <span>AZ 047.3°</span><span>RNG 12.4</span><span>SWP 4.2</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero__col hero__col--right">
+      <!-- HALO FIGURE -->
+      <div class="hero__figure" aria-hidden="true">
+        <svg class="svg-art" viewBox="0 0 240 240">
+          <g class="motif">
+            <circle class="st-cy" cx="120" cy="74" r="43" />
+            <path class="st-cy st-thin" d="M120 20 A54 54 0 0 1 120 128" />
+            <path class="st-cy" d="M120 122 V198" />
+            <path class="st-cy" d="M68 198 A54 54 0 0 1 172 198" />
+            <path class="st-cy st-thin" d="M94 142 L78 180 M146 142 L162 180" />
+          </g>
+        </svg>
+      </div>
+
+      <div class="hero__statement">
+      <p class="eyebrow"><span class="eyebrow__idx">00</span>Transmission</p>
+      <p class="hero__lede">
+        A reference visual matrix for night-drive radio out of Zürich.
+        Signal since 1997 — one frequency, one continuous mood, rendered
+        as light on a dark road.
+      </p>
+      <div class="hero__actions">
+        <button class="btn btn--primary" data-tune aria-pressed="false">
+          <span class="btn__dot" aria-hidden="true"></span>
+          <span class="btn__label" data-tune-label>Tune In</span>
+        </button>
+        <a class="btn btn--ghost" href="#matrix">View the Matrix</a>
+      </div>
+      <dl class="hero__specs">
+        <div><dt>Carrier</dt><dd>97.5 MHz FM</dd></div>
+        <div><dt>Origin</dt><dd>Zürich, CH</dd></div>
+        <div><dt>Schedule</dt><dd>22:00 → 06:00 CET</dd></div>
+        <div><dt>Format</dt><dd>Ambient / Dub / Techno</dd></div>
+      </dl>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero__stage">
+    <canvas class="hero__spectrum" id="fx-spectrum" aria-hidden="true"></canvas>
+
+    <!-- THREE-AXLE VEHICLE -->
+    <div class="hero__vehicle" aria-hidden="true">
+      <svg class="svg-art svg-art--bleed" viewBox="-60 -60 700 350">
+        <g class="motif">
+          <path class="st-mg car__body" d="M24 176 L92 84 L168 84 L182 26 L330 18 L334 138 L528 152 L606 188 L612 194 Z" />
+          <path class="st-mg car__chassis" d="M118 220 L498 228" />
+          <path class="st-mg car__mast" d="M250 22 V-34" />
+          <path class="st-mg car__mast" d="M234 -10 H266 M236 -22 H264" />
+          <circle class="st-am st-fill" cx="42" cy="172" r="6" />
+          <g class="motif__wheels">
+            <circle class="st-mg" cx="118" cy="220" r="42" />
+            <circle class="st-mg" cx="308" cy="224" r="42" />
+            <circle class="st-mg" cx="498" cy="228" r="42" />
+            <circle class="st-mg st-thin" cx="118" cy="220" r="14" />
+            <circle class="st-mg st-thin" cx="308" cy="224" r="14" />
+            <circle class="st-mg st-thin" cx="498" cy="228" r="14" />
+          </g>
+        </g>
+      </svg>
+    </div>
+
+    <canvas class="hero__wave" id="fx-wave" aria-hidden="true"></canvas>
+  </div>
+
+  <div class="hero__foot">
+    <div class="hero__coords mono">47.3769° N / 8.5417° E · ALT 408 M</div>
+    <div class="hero__scroll mono"><span class="hero__scroll-line"></span>SCROLL</div>
+    <div class="hero__accent mono">J·J // IDENTITY ACCENT</div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ SIGNAL ══════════════════════════ -->
+<section class="section section--signal" id="signal">
+  <div class="wrap">
+    <header class="sechead reveal">
+      <p class="eyebrow"><span class="eyebrow__idx">01</span>Live Signal</p>
+      <h2 class="sectitle">The carrier is <em>always</em> warm.</h2>
+      <p class="sechead__note">
+        A generative broadcast engine running entirely in your browser —
+        three detuned voices, a resonant filter and a noise bed, all built
+        from oscillators. Tune it and watch the skyline answer in real time.
+      </p>
+    </header>
+
+    <div class="signal-grid">
+      <!-- TUNER -->
+      <div class="panel panel--tuner reveal">
+        <div class="panel__head">
+          <span class="panel__tag">RECEIVER / RX-97</span>
+          <span class="panel__state" id="rx-state">STANDBY</span>
+        </div>
+
+        <div class="readout">
+          <div class="readout__freq">
+            <span id="freq-val">97.5</span><em>MHz</em>
+          </div>
+          <div class="readout__sub mono">
+            <span>STEREO</span><span class="sep"></span><span id="rx-lock">NO LOCK</span>
+          </div>
+        </div>
+
+        <label class="tuner" for="freq">
+          <span class="tuner__scale mono">
+            <i style="--p:0%">88</i><i style="--p:20%">92</i><i style="--p:47.5%">97.5</i><i style="--p:70%">102</i><i style="--p:100%">108</i>
+          </span>
+          <input type="range" id="freq" min="88" max="108" step="0.1" value="97.5"
+                 aria-label="Frequency tuner, 88 to 108 megahertz" />
+          <span class="tuner__cursor" id="freq-cursor" aria-hidden="true"></span>
+        </label>
+
+        <div class="modes" role="group" aria-label="Broadcast mode">
+          <button class="mode is-active" data-mode="night">Night Drive</button>
+          <button class="mode" data-mode="ambient">Ambient</button>
+          <button class="mode" data-mode="archive">Archive</button>
+        </div>
+
+        <button class="btn btn--primary btn--wide" data-tune aria-pressed="false">
+          <span class="btn__dot" aria-hidden="true"></span>
+          <span class="btn__label" data-tune-label>Tune In</span>
+        </button>
+
+        <p class="panel__foot mono">
+          AUDIO IS GENERATED LOCALLY · NO STREAM · HEADPHONES RECOMMENDED
+        </p>
+      </div>
+
+      <!-- METER -->
+      <div class="panel panel--meter reveal">
+        <div class="panel__head">
+          <span class="panel__tag">SPECTRUM / 24 BAND</span>
+          <span class="panel__state panel__state--live" id="meter-state">IDLE</span>
+        </div>
+
+        <div class="meter">
+          <canvas id="fx-meter" aria-label="Live spectrum analyser"></canvas>
+          <div class="meter__hud mono">
+            <span>PEAK <b id="peak-val">-∞</b> dB</span>
+            <span>RMS <b id="rms-val">-∞</b> dB</span>
+            <span>FFT <b id="fft-val">512</b></span>
+          </div>
+        </div>
+
+        <ul class="meter__legend mono">
+          <li><i class="sw sw--cy"></i>PROGRAM</li>
+          <li><i class="sw sw--mg"></i>SUBCARRIER / 38 kHz</li>
+          <li><i class="sw sw--am"></i>PILOT TONE</li>
+        </ul>
+
+        <div class="sigstats">
+          <div><span>MODULATION</span><b id="stat-mod">FM</b></div>
+          <div><span>BANDWIDTH</span><b id="stat-bw">180 kHz</b></div>
+          <div><span>SNR</span><b id="stat-snr">—</b></div>
+          <div><span>UPTIME</span><b id="stat-up">00:00:00</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ LINEUP ══════════════════════════ -->
+<section class="section section--lineup" id="lineup">
+  <div class="wrap">
+    <header class="sechead reveal">
+      <p class="eyebrow"><span class="eyebrow__idx">02</span>Resident Lineup</p>
+      <h2 class="sectitle">Four chairs, one long night.</h2>
+      <p class="sechead__note">
+        The resident set. Every show is recorded live off the desk and
+        archived as a transmission — see the archive for the full log.
+      </p>
+    </header>
+
+    <div class="lineup-grid">
+      <article class="card reveal">
+        <span class="card__num">01</span>
+        <h3 class="card__title">NULL POINTER</h3>
+        <p class="card__meta mono">MON · 22:00 — 00:00 · DUB / DOWNBEAT</p>
+        <p class="card__body">
+          Bass weight and tape hiss. Long-form dub for the last stretch of
+          the A8, mixed live with two decks and no crossfades.
+        </p>
+        <span class="card__tag">RESIDENT</span>
+      </article>
+
+      <article class="card reveal">
+        <span class="card__num">02</span>
+        <h3 class="card__title">HALO DISCO</h3>
+        <p class="card__meta mono">TUE · 00:00 — 02:00 · ITALO / SPACE DISCO</p>
+        <p class="card__body">
+          Arpeggios, side-chain and a lot of chrome. The show that turned
+          the studio ceiling into a mirror.
+        </p>
+        <span class="card__tag">RESIDENT</span>
+      </article>
+
+      <article class="card reveal">
+        <span class="card__num">03</span>
+        <h3 class="card__title">KALTSTRAHL</h3>
+        <p class="card__meta mono">THU · 02:00 — 04:00 · INDUSTRIAL / EBM</p>
+        <p class="card__body">
+          Cold steel, hard clock, no apologies. Recorded to tape with the
+          machine running slightly too fast.
+        </p>
+        <span class="card__tag">RESIDENT</span>
+      </article>
+
+      <article class="card reveal">
+        <span class="card__num">04</span>
+        <h3 class="card__title">NEBEL</h3>
+        <p class="card__meta mono">SAT · 04:00 — 06:00 · AMBIENT / DRONE</p>
+        <p class="card__body">
+          Fog, headlights and a single sustained chord. The handover show,
+          broadcast while the city is still asleep.
+        </p>
+        <span class="card__tag">RESIDENT</span>
+      </article>
+    </div>
+
+    <div class="schedule reveal">
+      <div class="schedule__row schedule__row--head mono">
+        <span>Slot</span><span>Show</span><span>Host</span><span>Format</span><span>State</span>
+      </div>
+      <div class="schedule__row mono">
+        <span>22:00</span><span class="sch-title">Null Pointer</span><span>A. Vogel</span><span>Dub / Downbeat</span><span class="sch-live" data-slot="22:00">ON AIR</span>
+      </div>
+      <div class="schedule__row mono">
+        <span>00:00</span><span class="sch-title">Halo Disco</span><span>M. Rinaldi</span><span>Italo / Space</span><span class="sch-live" data-slot="00:00">ARCHIVE</span>
+      </div>
+      <div class="schedule__row mono">
+        <span>02:00</span><span class="sch-title">Kaltstrahl</span><span>J. Fischer</span><span>Industrial</span><span class="sch-live" data-slot="02:00">ARCHIVE</span>
+      </div>
+      <div class="schedule__row mono">
+        <span>04:00</span><span class="sch-title">Nebel</span><span>S. Brunner</span><span>Ambient / Drone</span><span class="sch-live" data-slot="04:00">ARCHIVE</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ MATRIX ══════════════════════════ -->
+<section class="section section--matrix" id="matrix">
+  <div class="wrap">
+    <header class="sechead reveal">
+      <p class="eyebrow"><span class="eyebrow__idx">03</span>Reference Visual Matrix</p>
+      <h2 class="sectitle">The identity, <em>fully</em> specified.</h2>
+      <p class="sechead__note">
+        Every element on this page derives from one matrix: a deep hull,
+        two neon accents, one warm pilot tone, and four geometric motifs.
+        Nothing else is allowed in.
+      </p>
+    </header>
+
+    <div class="matrix-layout">
+      <!-- PALETTE -->
+      <div class="panel panel--palette reveal">
+        <div class="panel__head"><span class="panel__tag">PALETTE / 05</span></div>
+        <ul class="swatches">
+          <li><button class="swatch" data-copy="#03060E">
+            <i style="--c:#03060E"></i>
+            <span class="swatch__name">Hull Black</span>
+            <span class="swatch__hex mono">#03060E</span>
+          </button></li>
+          <li><button class="swatch" data-copy="#2DE1F4">
+            <i style="--c:#2DE1F4"></i>
+            <span class="swatch__name">Signal Cyan</span>
+            <span class="swatch__hex mono">#2DE1F4</span>
+          </button></li>
+          <li><button class="swatch" data-copy="#FF2D7E">
+            <i style="--c:#FF2D7E"></i>
+            <span class="swatch__name">Identity Accent</span>
+            <span class="swatch__hex mono">#FF2D7E</span>
+          </button></li>
+          <li><button class="swatch" data-copy="#8B5CF6">
+            <i style="--c:#8B5CF6"></i>
+            <span class="swatch__name">Dusk Violet</span>
+            <span class="swatch__hex mono">#8B5CF6</span>
+          </button></li>
+          <li><button class="swatch" data-copy="#F5B33C">
+            <i style="--c:#F5B33C"></i>
+            <span class="swatch__name">Pilot Amber</span>
+            <span class="swatch__hex mono">#F5B33C</span>
+          </button></li>
+        </ul>
+        <p class="panel__foot mono">CLICK A CHIP TO COPY · RATIO 70 / 18 / 6 / 4 / 2</p>
+      </div>
+
+      <!-- TYPE -->
+      <div class="panel panel--type reveal">
+        <div class="panel__head"><span class="panel__tag">TYPE SPECIMEN / 02</span></div>
+        <div class="specimen">
+          <p class="specimen__sample specimen__sample--display">Aa</p>
+          <div class="specimen__meta">
+            <h3 class="specimen__name">Michroma</h3>
+            <p class="mono specimen__desc">Display · uppercase · tracking .18em</p>
+            <p class="specimen__line">ABCDEFGHIJKLMNOPQRSTUVWXYZ<br />0123456789 // &amp;@#</p>
+          </div>
+        </div>
+        <div class="specimen specimen--mono">
+          <p class="specimen__sample specimen__sample--mono">Aa</p>
+          <div class="specimen__meta">
+            <h3 class="specimen__name">JetBrains Mono</h3>
+            <p class="mono specimen__desc">Data · micro-copy · tracking .22em</p>
+            <p class="specimen__line">signal 97.5 mhz — zürich / ch<br />est. 1997 — transmission active</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- MOTIFS -->
+      <div class="panel panel--motifs reveal">
+        <div class="panel__head"><span class="panel__tag">MOTIF LIBRARY / 05</span></div>
+        <div class="motifgrid">
+
+          <figure class="motifcard">
+            <svg class="svg-art" viewBox="0 0 240 240">
+              <g class="motif">
+                <circle class="st-cy" cx="120" cy="120" r="104" />
+                <circle class="st-bl" cx="120" cy="120" r="80" />
+                <circle class="st-mg" cx="120" cy="120" r="52" />
+                <g class="st-dim">
+                  <path d="M120 2 V24 M120 216 V238 M2 120 H24 M216 120 H238" />
+                </g>
+                <circle class="st-am st-fill" cx="120" cy="120" r="9" />
+              </g>
+            </svg>
+            <figcaption><b>Radar</b><span class="mono">M-01</span></figcaption>
+          </figure>
+
+          <figure class="motifcard">
+            <svg class="svg-art" viewBox="0 0 240 240">
+              <g class="motif">
+                <circle class="st-cy" cx="120" cy="74" r="43" />
+                <path class="st-cy st-thin" d="M120 20 A54 54 0 0 1 120 128" />
+                <path class="st-cy" d="M120 122 V198" />
+                <path class="st-cy" d="M68 198 A54 54 0 0 1 172 198" />
+                <path class="st-cy st-thin" d="M94 142 L78 180 M146 142 L162 180" />
+              </g>
+            </svg>
+            <figcaption><b>Figure</b><span class="mono">M-02</span></figcaption>
+          </figure>
+
+          <figure class="motifcard">
+            <svg class="svg-art" viewBox="-60 -60 700 350">
+              <g class="motif">
+                <path class="st-mg car__body" d="M24 176 L92 84 L168 84 L182 26 L330 18 L334 138 L528 152 L606 188 L612 194 Z" />
+                <path class="st-mg car__chassis" d="M118 220 L498 228" />
+                <path class="st-mg car__mast" d="M250 22 V-34" />
+                <path class="st-mg car__mast" d="M234 -10 H266 M236 -22 H264" />
+                <g class="motif__wheels">
+                  <circle class="st-mg" cx="118" cy="220" r="42" />
+                  <circle class="st-mg" cx="308" cy="224" r="42" />
+                  <circle class="st-mg" cx="498" cy="228" r="42" />
+                  <circle class="st-mg st-thin" cx="118" cy="220" r="14" />
+                  <circle class="st-mg st-thin" cx="308" cy="224" r="14" />
+                  <circle class="st-mg st-thin" cx="498" cy="228" r="14" />
+                </g>
+              </g>
+            </svg>
+            <figcaption><b>Vehicle</b><span class="mono">M-03</span></figcaption>
+          </figure>
+
+          <figure class="motifcard">
+            <svg class="svg-art" viewBox="0 0 240 240">
+              <g class="motif">
+                <circle class="st-cy st-thin" cx="120" cy="120" r="30" />
+                <circle class="st-cy st-thin" cx="120" cy="120" r="62" />
+                <circle class="st-cy st-thin" cx="120" cy="120" r="94" />
+                <circle class="st-cy st-thin" cx="120" cy="120" r="118" />
+              </g>
+            </svg>
+            <figcaption><b>Rings</b><span class="mono">M-04</span></figcaption>
+          </figure>
+
+          <figure class="motifcard">
+            <svg class="svg-art" viewBox="0 0 240 80">
+              <g class="motif">
+                <path class="st-cy st-thin" d="M0 40 C20 4 40 4 60 40 C80 76 100 76 120 40 C140 4 160 4 180 40 C200 76 220 76 240 40" />
+              </g>
+            </svg>
+            <figcaption><b>Ribbon</b><span class="mono">M-05</span></figcaption>
+          </figure>
+
+        </div>
+      </div>
+
+      <!-- RULES -->
+      <div class="panel panel--rules reveal">
+        <div class="panel__head"><span class="panel__tag">APPLICATION RULES</span></div>
+        <ol class="rules">
+          <li><b>Glow is structural.</b> Never a drop shadow on type — the neon is drawn by the stroke itself.</li>
+          <li><b>Two accents only.</b> Cyan carries signal, magenta carries identity. Amber only as a pilot tone.</li>
+          <li><b>Everything is a line.</b> Outlines, never fills — the matrix is drawn, not painted.</li>
+          <li><b>Dark by default.</b> The hull is the interface; light is the content.</li>
+          <li><b>Motion decays.</b> Glow fades as motion slows. Nothing pulses for decoration alone.</li>
+          <li><b>Micro-copy carries the system.</b> Frequencies, coordinates, timestamps, hash marks.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ ARCHIVE ══════════════════════════ -->
+<section class="section section--archive" id="archive">
+  <div class="wrap">
+    <header class="sechead reveal">
+      <p class="eyebrow"><span class="eyebrow__idx">04</span>Transmission Log</p>
+      <h2 class="sectitle">Everything that went out.</h2>
+      <p class="sechead__note">
+        The archive is a rolling index of every broadcast since the
+        frequency was first lit. Pull a hash, get the tape.
+      </p>
+    </header>
+
+    <div class="log reveal">
+      <div class="log__row log__row--head mono">
+        <span>Date</span><span>Freq</span><span>Programme</span><span>Duration</span><span>Hash</span>
+      </div>
+      <div class="log__row mono"><span>2026-10-28</span><span>97.5</span><span class="log__t">Null Pointer — Motorway Session</span><span>118:42</span><span class="log__hash">#bd-77c1</span></div>
+      <div class="log__row mono"><span>2026-10-21</span><span>97.5</span><span class="log__t">Halo Disco — Chrome Ceiling</span><span>124:08</span><span class="log__hash">#bd-4f09</span></div>
+      <div class="log__row mono"><span>2026-10-14</span><span>97.5</span><span class="log__t">Kaltstrahl — Tape Speed</span><span>119:55</span><span class="log__hash">#bd-9ad3</span></div>
+      <div class="log__row mono"><span>2026-10-07</span><span>97.5</span><span class="log__t">Nebel — Handover</span><span>122:31</span><span class="log__hash">#bd-2e10</span></div>
+      <div class="log__row mono"><span>2026-09-30</span><span>97.5</span><span class="log__t">Null Pointer — Motorway Session</span><span>117:26</span><span class="log__hash">#bd-8814</span></div>
+      <div class="log__row mono"><span>2026-09-23</span><span>97.5</span><span class="log__t">Halo Disco — Chrome Ceiling</span><span>121:03</span><span class="log__hash">#bd-51f7</span></div>
+    </div>
+
+    <div class="cta reveal">
+      <p class="mono">REQUEST A HASH · TRANSMISSIONS ARE PRESSED TO TAPE AND NEVER REPEATED</p>
+      <a class="btn btn--ghost" href="mailto:desk@bluedimension.fm">desk@bluedimension.fm</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ══════════════════════════ FOOTER ══════════════════════════ -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__word" aria-hidden="true">BLUE DIMENSION</div>
+
+    <div class="foot__cols">
+      <div class="foot__col">
+        <span class="panel__tag">STATION</span>
+        <p>Blue Dimension<br />Night drive radio<br />Zürich, Switzerland</p>
+      </div>
+      <div class="foot__col">
+        <span class="panel__tag">SIGNAL</span>
+        <p class="mono">97.5 MHz FM<br />22:00 → 06:00 CET<br />Est. 1997</p>
+      </div>
+      <div class="foot__col">
+        <span class="panel__tag">CONTACT</span>
+        <p class="mono">
+          <a href="mailto:desk@bluedimension.fm">desk@bluedimension.fm</a><br />
+          <a href="mailto:tape@bluedimension.fm">tape@bluedimension.fm</a>
+        </p>
+      </div>
+      <div class="foot__col">
+        <span class="panel__tag">IDENTITY</span>
+        <p class="mono">J·J // IDENTITY ACCENT<br />REF VISUAL MATRIX v4.2</p>
+      </div>
+    </div>
+
+    <div class="foot__base mono">
+      <span>© 1997—2026 BLUE DIMENSION</span>
+      <span>IDENTITY BY J·J</span>
+      <span>ALL SIGNAL RESERVED</span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   BLUE DIMENSION // SIGNAL BUS
+   Generative broadcast engine + shared analyser bus.
+   Everything here is synthesised from oscillators — no streams,
+   no samples, no network.
+   ═══════════════════════════════════════════════════════════════ */
+
+(function (global) {
+  "use strict";
+
+  /* ── Shared bus: visuals read from this, audio writes to it ── */
+  var SignalBus = {
+    BANDS: 24,
+    bands: new Float32Array(24),   // 0..1 smoothed spectrum
+    raw: new Float32Array(24),     // instantaneous
+    level: 0,                      // 0..1 output level
+    rms: 0,
+    peak: 0,
+    live: false,                   // true when real audio is running
+    onUpdate: null
+  };
+
+  /* ── Tuning maps ─────────────────────────────────────────── */
+  var MODES = {
+    night: {
+      label: "NIGHT DRIVE",
+      wave: "sawtooth",
+      chord: [55.00, 82.41, 110.00, 130.81, 164.81],
+      cutoff: 1150, q: 3.2,
+      detune: 9, noise: 0.035,
+      lfoRate: 0.06, lfoDepth: 520,
+      drive: 0.0, sub: 0.22
+    },
+    ambient: {
+      label: "AMBIENT",
+      wave: "sine",
+      chord: [55.00, 82.41, 110.00, 146.83, 220.00],
+      cutoff: 720, q: 1.4,
+      detune: 4, noise: 0.055,
+      lfoRate: 0.035, lfoDepth: 260,
+      drive: 0.0, sub: 0.4
+    },
+    archive: {
+      label: "ARCHIVE",
+      wave: "square",
+      chord: [55.00, 87.31, 116.54, 130.81, 174.61],
+      cutoff: 1500, q: 6.5,
+      detune: 16, noise: 0.13,
+      lfoRate: 0.13, lfoDepth: 700,
+      drive: 0.55, sub: 0.1
+    }
+  };
+
+  function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+
+  /* ── Engine ──────────────────────────────────────────────── */
+  function DimensionRadio() {
+    this.ctx = null;
+    this.playing = false;
+    this.mode = "night";
+    this.freq = 97.5;
+    this.startedAt = 0;
+    this._nodes = null;
+    this._timer = null;
+  }
+
+  DimensionRadio.prototype.supported = function () {
+    return !!(global.AudioContext || global.webkitAudioContext);
+  };
+
+  DimensionRadio.prototype.start = function () {
+    var self = this;
+    if (this.playing) return Promise.resolve(true);
+    if (!this.supported()) return Promise.resolve(false);
+
+    var Ctx = global.AudioContext || global.webkitAudioContext;
+    var ctx = this.ctx || new Ctx();
+    this.ctx = ctx;
+
+    var resume = ctx.state === "suspended" && ctx.resume ? ctx.resume() : Promise.resolve();
+    return resume.then(function () {
+      self._build();
+      self.playing = true;
+      self.startedAt = Date.now();
+      SignalBus.live = true;
+      self._loop();
+      return true;
+    }).catch(function () { return false; });
+  };
+
+  DimensionRadio.prototype._build = function () {
+    var ctx = this.ctx;
+    var cfg = MODES[this.mode];
+
+    /* master chain ------------------------------------------------ */
+    var master = ctx.createGain();
+    master.gain.value = 0;
+
+    var analyser = ctx.createAnalyser();
+    analyser.fftSize = 512;
+    analyser.smoothingTimeConstant = 0.78;
+    analyser.minDecibels = -96;
+    analyser.maxDecibels = -12;
+
+    var shaper = ctx.createWaveShaper();
+    shaper.curve = makeDriveCurve(cfg.drive);
+    shaper.oversample = "2x";
+
+    var filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = cfg.cutoff;
+    filter.Q.value = cfg.q;
+
+    var voiceBus = ctx.createGain();
+    voiceBus.gain.value = 0.5;
+
+    var subBus = ctx.createGain();
+    subBus.gain.value = cfg.sub;
+
+    /* voices ------------------------------------------------------ */
+    var oscs = [];
+    var voices = cfg.chord.map(function (f, i) {
+      var o = ctx.createOscillator();
+      o.type = cfg.wave;
+      o.frequency.value = f;
+      o.detune.value = (i % 2 === 0 ? -1 : 1) * cfg.detune * (0.6 + i * 0.22);
+      o.connect(voiceBus);
+      o.start();
+      oscs.push(o);
+      return o;
+    });
+
+    /* sub bass ----------------------------------------------------- */
+    var sub = ctx.createOscillator();
+    sub.type = "sine";
+    sub.frequency.value = cfg.chord[0] / 2;
+    sub.connect(subBus);
+    subBus.connect(filter);
+    sub.start();
+    oscs.push(sub);
+
+    /* noise bed ---------------------------------------------------- */
+    var noise = ctx.createBufferSource();
+    noise.buffer = makeNoiseBuffer(ctx, 3);
+    noise.loop = true;
+
+    var noiseFilter = ctx.createBiquadFilter();
+    noiseFilter.type = "bandpass";
+    noiseFilter.frequency.value = 640;
+    noiseFilter.Q.value = 0.8;
+
+    var noiseGain = ctx.createGain();
+    noiseGain.gain.value = cfg.noise;
+
+    noise.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(filter);
+    noise.start();
+    oscs.push(noise);
+
+    /* filter LFO -------------------------------------------------- */
+    var lfo = ctx.createOscillator();
+    lfo.type = "sine";
+    lfo.frequency.value = cfg.lfoRate;
+
+    var lfoDepth = ctx.createGain();
+    lfoDepth.gain.value = cfg.lfoDepth;
+
+    lfo.connect(lfoDepth);
+    lfoDepth.connect(filter.frequency);
+    lfo.start();
+    oscs.push(lfo);
+
+    /* tremolo ------------------------------------------------------ */
+    var trem = ctx.createOscillator();
+    trem.type = "sine";
+    trem.frequency.value = cfg.lfoRate * 1.7;
+
+    var tremDepth = ctx.createGain();
+    tremDepth.gain.value = 0.18;
+
+    var tremBase = ctx.createGain();
+    tremBase.gain.value = 0.55;
+
+    trem.connect(tremDepth);
+    tremDepth.connect(tremBase.gain);
+    trem.start();
+    oscs.push(trem);
+
+    /* wire up ------------------------------------------------------ */
+    voiceBus.connect(filter);
+    filter.connect(shaper);
+    shaper.connect(tremBase);
+    tremBase.connect(master);
+    master.connect(analyser);
+    analyser.connect(ctx.destination);
+
+    master.gain.setTargetAtTime(0.6, ctx.currentTime, 0.9);
+
+    this._nodes = {
+      master: master, analyser: analyser, filter: filter,
+      shaper: shaper, oscs: oscs, voices: voices,
+      noiseGain: noiseGain, noiseFilter: noiseFilter,
+      lfo: lfo, lfoDepth: lfoDepth, cfg: cfg
+    };
+
+    this._applyFreq(true);
+  };
+
+  DimensionRadio.prototype._teardown = function () {
+    if (!this._nodes) return;
+    var ctx = this.ctx;
+    var n = this._nodes;
+    this._nodes = null;
+
+    try {
+      n.master.gain.cancelScheduledValues(ctx.currentTime);
+      n.master.gain.setTargetAtTime(0, ctx.currentTime, 0.25);
+    } catch (e) { /* noop */ }
+
+    setTimeout(function () {
+      n.oscs.forEach(function (o) { try { o.stop(); } catch (e) {} try { o.disconnect(); } catch (e) {} });
+      try { n.master.disconnect(); } catch (e) {}
+      try { n.analyser.disconnect(); } catch (e) {}
+    }, 900);
+  };
+
+  DimensionRadio.prototype.stop = function () {
+    if (!this.playing) return;
+    this.playing = false;
+    SignalBus.live = false;
+    if (this._timer) { clearInterval(this._timer); this._timer = null; }
+    this._teardown();
+  };
+
+  /* Frequency → timbre. Off the sweet spot the signal degrades. */
+  DimensionRadio.prototype.setFreq = function (f) {
+    this.freq = f;
+    if (this._nodes) this._applyFreq(false);
+  };
+
+  DimensionRadio.prototype._applyFreq = function (immediate) {
+    var n = this._nodes;
+    if (!n) return;
+    var ctx = this.ctx;
+    var t = ctx.currentTime;
+    var cfg = n.cfg;
+
+    /* deviation from 97.5 → 0 (locked) .. 1 (off station) */
+    var dev = Math.min(1, Math.abs(this.freq - 97.5) / 9.5);
+    var tc = immediate ? 0.08 : 0.25;
+
+    var cutoff = clamp(cfg.cutoff * (1 - dev * 0.72) + this.freq * 5.5, 220, 6000);
+    n.filter.frequency.setTargetAtTime(cutoff, t, tc);
+    n.filter.Q.setTargetAtTime(cfg.q * (1 + dev * 1.6), t, tc);
+
+    n.noiseGain.gain.setTargetAtTime(cfg.noise + dev * 0.16, t, tc);
+    n.noiseFilter.frequency.setTargetAtTime(420 + this.freq * 22, t, tc);
+
+    /* detune spread widens off-station */
+    n.voices.forEach(function (o, i) {
+      var spread = cfg.detune * (0.6 + i * 0.22) * (1 + dev * 3.4);
+      o.detune.setTargetAtTime((i % 2 === 0 ? -1 : 1) * spread, t, tc);
+    });
+
+    n.master.gain.setTargetAtTime(0.6 * (1 - dev * 0.35), t, tc);
+  };
+
+  DimensionRadio.prototype.setMode = function (m) {
+    if (!MODES[m]) return;
+    this.mode = m;
+    if (!this.playing || !this._nodes) return;
+    var ctx = this.ctx;
+    var t = ctx.currentTime;
+    var cfg = MODES[m];
+    var n = this._nodes;
+
+    n.oscs.forEach(function (o) {
+      if (o.type !== "sine" && o.frequency.value < 200) { /* lfos untouched */ }
+    });
+
+    n.voices.forEach(function (o, i) {
+      try { o.type = cfg.wave; } catch (e) {}
+      var f = cfg.chord[i % cfg.chord.length];
+      o.frequency.setTargetAtTime(f, t, 0.35);
+    });
+
+    n.filter.Q.setTargetAtTime(cfg.q, t, 0.3);
+    n.lfo.frequency.setTargetAtTime(cfg.lfoRate, t, 0.4);
+    n.lfoDepth.gain.setTargetAtTime(cfg.lfoDepth, t, 0.4);
+    n.shaper.curve = makeDriveCurve(cfg.drive);
+    n.cfg = cfg;
+    this._applyFreq(false);
+  };
+
+  DimensionRadio.prototype.modeLabel = function () {
+    return (MODES[this.mode] || MODES.night).label;
+  };
+
+  /* Analyser pump → SignalBus */
+  DimensionRadio.prototype._loop = function () {
+    var self = this;
+    var analyser = this._nodes.analyser;
+    var freq = new Uint8Array(analyser.frequencyBinCount);
+    var time = new Uint8Array(analyser.fftSize);
+    var bands = SignalBus.raw;
+
+    this._timer = setInterval(function () {
+      analyser.getByteFrequencyData(freq);
+      analyser.getByteTimeDomainData(time);
+
+      /* log-spaced band mapping */
+      var n = SignalBus.BANDS;
+      var usable = Math.floor(freq.length * 0.62);
+      for (var i = 0; i < n; i++) {
+        var lo = Math.floor(Math.pow(usable, i / n));
+        var hi = Math.max(lo + 1, Math.floor(Math.pow(usable, (i + 1) / n)));
+        var sum = 0, count = 0;
+        for (var k = lo; k < hi && k < usable; k++) { sum += freq[k]; count++; }
+        var v = count ? (sum / count) / 255 : 0;
+        /* tilt up the top end so it doesn't look flat */
+        v = Math.pow(v, 0.82) * (0.62 + i / n * 0.85);
+        bands[i] = Math.min(1, v);
+      }
+
+      /* rms / peak from time domain */
+      var sq = 0, pk = 0;
+      for (var j = 0; j < time.length; j++) {
+        var s = (time[j] - 128) / 128;
+        sq += s * s;
+        var a = Math.abs(s);
+        if (a > pk) pk = a;
+      }
+      SignalBus.rms = Math.sqrt(sq / time.length);
+      SignalBus.peak = pk;
+      SignalBus.level = Math.min(1, SignalBus.rms * 3.2);
+
+      for (var b = 0; b < SignalBus.BANDS; b++) {
+        SignalBus.bands[b] += (bands[b] - SignalBus.bands[b]) * 0.28;
+      }
+      if (SignalBus.onUpdate) SignalBus.onUpdate();
+    }, 33);
+  };
+
+  /* ── helpers ─────────────────────────────────────────────── */
+  function makeNoiseBuffer(ctx, seconds) {
+    var len = Math.floor(ctx.sampleRate * seconds);
+    var buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    var data = buf.getChannelData(0);
+    var last = 0;
+    for (var i = 0; i < len; i++) {
+      var white = Math.random() * 2 - 1;
+      last = (last + 0.02 * white) / 1.02;  /* brown-ish */
+      data[i] = last * 3.2 + white * 0.25;
+    }
+    return buf;
+  }
+
+  function makeDriveCurve(amount) {
+    var k = amount * 24;
+    var n = 1024;
+    var curve = new Float32Array(n);
+    for (var i = 0; i < n; i++) {
+      var x = (i * 2) / n - 1;
+      curve[i] = ((1 + k) * x) / (1 + k * Math.abs(x));
+    }
+    return curve;
+  }
+
+  /* ── Silent simulation: keeps visuals alive before tuning in ── */
+  function Simulation() {
+    this.t = 0;
+    this.timer = null;
+  }
+
+  Simulation.prototype.start = function () {
+    var self = this;
+    if (this.timer) return;
+    this.timer = setInterval(function () {
+      self.t += 0.016;
+      var t = self.t;
+      var scan = (Math.sin(t * 0.55) * 0.5 + 0.5);
+      for (var i = 0; i < SignalBus.BANDS; i++) {
+        var ph = i * 0.42;
+        var v =
+          0.30 +
+          0.26 * Math.sin(t * 1.25 + ph) +
+          0.16 * Math.sin(t * 2.10 + ph * 1.7) +
+          0.10 * Math.sin(t * 0.43 + ph * 0.5);
+        v *= 0.55 + 0.85 * Math.exp(-Math.pow((i / SignalBus.BANDS - scan) * 2.6, 2));
+        v = Math.max(0.04, Math.min(1, v * 1.15));
+        SignalBus.raw[i] = v;
+        SignalBus.bands[i] += (v - SignalBus.bands[i]) * 0.12;
+      }
+      SignalBus.level = 0.35 + 0.25 * Math.sin(t * 1.1);
+      SignalBus.rms = SignalBus.level * 0.3;
+      SignalBus.peak = SignalBus.level * 0.8;
+      if (SignalBus.onUpdate) SignalBus.onUpdate();
+    }, 40);
+  };
+
+  Simulation.prototype.stop = function () {
+    if (this.timer) { clearInterval(this.timer); this.timer = null; }
+  };
+
+  global.SignalBus = SignalBus;
+  global.DimensionRadio = DimensionRadio;
+  global.DimensionSimulation = Simulation;
+  global.RADIO_MODES = MODES;
+
+})(window);
+
+/* ═══════════════════════════════════════════════════════════════
+   BLUE DIMENSION // VISUAL MATRIX RENDERER
+   Canvas layers: perspective grid, spectrum skyline, wave ribbon,
+   signal meter. All driven by SignalBus.
+   ═══════════════════════════════════════════════════════════════ */
+
+(function (global) {
+  "use strict";
+
+  var bus = global.SignalBus;
+  var reduceMotion = global.matchMedia &&
+    global.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var pointer = { x: 0, y: 0, tx: 0, ty: 0 };
+
+  /* ── canvas helper ────────────────────────────────────────── */
+  function fit(canvas) {
+    var dpr = Math.min(global.devicePixelRatio || 1, 2);
+    var r = canvas.getBoundingClientRect();
+    var w = Math.max(1, Math.round(r.width));
+    var h = Math.max(1, Math.round(r.height));
+    if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+    }
+    var ctx = null;
+    try { ctx = canvas.getContext("2d"); } catch (e) { ctx = null; }
+    if (!ctx) return { ctx: null, w: w, h: h };
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { ctx: ctx, w: w, h: h };
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    var rr = Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + rr, y);
+    ctx.lineTo(x + w - rr, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + rr);
+    ctx.lineTo(x + w, y + h - rr);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - rr, y + h);
+    ctx.lineTo(x + rr, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - rr);
+    ctx.lineTo(x, y + rr);
+    ctx.quadraticCurveTo(x, y, x + rr, y);
+    ctx.closePath();
+  }
+
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  /* ════════════════════════════════════════════════════════════
+     1. GRID FIELD — perspective floor + radar rings + horizon
+     ════════════════════════════════════════════════════════════ */
+  function GridField(canvas) {
+    this.canvas = canvas;
+    this.t = 0;
+    this.enabled = true;
+    this.resize();
+  }
+
+  GridField.prototype.resize = function () {
+    this.s = fit(this.canvas);
+  };
+
+  GridField.prototype.draw = function (dt) {
+    var s = this.s, ctx = s.ctx, w = s.w, h = s.h;
+    if (!ctx || !w || !h) return;
+    this.t += dt;
+
+    pointer.x = lerp(pointer.x, pointer.tx, 0.045);
+    pointer.y = lerp(pointer.y, pointer.ty, 0.045);
+
+    var px = pointer.x, py = pointer.y;
+    var horizon = h * 0.68 + py * 8;
+    var vpx = w * 0.5 + px * 46;
+
+    ctx.clearRect(0, 0, w, h);
+
+    /* horizon glow ------------------------------------------------ */
+    var hg = ctx.createLinearGradient(0, horizon - h * 0.16, 0, horizon + h * 0.05);
+    hg.addColorStop(0, "rgba(45,225,244,0)");
+    hg.addColorStop(0.72, "rgba(45,225,244,0.055)");
+    hg.addColorStop(1, "rgba(45,225,244,0.14)");
+    ctx.fillStyle = hg;
+    ctx.fillRect(0, horizon - h * 0.16, w, h * 0.21);
+
+    /* radar arcs in the sky --------------------------------------- */
+    var cx = w * 0.52 + px * 22;
+    var cy = h * 0.06 + py * 14;
+
+    ctx.save();
+    ctx.lineWidth = 1;
+    for (var i = 1; i <= 9; i++) {
+      var r = i * (w * 0.115);
+      var a = 0.16 - i * 0.012;
+      if (a <= 0.005) break;
+      ctx.strokeStyle = "rgba(45,225,244," + a.toFixed(3) + ")";
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    for (var j = 1; j <= 3; j++) {
+      var rm = j * (w * 0.19);
+      ctx.strokeStyle = "rgba(255,45,126," + (0.085 - j * 0.02).toFixed(3) + ")";
+      ctx.beginPath();
+      ctx.arc(cx + w * 0.06, cy, rm, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    /* perspective floor -------------------------------------------- */
+    ctx.save();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(45,225,244,0.11)";
+
+    /* verticals */
+    var spread = w * 0.86;
+    var lines = 34;
+    for (var v = -lines; v <= lines; v++) {
+      var bx = w * 0.5 + (v / lines) * spread + px * 30;
+      ctx.globalAlpha = 0.10 + 0.12 * (1 - Math.abs(v) / lines);
+      ctx.beginPath();
+      ctx.moveTo(vpx, horizon);
+      ctx.lineTo(bx, h + 40);
+      ctx.stroke();
+    }
+
+    /* horizontals with exponential spacing */
+    ctx.globalAlpha = 1;
+    var rows = 16;
+    for (var k = 1; k <= rows; k++) {
+      var t = k / rows;
+      var y = horizon + Math.pow(t, 2.35) * (h - horizon + 60);
+      ctx.globalAlpha = 0.05 + 0.14 * t;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    /* horizon line ------------------------------------------------- */
+    ctx.save();
+    ctx.shadowBlur = 14;
+    ctx.shadowColor = "rgba(45,225,244,0.6)";
+    ctx.strokeStyle = "rgba(45,225,244,0.30)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, horizon);
+    ctx.lineTo(w, horizon);
+    ctx.stroke();
+    ctx.restore();
+
+    /* moving scan pulse along the horizon -------------------------- */
+    var sweepX = ((this.t * 0.12) % 1.4 - 0.2) * w;
+    var sg = ctx.createLinearGradient(sweepX - 160, 0, sweepX + 160, 0);
+    sg.addColorStop(0, "rgba(45,225,244,0)");
+    sg.addColorStop(0.5, "rgba(45,225,244,0.16)");
+    sg.addColorStop(1, "rgba(45,225,244,0)");
+    ctx.fillStyle = sg;
+    ctx.fillRect(sweepX - 160, horizon - 2, 320, 3);
+  };
+
+  /* ════════════════════════════════════════════════════════════
+     2. SPECTRUM SKYLINE — the reference bar matrix
+     ════════════════════════════════════════════════════════════ */
+  function SpectrumField(canvas) {
+    this.canvas = canvas;
+    this.t = 0;
+    this.bars = 19;
+    this.resize();
+  }
+
+  SpectrumField.prototype.resize = function () {
+    this.s = fit(this.canvas);
+  };
+
+  SpectrumField.prototype.draw = function (dt) {
+    var s = this.s, ctx = s.ctx, w = s.w, h = s.h;
+    if (!ctx || !w || !h) return;
+    this.t += dt;
+
+    ctx.clearRect(0, 0, w, h);
+
+    var pad = Math.max(10, w * 0.022);
+    var base = h - 6;
+    var usable = w - pad * 2;
+    var n = this.bars;
+    var gap = usable * 0.012;
+    var bw = (usable - gap * (n - 1)) / n;
+    var maxH = h * 0.82;
+
+    /* baseline */
+    ctx.save();
+    ctx.shadowBlur = 16;
+    ctx.shadowColor = "rgba(45,225,244,0.55)";
+    ctx.strokeStyle = "rgba(45,225,244,0.45)";
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(pad * 0.3, base);
+    ctx.lineTo(w - pad * 0.3, base);
+    ctx.stroke();
+    ctx.restore();
+
+    /* bars */
+    for (var i = 0; i < n; i++) {
+      var v = bus.bands[i % bus.BANDS];
+      var hh = Math.max(4, v * maxH);
+      var x = pad + i * (bw + gap);
+      var y = base - hh;
+
+      /* cyan outline */
+      ctx.save();
+      ctx.shadowBlur = 18;
+      ctx.shadowColor = "rgba(45,225,244,0.5)";
+      ctx.strokeStyle = "rgba(45,225,244,0.92)";
+      ctx.lineWidth = Math.max(1.6, Math.min(3, bw * 0.09));
+      roundRect(ctx, x, y, bw, hh, 2.5);
+      ctx.stroke();
+      ctx.restore();
+
+      /* faint inner wash */
+      var g = ctx.createLinearGradient(0, y, 0, base);
+      g.addColorStop(0, "rgba(45,225,244,0.10)");
+      g.addColorStop(1, "rgba(45,225,244,0.01)");
+      ctx.fillStyle = g;
+      roundRect(ctx, x, y, bw, hh, 2.5);
+      ctx.fill();
+    }
+
+    /* magenta identity bars overlapping the centre group */
+    var mgIdx = [Math.floor(n * 0.24), Math.floor(n * 0.31), Math.floor(n * 0.38), Math.floor(n * 0.44)];
+    for (var m = 0; m < mgIdx.length; m++) {
+      var idx = mgIdx[m];
+      var mv = bus.bands[(idx + 3) % bus.BANDS];
+      var mh = Math.max(6, mv * maxH * 0.92);
+      var mx = pad + idx * (bw + gap) - bw * 0.42;
+      var mw = bw * 1.72;
+      ctx.save();
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = "rgba(255,45,126,0.55)";
+      ctx.strokeStyle = "rgba(255,45,126,0.62)";
+      ctx.lineWidth = Math.max(1.2, Math.min(2, bw * 0.05));
+      roundRect(ctx, mx, base - mh, mw, mh, 2.5);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    /* antenna mast with cross ticks over the centre */
+    var ax = pad + Math.floor(n * 0.31) * (bw + gap) + bw * 0.5;
+    var tickTop = base - maxH * 0.99;
+    ctx.save();
+    ctx.shadowBlur = 14;
+    ctx.shadowColor = "rgba(255,45,126,0.7)";
+    ctx.strokeStyle = "rgba(255,45,126,0.9)";
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(ax, tickTop);
+    ctx.lineTo(ax, base - maxH * 0.1);
+    ctx.stroke();
+    ctx.lineWidth = 1.1;
+    [0.16, 0.34, 0.52].forEach(function (o) {
+      var y = tickTop + (base - maxH * 0.1 - tickTop) * o;
+      ctx.beginPath();
+      ctx.moveTo(ax - bw * 0.42, y);
+      ctx.lineTo(ax + bw * 0.42, y);
+      ctx.stroke();
+    });
+    ctx.restore();
+  };
+
+  /* ════════════════════════════════════════════════════════════
+     3. WAVE RIBBON — the gradient sine at the base
+     ════════════════════════════════════════════════════════════ */
+  function WaveRibbon(canvas) {
+    this.canvas = canvas;
+    this.t = 0;
+    this.resize();
+  }
+
+  WaveRibbon.prototype.resize = function () {
+    this.s = fit(this.canvas);
+  };
+
+  WaveRibbon.prototype.draw = function (dt) {
+    var s = this.s, ctx = s.ctx, w = s.w, h = s.h;
+    if (!ctx || !w || !h) return;
+    this.t += dt;
+
+    ctx.clearRect(0, 0, w, h);
+
+    var amp = h * (0.2 + bus.level * 0.3);
+    var mid = h * 0.5;
+    var t = this.t;
+
+    var grad = ctx.createLinearGradient(0, 0, w, 0);
+    grad.addColorStop(0.00, "#2DE1F4");
+    grad.addColorStop(0.22, "#38C6F0");
+    grad.addColorStop(0.46, "#5A7CFF");
+    grad.addColorStop(0.68, "#8B5CF6");
+    grad.addColorStop(0.86, "#E23C9B");
+    grad.addColorStop(1.00, "#FF2D7E");
+
+    ctx.save();
+    ctx.shadowBlur = 26;
+    ctx.shadowColor = "rgba(90,124,255,0.55)";
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = Math.max(3, h * 0.055);
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.beginPath();
+    for (var x = 0; x <= w; x += 3) {
+      var p = x / w;
+      var y = mid +
+        Math.sin(p * 7.2 + t * 1.05) * amp * 0.62 +
+        Math.sin(p * 13.5 - t * 0.62) * amp * 0.26 +
+        Math.sin(p * 21.0 + t * 1.8) * amp * 0.12;
+      if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.restore();
+
+    /* bright core */
+    ctx.save();
+    ctx.globalAlpha = 0.42;
+    ctx.strokeStyle = "#EAF7FF";
+    ctx.lineWidth = Math.max(1, h * 0.014);
+    ctx.beginPath();
+    for (var x2 = 0; x2 <= w; x2 += 4) {
+      var p2 = x2 / w;
+      var y2 = mid +
+        Math.sin(p2 * 7.2 + t * 1.05) * amp * 0.62 +
+        Math.sin(p2 * 13.5 - t * 0.62) * amp * 0.26 +
+        Math.sin(p2 * 21.0 + t * 1.8) * amp * 0.12;
+      if (x2 === 0) ctx.moveTo(x2, y2); else ctx.lineTo(x2, y2);
+    }
+    ctx.stroke();
+    ctx.restore();
+  };
+
+  /* ════════════════════════════════════════════════════════════
+     4. METER — the signal-section analyser
+     ════════════════════════════════════════════════════════════ */
+  function Meter(canvas) {
+    this.canvas = canvas;
+    this.t = 0;
+    this.holds = new Float32Array(bus.BANDS);
+    this.resize();
+  }
+
+  Meter.prototype.resize = function () {
+    this.s = fit(this.canvas);
+  };
+
+  Meter.prototype.draw = function (dt) {
+    var s = this.s, ctx = s.ctx, w = s.w, h = s.h;
+    if (!ctx || !w || !h) return;
+    this.t += dt;
+
+    ctx.clearRect(0, 0, w, h);
+
+    var padL = 34, padR = 12, padT = 34, padB = 20;
+    var gw = w - padL - padR;
+    var gh = h - padT - padB;
+    var base = padT + gh;
+
+    /* grid */
+    ctx.save();
+    ctx.strokeStyle = "rgba(45,225,244,0.07)";
+    ctx.lineWidth = 1;
+    for (var g = 0; g <= 4; g++) {
+      var y = padT + (gh * g) / 4;
+      ctx.beginPath();
+      ctx.moveTo(padL, y);
+      ctx.lineTo(w - padR, y);
+      ctx.stroke();
+    }
+    ctx.strokeStyle = "rgba(45,225,244,0.05)";
+    for (var gx = 0; gx <= 8; gx++) {
+      var x = padL + (gw * gx) / 8;
+      ctx.beginPath();
+      ctx.moveTo(x, padT);
+      ctx.lineTo(x, base);
+      ctx.stroke();
+    }
+    /* dB labels */
+    ctx.fillStyle = "rgba(126,147,172,0.55)";
+    ctx.font = "9px 'JetBrains Mono', monospace";
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+    var labels = ["0", "-12", "-24", "-36", "-48"];
+    for (var l = 0; l < labels.length; l++) {
+      var ly = padT + (gh * l) / 4;
+      ctx.fillText(labels[l], padL - 8, ly);
+    }
+    ctx.restore();
+
+    /* bars */
+    var n = bus.BANDS;
+    var gap = gw * 0.018;
+    var bw = (gw - gap * (n - 1)) / n;
+
+    for (var i = 0; i < n; i++) {
+      var v = bus.bands[i];
+      var hh = Math.max(1, v * gh);
+      var x2 = padL + i * (bw + gap);
+      var y2 = base - hh;
+
+      var g2 = ctx.createLinearGradient(0, base, 0, y2);
+      g2.addColorStop(0, "rgba(45,225,244,0.22)");
+      g2.addColorStop(0.65, "rgba(45,225,244,0.75)");
+      g2.addColorStop(1, "rgba(180,250,255,0.95)");
+      ctx.fillStyle = g2;
+      ctx.fillRect(x2, y2, bw, hh);
+
+      ctx.save();
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = "rgba(45,225,244,0.6)";
+      ctx.strokeStyle = "rgba(45,225,244,0.85)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x2, y2);
+      ctx.lineTo(x2 + bw, y2);
+      ctx.stroke();
+      ctx.restore();
+
+      /* peak hold */
+      this.holds[i] = Math.max(this.holds[i] - dt * 0.22, v);
+      var hy = base - this.holds[i] * gh;
+      ctx.fillStyle = "rgba(255,45,126,0.9)";
+      ctx.fillRect(x2, hy - 1, bw, 2);
+    }
+
+    /* magenta subcarrier overlay (bars 8-13) */
+    ctx.save();
+    ctx.globalAlpha = 0.55;
+    for (var k = 8; k <= 13; k++) {
+      var mv = bus.bands[k] * 0.72;
+      var mh = Math.max(1, mv * gh);
+      var mx = padL + k * (bw + gap);
+      ctx.fillStyle = "rgba(255,45,126,0.4)";
+      ctx.fillRect(mx, base - mh, bw * 0.55, mh);
+    }
+    ctx.restore();
+
+    /* amber pilot line */
+    var pilot = base - (0.34 + 0.05 * Math.sin(this.t * 1.4)) * gh;
+    ctx.save();
+    ctx.strokeStyle = "rgba(245,179,60,0.55)";
+    ctx.setLineDash([4, 6]);
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(padL, pilot);
+    ctx.lineTo(w - padR, pilot);
+    ctx.stroke();
+    ctx.restore();
+
+    /* baseline */
+    ctx.save();
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = "rgba(45,225,244,0.55)";
+    ctx.strokeStyle = "rgba(45,225,244,0.55)";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(padL, base);
+    ctx.lineTo(w - padR, base);
+    ctx.stroke();
+    ctx.restore();
+  };
+
+  /* ════════════════════════════════════════════════════════════
+     RUNNER
+     ════════════════════════════════════════════════════════════ */
+  var layers = [];
+
+  function add(canvas, ctor) {
+    if (!canvas) return null;
+    var layer = new ctor(canvas);
+    layers.push(layer);
+    return layer;
+  }
+
+  function resizeAll() {
+    layers.forEach(function (l) { l.resize(); });
+  }
+
+  var last = 0;
+  function frame(ts) {
+    var dt = last ? Math.min(0.05, (ts - last) / 1000) : 0.016;
+    last = ts;
+    if (!document.hidden) {
+      for (var i = 0; i < layers.length; i++) layers[i].draw(dt);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function init() {
+    add(document.getElementById("fx-grid"), GridField);
+    add(document.getElementById("fx-spectrum"), SpectrumField);
+    add(document.getElementById("fx-wave"), WaveRibbon);
+    add(document.getElementById("fx-meter"), Meter);
+
+    global.addEventListener("resize", resizeAll);
+    if (global.ResizeObserver) {
+      var ro = new ResizeObserver(resizeAll);
+      layers.forEach(function (l) { ro.observe(l.canvas); });
+    }
+    document.addEventListener("visibilitychange", function () { last = 0; });
+
+    if (!reduceMotion) requestAnimationFrame(frame);
+    else {
+      /* static first frame once the simulated spectrum has settled */
+      setTimeout(function () {
+        layers.forEach(function (l) { l.draw(0.016); });
+      }, 140);
+    }
+  }
+
+  global.MatrixVisuals = {
+    init: init,
+    pointer: pointer,
+    reduceMotion: reduceMotion
+  };
+
+})(window);
+
+/* ═══════════════════════════════════════════════════════════════
+   BLUE DIMENSION // APP LAYER
+   Clock, tuner, transport, scroll choreography, clipboard.
+   ═══════════════════════════════════════════════════════════════ */
+
+(function () {
+  "use strict";
+
+  var bus = window.SignalBus;
+  var radio = new window.DimensionRadio();
+  var sim = new window.DimensionSimulation();
+  var visuals = window.MatrixVisuals;
+
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  /* ── toast ─────────────────────────────────────────────────── */
+  var toastEl = $("#toast");
+  var toastTimer = null;
+  function toast(msg) {
+    if (!toastEl) return;
+    toastEl.textContent = msg;
+    toastEl.classList.add("is-on");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove("is-on"); }, 1900);
+  }
+
+  /* ── zürich clock ──────────────────────────────────────────── */
+  var clockEl = $("#zrh-clock");
+  function tickClock() {
+    if (!clockEl) return;
+    try {
+      var now = new Date();
+      var t = now.toLocaleTimeString("en-GB", {
+        timeZone: "Europe/Zurich",
+        hour12: false,
+        hour: "2-digit", minute: "2-digit", second: "2-digit"
+      });
+      clockEl.textContent = t;
+      clockEl.setAttribute("datetime", now.toISOString());
+    } catch (e) {
+      clockEl.textContent = new Date().toTimeString().slice(0, 8);
+    }
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+
+  /* ── transport (tune in / out) ─────────────────────────────── */
+  var tuneBtns = $$("[data-tune]");
+  var rxState = $("#rx-state");
+  var rxLock = $("#rx-lock");
+  var meterState = $("#meter-state");
+
+  function setLive(on) {
+    tuneBtns.forEach(function (b) {
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+      var l = b.querySelector("[data-tune-label]");
+      if (l) l.textContent = on ? "Tune Out" : "Tune In";
+    });
+    if (rxState) rxState.textContent = on ? "RECEIVING" : "STANDBY";
+    if (rxLock) rxLock.textContent = on ? "LOCKED" : "NO LOCK";
+    if (meterState) {
+      meterState.textContent = on ? "LIVE" : "IDLE";
+      meterState.classList.toggle("panel__state--live", on);
+    }
+    document.body.classList.toggle("is-live", on);
+  }
+
+  function toggleTransport() {
+    if (radio.playing) {
+      radio.stop();
+      sim.start();
+      setLive(false);
+      toast("Signal out · simulation mode");
+      return;
+    }
+
+    if (!radio.supported()) {
+      toast("Audio unavailable in this browser");
+      return;
+    }
+
+    radio.setFreq(currentFreq);
+    radio.setMode(currentMode);
+
+    radio.start().then(function (ok) {
+      if (!ok) { toast("Could not start audio engine"); return; }
+      sim.stop();
+      setLive(true);
+      toast("On air · " + radio.modeLabel());
+    });
+  }
+
+  tuneBtns.forEach(function (b) { b.addEventListener("click", toggleTransport); });
+
+  /* ── tuner ─────────────────────────────────────────────────── */
+  var freqInput = $("#freq");
+  var freqVal = $("#freq-val");
+  var cursor = $("#freq-cursor");
+  var currentFreq = 97.5;
+  var currentMode = "night";
+
+  function renderFreq() {
+    var v = parseFloat(freqInput.value);
+    currentFreq = v;
+    if (freqVal) freqVal.textContent = v.toFixed(1);
+    if (cursor) {
+      var pct = ((v - 88) / (108 - 88)) * 100;
+      cursor.style.left = pct + "%";
+    }
+    radio.setFreq(v);
+    if (radio.playing) {
+      var dev = Math.abs(v - 97.5);
+      if (rxLock) rxLock.textContent = dev < 0.6 ? "LOCKED" : dev < 3 ? "DRIFT" : "NO SIGNAL";
+    }
+  }
+  if (freqInput) {
+    freqInput.addEventListener("input", renderFreq);
+    renderFreq();
+  }
+
+  /* ── modes ─────────────────────────────────────────────────── */
+  $$(".mode").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      $$(".mode").forEach(function (b) { b.classList.remove("is-active"); });
+      btn.classList.add("is-active");
+      currentMode = btn.getAttribute("data-mode");
+      radio.setMode(currentMode);
+      if (radio.playing) toast("Mode · " + radio.modeLabel());
+    });
+  });
+
+  /* ── live readouts ─────────────────────────────────────────── */
+  var peakEl = $("#peak-val");
+  var rmsEl = $("#rms-val");
+  var snrEl = $("#stat-snr");
+  var upEl = $("#stat-up");
+  var bwEl = $("#stat-bw");
+  var startedAt = null;
+
+  function fmtDb(v) {
+    if (!isFinite(v) || v <= 0.0005) return "-∞";
+    return (20 * Math.log10(v)).toFixed(1);
+  }
+
+  function fmtDuration(ms) {
+    var t = Math.floor(ms / 1000);
+    var h = Math.floor(t / 3600);
+    var m = Math.floor((t % 3600) / 60);
+    var s = t % 60;
+    return [h, m, s].map(function (n) { return String(n).padStart(2, "0"); }).join(":");
+  }
+
+  setInterval(function () {
+    if (peakEl) peakEl.textContent = fmtDb(bus.peak);
+    if (rmsEl) rmsEl.textContent = fmtDb(bus.rms);
+    if (radio.playing) {
+      startedAt = startedAt || Date.now();
+      if (upEl) upEl.textContent = fmtDuration(Date.now() - startedAt);
+      if (snrEl) {
+        var dev = Math.abs(currentFreq - 97.5);
+        snrEl.textContent = dev < 0.6 ? "38.4 dB" : dev < 3 ? (22 - dev * 4).toFixed(1) + " dB" : "6.1 dB";
+      }
+      var bw = currentMode === "archive" ? "250 kHz" : currentMode === "ambient" ? "120 kHz" : "180 kHz";
+      if (bwEl) bwEl.textContent = bw;
+    } else {
+      if (upEl) upEl.textContent = "00:00:00";
+      if (snrEl) snrEl.textContent = "—";
+    }
+  }, 250);
+
+  /* ── scroll reveal ─────────────────────────────────────────── */
+  var reveals = $$(".reveal");
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          e.target.classList.add("is-in");
+          io.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
+    reveals.forEach(function (el, i) {
+      el.style.transitionDelay = Math.min(i % 4, 3) * 70 + "ms";
+      io.observe(el);
+    });
+  } else {
+    reveals.forEach(function (el) { el.classList.add("is-in"); });
+  }
+  /* safety net: never leave content hidden if the observer misfires */
+  setTimeout(function () {
+    reveals.forEach(function (el) { el.classList.add("is-in"); });
+  }, 5000);
+
+  /* ── footer wordmark: fit the display type to the column ── */
+  var footWord = $(".foot__word");
+  function fitFootWord() {
+    if (!footWord) return;
+    var host = footWord.parentElement;
+    if (!host) return;
+    var avail = host.clientWidth;
+    if (!avail) return;
+    footWord.style.fontSize = "";
+    var size = parseFloat(getComputedStyle(footWord).fontSize);
+    var w = footWord.scrollWidth;
+    if (w > avail) footWord.style.fontSize = (size * (avail / w)).toFixed(2) + "px";
+  }
+  fitFootWord();
+  window.addEventListener("resize", fitFootWord);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(fitFootWord).catch(function () {});
+  }
+
+  /* ── active nav ────────────────────────────────────────────── */
+  var navLinks = $$("[data-nav]");
+  var sections = navLinks.map(function (a) { return document.querySelector(a.getAttribute("href")); });
+  function updateNav() {
+    var y = window.scrollY + window.innerHeight * 0.35;
+    var idx = -1;
+    sections.forEach(function (s, i) { if (s && s.offsetTop <= y) idx = i; });
+    navLinks.forEach(function (a, i) { a.classList.toggle("is-active", i === idx); });
+  }
+  window.addEventListener("scroll", updateNav, { passive: true });
+  updateNav();
+
+  /* ── pointer parallax ──────────────────────────────────────── */
+  if (!visuals || !visuals.reduceMotion) {
+    window.addEventListener("pointermove", function (e) {
+      visuals.pointer.tx = (e.clientX / window.innerWidth) * 2 - 1;
+      visuals.pointer.ty = (e.clientY / window.innerHeight) * 2 - 1;
+    }, { passive: true });
+  }
+
+  /* ── swatch clipboard ──────────────────────────────────────── */
+  $$(".swatch").forEach(function (sw) {
+    sw.addEventListener("click", function () {
+      var val = sw.getAttribute("data-copy");
+      var done = function () { toast("Copied " + val); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(val).then(done).catch(fallback);
+      } else fallback();
+      function fallback() {
+        var ta = document.createElement("textarea");
+        ta.value = val;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); done(); } catch (e) { toast(val); }
+        document.body.removeChild(ta);
+      }
+    });
+  });
+
+  /* ── schedule: who is on air right now ─────────────────────── */
+  function markOnAir() {
+    var h, m;
+    try {
+      var parts = new Date().toLocaleTimeString("en-GB", {
+        timeZone: "Europe/Zurich", hour12: false, hour: "2-digit", minute: "2-digit"
+      }).split(":");
+      h = parseInt(parts[0], 10);
+      m = parseInt(parts[1], 10);
+    } catch (e) {
+      var n = new Date();
+      h = n.getHours();
+      m = n.getMinutes();
+    }
+
+    var minutes = h * 60 + m;
+    var slots = $$(".sch-live");
+    var order = [
+      { at: 22 * 60, len: 120 },
+      { at: 0, len: 120 },
+      { at: 2 * 60, len: 120 },
+      { at: 4 * 60, len: 120 }
+    ];
+    var active = -1;
+    order.forEach(function (s, i) {
+      if (minutes >= s.at && minutes < s.at + s.len) active = i;
+    });
+    if (minutes >= 22 * 60) active = 0;
+
+    slots.forEach(function (el, i) {
+      if (active === -1) {
+        el.textContent = "OFF AIR";
+        el.classList.remove("is-now");
+      } else if (i === active) {
+        el.textContent = "ON AIR";
+        el.classList.add("is-now");
+      } else {
+        el.textContent = "ARCHIVE";
+        el.classList.remove("is-now");
+      }
+    });
+  }
+  markOnAir();
+  setInterval(markOnAir, 30000);
+
+  /* ── boot ──────────────────────────────────────────────────── */
+  sim.start();
+  setLive(false);
+
+  if (window.MatrixVisuals) window.MatrixVisuals.init();
+
+})();
+
+</script>
+</body>
+</html>
