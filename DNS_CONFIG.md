@@ -80,6 +80,16 @@ dead" from "Worker alive, site not served".
    and `API_ORIGIN_HOST` is set, but the deployed Worker sends no Access service
    token, so Access rejects the subrequest. See the ordered prerequisites in
    `infra/cloudflare/wrangler.toml`.
+4. `hermes.cy8er.djjessejay.ch` returns NXDOMAIN (observed 2026-11-06; first
+   recorded in the closed, unmerged PR #169). The zone has no record for it, and
+   this file never listed one. The hostname is nonetheless configured as
+   `TUNNEL_MERGE_HOST` in `workers/superagent-orchestrator/wrangler.jsonc`, so
+   every job accepted by that Worker fails in the queue consumer with a DNS
+   error and lands in `superagent-merge-jobs-dlq` after 3 retries. NXDOMAIN
+   cannot be claimed by an attacker, so no defensive action is required; either
+   publish the tunnel hostname's record or retire the Worker config. If a
+   `cy8er.djjessejay.ch` or wildcard record is ever added, document it here
+   immediately.
 
 ## Domain Overview
 
