@@ -90,6 +90,13 @@ djjessejay.ch uses a **hybrid deployment model** combining GitHub Pages for stat
 
 **Implementation**: See `docs/cloudflare-worker-router.js` for deployable code.
 
+> Production runs the Worker **`wdjjj`** from `infra/cloudflare/` (deployed by
+> `.github/workflows/deploy-wdjjj.yml`). Its secrets `API_ORIGIN_HOST`,
+> `ORIGIN_ACCESS_CLIENT_ID` and `ORIGIN_ACCESS_CLIENT_SECRET` go on `wdjjj`
+> (`npx wrangler secret put <NAME> --name wdjjj`, see `ORIGIN-PROTECTION-DEPLOYMENT.md`);
+> a deploy fails until all three exist. The `djjessejay-router` steps below are the
+> standalone dashboard variant and do not configure `wdjjj`.
+
 **Deployment Steps**:
 1. Cloudflare Dashboard → Workers & Pages → Create Application → Copy Paste
 2. Copy code from `docs/cloudflare-worker-router.js`

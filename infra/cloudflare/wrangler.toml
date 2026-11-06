@@ -85,3 +85,8 @@ ORIGIN_PREFIX = "/djjessejay.ch"
 # every var and lets dashboard state drift away from this file. Prefer the
 # secret.
 API_ORIGIN_SCHEME = "https"
+
+# Deploy fails while any of these is unset on the Worker, instead of
+# shipping a Worker that answers /api/* with 502.
+[secrets]
+required = ["API_ORIGIN_HOST", "ORIGIN_ACCESS_CLIENT_ID", "ORIGIN_ACCESS_CLIENT_SECRET"]

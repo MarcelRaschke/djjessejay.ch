@@ -69,9 +69,18 @@ and protects `CF_PUBLIC_HOSTNAME` with an Access app whose only policy is
 
 1. Zero Trust → Access → Service Auth → create a service token, e.g. `wdjjj-origin`.
    Copy Client ID and Client Secret once into your password manager; note the token ID.
-2. Store both values as Worker secrets (never in `wrangler.toml`):
-   `npx wrangler secret put ORIGIN_ACCESS_CLIENT_ID` and
-   `npx wrangler secret put ORIGIN_ACCESS_CLIENT_SECRET`.
+2. Store all three Worker secrets on the production Worker `wdjjj` (never in
+   `wrangler.toml`). `infra/cloudflare/wrangler.toml` declares them in
+   `[secrets].required`, so every deploy fails until all three exist:
+   ```bash
+   cd infra/cloudflare
+   npx wrangler secret put API_ORIGIN_HOST --name wdjjj              # value: origin.djjessejay.ch
+   npx wrangler secret put ORIGIN_ACCESS_CLIENT_ID --name wdjjj      # Client ID from step 1
+   npx wrangler secret put ORIGIN_ACCESS_CLIENT_SECRET --name wdjjj  # Client Secret from step 1
+   npx wrangler secret list --name wdjjj                             # shows names only
+   ```
+   The Worker only sends the token to exactly `origin.djjessejay.ch`; any other
+   `API_ORIGIN_HOST` answers 502.
 3. Make sure the deployed `wdjjj` Worker forwards the token (`cf-access-client-id` /
    `cf-access-client-secret` on `/api` subrequests; PR #160). Until that Worker is live,
    applying the service-token-only policy makes every `/api` request fail at Access.
