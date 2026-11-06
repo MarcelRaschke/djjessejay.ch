@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """Import the v9 logical snapshot in an isolated, disposable Neo4j."""
-import csv
 import hashlib
-import io
 import json
 import os
 from pathlib import Path
@@ -20,6 +18,61 @@ def run(args, **kwargs):
     return subprocess.run(
         args, check=True, capture_output=True, text=True, **kwargs,
     ).stdout.strip()
+
+
+def counts(query, statement):
+    """Read only integer columns; Cypher plain output is not RFC 4180 CSV."""
+    lines = query(statement).strip().splitlines()
+    if not lines or lines[0] != "matches":
+        raise ValueError("unexpected count result header")
+    values = lines[1:]
+    if not values or any(not v.isdecimal() for v in values):
+        raise ValueError("invalid count result")
+    return [int(v) for v in values]
+
+
+def verify_snapshot(query, graph):
+    """Compare each full JSON record in Neo4j, without parsing quoted CSV."""
+    def literal(value):
+        return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
+
+    nodes = graph["nodes"]
+    edges = graph["edges"]
+    node_clauses = []
+    for node in nodes:
+        label = "Provenance" + node["label"]
+        if label not in {"ProvenanceClaim", "ProvenanceSource"}:
+            raise ValueError("unexpected snapshot label")
+        node_clauses.append(
+            "MATCH (n:" + label + ") WHERE n.id = " + literal(node["id"])
+            + " AND n.record_json = " + literal(literal(node["properties"]))
+            + " AND labels(n) = [" + literal(label) + "]"
+            + " RETURN count(n) AS matches"
+        )
+    edge_clauses = []
+    for edge in edges:
+        if edge["type"] != "CITES":
+            raise ValueError("unexpected relationship type")
+        edge_clauses.append(
+            "MATCH (c:ProvenanceClaim)-[r:CITES]->(s:ProvenanceSource)"
+            + " WHERE c.id = " + literal(edge["from"])
+            + " AND s.id = " + literal(edge["to"])
+            + " AND keys(r) = [] RETURN count(r) AS matches"
+        )
+    if counts(query, "MATCH (n) RETURN count(n) AS matches;") != [len(nodes)]:
+        raise ValueError("Neo4j node inventory differs from snapshot")
+    if counts(
+        query, "MATCH ()-[r]->() RETURN count(r) AS matches;",
+    ) != [len(edges)]:
+        raise ValueError("Neo4j edge inventory differs from snapshot")
+    if counts(query, " UNION ALL ".join(node_clauses) + ";") != [1] * len(
+        nodes,
+    ):
+        raise ValueError("Neo4j node metadata differs from snapshot")
+    if counts(query, " UNION ALL ".join(edge_clauses) + ";") != [1] * len(
+        edges,
+    ):
+        raise ValueError("Neo4j relationships differ from snapshot")
 
 
 def main():
@@ -47,9 +100,6 @@ def main():
 
     def query(statement):
         return run(command, input=statement, env=env)
-
-    def rows(statement):
-        return list(csv.DictReader(io.StringIO(query(statement))))
 
     try:
         run([
@@ -79,42 +129,17 @@ def main():
                         )
                     ) from None
                 time.sleep(3)
-        empty = rows("MATCH (n) RETURN count(n) AS nodes;")
-        if empty != [{"nodes": "0"}]:
+        if counts(query, "MATCH (n) RETURN count(n) AS matches;") != [0]:
             raise ValueError("review database must start empty")
-        expected_nodes = [
-            (n["id"], "Provenance" + n["label"], n["properties"])
-            for n in sorted(graph["nodes"], key=lambda n: n["id"])
-        ]
-        expected_edges = sorted(
-            (e["from"], e["type"], e["to"]) for e in graph["edges"]
-        )
         # Second import must preserve every record without duplicate edges.
         for _ in range(2):
             query(cypher)
-            actual_nodes = [
-                (r["id"], r["label"], json.loads(r["record"]))
-                for r in rows(
-                    "MATCH (n) RETURN n.id AS id, labels(n)[0] AS label, "
-                    "n.record_json AS record ORDER BY n.id;"
-                )
-            ]
-            actual_edges = sorted(
-                (r["source"], r["kind"], r["target"])
-                for r in rows(
-                    "MATCH (c)-[r]->(s) RETURN c.id AS source, "
-                    "type(r) AS kind, s.id AS target;"
-                )
-            )
-            if actual_nodes != expected_nodes:
-                raise ValueError("Neo4j node metadata differs from snapshot")
-            if actual_edges != expected_edges:
-                raise ValueError("Neo4j relationships differ from snapshot")
+            verify_snapshot(query, graph)
         print(json.dumps({
             "result": "PASS", "kind": "logical_assertion_snapshot",
             "sourceCommit": run(["git", "rev-parse", "HEAD"], cwd=ROOT),
             "image": IMAGE, "imageDigest": digest,
-            "nodes": len(actual_nodes), "edges": len(actual_edges),
+            "nodes": len(graph["nodes"]), "edges": len(graph["edges"]),
             "imports": 2, "allMetadataCompared": True,
             "snapshotSha256": hashlib.sha256(graph_bytes).hexdigest(),
             "cypherSha256": hashlib.sha256(cypher.encode()).hexdigest(),
