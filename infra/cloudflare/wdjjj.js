@@ -14,7 +14,7 @@ const UPSTREAM_TIMEOUT_MS = 8000;
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 const API_ORIGIN_HOST = "origin.djjessejay.ch";
 const API_FORWARD_REQUEST_HEADERS = new Set([
-  "accept", "accept-language", "authorization", "content-type", "origin",
+  "accept", "accept-language", "authorization", "content-encoding", "content-type", "origin",
   "referer", "user-agent", "x-honeypot-token",
 ]);
 
