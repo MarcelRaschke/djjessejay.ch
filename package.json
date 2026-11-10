@@ -18,7 +18,8 @@
     "build:html": "node scripts/inject-site-keys.mjs",
     "db:init": "node --no-warnings scripts/db-init.mjs",
     "test:cloudflare-preflight": "node --test test/cloudflare-deploy-preflight.test.mjs",
-    "test:provenance-v9": "python3 scripts/package-provenance-v9.py --check"
+    "test:provenance-v9": "python3 scripts/package-provenance-v9.py --check",
+    "build:pages": "npm run build:css && node scripts/build-pages.mjs"
   },
   "keywords": [
     "dj",
