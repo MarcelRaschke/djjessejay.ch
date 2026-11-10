@@ -53,8 +53,10 @@ testing; `server.js` falls back to empty strings and those features stay inert.
 
 ## 4. Run
 
+`npm start` does not read `.env` by itself, so load it explicitly:
+
 ```bash
-npm start
+node --env-file=.env server.js
 ```
 
 Open `http://localhost:3000` in the phone's browser. From another device on the
@@ -75,7 +77,7 @@ processes when the screen locks or Termux is backgrounded:
 - Termux notification → **Acquire wakelock**, and disable battery
   optimization for Termux.
 - For a persistent setup, use Termux:Boot with a start script, or
-  `pkg install termux-services` and an `sv` service for `node server.js`.
+  `pkg install termux-services` and an `sv` service for `node --env-file=.env server.js`.
 
 ## Limits on a phone
 
