@@ -47,7 +47,7 @@ export function verifyHostAttestation(document, pem, headSha, now = new Date()) 
 if (process.argv[1]?.endsWith('audio-host-attestation-verify.mjs')) {
   try {
     const b64 = process.env.AUDIO_HOST_ATTESTATION_B64 || '';
-    const rootB64 = process.env.AUDIO_HOST_ROOT_PUB_B64: || '';
+    const rootB64 = process.env.AUDIO_HOST_ROOT_PUB_B64 || '';
     if (!b64 || !rootB64) throw new Error('DENY:missing_external_attestation_or_root');
     const doc = JSON.parse(Buffer.from(b64, 'base64').toString('utf8'));
     const pem = Buffer.from(rootB64, 'base64').toString('utf8');
