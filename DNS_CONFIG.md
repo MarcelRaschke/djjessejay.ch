@@ -40,6 +40,8 @@ source, not to this one.
 | `https://djjessejay.ch/favicon.svg` | 200 | 200 |
 | `https://djjessejay.ch/assets/j-main-seal.svg` | 200 | 200 |
 | `https://djjessejay.ch/__wdjjj/health` | `{"ok":true,"proxy":"wdjjj"}` | `{"ok":true,"proxy":"wdjjj","origin":"marcelraschke.github.io","originPrefix":"/djjessejay.ch","version":"2026-09"}` |
+
+Since the health endpoint change after this check, `/__wdjjj/health` answers `{"ok":true,"proxy":"wdjjj","version":{"id":…,"tag":…,"timestamp":…}}` from the `version_metadata` binding and no longer reports the origin host or prefix.
 | `https://www.djjessejay.ch/` | 301 to apex | 301 to apex, then 200 |
 | `https://marcelraschke.github.io/djjessejay.ch/` | 200 | 200 |
 | apex resolution | proxied by Cloudflare | 104.21.53.115, 172.67.212.61 |

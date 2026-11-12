@@ -180,6 +180,15 @@ function isAccessCookie(cookie) {
   return ACCESS_COOKIE_NAMES.has(name);
 }
 
+// Version for /__wdjjj/health, read from the version_metadata binding
+// (wrangler.toml) so it follows every deploy instead of a hand-kept string.
+// Origin host and prefix are deliberately not reported.
+function workerVersion(env) {
+  const meta = env && env.CF_VERSION_METADATA;
+  if (!meta || !meta.id) return "unknown";
+  return { id: meta.id, tag: meta.tag || null, timestamp: meta.timestamp || null };
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -191,7 +200,7 @@ export default {
     }
 
     if (url.pathname === "/__wdjjj/health") {
-      return new Response(JSON.stringify({ ok: true, proxy: "wdjjj", origin: originHost, originPrefix, version: "2026-09" }), {
+      return new Response(JSON.stringify({ ok: true, proxy: "wdjjj", version: workerVersion(env) }), {
         status: 200,
         headers: { ...OWN_HEADERS, "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
       });
