@@ -11,9 +11,9 @@
     "queue:create": "wrangler queues create superagent-merge-jobs && wrangler queues create superagent-merge-jobs-dlq"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20261006.1",
-    "typescript": "^5.6.0",
-    "wrangler": "^4.24.3"
+    "@cloudflare/workers-types": "^5.20261112.1",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.160.1"
   },
   "engines": {
     "node": ">=22"
