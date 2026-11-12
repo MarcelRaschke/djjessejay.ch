@@ -17,25 +17,25 @@ permissions:
 
 jobs:
   mojo-audio-core:
-    name: Mojo 1.1 Audio Core Gate
+    name: Mojo 1.2 Audio Core Gate
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up uv
-        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
 
-      - name: Install Mojo 1.1.0
+      - name: Install Mojo 1.2.0
         run: |
           uv venv --python 3.13
-          uv pip install --python .venv/bin/python "mojo==1.1.0"
+          uv pip install --python .venv/bin/python "mojo==1.2.0"
 
       - name: Verify Mojo version
         run: |
           .venv/bin/mojo --version
-          test "$(.venv/bin/mojo --version | grep -o "1\\.1\\.0" | head -n1)" = "1.1.0"
+          test "$(.venv/bin/mojo --version | grep -o "1\\.2\\.0" | head -n1)" = "1.2.0"
 
       - name: Format check
         run: |

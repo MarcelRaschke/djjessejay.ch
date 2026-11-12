@@ -8,6 +8,6 @@
     "start": "npx serve . -l 8123"
   },
   "dependencies": {
-    "three": "^0.170.0"
+    "three": "^0.187.0"
   }
 }

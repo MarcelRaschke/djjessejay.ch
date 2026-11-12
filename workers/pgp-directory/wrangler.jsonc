@@ -3,6 +3,7 @@
   "name": "cy8er-pgp-directory",
   "main": "src/index.js",
   "compatibility_date": "2026-07-14",
+  "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
   "preview_urls": true,
   "observability": {

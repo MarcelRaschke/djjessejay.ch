@@ -9,7 +9,7 @@
 # This module intentionally does NOT implement TouchDesigner, OSC, NDI,
 # broadcast scheduling, or GPU rendering. Those are separate pipeline layers.
 
-from math import sqrt, log
+from std.math import sqrt, log
 
 comptime LN10: Float32 = 2.302585092994046
 comptime DEFAULT_TRUE_PEAK_CEILING_DBFS: Float32 = -1.0
@@ -21,7 +21,6 @@ def to_dbfs(linear: Float32) -> Float32:
     if linear <= 0.0:
         return Float32(-180.0)
     return 20.0 * (log(linear) / LN10)
-
 
 
 struct TrackMetadata:
@@ -54,6 +53,9 @@ struct TrackMetadata:
 
 struct SoundKurator:
     """Deterministic metadata router; no audio mutation occurs here."""
+
+    def __init__(out self):
+        pass
 
     def evaluate_track(self, track: TrackMetadata) -> String:
         if track.is_commercial_edm or track.is_sterile_idm:
