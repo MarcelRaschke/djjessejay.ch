@@ -1,0 +1,30 @@
+name: Audio Python Hash Lock Generation
+on:
+  pull_request:
+    paths:
+      - audio-intelligence-moe/requirements.txt
+      - .github/workflows/audio-lock-generate.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  generate-lock:
+    name: Review candidate hashed lock
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.12'
+      - name: Generate candidate lock (review only)
+        run: |
+          python -m pip install 'pip-tools==7.6.2'
+          cd audio-intelligence-moe
+          python -m piptools compile --generate-hashes --resolver=backtracking --output-file=requirements.lock requirements.txt
+          python -m pip install --require-hashes -r requirements.lock
+          echo AUDIO_LOCK_BEGIN
+          cat requirements.lock
+          echo AUDIO_LOCK_END
