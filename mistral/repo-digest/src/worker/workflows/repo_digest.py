@@ -18,12 +18,27 @@ github_connector = connector("github_app")
 slack_connector = connector("slack")
 
 MAX_PRS_PER_SECTION = 30
-PR_FIELDS = ["number", "title", "body", "html_url", "user", "closed_at", "created_at"]
+PR_FIELDS = [
+    "number",
+    "title",
+    "body",
+    "html_url",
+    "user",
+    "closed_at",
+    "created_at",
+]
 
 
 class RepoDigestInput(BaseModel):
-    repo: str = Field(description='GitHub repository handle, e.g. "owner/repo".')
-    since: str = Field(description="ISO date (YYYY-MM-DD); PRs merged on/after this date are included.")
+    repo: str = Field(
+        description='GitHub repository handle, e.g. "owner/repo".'
+    )
+    since: str = Field(
+        description=(
+            "ISO date (YYYY-MM-DD); PRs merged on/after this date are "
+            "included."
+        )
+    )
 
 
 class PrSummary(BaseModel):
@@ -96,7 +111,9 @@ def _all_text(value: Any) -> str:
 def _split_repo(repo: str) -> tuple[str, str]:
     owner, sep, name = repo.partition("/")
     if not sep or not owner or not name:
-        raise ValueError(f'Invalid repo handle "{repo}", expected "owner/repo".')
+        raise ValueError(
+            f'Invalid repo handle "{repo}", expected "owner/repo".'
+        )
     return owner, name
 
 
@@ -127,7 +144,9 @@ async def _search_prs(
                 "number": item["number"],
                 "title": item.get("title") or "",
                 "url": item.get("html_url") or "",
-                "author": user.get("login", "") if isinstance(user, dict) else "",
+                "author": (
+                    user.get("login", "") if isinstance(user, dict) else ""
+                ),
                 "body": (item.get("body") or "")[:800],
             }
         )
@@ -141,7 +160,9 @@ async def fetch_merged_prs(
     github: ToolCallClient = Depends(github_connector),
 ) -> list[dict[str, Any]]:
     owner, name = _split_repo(repo)
-    return await _search_prs(github, owner, name, f"is:merged merged:>={since}")
+    return await _search_prs(
+        github, owner, name, f"is:merged merged:>={since}"
+    )
 
 
 @workflows.activity(start_to_close_timeout=timedelta(seconds=60))
@@ -170,7 +191,8 @@ async def summarize_prs(
     if not prs:
         return []
     listing = "\n\n".join(
-        f"#{p['number']} | {p['title']} | by {p['author']} | {p['url']}\n{p['body']}"
+        f"#{p['number']} | {p['title']} | by {p['author']} | {p['url']}"
+        f"\n{p['body']}"
         for p in prs
     )
     response = await client.chat.parse_async(
@@ -179,9 +201,11 @@ async def summarize_prs(
             {
                 "role": "system",
                 "content": (
-                    "You write one-line summaries (max 140 characters, in German) for GitHub pull "
-                    "requests. For every PR in the user message, return its number and one concise "
-                    "line describing what it changes and why. Do not add anything else."
+                    "You write one-line summaries (max 140 characters, in "
+                    "German) for GitHub pull requests. For every PR in the "
+                    "user message, return its number and one concise line "
+                    "describing what it changes and why. Do not add anything "
+                    "else."
                 ),
             },
             {"role": "user", "content": listing},
@@ -189,7 +213,9 @@ async def summarize_prs(
         response_format=_SummaryBatch,
     )
     parsed = response.choices[0].message.parsed
-    by_number = {item.number: item.summary for item in parsed.items} if parsed else {}
+    by_number = (
+        {item.number: item.summary for item in parsed.items} if parsed else {}
+    )
     return [
         PrSummary(
             number=p["number"],
@@ -207,30 +233,42 @@ def _render_section(title: str, items: list[PrSummary]) -> list[str]:
         return [title, "_— keine —_", ""]
     lines = [title]
     for item in items:
-        lines.append(f"- [#{item.number} {item.title}]({item.url}) — {item.summary}")
+        lines.append(
+            f"- [#{item.number} {item.title}]({item.url}) — {item.summary}"
+        )
     lines.append("")
     return lines
 
 
 def render_message(
-    repo: str, since: str, merged: list[PrSummary], awaiting_review: list[PrSummary]
+    repo: str,
+    since: str,
+    merged: list[PrSummary],
+    awaiting_review: list[PrSummary],
 ) -> str:
     lines = [
         f"*Repo-Digest für* `{repo}` *seit* `{since}`",
         "",
         *_render_section(f"*Gemerged ({len(merged)})*", merged),
-        *_render_section(f"*Offen / wartet auf Review ({len(awaiting_review)})*", awaiting_review),
+        *_render_section(
+            f"*Offen / wartet auf Review ({len(awaiting_review)})*",
+            awaiting_review,
+        ),
     ]
     return "\n".join(lines).strip()
 
 
-@workflows.activity(start_to_close_timeout=timedelta(seconds=60), retry_policy_max_attempts=1)
+@workflows.activity(
+    start_to_close_timeout=timedelta(seconds=60), retry_policy_max_attempts=1
+)
 async def post_digest_to_slack(
     message: str,
     slack: ToolCallClient = Depends(slack_connector),
 ) -> str:
     profile_text = _all_text(
-        await slack.call_tool("slack_read_user_profile", {"response_format": "detailed"})
+        await slack.call_tool(
+            "slack_read_user_profile", {"response_format": "detailed"}
+        )
     )
     match = re.search(r"User ID:\s*([A-Z0-9]+)", profile_text) or re.search(
         r"\b(U[0-9A-Z]{8,})\b", profile_text
@@ -258,9 +296,10 @@ async def post_digest_to_slack(
     name="repo-digest",
     workflow_display_name="Repo Digest",
     workflow_description=(
-        "Given a GitHub repo handle and a date, lists the PRs merged since that date and the open "
-        "PRs awaiting review, summarizes each in one line with a link, and posts the digest to the "
-        "triggering user's Slack self-DM."
+        "Given a GitHub repo handle and a date, lists the PRs merged since "
+        "that date and the open PRs awaiting review, summarizes each in one "
+        "line with a link, and posts the digest to the triggering user's "
+        "Slack self-DM."
     ),
     on_behalf_of=True,
 )
@@ -272,7 +311,9 @@ class RepoDigestWorkflow:
         open_raw = await fetch_open_prs(input.repo)
         merged = await summarize_prs(merged_raw)
         awaiting_review = await summarize_prs(open_raw)
-        message = render_message(input.repo, input.since, merged, awaiting_review)
+        message = render_message(
+            input.repo, input.since, merged, awaiting_review
+        )
         link = await post_digest_to_slack(message)
         return RepoDigestResult(
             repo=input.repo,
