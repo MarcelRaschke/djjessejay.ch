@@ -10,16 +10,45 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PORT = 30000 + Math.floor(Math.random() * 20000);
 let child;
 
-function get(path) {
+function get(path, port = PORT) {
   return new Promise((resolve, reject) => {
-    const req = request({ host: '127.0.0.1', port: PORT, path, method: 'GET' }, (res) => {
-      res.resume();
-      res.on('end', () => resolve({ status: res.statusCode, location: res.headers.location }));
+    const req = request({ host: '127.0.0.1', port, path, method: 'GET' }, (res) => {
+      let body = '';
+      res.setEncoding('utf8');
+      res.on('data', (chunk) => { body += chunk; });
+      res.on('end', () => resolve({ status: res.statusCode, location: res.headers.location, body }));
+      res.on('error', reject);
     });
+    req.setTimeout(1000, () => req.destroy(new Error('request timed out')));
     req.on('error', reject);
     req.end();
   });
 }
+
+test('the production default serves the API but not static files', async () => {
+  const port = PORT + 1;
+  const apiChild = spawn(process.execPath, ['server.js'], {
+    cwd: root,
+    env: { PATH: process.env.PATH, PORT: String(port), NODE_ENV: 'test' },
+    stdio: 'ignore',
+  });
+  try {
+    for (let i = 0; i < 50; i++) {
+      try { await get('/', port); break; } catch (err) {
+        if (i === 49) throw err;
+        await new Promise((r) => setTimeout(r, 100));
+      }
+    }
+    for (const p of ['/', '/index.html', '/favicon.svg']) {
+      assert.equal((await get(p, port)).status, 404, p);
+    }
+    const health = await get('/api/health', port);
+    assert.equal(health.status, 200);
+    assert.equal(JSON.parse(health.body).status, 'healthy');
+  } finally {
+    apiChild.kill();
+  }
+});
 
 before(async () => {
   child = spawn(process.execPath, ['server.js'], {
