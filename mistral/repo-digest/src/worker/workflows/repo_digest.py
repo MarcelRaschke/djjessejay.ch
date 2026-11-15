@@ -9,6 +9,7 @@ import mistralai.workflows as workflows
 from mistralai.workflows import Depends
 from mistralai.workflows.client import get_mistral_client
 from mistralai.workflows.plugins.mistralai.connectors import (
+    ConnectorToolCallError,
     ToolCallClient,
     connector,
     uses_connectors,
@@ -18,6 +19,8 @@ github_connector = connector("github_app")
 slack_connector = connector("slack")
 
 MAX_PRS_PER_SECTION = 30
+MAX_SHOWN_PER_SECTION = 20
+SLACK_MESSAGE_LIMIT = 4900
 PR_FIELDS = [
     "number",
     "title",
@@ -27,6 +30,7 @@ PR_FIELDS = [
     "closed_at",
     "created_at",
 ]
+PR_FIELDS_MINIMAL = ["number", "title", "html_url", "user", "created_at"]
 
 
 class RepoDigestInput(BaseModel):
@@ -120,18 +124,23 @@ def _split_repo(repo: str) -> tuple[str, str]:
 async def _search_prs(
     github: ToolCallClient, owner: str, name: str, query: str
 ) -> list[dict[str, Any]]:
-    result = await github.call_tool(
-        "search_pull_requests",
-        {
-            "query": f"{query} sort:updated-desc",
-            "owner": owner,
-            "repo": name,
-            "fields": PR_FIELDS,
-            "perPage": MAX_PRS_PER_SECTION,
-            "sort": "updated",
-            "order": "desc",
-        },
-    )
+    arguments = {
+        "query": f"{query} sort:updated-desc",
+        "owner": owner,
+        "repo": name,
+        "fields": PR_FIELDS,
+        "perPage": MAX_PRS_PER_SECTION,
+        "sort": "updated",
+        "order": "desc",
+    }
+    try:
+        result = await github.call_tool("search_pull_requests", arguments)
+    except ConnectorToolCallError:
+        # The connectors gateway can block responses whose PR bodies match a
+        # prompt-injection pattern; retry without bodies.
+        result = await github.call_tool(
+            "search_pull_requests", {**arguments, "fields": PR_FIELDS_MINIMAL}
+        )
     payload = _payload(result)
     items = payload.get("items", []) if isinstance(payload, dict) else []
     prs = []
@@ -231,11 +240,15 @@ async def summarize_prs(
 def _render_section(title: str, items: list[PrSummary]) -> list[str]:
     if not items:
         return [title, "_— keine —_", ""]
+    shown = items[:MAX_SHOWN_PER_SECTION]
     lines = [title]
-    for item in items:
+    for item in shown:
         lines.append(
             f"- [#{item.number} {item.title}]({item.url}) — {item.summary}"
         )
+    hidden = len(items) - len(shown)
+    if hidden > 0:
+        lines.append(f"_… {hidden} weitere_")
     lines.append("")
     return lines
 
@@ -255,7 +268,14 @@ def render_message(
             awaiting_review,
         ),
     ]
-    return "\n".join(lines).strip()
+    message = "\n".join(lines).strip()
+    if len(message) > SLACK_MESSAGE_LIMIT:
+        cut = message.rfind("\n", 0, SLACK_MESSAGE_LIMIT)
+        message = (
+            message[:cut]
+            + "\n_… gekürzt (Slack-Limit 5000 Zeichen)_"
+        )
+    return message
 
 
 @workflows.activity(
