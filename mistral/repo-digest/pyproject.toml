@@ -1,0 +1,16 @@
+[project]
+name = "repo-digest-worker"
+version = "0.1.0"
+requires-python = ">=3.12,<3.15"
+dependencies = [
+    "mistralai>=2.9.4",
+    "mistralai-workflows[mistralai]>=3.16.0",
+    "pydantic>=2.11",
+]
+
+[build-system]
+requires = ["uv_build>=0.8.22,<0.9.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "worker"
