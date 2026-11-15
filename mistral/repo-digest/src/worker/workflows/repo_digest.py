@@ -230,7 +230,7 @@ async def post_digest_to_slack(
     slack: ToolCallClient = Depends(slack_connector),
 ) -> str:
     profile_text = _all_text(
-        await slack.call_tool("slack_read_user_profile", {"response_format": "concise"})
+        await slack.call_tool("slack_read_user_profile", {"response_format": "detailed"})
     )
     match = re.search(r"User ID:\s*([A-Z0-9]+)", profile_text) or re.search(
         r"\b(U[0-9A-Z]{8,})\b", profile_text
