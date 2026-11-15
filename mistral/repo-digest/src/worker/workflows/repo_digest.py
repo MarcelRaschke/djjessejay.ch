@@ -72,6 +72,27 @@ def _text_of(payload: Any) -> str:
     return json.dumps(payload, ensure_ascii=False)
 
 
+def _all_text(value: Any) -> str:
+    parts: list[str] = []
+
+    def walk(node: Any) -> None:
+        if isinstance(node, str):
+            parts.append(node)
+            try:
+                walk(json.loads(node))
+            except (ValueError, TypeError):
+                pass
+        elif isinstance(node, dict):
+            for child in node.values():
+                walk(child)
+        elif isinstance(node, (list, tuple)):
+            for child in node:
+                walk(child)
+
+    walk(value)
+    return "\n".join(parts)
+
+
 def _split_repo(repo: str) -> tuple[str, str]:
     owner, sep, name = repo.partition("/")
     if not sep or not owner or not name:
@@ -208,13 +229,18 @@ async def post_digest_to_slack(
     message: str,
     slack: ToolCallClient = Depends(slack_connector),
 ) -> str:
-    profile = _payload(
+    profile_text = _all_text(
         await slack.call_tool("slack_read_user_profile", {"response_format": "concise"})
     )
-    match = re.search(r"User ID:\s*(\S+)", _text_of(profile))
+    match = re.search(r"User ID:\s*([A-Z0-9]+)", profile_text) or re.search(
+        r"\b(U[0-9A-Z]{8,})\b", profile_text
+    )
     if not match:
-        raise RuntimeError("Could not resolve the Slack user id of the triggering user.")
-    sent = _payload(
+        raise RuntimeError(
+            "Could not resolve the Slack user id of the triggering user. "
+            f"Profile response: {profile_text[:300]}"
+        )
+    sent_text = _all_text(
         await slack.call_tool(
             "slack_send_message",
             {
@@ -224,9 +250,8 @@ async def post_digest_to_slack(
             },
         )
     )
-    text = _text_of(sent)
-    link = re.search(r"https://[^\s\"'<>]+", text)
-    return link.group(0) if link else text
+    link = re.search(r"https://[^\s\"'<>]+", sent_text)
+    return link.group(0) if link else sent_text
 
 
 @workflows.workflow.define(
