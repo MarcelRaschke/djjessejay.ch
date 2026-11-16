@@ -110,7 +110,13 @@
     .hero h1{font-size:clamp(48px,8vw,94px)}
     .hero h1 .since-line{display:block;margin-top:.25em;font-size:.36em;line-height:1.25;letter-spacing:.16em;color:var(--gold);-webkit-text-stroke:0;background:none;animation:none}
     .lead strong{color:var(--cyan);letter-spacing:.03em}
-    .featured-mix iframe{display:block;max-width:100%;margin-top:18px;border:0;border-radius:4px;background:#071827}
+    .featured-mix iframe{display:block;max-width:100%;border:0;border-radius:4px;background:#071827}
+    .player-consent{margin-top:18px;min-height:220px;border:1px dashed var(--line);border-radius:4px;background:#071827;display:flex}
+    .player-consent.is-loaded{border:0;display:block}
+    .player-slot{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px;text-align:center}
+    .player-consent.is-loaded .player-slot{display:block;padding:0}
+    .player-load{font-family:inherit;cursor:pointer}
+    .player-note{max-width:46ch;font-size:13px}.player-note a{color:var(--cyan);text-underline-offset:4px}
     .sound-links{margin-top:16px!important}
     .sound-links a{color:var(--cyan);text-underline-offset:4px}
     .sound-more{display:flex;flex-direction:column;align-items:flex-start}
@@ -180,10 +186,13 @@
         <article class="card wide featured-mix">
           <h3>Blue Dimension — Radio LoRa 97.5</h3>
           <p>DJ Jesse Jay &amp; Juicy J · dokumentierte Playlist von 2025 · sechs Aufnahmen.</p>
-          <iframe
-            title="SoundCloud Player: DJ Jesse Jay und Juicy J — Blue Dimension Radio LoRa 97.5"
-            src="https://w.soundcloud.com/player/?url=https%3A%2F%2Fsoundcloud.com%2Fjessejay%2Fsets%2Fjesse-jay-juicy-j-blue-dimension-radio-lora-975&amp;color=%2300d9ff&amp;auto_play=false&amp;show_artwork=false&amp;show_comments=false"
-            width="100%" height="220" loading="lazy" allow="autoplay" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+          <div class="player-consent" data-title="SoundCloud Player: DJ Jesse Jay und Juicy J — Blue Dimension Radio LoRa 97.5" data-height="220"
+               data-src="https://w.soundcloud.com/player/?url=https%3A%2F%2Fsoundcloud.com%2Fjessejay%2Fsets%2Fjesse-jay-juicy-j-blue-dimension-radio-lora-975&amp;color=%2300d9ff&amp;auto_play=false&amp;show_artwork=false&amp;show_comments=false">
+            <div class="player-slot">
+              <button type="button" class="btn primary player-load">SoundCloud-Player laden</button>
+              <p class="player-note">Beim Laden werden Daten an SoundCloud übertragen, auch in die USA. Mehr dazu in der <a href="datenschutz.html#soundcloud">Datenschutzerklärung</a>.</p>
+            </div>
+          </div>
           <p class="sound-links"><a href="https://soundcloud.com/jessejay/sets/jesse-jay-juicy-j-blue-dimension-radio-lora-975" rel="noopener noreferrer" target="_blank">Auf SoundCloud anhören (Alternative zum Player)</a></p>
         </article>
         <article class="card sound-more">
@@ -261,7 +270,7 @@
 <footer>
   <div class="wrap foot">
     <span>DJ JESSE JAY — ZÜRICH — EST. 1997</span>
-    <span><a href="#booking">Booking</a> · <a href="#impressum">Impressum</a></span>
+    <span><a href="#booking">Booking</a> · <a href="#impressum">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></span>
     <span class="mono">BLUE DIMENSION // SIGNAL 97.5</span>
   </div>
 </footer>
@@ -291,5 +300,6 @@
   addEventListener('scroll',onScroll,{passive:true});onScroll();
 })();
 </script>
+<script src="js/player-consent.js" defer></script>
 </body>
 </html>
