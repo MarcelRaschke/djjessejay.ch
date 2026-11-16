@@ -125,50 +125,11 @@ jobs:
           note "Live assertions were skipped. This run will start failing after that date."
           echo "::warning::Live edge unreachable. Accepted under LIVE_EDGE_OUTAGE_ACK_UNTIL=$OUTAGE_ACK_UNTIL; live assertions skipped. This gate fails automatically once that date passes."
 
-      - name: Health endpoint
+      # Eine einzige Quelle fuer die Assertions, gemeinsam mit
+      # deploy-wdjjj.yml. Vorher standen hier sechs Schritte und im Deploy-
+      # Workflow vier; die zwei fehlenden waren genau die, die den www-Ausfall
+      # vom 2026-11-13 gemeldet haben. Das Skript laeuft alle durch und gibt am
+      # Ende eine Uebersicht, statt nach dem ersten Fehlschlag abzubrechen.
+      - name: Live edge assertions
         if: steps.readiness.outputs.ready == 'true'
-        run: |
-          set -euo pipefail
-          body="$(curl -fsS -A "wdjjj-healthcheck/1.0 (+https://github.com/MarcelRaschke/djjessejay.ch ci smoke test)" --retry 3 --retry-delay 2 https://djjessejay.ch/__wdjjj/health)"
-          echo "$body"
-          echo "$body" | grep -q '"ok":true'
-          echo "$body" | grep -q '"proxy":"wdjjj"'
-
-      - name: Apex returns a successful response
-        if: steps.readiness.outputs.ready == 'true'
-        run: |
-          set -euo pipefail
-          code="$(curl -sS -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36" -L --retry 3 --retry-delay 2 -o /dev/null -w '%{http_code}' https://djjessejay.ch/)"
-          test "$code" = "200"
-
-      - name: WWW redirects to apex
-        if: steps.readiness.outputs.ready == 'true'
-        run: |
-          set -euo pipefail
-          location="$(curl -sS -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36" --retry 3 --retry-delay 2 -D - -o /dev/null https://www.djjessejay.ch/ | awk 'tolower($1)=="location:" {print $2}' | tr -d '\r')"
-          test "$location" = "https://djjessejay.ch/"
-
-      - name: Mutating request on static path is rejected
-        if: steps.readiness.outputs.ready == 'true'
-        run: |
-          set -euo pipefail
-          code="$(curl -sS -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36" --retry 3 --retry-delay 2 -o /dev/null -w '%{http_code}' -X POST https://djjessejay.ch/)"
-          test "$code" = "405"
-
-      - name: Disallowed method on API path is rejected
-        if: steps.readiness.outputs.ready == 'true'
-        run: |
-          set -euo pipefail
-          code="$(curl -sS -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36" --retry 3 --retry-delay 2 -o /dev/null -w '%{http_code}' -X DELETE https://djjessejay.ch/api/health)"
-          test "$code" = "405"
-
-      - name: Security headers are present
-        if: steps.readiness.outputs.ready == 'true'
-        run: |
-          set -euo pipefail
-          headers="$(curl -sS -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36" --retry 3 --retry-delay 2 -D - -o /dev/null https://djjessejay.ch/)"
-          echo "$headers"
-          echo "$headers" | grep -qi '^strict-transport-security:'
-          echo "$headers" | grep -qi '^content-security-policy:'
-          echo "$headers" | grep -qi '^x-content-type-options: nosniff'
-          echo "$headers" | grep -qi '^referrer-policy:'
+        run: ./scripts/verify-live-edge.sh
