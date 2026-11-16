@@ -1,0 +1,57 @@
+name: "📦 Sentinel-Core: Cloud Deploy & QuickShare Provisioning"
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  matrix-deploy:
+    runs-on: ubuntu-latest
+    env:
+      SYSTEM_TAGS: "#Asimovs #Karpathey #WoP #Blockchain"
+      GCP_PROJECT_ID: ${{ secrets.GCP_cy8er }}
+      GCP_REGION: "eu-west7"
+    steps:
+      - name: "📂 Checkout Repository"
+        uses: actions/checkout@v4
+
+      - name: "🔑 Authenticate to Google Cloud"
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: "⚙️ Set up Cloud SDK"
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: "🔄 Trigger OpenAPI Key Rotation"
+        run: |
+          echo "[*] Initialisiere Key-Zustand für System-Tags: $SYSTEM_TAGS"
+          curl -X POST https://${{ env.GCP_REGION }}-${{ env.GCP_PROJECT_ID }}.cloudfunctions.net/github-event-receiver \
+            -H "Content-Type: application/json" \
+            -H "X-GitHub-Event: push" \
+            -d '{"operator": "MarcelRaschke"}'
+
+      - name: "📝 Generate QuickShare Provisioning File"
+        run: |
+          mkdir -p output/
+          cat <<JSON_EOF > output/sentinel_config.json
+          {
+            "system": "Sentinel-Core-Mesh",
+            "operator": "MarcelRaschke",
+            "timestamp": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')",
+            "network": {
+              "host": "127.0.0.1",
+              "protocol": "WoP",
+              "secure_inference_endpoint": "https://vllm-secure-inference-${{ env.GCP_PROJECT_ID }}.a.run.app"
+            },
+            "status": "VERIFIED_VIA_BLOCKCHAIN_MOCK"
+          }
+          JSON_EOF
+
+      - name: "🚀 Upload QuickShare Artifact"
+        uses: actions/artifacts@v4
+        with:
+          name: sentinel-quickshare-config
+          path: output/sentinel_config.json
+          retention-days: 1
