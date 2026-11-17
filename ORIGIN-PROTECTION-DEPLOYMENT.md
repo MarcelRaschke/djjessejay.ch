@@ -9,7 +9,6 @@ This feature establishes a fail-closed deployment gate for a Cloudflare Tunnel b
 - `scripts/cloudflare-tunnel-setup.js` — Node 22+ Cloudflare API bootstrap. Dry-run by default; mutations require `--apply`.
 - `scripts/verify-origin-protection.js` — six-point, read-only verification.
 - `scripts/deployment-checklist.sh` — local syntax and security gate.
-- `.github/workflows/origin-protection-ci-block.yml` — pull-request/main gate.
 - `ORIGIN-PROTECTION-DEPLOYMENT.md` — deployment contract.
 
 ## Security invariants
@@ -24,8 +23,7 @@ This feature establishes a fail-closed deployment gate for a Cloudflare Tunnel b
 8. Tunnel ingress contains an explicit catch-all `http_status:404` rule.
 9. Cloudflare Access, when used, is attached to a **dedicated** hostname. The script refuses to attach Access to the public hostname.
 10. The verifier fails closed when a known origin IP is not supplied, because direct-origin exposure cannot otherwise be proven absent.
-11. CI has `contents: read` only and does not receive Cloudflare credentials.
-12. Failed validation blocks the deployment gate when the workflow check is configured as a required status check for `main`.
+11. There is no CI gate for this feature. Validation runs locally before a deploy; see "5. Gate status". CI never received Cloudflare credentials, and after the workflow's removal it has no part in this path at all.
 
 ## Required environment
 
@@ -122,11 +120,15 @@ ORIGIN PROTECTION: PASS
 bash scripts/deployment-checklist.sh
 ```
 
-### 5. CI gate
+### 5. Gate status
 
-The GitHub Actions workflow validates the five files on pull requests to `main` and on relevant pushes to `main`. The workflow has read-only repository permissions and does not perform Cloudflare mutations.
+There is no CI gate. `.github/workflows/origin-protection-ci-block.yml` was removed on 2026-11-17.
 
-To make this a merge/deployment block, configure the workflow's validation check as a **required status check** in the branch protection/ruleset for `main`. The workflow alone cannot enforce repository branch protection policy.
+Reason: the workflow's checklist step requires `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_ZONE_ID` and `CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID`. These are deliberately not set in this repository. The step treated missing credentials as a hard failure on pushes to `main` and as a warning on pull requests, so the same commit was green on its pull request and red once merged. The check reported nothing that was not already known and failed on every push, which is noise rather than a gate.
+
+Note that this removes a control that section 3 of this document previously described as blocking. Nothing in the validation logic changed: `scripts/deployment-checklist.sh` and `scripts/verify-origin-protection.js` are unchanged and are run locally, as sections 3 and 4 describe. What is gone is the automatic execution of that validation on pull requests and pushes.
+
+To reinstate the CI gate: restore the workflow from history, set the three credentials as repository secrets, and configure its check as a **required status check** in the ruleset for `main`. A workflow alone cannot enforce branch protection policy. Without the credentials the check cannot pass, so restoring the workflow without them reproduces the state that led to its removal.
 
 ## Six verification points
 
