@@ -126,7 +126,7 @@ There is no CI gate. `.github/workflows/origin-protection-ci-block.yml` was remo
 
 Reason: the workflow's checklist step checks five values. Three of them — `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_ZONE_ID` and `CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID` — are deliberately not set in this repository. The step treated a missing value as a hard failure on pushes to `main` and as a warning on pull requests, so the same commit was green on its pull request and red once merged. The check reported nothing that was not already known and failed on every push, which is noise rather than a gate.
 
-This removes a control that security invariant 12 previously described as blocking. Nothing in the validation logic changed: `scripts/deployment-checklist.sh` and `scripts/verify-origin-protection.js` are unchanged and are run locally, as sections 3 and 4 describe. What is gone is the automatic execution of that validation on pull requests and pushes. The syntax check of `scripts/verify-origin-protection.js` was moved into `npm run lint`, which runs in `ci.yml`.
+This removes a control that this document previously described as blocking: the former security invariant 12, whose substance is now folded into invariant 11. The list ends at 11 as a result; number 12 no longer exists. Nothing in the validation logic changed: `scripts/deployment-checklist.sh` and `scripts/verify-origin-protection.js` are unchanged and are run locally, as sections 3 and 4 describe. What is gone is the automatic execution of that validation on pull requests and pushes. The syntax check of `scripts/verify-origin-protection.js` was moved into `npm run lint`, which runs in `ci.yml`.
 
 To reinstate the CI gate:
 
