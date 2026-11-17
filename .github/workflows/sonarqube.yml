@@ -34,6 +34,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  contents: read      # fuer den Checkout unten
   pull-requests: read # allows SonarQube to decorate PRs with analysis results
 
 jobs:
@@ -50,12 +51,21 @@ jobs:
     # wurde -- ein gruener Check, der luegt. AGENTS.md verbietet das Umgehen
     # von CI; der rote Check ist das ehrliche Signal, dass die Analyse fehlt.
     #
-    # Was zum Gruenwerden fehlt: eine SonarQube-Instanz, die beiden Secrets,
-    # und ein Projekt dort, dessen Schluessel zu sonar-project.properties passt.
-    # Die uebrige Scannerkonfiguration -- Quellmenge, Testmenge, Ausschluesse --
-    # steht bereits in dieser Datei im Projektstamm.
+    # Was zum Gruenwerden noch fehlt: eine SonarQube-Instanz, die beiden
+    # Secrets, und ein Projekt dort, dessen Schluessel zu
+    # sonar-project.properties passt. Scannerkonfiguration und Checkout stehen.
 
     steps:
+      # Ohne Checkout ist der Workspace leer: GitHub Actions holt den Code nicht
+      # von selbst, und die Scan-Action ist eine Docker-Action, die nur den
+      # Scanner startet. Ohne diesen Schritt faende der Scanner weder
+      # sonar-project.properties noch den zu analysierenden Code.
+      # fetch-depth: 0 auf Empfehlung der SonarQube-Doku -- flache Klone
+      # verschlechtern die Relevanz der Analyse und die Blame-Zuordnung.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
       - name: Analyze with SonarQube
 
         # You can pin the exact commit or the version.
