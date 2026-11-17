@@ -99,3 +99,4 @@ honeypot/logs/
 # SQLite database files (derived artifact, never committed)
 *.sqlite
 *.sqlite3
+_site/
