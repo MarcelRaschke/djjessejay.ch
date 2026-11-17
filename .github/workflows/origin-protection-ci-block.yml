@@ -23,7 +23,9 @@ jobs:
       - name: Deployment Checklist
         run: bash scripts/deployment-checklist.sh
         env:
-          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          # Steuert, ob fehlende Credentials ein harter Fehler sind.
+          # Nicht gesetzt oder != true -> Warnung, Job bleibt gruen.
+          ORIGIN_PROTECTION_ENFORCE: ${{ vars.ORIGIN_PROTECTION_ENFORCE }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
