@@ -7,25 +7,50 @@
  *
  * Usage: node scripts/stage-pages-site.mjs [outDir]   (default: _site)
  */
-import { copyFileSync, existsSync, lstatSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
+import { copyFileSync, existsSync, lstatSync, mkdirSync, readdirSync, realpathSync, rmSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { dirname, join, relative, resolve, sep } from 'node:path';
+import { basename, dirname, isAbsolute, join, parse, relative, resolve } from 'node:path';
 
 const require = createRequire(import.meta.url);
 const { PUBLIC_FILES, PUBLIC_DIRS, isPublicFile } = require('../lib/public-site.js');
 
-const root = resolve(import.meta.dirname, '..');
-const out = resolve(root, process.argv[2] || '_site');
+const root = realpathSync(resolve(import.meta.dirname, '..'));
+const out = realOutput(resolve(root, process.argv[2] || '_site'));
 
-// The output is wiped first, so it must be a dedicated directory: not the repository,
-// not one of its ancestors, and not a public path that would be copied into itself.
+// Resolves symlinks in every existing ancestor, so an alias such as /tmp/link -> repo
+// cannot make a path inside the repository look like an outside one.
+function realOutput(target) {
+  const rest = [];
+  let probe = target;
+  while (!existsSync(probe)) {
+    rest.unshift(basename(probe));
+    const parent = dirname(probe);
+    if (parent === probe) break;
+    probe = parent;
+  }
+  // The output itself may be a symlink: it is removed as a link below, so resolve only
+  // its parent and keep the last segment as written.
+  if (rest.length === 0) return join(realpathSync(dirname(target)), basename(target));
+  return join(realpathSync(probe), ...rest);
+}
+
+// The output is wiped first, so it must be a dedicated directory: not the filesystem root,
+// not the repository or one of its ancestors, and not a source directory.
+const rootRel = relative(out, root);
+if (out === parse(out).root || rootRel === '' || !rootRel.startsWith('..')) {
+  throw new Error(`Refusing output directory: ${out}`);
+}
 const outRel = relative(root, out);
-const insideRoot = outRel !== '' && !outRel.startsWith('..');
-if (outRel === '' || root.startsWith(out + sep)) throw new Error(`Refusing output directory: ${out}`);
+const insideRoot = !outRel.startsWith('..') && !isAbsolute(outRel);
 // Inside the repository only a top-level build directory (_site, _anything, dist) is allowed,
 // so a typo cannot wipe source directories such as scripts/ or a public tree.
 if (insideRoot && !/^(?:_[A-Za-z0-9-]+|dist)$/.test(outRel)) {
   throw new Error(`Refusing output directory inside the repository: ${outRel} (use _site or dist)`);
+}
+// Outside the repository an existing directory is only reused when it is empty.
+if (!insideRoot && existsSync(out) && !lstatSync(out).isSymbolicLink()
+  && (!lstatSync(out).isDirectory() || readdirSync(out).length > 0)) {
+  throw new Error(`Refusing output directory: ${out} exists and is not an empty directory`);
 }
 
 const copied = [];

@@ -70,10 +70,46 @@ test('a public tree that is itself a symlink is refused', () => {
 });
 
 test('the staging script refuses to wipe source directories', () => {
-  for (const out of ['.', 'scripts', 'js', '..']) {
+  for (const out of ['.', 'scripts', 'js', '..', '/']) {
     const r = stage(out);
     assert.notEqual(r.status, 0, out);
     assert.match(r.stderr, /Refusing output directory/, out);
   }
   assert.ok(existsSync(join(root, 'scripts', 'stage-pages-site.mjs')));
+});
+
+test('a symlinked alias of the repository cannot smuggle a source directory past the checks', () => {
+  const fake = mkdtempSync(join(tmpdir(), 'pages-root-'));
+  const links = mkdtempSync(join(tmpdir(), 'pages-alias-'));
+  try {
+    mkdirSync(join(fake, 'scripts'));
+    mkdirSync(join(fake, 'lib'));
+    mkdirSync(join(fake, 'js'));
+    copyFileSync(script, join(fake, 'scripts', 'stage-pages-site.mjs'));
+    copyFileSync(join(root, 'lib', 'public-site.js'), join(fake, 'lib', 'public-site.js'));
+    writeFileSync(join(fake, 'index.html'), '<!doctype html>');
+    writeFileSync(join(fake, 'js', 'keep.js'), '// source');
+    symlinkSync(fake, join(links, 'repo'), 'dir');
+    const r = spawnSync(process.execPath,
+      [join(fake, 'scripts', 'stage-pages-site.mjs'), join(links, 'repo', 'js')],
+      { cwd: fake, encoding: 'utf8' });
+    assert.notEqual(r.status, 0);
+    assert.match(r.stderr, /Refusing output directory/);
+    assert.ok(existsSync(join(fake, 'js', 'keep.js')), 'source directory was wiped');
+  } finally {
+    rmSync(links, { recursive: true, force: true });
+    rmSync(fake, { recursive: true, force: true });
+  }
+});
+
+test('an existing non-empty directory outside the repository is not wiped', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'pages-keep-'));
+  try {
+    writeFileSync(join(dir, 'important.txt'), 'keep');
+    const r = stage(dir);
+    assert.notEqual(r.status, 0);
+    assert.ok(existsSync(join(dir, 'important.txt')));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
