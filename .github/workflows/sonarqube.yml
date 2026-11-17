@@ -51,9 +51,10 @@ jobs:
     # in seinem `if` lesen kann. Fehlt eines von beiden, wird der Schritt
     # uebersprungen und der Job meldet success statt failure.
     #
-    # VOR DEM AKTIVIEREN: zusaetzlich zu den beiden Secrets muss unten
-    # -Dsonar.projectKey= gefuellt werden. Der Wert ist zurzeit leer; mit
-    # gesetztem Token wuerde der Scanner genau daran scheitern.
+    # Die Scannerkonfiguration steht in sonar-project.properties im
+    # Projektstamm: Projektschluessel, Quell- und Testmenge, Ausschluesse.
+    # Zum Aktivieren reichen deshalb die beiden Secrets, sofern der dortige
+    # Projektschluessel mit dem Projekt in der SonarQube-Instanz uebereinstimmt.
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
@@ -69,11 +70,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information
           # SONAR_TOKEN und SONAR_HOST_URL werden vom Job-env oben geerbt.
         with:
-          # Additional arguments for the sonarcloud scanner
+          # Zusaetzliche Scanner-Argumente. Projektschluessel, Quellen, Tests
+          # und Ausschluesse stehen in sonar-project.properties; ein Wert hier
+          # wuerde die Datei ueberstimmen, deshalb steht hier nichts.
           args:
-            # Unique key of your project. You can find it in SonarQube > [my project] > Project Information (top-right menu)
-            # mandatory
-            -Dsonar.projectKey=
             # Comma-separated paths to directories containing main source files.
             #-Dsonar.sources= # optional, default is project base directory
             # When you need the analysis to take place in a directory other than the one from which it was launched
