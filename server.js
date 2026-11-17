@@ -84,6 +84,9 @@ const PUBLIC_FILES = new Set([
 ]);
 const PUBLIC_DIRS = new Set(['css', 'js', 'assets', 'survey', 'pressekit', 'presskit', 'website', 'visuals', 'vendor']);
 const BLOCKED_EXT = /\.(?:sql|env|pem|key|log|jsonl|sh|py|ts|md|ya?ml|lock)$/i;
+// Scripts and JSON are denied outside the allowlisted public trees (js/, vendor/, ...), which
+// need them. Root-level files such as server.js or package.json never match an allowlist entry.
+const SOURCE_EXT = /\.(?:m?js|cjs|json)$/i;
 const staticFiles = express.static(__dirname, { dotfiles: 'ignore', index: ['index.html'], redirect: false });
 
 // Directory index of the allowlisted trees, built once at startup so the request path never
@@ -117,6 +120,7 @@ function classifyStaticPath(rawPath) {
   if (BLOCKED_EXT.test(rel)) return 'deny';
   const top = rel.split('/')[0];
   if (PUBLIC_FILES.has(rel)) return 'serve';
+  if (SOURCE_EXT.test(rel) && !PUBLIC_DIRS.has(top)) return 'deny';
   // A directory inside the allowlist requested without its trailing slash ("/survey",
   // "/visuals/blue-dimension-21600") redirects to its index. The target is built from the
   // normalized relative path, so "//survey" cannot become an off-site redirect.

@@ -88,6 +88,15 @@ test('a double-slash directory request cannot become an off-site redirect', asyn
   assert.equal(r.location, '/survey/');
 });
 
+test('root-level scripts and JSON stay blocked, public trees keep their assets', async () => {
+  for (const p of ['/js/hero-simple.js', '/scripts.js', '/artist-profile.json', '/website/open-graph.json']) {
+    assert.equal((await get(p)).status, 200, p);
+  }
+  for (const p of ['/server.mjs', '/tailwind.config.cjs', '/package-lock.json', '/tsconfig.json', '/Dockerfile.json']) {
+    assert.equal((await get(p)).status, 404, p);
+  }
+});
+
 test('a nested public directory without trailing slash redirects to its index', async () => {
   const r = await get('/visuals/blue-dimension-21600');
   assert.equal(r.status, 301);
