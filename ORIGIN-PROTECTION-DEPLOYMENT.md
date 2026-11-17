@@ -124,11 +124,19 @@ bash scripts/deployment-checklist.sh
 
 There is no CI gate. `.github/workflows/origin-protection-ci-block.yml` was removed on 2026-11-17.
 
-Reason: the workflow's checklist step requires `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_ZONE_ID` and `CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID`. These are deliberately not set in this repository. The step treated missing credentials as a hard failure on pushes to `main` and as a warning on pull requests, so the same commit was green on its pull request and red once merged. The check reported nothing that was not already known and failed on every push, which is noise rather than a gate.
+Reason: the workflow's checklist step checks five values. Three of them — `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_ZONE_ID` and `CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID` — are deliberately not set in this repository. The step treated a missing value as a hard failure on pushes to `main` and as a warning on pull requests, so the same commit was green on its pull request and red once merged. The check reported nothing that was not already known and failed on every push, which is noise rather than a gate.
 
-Note that this removes a control that section 3 of this document previously described as blocking. Nothing in the validation logic changed: `scripts/deployment-checklist.sh` and `scripts/verify-origin-protection.js` are unchanged and are run locally, as sections 3 and 4 describe. What is gone is the automatic execution of that validation on pull requests and pushes.
+This removes a control that security invariant 12 previously described as blocking. Nothing in the validation logic changed: `scripts/deployment-checklist.sh` and `scripts/verify-origin-protection.js` are unchanged and are run locally, as sections 3 and 4 describe. What is gone is the automatic execution of that validation on pull requests and pushes. The syntax check of `scripts/verify-origin-protection.js` was moved into `npm run lint`, which runs in `ci.yml`.
 
-To reinstate the CI gate: restore the workflow from history, set the three credentials as repository secrets, and configure its check as a **required status check** in the ruleset for `main`. A workflow alone cannot enforce branch protection policy. Without the credentials the check cannot pass, so restoring the workflow without them reproduces the state that led to its removal.
+To reinstate the CI gate:
+
+1. Restore the workflow from history.
+2. Set `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_ZONE_ID` as repository **secrets**.
+3. Set `CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID` as a repository **variable**, not a secret. It is an identifier, not a credential, and the workflow reads it from `vars`. Step 5 under "Worker-only origin (service token)" says the same; a value stored as a secret arrives empty and the check fails.
+4. `CF_PUBLIC_HOSTNAME` needs no action: the workflow sets it inline.
+5. Configure the workflow's check as a **required status check** in the ruleset for `main`. A workflow alone cannot enforce branch protection policy.
+
+Without those values the check cannot pass, so restoring the workflow without them reproduces the state that led to its removal.
 
 ## Six verification points
 
