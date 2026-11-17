@@ -61,7 +61,13 @@ for (const name of PUBLIC_FILES) {
   else console.warn(`Public file missing, not published: ${name}`);
 }
 for (const dir of PUBLIC_DIRS) {
-  if (existsSync(join(root, dir))) walk(dir);
+  const source = join(root, dir);
+  if (!existsSync(source)) continue;
+  // readdirSync follows symlinks, so a public tree that is itself a link would pull in
+  // files from outside the repository. Child entries are checked in walk().
+  const stat = lstatSync(source);
+  if (stat.isSymbolicLink()) throw new Error(`Refusing symlink: ${dir}`);
+  if (stat.isDirectory()) walk(dir);
 }
 
 if (!copied.includes('index.html')) throw new Error('Missing Pages entrypoint index.html');

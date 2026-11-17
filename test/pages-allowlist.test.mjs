@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
@@ -44,6 +44,28 @@ test('the staged Pages artifact holds the site and no repository internals', () 
     }
   } finally {
     rmSync(out, { recursive: true, force: true });
+  }
+});
+
+test('a public tree that is itself a symlink is refused', () => {
+  const fake = mkdtempSync(join(tmpdir(), 'pages-root-'));
+  const outside = mkdtempSync(join(tmpdir(), 'pages-outside-'));
+  try {
+    mkdirSync(join(fake, 'scripts'));
+    mkdirSync(join(fake, 'lib'));
+    copyFileSync(script, join(fake, 'scripts', 'stage-pages-site.mjs'));
+    copyFileSync(join(root, 'lib', 'public-site.js'), join(fake, 'lib', 'public-site.js'));
+    writeFileSync(join(fake, 'index.html'), '<!doctype html>');
+    writeFileSync(join(outside, 'secret.txt'), 'not public');
+    symlinkSync(outside, join(fake, 'assets'), 'dir');
+    const r = spawnSync(process.execPath, [join(fake, 'scripts', 'stage-pages-site.mjs'), '_site'],
+      { cwd: fake, encoding: 'utf8' });
+    assert.notEqual(r.status, 0);
+    assert.match(r.stderr, /Refusing symlink: assets/);
+    assert.ok(!existsSync(join(fake, '_site', 'assets', 'secret.txt')));
+  } finally {
+    rmSync(fake, { recursive: true, force: true });
+    rmSync(outside, { recursive: true, force: true });
   }
 });
 
