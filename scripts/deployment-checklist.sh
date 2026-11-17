@@ -11,22 +11,13 @@ failed=0
 passed=0
 warnings=0
 
-# Die Secret-Presence-Checks sind ein Bereitschaftssignal fuer das
-# Origin-Protection-Deployment, keine Code- oder Sicherheitspruefung. Sie sind
-# nur dann ein harter Fehler, wenn das Repository ausdruecklich erklaert, dass
-# die Credentials gesetzt sein sollen: Variable ORIGIN_PROTECTION_ENFORCE=true.
-#
-# Default ist warn. Grund: die Credentials sind bewusst nicht gesetzt, und ein
-# Check, der auf jedem Push nach main rot steht, ist kein Signal mehr, sondern
-# Rauschen, in dem echte Fehlschlaege untergehen. Vorher haengte der Modus am
-# Event-Typ, dadurch war der Check auf PRs gruen und auf main rot -- derselbe
-# Commit, zwei Ergebnisse.
-#
-# Die strukturellen Checks darunter bleiben in jedem Modus hart.
-if [[ "${ORIGIN_PROTECTION_ENFORCE:-false}" == "true" ]]; then
-  secret_mode="required"
-else
+# On pull_request events, repository secrets are often not available to CI.
+# Secret-presence checks become warnings there; they remain hard requirements
+# on push events to protected branches.
+if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
   secret_mode="warn"
+else
+  secret_mode="required"
 fi
 
 check() {
@@ -68,11 +59,9 @@ if [[ $failed -gt 0 ]]; then
   exit 1
 elif [[ $warnings -gt 0 ]]; then
   echo ""
-  echo "🚀 Strukturelle Checks bestanden. $warnings Credential(s) nicht gesetzt."
-  echo "    Origin Protection ist damit nicht deploybar. Das ist der aktuelle"
-  echo "    Stand des Repositories, kein Fehler dieses Laufs."
-  echo "    Harte Pruefung einschalten: Repository-Variable"
-  echo "    ORIGIN_PROTECTION_ENFORCE=true setzen."
+  echo "🚀 Structural checks passed. Secret checks skipped as warnings (pull_request event)."
+  echo "    Set CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_ZONE_ID, CF_PUBLIC_HOSTNAME and"
+  echo "    CF_ORIGIN_ACCESS_SERVICE_TOKEN_ID in repository secrets before merging."
   exit 0
 else
   echo ""

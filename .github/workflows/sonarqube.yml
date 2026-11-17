@@ -40,35 +40,31 @@ jobs:
   Analysis:
     runs-on: ubuntu-latest
 
-    # Dieser Workflow wurde am 2026-11-12 mit dc6900c0 als unveraenderte
-    # Starter-Vorlage hinzugefuegt und hatte seither keinen einzigen gruenen
-    # Lauf: SONAR_TOKEN und SONAR_HOST_URL sind nicht gesetzt, die Action
-    # bricht mit "This GitHub Action requires the SONAR_TOKEN env variable" ab.
-    # Ein Check, der auf jedem Commit rot ist, ist kein Signal mehr, sondern
-    # Rauschen, in dem echte Fehlschlaege untergehen.
+    # Dieser Check ist rot, seit der Workflow am 2026-11-12 mit dc6900c0 als
+    # unveraenderte Starter-Vorlage hinzugefuegt wurde: SONAR_TOKEN und
+    # SONAR_HOST_URL sind nicht gesetzt, die Action bricht mit "This GitHub
+    # Action requires the SONAR_TOKEN env variable" ab.
     #
-    # Die Secrets stehen deshalb hier auf Job-Ebene, damit der Schritt unten sie
-    # in seinem `if` lesen kann. Fehlt eines von beiden, wird der Schritt
-    # uebersprungen und der Job meldet success statt failure.
+    # Er bleibt bewusst rot. Ein `if` auf die Secrets wuerde den Schritt
+    # ueberspringen und der Job meldete success, obwohl kein Code analysiert
+    # wurde -- ein gruener Check, der luegt. AGENTS.md verbietet das Umgehen
+    # von CI; der rote Check ist das ehrliche Signal, dass die Analyse fehlt.
     #
-    # Die Scannerkonfiguration steht in sonar-project.properties im
-    # Projektstamm: Projektschluessel, Quell- und Testmenge, Ausschluesse.
-    # Zum Aktivieren reichen deshalb die beiden Secrets, sofern der dortige
-    # Projektschluessel mit dem Projekt in der SonarQube-Instanz uebereinstimmt.
-    env:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+    # Was zum Gruenwerden fehlt: eine SonarQube-Instanz, die beiden Secrets,
+    # und ein Projekt dort, dessen Schluessel zu sonar-project.properties passt.
+    # Die uebrige Scannerkonfiguration -- Quellmenge, Testmenge, Ausschluesse --
+    # steht bereits in dieser Datei im Projektstamm.
 
     steps:
       - name: Analyze with SonarQube
-        if: ${{ env.SONAR_TOKEN != '' && env.SONAR_HOST_URL != '' }}
 
         # You can pin the exact commit or the version.
         # uses: SonarSource/sonarqube-scan-action@v1.1.0
         uses: SonarSource/sonarqube-scan-action@7295e71c9583053f5bf40e9d4068a0c974603ec8
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information
-          # SONAR_TOKEN und SONAR_HOST_URL werden vom Job-env oben geerbt.
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         with:
           # Zusaetzliche Scanner-Argumente. Projektschluessel, Quellen, Tests
           # und Ausschluesse stehen in sonar-project.properties; ein Wert hier
