@@ -34,38 +34,13 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read      # fuer den Checkout unten
   pull-requests: read # allows SonarQube to decorate PRs with analysis results
 
 jobs:
   Analysis:
     runs-on: ubuntu-latest
 
-    # Dieser Check ist rot, seit der Workflow am 2026-11-12 mit dc6900c0 als
-    # unveraenderte Starter-Vorlage hinzugefuegt wurde: SONAR_TOKEN und
-    # SONAR_HOST_URL sind nicht gesetzt, die Action bricht mit "This GitHub
-    # Action requires the SONAR_TOKEN env variable" ab.
-    #
-    # Er bleibt bewusst rot. Ein `if` auf die Secrets wuerde den Schritt
-    # ueberspringen und der Job meldete success, obwohl kein Code analysiert
-    # wurde -- ein gruener Check, der luegt. AGENTS.md verbietet das Umgehen
-    # von CI; der rote Check ist das ehrliche Signal, dass die Analyse fehlt.
-    #
-    # Was zum Gruenwerden noch fehlt: eine SonarQube-Instanz, die beiden
-    # Secrets, und ein Projekt dort, dessen Schluessel zu
-    # sonar-project.properties passt. Scannerkonfiguration und Checkout stehen.
-
     steps:
-      # Ohne Checkout ist der Workspace leer: GitHub Actions holt den Code nicht
-      # von selbst, und die Scan-Action ist eine Docker-Action, die nur den
-      # Scanner startet. Ohne diesen Schritt faende der Scanner weder
-      # sonar-project.properties noch den zu analysierenden Code.
-      # fetch-depth: 0 auf Empfehlung der SonarQube-Doku -- flache Klone
-      # verschlechtern die Relevanz der Analyse und die Blame-Zuordnung.
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-
       - name: Analyze with SonarQube
 
         # You can pin the exact commit or the version.
@@ -73,13 +48,14 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@7295e71c9583053f5bf40e9d4068a0c974603ec8
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}   # Generate a token on SonarQube, add it to the secrets of this repo with the name SONAR_TOKEN (Settings > Secrets > Actions > add new repository secret)
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}   # add the URL of your instance to the secrets of this repo with the name SONAR_HOST_URL (Settings > Secrets > Actions > add new repository secret)
         with:
-          # Zusaetzliche Scanner-Argumente. Projektschluessel, Quellen, Tests
-          # und Ausschluesse stehen in sonar-project.properties; ein Wert hier
-          # wuerde die Datei ueberstimmen, deshalb steht hier nichts.
+          # Additional arguments for the sonarcloud scanner
           args:
+            # Unique key of your project. You can find it in SonarQube > [my project] > Project Information (top-right menu)
+            # mandatory
+            -Dsonar.projectKey=
             # Comma-separated paths to directories containing main source files.
             #-Dsonar.sources= # optional, default is project base directory
             # When you need the analysis to take place in a directory other than the one from which it was launched
