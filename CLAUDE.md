@@ -31,7 +31,8 @@ npm install               # Install dependencies
 npm run build:css        # Compile Tailwind CSS
 npm run sync:metadata    # Sync metadata (if configured)
 npm test                 # Run syntax checks
-npm start                # Start Express.js backend locally
+npm start                # Start Express.js backend (API only)
+npm run dev              # Local preview: API plus static site (SERVE_STATIC=1)
 ```
 
 **Static deployment**: Automatic via `.github/workflows/static.yml` on push to `main` (no manual deployment script required).
