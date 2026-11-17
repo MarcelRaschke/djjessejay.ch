@@ -77,16 +77,8 @@ app.use('/api/djjj-survey', djjjSurveyRouter);
 // documented custom-server rollback). Even then only an explicit allowlist of public
 // site files is served; everything else in the repository stays unreachable.
 const SERVE_STATIC = process.env.SERVE_STATIC === '1';
-const PUBLIC_FILES = new Set([
-  'index.html', 'ivdj-supreme.html', 'hero-test.html', 'artist-profile.json', 'robots.txt',
-  'favicon.ico', 'favicon.svg', 'tailwind.css', 'jessejay.css', 'scripts.js',
-  'DJ-Jesse-Jay.jpg', 'DJPult.gif', 'img_contact_sound.svg', 'spacer.svg',
-]);
-const PUBLIC_DIRS = new Set(['css', 'js', 'assets', 'survey', 'pressekit', 'presskit', 'website', 'visuals', 'vendor']);
-const BLOCKED_EXT = /\.(?:sql|env|pem|key|log|jsonl|sh|py|ts|md|ya?ml|lock)$/i;
-// Scripts and JSON are denied outside the allowlisted public trees (js/, vendor/, ...), which
-// need them. Root-level files such as server.js or package.json never match an allowlist entry.
-const SOURCE_EXT = /\.(?:m?js|cjs|json)$/i;
+// The public site allowlist is shared with the GitHub Pages build (scripts/stage-pages-site.mjs).
+const { PUBLIC_FILES, PUBLIC_DIRS, BLOCKED_EXT, SOURCE_EXT } = require('./lib/public-site');
 const staticFiles = express.static(__dirname, { dotfiles: 'ignore', index: ['index.html'], redirect: false });
 
 // Directory index of the allowlisted trees, built once at startup so the request path never

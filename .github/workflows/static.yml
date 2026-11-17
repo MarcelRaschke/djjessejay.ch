@@ -50,17 +50,18 @@ jobs:
           TURNSTILE_SITE_KEY: ${{ vars.TURNSTILE_SITE_KEY }}
         run: npm run build:html
 
-      - name: Remove large/unnecessary files before upload
-        run: bash scripts/prepare-pages-content.sh
-
       - name: Validate public provenance bundle
         run: python3 scripts/package-provenance-v9.py --site-check
+
+      - name: Stage public site allowlist
+        # Copies only lib/public-site.js entries into _site. Server code, package
+        # manifests, docs, tests and dotfiles are never part of the Pages artifact.
+        run: node scripts/stage-pages-site.mjs _site
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
-          # Upload minimal, optimized site directory
-          path: '.'
+          path: '_site'
 
       - name: Deploy to GitHub Pages
         id: deployment
