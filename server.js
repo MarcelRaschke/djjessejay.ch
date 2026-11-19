@@ -145,6 +145,12 @@ const TURNSTILE_ACTION = 'contact';
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || '';
 const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-5-20250929';
 const ANTHROPIC_MAX_TOKENS = Number(process.env.ANTHROPIC_MAX_TOKENS) || 1024;
+const ANTHROPIC_API_URL = process.env.ANTHROPIC_API_URL || 'https://api.anthropic.com/v1/messages';
+// JJ-AI is off unless explicitly switched on, so the key alone never makes the
+// visitor chat appear. eu-ai-act.html and datenschutz.html describe it as live
+// only while /api/health reports jjAi: true.
+const JJ_AI_ENABLED = process.env.JJ_AI_ENABLED === '1';
+const JJ_AI_MAX_TOKENS = Number(process.env.JJ_AI_MAX_TOKENS) || 700;
 const MAX_FIELD_LENGTH = 2000;
 const AI_PROMPT_MAX_LENGTH = 2000;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -334,13 +340,51 @@ app.post('/api/ai/generate', aiLimiter, async (req, res) => {
   }
 });
 
+// JJ-AI visitor chat. Grounding sources are loaded once; a missing source
+// disables the feature instead of answering without grounding.
+const jjAi = require('./lib/jj-ai');
+let jjKnowledge = null;
+if (JJ_AI_ENABLED) {
+  try {
+    jjKnowledge = jjAi.loadKnowledge(__dirname);
+  } catch (err) {
+    console.error('JJ-AI disabled, knowledge sources failed to load:', err.message);
+  }
+}
+const jjAiReady = () => JJ_AI_ENABLED && !!ANTHROPIC_API_KEY && !!jjKnowledge;
+
+app.post('/api/jj-ai/chat', aiLimiter, async (req, res) => {
+  if (!jjAiReady()) {
+    return res.status(503).json({ error: 'JJ-AI ist derzeit nicht verfügbar.' });
+  }
+  const conv = jjAi.validateConversation(req.body);
+  if (conv.error) return res.status(400).json({ error: conv.error });
+
+  const upstream = await jjAi.callAnthropic({
+    apiKey: ANTHROPIC_API_KEY,
+    model: ANTHROPIC_MODEL,
+    maxTokens: JJ_AI_MAX_TOKENS,
+    system: jjAi.buildSystemPrompt(conv.mode, jjKnowledge),
+    messages: conv.messages,
+    url: ANTHROPIC_API_URL,
+  });
+  if (upstream.error) {
+    // Log the failure class only, never conversation content.
+    console.error('JJ-AI upstream error:', upstream.error);
+    return res.status(502).json({ error: 'JJ-AI konnte gerade nicht antworten. Bitte später erneut versuchen.' });
+  }
+  res.set('Cache-Control', 'no-store');
+  res.json({ ...jjAi.parseReply(upstream.text, jjKnowledge.catalog), generatedBy: 'ai' });
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'healthy', 
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    aiEnabled: !!ANTHROPIC_API_KEY
+    aiEnabled: !!ANTHROPIC_API_KEY,
+    jjAi: jjAiReady()
   });
 });
 
@@ -370,6 +414,7 @@ const server = app.listen(PORT, () => {
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`Turnstile enabled: ${!!TURNSTILE_SECRET}`);
   console.log(`AI proxy enabled: ${!!ANTHROPIC_API_KEY}`);
+  console.log(`JJ-AI enabled: ${jjAiReady()}`);
   console.log(`SMTP enabled: ${!!(process.env.SMTP_HOST && process.env.SMTP_USER)}`);
 });
 
