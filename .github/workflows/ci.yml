@@ -113,10 +113,10 @@ jobs:
         run: |
           npm ci
           npm run build:css
-      - name: Apply actual Pages cleanup
-        run: bash scripts/prepare-pages-content.sh
-      - name: Validate retained public content
+      - name: Validate public content
         run: python3 scripts/package-provenance-v9.py --site-check
+      - name: Stage the actual Pages artifact
+        run: node scripts/stage-pages-site.mjs _site
 
   provenance-v9-neo4j:
     name: v9 Neo4j Snapshot Roundtrip

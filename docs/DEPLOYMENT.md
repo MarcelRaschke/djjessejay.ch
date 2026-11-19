@@ -226,6 +226,8 @@ pm2 restart server.js
   WorkingDirectory=/path/to/app
   ExecStart=/usr/bin/node server.js
   Restart=on-failure
+  # API only by default. Only for the custom-server rollback below:
+  # Environment=SERVE_STATIC=1
 
   [Install]
   WantedBy=multi-user.target
@@ -286,25 +288,99 @@ If the hybrid GitHub Pages + Cloudflare Worker deployment fails and you need to 
 
 ### Rollback Steps
 
-1. **DNS Revert** (Cloudflare Dashboard → DNS → Records)
+> **Status 2026-11-17: origin not provisioned.** The tunnel `djjessejay-origin` exists with one
+> route (`origin.djjessejay.ch`, path `^/api(?:/.*)?$` → `http://127.0.0.1:3000`), but it is
+> **inactive with 0 replicas**: no `cloudflared` connector and no Express host are running
+> anywhere. `/api/*` on the live site currently ends at the Cloudflare Access 403. Neither the
+> A-record rollback nor the tunnel variant below can run until an origin host is provisioned
+> (Node on port 3000 plus a `cloudflared` connector). Re-verify the tunnel status in
+> Zero Trust → Networks → Tunnels before using this section.
+
+Prepare and verify the origin first. DNS and the Worker change only after the
+origin answers correctly, otherwise the site returns 404 during the switch.
+
+1. **Prepare the origin** (static serving is off by default)
+   - systemd: uncomment `Environment=SERVE_STATIC=1` in `djjessejay.service`, then
+     `sudo systemctl daemon-reload && sudo systemctl restart djjessejay`.
+   - PM2: `SERVE_STATIC=1 pm2 restart djjessejay --update-env`.
+   - Only the public site allowlist in `server.js` is served, never repository internals.
+   - Node itself speaks plain HTTP on `PORT` (default 3000) and never terminates TLS.
+     The A record in step 3 sends Cloudflare to `ORIGIN_IP:443`, so this rollback path needs a
+     TLS-terminating reverse proxy on the origin host (for example nginx or Caddy) that listens on
+     443 and forwards to `http://127.0.0.1:3000`. This repository ships no such proxy config
+     (`control-center/foss/Caddyfile` is the local FOSS stack on :8088, not the origin).
+     If the origin only has `cloudflared` (tunnel to `http://127.0.0.1:3000`, see
+     `ORIGIN-PROTECTION-DEPLOYMENT.md`), nothing listens on 443: set up the proxy first, or
+     roll back through the tunnel instead (see the note after step 5).
+
+2. **Verify the origin before switching traffic**
+   - The firewall only admits Cloudflare ranges, so run the probes on the origin itself
+     (SSH in as the admin user), not from a workstation.
+   - Node directly, without TLS:
+     `curl -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3000/` must print 200,
+     `http://127.0.0.1:3000/server.js` and `http://127.0.0.1:3000/.env` must print 404.
+   - Through the TLS proxy on 443 (the path Cloudflare will use):
+     `curl -k --resolve djjessejay.ch:443:127.0.0.1 https://djjessejay.ch/` must return the site (200),
+     `.../server.js` and `.../.env` must return 404. A 200 from Node but a 502 here means the
+     proxy does not reach port 3000.
+   - Probing from a workstation instead needs a temporary firewall rule for that one source IP;
+     remove it right after the check.
+   - `-k` above only skips trust so the content check works; it does not prove the certificate.
+     Validate TLS separately, without `-k`:
+     `curl -sS -o /dev/null -w '%{http_code}\n' --resolve djjessejay.ch:443:127.0.0.1 https://djjessejay.ch/`
+     must print 200 with no certificate error. If the origin uses a Cloudflare Origin CA certificate
+     (not publicly trusted), add `--cacert /path/to/cloudflare-origin-ca-root.pem`.
+   - Check name and expiry:
+     `openssl s_client -connect 127.0.0.1:443 -servername djjessejay.ch </dev/null 2>/dev/null | openssl x509 -noout -subject -ext subjectAltName -enddate -checkend 604800`
+     must list `djjessejay.ch` in the SAN and report "Certificate will not expire" (valid for at least 7 more days).
+     With the SSL mode at Full (strict), a failing check here means a 526 for every visitor after the DNS switch.
+   - Do not continue until all checks pass.
+
+3. **DNS Revert** (Cloudflare Dashboard → DNS → Records)
    - Delete the CNAME record for `djjessejay.ch`
-   - Restore the original A record: `djjessejay.ch` → `ORIGIN_IP` (Proxied)
+   - Restore the A record: `djjessejay.ch` → `ORIGIN_IP` (Proxied)
    - DNS propagation: ~10-30 minutes
 
-2. **Cloudflare Worker Disable**
+4. **Cloudflare Worker Disable**
    - Cloudflare Dashboard → Workers & Pages
    - Delete or disable the `djjessejay-router` Worker
    - Remove route binding: `djjessejay.ch/*`
+   - Test: `curl -I https://djjessejay.ch/` (should be served by the custom server)
 
-3. **Custom Server Verification**
-   - Ensure application is running on `ORIGIN_IP` (ports 80/443)
-   - Verify SSL certificate is valid
-   - Test: `curl -k https://djjessejay.ch/` (should load the static site from custom server)
-
-4. **GitHub Pages Disable** (optional)
+5. **GitHub Pages Disable** (optional)
    - Repository → Settings → Pages
    - Disable GitHub Pages
    - This prevents confusion if DNS resolves to both sources
+
+`ORIGIN_IP`: see the note at the top of this document.
+
+Tunnel variant: the proxied A record in step 3 does not reveal `ORIGIN_IP` in public DNS
+answers, but it requires an inbound TLS listener on the origin (port 443 open to Cloudflare
+ranges, a valid origin certificate) and departs from the tunnel-only architecture in
+`CLAUDE.md`. Where `cloudflared` already runs, the tunnel variant keeps that architecture,
+opens no inbound port and needs no origin certificate. It replaces step 3 and the TLS checks in
+step 2:
+
+0. Verify the tunnel before touching DNS. Localhost probes pass even while `cloudflared` is
+   disconnected, so they are not enough here:
+   - Zero Trust → Networks → Tunnels → `djjessejay-origin`: status Healthy, at least one active
+     replica.
+   - An authenticated request through the existing origin hostname returns 200. Load the Worker's
+     service token into the shell from the password manager (never paste it into the command
+     line or a ticket):
+     `curl -sS -o /dev/null -w '%{http_code}\n' -H "CF-Access-Client-Id: $ORIGIN_ACCESS_CLIENT_ID" -H "CF-Access-Client-Secret: $ORIGIN_ACCESS_CLIENT_SECRET" https://origin.djjessejay.ch/api/health`
+   - Do not continue on anything but 200.
+1. Delete the existing apex CNAME `djjessejay.ch` → `marcelraschke.github.io`. A tunnel public
+   hostname does not replace an existing record: the dashboard rejects it, and
+   `scripts/cloudflare-tunnel-setup.js` refuses any conflicting record (`classifyDns`).
+2. Add `djjessejay.ch` as a second public hostname on the tunnel `djjessejay-origin`
+   (no path, service `http://127.0.0.1:3000`). This creates the proxied CNAME
+   `djjessejay.ch` → `<tunnel-id>.cfargotunnel.com`. Confirm in DNS → Records that it is the only
+   record for the apex before continuing with step 4.
+
+The window between deleting the old CNAME and the tunnel record appearing is a short outage;
+do both in one sitting. In this variant step 2 consists of the plain-HTTP checks against
+`127.0.0.1:3000` plus the tunnel checks in step 0 above.
 
 ### Rollback Timing
 - Full rollback should be complete within 30-45 minutes (DNS propagation + verification)
