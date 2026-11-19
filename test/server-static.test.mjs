@@ -67,6 +67,7 @@ test('the site root and documented public pages are served', async () => {
   assert.equal((await get('/')).status, 200);
   assert.equal((await get('/hero-test.html')).status, 200);
   assert.equal((await get('/datenschutz.html')).status, 200);
+  assert.equal((await get('/eu-ai-act.html')).status, 200);
   assert.equal((await get('/index-legacy.html')).status, 404);
 });
 
