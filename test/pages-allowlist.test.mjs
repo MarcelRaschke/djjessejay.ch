@@ -33,7 +33,7 @@ test('the staged Pages artifact holds the site and no repository internals', () 
   try {
     const r = stage(out);
     assert.equal(r.status, 0, r.stderr);
-    for (const p of ['index.html', 'datenschutz.html', 'tailwind.css', 'js/player-consent.js',
+    for (const p of ['index.html', '404.html', 'datenschutz.html', 'tailwind.css', 'js/player-consent.js',
       'website/provenance.json', 'presskit/ARCHIVE_CITATION_APPENDIX.html']) {
       assert.ok(existsSync(join(out, p)), `missing ${p}`);
     }
