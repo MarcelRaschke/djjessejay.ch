@@ -9,8 +9,26 @@ jobs:
       issues: write
       pull-requests: write
     steps:
+    # actions/first-interaction v3 erwartet Unterstriche: repo_token, issue_message,
+    # pr_message. Bis zum Bump in #251 (e540cc02, 2026-11-12) stand hier v1 mit
+    # Bindestrichen. Der Bump tauschte die Action-SHA und liess die Schluessel stehen,
+    # seither bricht der Lauf mit "Input required and not supplied: issue_message" ab,
+    # sobald ein Event den Begruessungspfad ueberhaupt erreicht. Der Runner nennt die
+    # gueltigen Namen selbst:
+    #   ##[warning]Unexpected input(s) 'repo-token', 'issue-message', 'pr-message',
+    #   valid inputs are ['issue_message', 'pr_message', 'repo_token']
     - uses: actions/first-interaction@1c4688942c71f71d4f5502a26ea67c331730fa4d # v3.1.0
       with:
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-        issue-message: "Message that will be displayed on users' first issue"
-        pr-message: "Message that will be displayed on users' first pull request"
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        issue_message: >-
+          Danke fuer das erste Issue in diesem Repository.
+          Fuer den Umgangston gilt CONTRIBUTING.md. Wenn es um Identitaet,
+          Biografie, Metadaten oder Pressematerial von DJ Jesse Jay geht, gilt
+          zusaetzlich die Belegpflicht aus AGENTS.md: generierter Text ist kein
+          Nachweis.
+        pr_message: >-
+          Danke fuer den ersten Pull Request in diesem Repository.
+          Zwei Dinge beschleunigen das Review: Commits brauchen einen
+          DCO-Sign-off (git commit -s), und GitHub Actions muessen auf einen
+          vollstaendigen Commit-SHA gepinnt sein, nicht auf ein Tag. Alles
+          Weitere steht in CONTRIBUTING.md und AGENTS.md.
