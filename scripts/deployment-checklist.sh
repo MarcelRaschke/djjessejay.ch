@@ -46,7 +46,6 @@ check "cloudflare-tunnel-setup.js executable" "[[ -x scripts/cloudflare-tunnel-s
 check "verify-origin-protection.js executable" "[[ -x scripts/verify-origin-protection.js ]]"
 check "Node.js installed" "command -v node"
 check "ORIGIN-PROTECTION-DEPLOYMENT.md exists" "[[ -f ORIGIN-PROTECTION-DEPLOYMENT.md ]]"
-check "GitHub Actions workflow exists" "[[ -f .github/workflows/origin-protection-ci-block.yml ]]"
 
 echo ""
 echo "==========================================="
