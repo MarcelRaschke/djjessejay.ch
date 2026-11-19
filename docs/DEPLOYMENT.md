@@ -354,10 +354,22 @@ origin answers correctly, otherwise the site returns 404 during the switch.
 
 `ORIGIN_IP`: see the note at the top of this document.
 
-Tunnel variant: step 3 publishes an A record for `ORIGIN_IP`, which exposes the origin address
-(the project otherwise never publishes one, see `CLAUDE.md`). Where `cloudflared` already runs,
-the alternative replaces step 3 and the TLS checks in step 2:
+Tunnel variant: the proxied A record in step 3 does not reveal `ORIGIN_IP` in public DNS
+answers, but it requires an inbound TLS listener on the origin (port 443 open to Cloudflare
+ranges, a valid origin certificate) and departs from the tunnel-only architecture in
+`CLAUDE.md`. Where `cloudflared` already runs, the tunnel variant keeps that architecture,
+opens no inbound port and needs no origin certificate. It replaces step 3 and the TLS checks in
+step 2:
 
+0. Verify the tunnel before touching DNS. Localhost probes pass even while `cloudflared` is
+   disconnected, so they are not enough here:
+   - Zero Trust → Networks → Tunnels → `djjessejay-origin`: status Healthy, at least one active
+     replica.
+   - An authenticated request through the existing origin hostname returns 200. Load the Worker's
+     service token into the shell from the password manager (never paste it into the command
+     line or a ticket):
+     `curl -sS -o /dev/null -w '%{http_code}\n' -H "CF-Access-Client-Id: $ORIGIN_ACCESS_CLIENT_ID" -H "CF-Access-Client-Secret: $ORIGIN_ACCESS_CLIENT_SECRET" https://origin.djjessejay.ch/api/health`
+   - Do not continue on anything but 200.
 1. Delete the existing apex CNAME `djjessejay.ch` → `marcelraschke.github.io`. A tunnel public
    hostname does not replace an existing record: the dashboard rejects it, and
    `scripts/cloudflare-tunnel-setup.js` refuses any conflicting record (`classifyDns`).
@@ -367,8 +379,8 @@ the alternative replaces step 3 and the TLS checks in step 2:
    record for the apex before continuing with step 4.
 
 The window between deleting the old CNAME and the tunnel record appearing is a short outage;
-do both in one sitting. No port is opened and no origin certificate is needed; step 2 then
-reduces to the plain-HTTP checks against `127.0.0.1:3000`.
+do both in one sitting. In this variant step 2 consists of the plain-HTTP checks against
+`127.0.0.1:3000` plus the tunnel checks in step 0 above.
 
 ### Rollback Timing
 - Full rollback should be complete within 30-45 minutes (DNS propagation + verification)
