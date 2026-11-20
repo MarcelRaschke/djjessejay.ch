@@ -33,24 +33,30 @@ jobs:
           live="$(curl -fsS "https://djjessejay.ch/BDSN/bdsn-version.txt?t=$(date +%s)" 2>/dev/null | tr -d '[:space:]' || true)"
           echo "release=${want:-none} live=${live:-none}"
           if [ -z "$want" ]; then echo "action=none" >> "$GITHUB_OUTPUT"; exit 0; fi
+          case "$want" in *[!0-9a-f]*) echo "::error::Unerwartete Release-SHA"; exit 1 ;; esac
+          echo "sha=$want" >> "$GITHUB_OUTPUT"
           if [ "$want" = "$live" ]; then echo "action=none" >> "$GITHUB_OUTPUT"; else echo "action=deploy" >> "$GITHUB_OUTPUT"; fi
 
       - name: Trigger Pages build
         if: steps.cmp.outputs.action == 'deploy'
         env:
           GH_TOKEN: ${{ github.token }}
+          WANT_SHA: ${{ steps.cmp.outputs.sha }}
         run: |
           set -euo pipefail
           active="$(gh run list -R "$GITHUB_REPOSITORY" --workflow static.yml --limit 5 --json status \
             --jq '[.[] | select(.status != "completed")] | length')"
           if [ "$active" != "0" ]; then echo "static.yml läuft bereits"; exit 0; fi
-          # Loop guard: a failed dispatched build in the last 6 h means the release
-          # does not pass here; do not retry every 30 min.
-          recent_fail="$(gh run list -R "$GITHUB_REPOSITORY" --workflow static.yml --event workflow_dispatch --limit 1 \
-            --json conclusion,createdAt --jq '.[0] | select(.conclusion == "failure") | .createdAt' || true)"
+          # Loop guard: if the latest dispatched build of this same release failed in
+          # the last 6 h, the release does not pass here; do not retry every 30 min.
+          # A later successful build of that SHA clears the guard, and a new or
+          # rolled-back release has a different SHA and is built right away.
+          recent_fail="$(gh run list -R "$GITHUB_REPOSITORY" --workflow static.yml --event workflow_dispatch --limit 20 \
+            --json conclusion,createdAt,displayTitle \
+            --jq "[.[] | select(.displayTitle == \"BDSN ${WANT_SHA}\")][0] | select(.conclusion == \"failure\") | .createdAt" || true)"
           if [ -n "$recent_fail" ] && [ $(( $(date +%s) - $(date -d "$recent_fail" +%s) )) -lt 21600 ]; then
-            echo "::warning::Letzter BDSN-Build fehlgeschlagen ($recent_fail); kein automatischer Retry. Manuell: gh workflow run static.yml"
+            echo "::warning::Build für Release ${WANT_SHA} fehlgeschlagen ($recent_fail); kein automatischer Retry. Manuell: gh workflow run static.yml -f bdsn_sha=${WANT_SHA}"
             exit 0
           fi
-          gh workflow run static.yml -R "$GITHUB_REPOSITORY" --ref main
+          gh workflow run static.yml -R "$GITHUB_REPOSITORY" --ref main -f bdsn_sha="$WANT_SHA"
           echo "static.yml gestartet" >> "$GITHUB_STEP_SUMMARY"
