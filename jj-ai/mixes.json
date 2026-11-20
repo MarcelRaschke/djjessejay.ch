@@ -1,0 +1,32 @@
+{
+  "version": "1.1.0",
+  "note": "Catalog for JJ-AI mix recommendations. Only entries listed here may be recommended; the server maps ids to these URLs. Keep in sync with the #sound section of index.html. Descriptions repeat first-party website text only; evidence status comes from website/provenance.json via claimId.",
+  "mixes": [
+    {
+      "id": "blue-dimension-lora",
+      "title": "Blue Dimension — Radio LoRa 97.5",
+      "artists": "DJ Jesse Jay & Juicy J",
+      "kind": "Radio-Playlist",
+      "description": "Radiosessions der Blue-Dimension-Sendung auf Radio LoRa 97.5.",
+      "claimId": "claim:blue-dimension-playlist-2025",
+      "url": "https://soundcloud.com/jessejay/sets/jesse-jay-juicy-j-blue-dimension-radio-lora-975"
+    },
+    {
+      "id": "schlaflos-2018",
+      "title": "Live im Club Schlaflos · 16.11.2018",
+      "artists": "DJ Jesse Jay",
+      "kind": "Live-Clubset",
+      "description": "Club-Set; die Website ordnet die Club-Sets als Deep House, Progressive House und Techno ein.",
+      "claimId": "claim:schlaflos-live-recording-2018",
+      "url": "https://soundcloud.com/jessejay/jesse-jay-im-club-schlaflos-16112018-mp3"
+    },
+    {
+      "id": "soundcloud-all",
+      "title": "Alle Sets auf SoundCloud",
+      "artists": "DJ Jesse Jay",
+      "kind": "Übersicht",
+      "description": "Öffentliches SoundCloud-Profil mit allen Sets.",
+      "url": "https://soundcloud.com/jessejay"
+    }
+  ]
+}
