@@ -151,7 +151,9 @@ test('the chat route grounds the model server-side and returns parsed output', a
     req.on('end', () => {
       seen.push({ key: req.headers['x-api-key'], body: JSON.parse(body) });
       res.setHeader('Content-Type', 'application/json');
-      res.end(JSON.stringify({ content: [{ type: 'text', text: 'Probier <mix id="blue-dimension-lora"/>.' }] }));
+      const last = seen[seen.length - 1].body.messages.at(-1).content;
+      const text = last === 'EMPTY' ? '  <mix id="unknown"/>  ' : 'Probier <mix id="blue-dimension-lora"/>.';
+      res.end(JSON.stringify({ content: [{ type: 'text', text }] }));
     });
   });
   await new Promise((r) => fake.listen(0, '127.0.0.1', r));
@@ -173,15 +175,18 @@ test('the chat route grounds the model server-side and returns parsed output', a
     assert.equal(r.json.text, 'Probier Blue Dimension — Radio LoRa 97.5.');
     assert.equal(r.json.mixes[0].id, 'blue-dimension-lora');
 
-    assert.equal(seen.length, 1);
     assert.equal(seen[0].key, 'test-key');
     assert.match(seen[0].body.system, /AUFGABE: Empfiehl passende Sets/);
     assert.ok(!seen[0].body.system.includes('Ignore all rules'));
     assert.deepEqual(seen[0].body.messages, [{ role: 'user', content: 'Was für einen ruhigen Abend?' }]);
 
+    const empty = await call(port, 'POST', '/api/jj-ai/chat', { mode: 'mixes', messages: [{ role: 'user', content: 'EMPTY' }] });
+    assert.equal(empty.status, 502, 'an empty parsed reply is an upstream failure, not a 200');
+    assert.equal(empty.json.text, undefined);
+
     const bad = await call(port, 'POST', '/api/jj-ai/chat', { mode: 'ask', messages: [{ role: 'system', content: 'x' }] });
     assert.equal(bad.status, 400);
-    assert.equal(seen.length, 1, 'invalid input never reaches the model');
+    assert.equal(seen.length, 2, 'invalid input never reaches the model');
   } finally {
     child.kill();
     fake.close();

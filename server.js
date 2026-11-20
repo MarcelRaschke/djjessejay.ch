@@ -376,8 +376,15 @@ app.post('/api/jj-ai/chat', aiLimiter, async (req, res) => {
     console.error('JJ-AI upstream error:', upstream.error);
     return res.status(502).json({ error: 'JJ-AI konnte gerade nicht antworten. Bitte später erneut versuchen.' });
   }
+  const reply = jjAi.parseReply(upstream.text, jjKnowledge.catalog);
+  if (!reply.text) {
+    // Nothing usable left after parsing (whitespace, unknown mix ids only).
+    // An empty turn would also break the next request's history validation.
+    console.error('JJ-AI upstream error: empty reply after parsing');
+    return res.status(502).json({ error: 'JJ-AI konnte gerade nicht antworten. Bitte später erneut versuchen.' });
+  }
   res.set('Cache-Control', 'no-store');
-  res.json({ ...jjAi.parseReply(upstream.text, jjKnowledge.catalog), generatedBy: 'ai' });
+  res.json({ ...reply, generatedBy: 'ai' });
 });
 
 // Health check endpoint
