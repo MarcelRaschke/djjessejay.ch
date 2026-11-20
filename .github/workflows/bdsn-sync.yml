@@ -47,12 +47,13 @@ jobs:
           active="$(gh run list -R "$GITHUB_REPOSITORY" --workflow static.yml --limit 5 --json status \
             --jq '[.[] | select(.status != "completed")] | length')"
           if [ "$active" != "0" ]; then echo "static.yml läuft bereits"; exit 0; fi
-          # Loop guard: if a dispatched build of this same release failed in the last
-          # 6 h, the release does not pass here; do not retry every 30 min. A new or
+          # Loop guard: if the latest dispatched build of this same release failed in
+          # the last 6 h, the release does not pass here; do not retry every 30 min.
+          # A later successful build of that SHA clears the guard, and a new or
           # rolled-back release has a different SHA and is built right away.
           recent_fail="$(gh run list -R "$GITHUB_REPOSITORY" --workflow static.yml --event workflow_dispatch --limit 20 \
             --json conclusion,createdAt,displayTitle \
-            --jq "[.[] | select(.displayTitle == \"BDSN ${WANT_SHA}\" and .conclusion == \"failure\")][0].createdAt // empty" || true)"
+            --jq "[.[] | select(.displayTitle == \"BDSN ${WANT_SHA}\")][0] | select(.conclusion == \"failure\") | .createdAt" || true)"
           if [ -n "$recent_fail" ] && [ $(( $(date +%s) - $(date -d "$recent_fail" +%s) )) -lt 21600 ]; then
             echo "::warning::Build für Release ${WANT_SHA} fehlgeschlagen ($recent_fail); kein automatischer Retry. Manuell: gh workflow run static.yml -f bdsn_sha=${WANT_SHA}"
             exit 0

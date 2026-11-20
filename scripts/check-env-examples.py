@@ -34,6 +34,7 @@ PLACEHOLDER = re.compile(
     re.IGNORECASE,
 )
 MIN_LEN = 20
+DQ_ESCAPABLE = "$`\"\\"
 
 
 def shell_value(raw: str) -> str:
@@ -41,7 +42,8 @@ def shell_value(raw: str) -> str:
 
     Quoted and unquoted fragments are concatenated ("abc"def is abcdef);
     inside double quotes and unquoted text a backslash escapes the next
-    character, single quotes have no escapes. The value ends at the first
+    character (inside double quotes only before $ ` " \\), single quotes
+    have no escapes. The value ends at the first
     unquoted whitespace; what follows must be empty or a comment. An
     unterminated quote or other trailing text returns the raw text, so
     ambiguous syntax never shortens a value.
@@ -55,7 +57,14 @@ def shell_value(raw: str) -> str:
         if quote:
             if ch == quote:
                 quote = ""
-            elif quote == '"' and ch == "\\" and i + 1 < len(text):
+            elif (
+                quote == '"'
+                and ch == "\\"
+                and i + 1 < len(text)
+                and text[i + 1] in DQ_ESCAPABLE
+            ):
+                # Bash honours a backslash inside double quotes only before
+                # $ ` " \ ; elsewhere it stays part of the value.
                 i += 1
                 out.append(text[i])
             else:
