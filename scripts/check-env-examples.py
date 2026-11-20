@@ -7,8 +7,9 @@ A line NAME=VALUE whose NAME contains PASSWORD, SECRET, TOKEN, PRIVATE_KEY or
 API_KEY fails when VALUE is 20 characters or longer and is not an explicit
 placeholder. Only the value is judged: an inline comment (" # ...") is removed
 first, so a comment such as "# replace_me" cannot exempt a real credential.
-Quoted values are read like a shell does (backslash escapes inside double
-quotes); an unterminated quote is judged as the raw text. A placeholder must
+Values are read like a shell assignment (quoted and unquoted fragments
+concatenated, backslash escapes); unterminated quotes or trailing text after
+the value are judged as the raw text. A placeholder must
 be the whole value in one of the formats below. Python stdlib only; exit 1 on
 any finding.
 """
@@ -35,35 +36,46 @@ PLACEHOLDER = re.compile(
 MIN_LEN = 20
 
 
-def unquote(value: str) -> str:
-    """Return the content of a leading quoted string, shell-style.
+def shell_value(raw: str) -> str:
+    """Return the value a shell would assign for NAME=raw.
 
-    Inside double quotes a backslash escapes the next character, so
-    "abc\\"def" is abc"def. Single quotes have no escapes. Without a closing
-    quote the raw text is returned, so ambiguity never shortens a value.
+    Quoted and unquoted fragments are concatenated ("abc"def is abcdef);
+    inside double quotes and unquoted text a backslash escapes the next
+    character, single quotes have no escapes. The value ends at the first
+    unquoted whitespace; what follows must be empty or a comment. An
+    unterminated quote or other trailing text returns the raw text, so
+    ambiguous syntax never shortens a value.
     """
-    quote = value[0]
+    text = raw.strip()
     out: list[str] = []
-    i = 1
-    while i < len(value):
-        ch = value[i]
-        if quote == '"' and ch == "\\" and i + 1 < len(value):
-            out.append(value[i + 1])
-            i += 2
-            continue
-        if ch == quote:
-            return "".join(out)
-        out.append(ch)
+    quote = ""
+    i = 0
+    while i < len(text):
+        ch = text[i]
+        if quote:
+            if ch == quote:
+                quote = ""
+            elif quote == '"' and ch == "\\" and i + 1 < len(text):
+                i += 1
+                out.append(text[i])
+            else:
+                out.append(ch)
+        elif ch in "\"'":
+            quote = ch
+        elif ch == "\\" and i + 1 < len(text):
+            i += 1
+            out.append(text[i])
+        elif ch.isspace():
+            break
+        else:
+            out.append(ch)
         i += 1
-    return value
-
-
-def value_of(raw: str) -> str:
-    value = raw.strip()
-    if value and value[0] in "\"'":
-        return unquote(value)
-    # Unquoted: an inline comment starts at whitespace followed by "#".
-    return re.split(r"\s+#", value, maxsplit=1)[0].strip()
+    if quote:
+        return text
+    rest = text[i:].strip()
+    if rest and not rest.startswith("#"):
+        return text
+    return "".join(out)
 
 
 def check(path: str) -> list[tuple[str, int, str]]:
@@ -73,7 +85,7 @@ def check(path: str) -> list[tuple[str, int, str]]:
             m = SENSITIVE.match(line.rstrip("\n"))
             if not m:
                 continue
-            value = value_of(m.group(2))
+            value = shell_value(m.group(2))
             if len(value) >= MIN_LEN and not PLACEHOLDER.match(value):
                 findings.append((path, no, m.group(1)))
     return findings
