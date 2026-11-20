@@ -78,10 +78,21 @@ jobs:
       # this repo's own copy, no code from the other repo is executed.
       - name: Resolve BDSN release
         id: bdsn
+        env:
+          REQUESTED_SHA: ${{ inputs.bdsn_sha }}
         run: |
           set -euo pipefail
-          sha="$(git ls-remote "https://github.com/${BDSN_REPO}.git" "refs/tags/${BDSN_TAG}^{}" | cut -f1)"
-          [ -n "$sha" ] || sha="$(git ls-remote "https://github.com/${BDSN_REPO}.git" "refs/tags/${BDSN_TAG}" | cut -f1)"
+          # A bdsn-sync dispatch builds exactly the release it requested, so the run
+          # name (BDSN <sha>) and the built content always agree, even if the tag
+          # moves while the run is queued. Other runs follow the tag.
+          if [ -n "${REQUESTED_SHA:-}" ]; then
+            [[ "$REQUESTED_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::bdsn_sha ist keine vollständige Commit-SHA"; exit 1; }
+            sha="$REQUESTED_SHA"
+            echo "BDSN: angeforderter Release ${sha}" >> "$GITHUB_STEP_SUMMARY"
+          else
+            sha="$(git ls-remote "https://github.com/${BDSN_REPO}.git" "refs/tags/${BDSN_TAG}^{}" | cut -f1)"
+            [ -n "$sha" ] || sha="$(git ls-remote "https://github.com/${BDSN_REPO}.git" "refs/tags/${BDSN_TAG}" | cut -f1)"
+          fi
           if [ -z "$sha" ]; then
             echo "::notice::${BDSN_TAG} existiert noch nicht; /BDSN/ wird nicht veröffentlicht."
             echo "staged=false" >> "$GITHUB_OUTPUT"; exit 0
@@ -146,12 +157,19 @@ jobs:
           # comes through the Worker cache (infra/cloudflare/wdjjj.js caches only
           # query-free GETs; HTML for s-maxage=600). Without a successful purge the
           # old release can be served for up to 10 min, hence the 13 min window.
-          [ -f _site/BDSN/index.html ] || { echo "::error::_site/BDSN/index.html fehlt"; exit 1; }
+          [ -s _site/BDSN/index.html ] || { echo "::error::_site/BDSN/index.html fehlt oder ist leer"; exit 1; }
           want_html="$(sha256sum _site/BDSN/index.html | cut -d' ' -f1)"
+          page="$RUNNER_TEMP/bdsn-index.html"
           for i in $(seq 1 78); do
             live="$(curl -fsS https://djjessejay.ch/BDSN/bdsn-version.txt 2>/dev/null | tr -d '[:space:]' || true)"
-            html="$( (curl -fsS https://djjessejay.ch/BDSN/ 2>/dev/null || true) | sha256sum | cut -d' ' -f1)"
-            if [ "$live" = "$BDSN_SHA" ] && [ "$html" = "$want_html" ]; then
+            # Hash only a complete HTTP 200 body; a failed or empty request is retried.
+            html=""
+            rm -f "$page"
+            code="$(curl -sS -o "$page" -w '%{http_code}' https://djjessejay.ch/BDSN/ 2>/dev/null || true)"
+            if [ "$code" = "200" ] && [ -s "$page" ]; then
+              html="$(sha256sum "$page" | cut -d' ' -f1)"
+            fi
+            if [ "$live" = "$BDSN_SHA" ] && [ -n "$html" ] && [ "$html" = "$want_html" ]; then
               echo "BDSN live: $BDSN_SHA (HTML identisch mit Build)"; exit 0
             fi
             sleep 10
