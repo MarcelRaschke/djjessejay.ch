@@ -9,6 +9,15 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+      bdsn_sha:
+        description: "BDSN release SHA that bdsn-sync requested (labels the run for its retry cooldown)"
+        required: false
+        default: ""
+
+# Dispatches from bdsn-sync carry the requested release in the run name, so a
+# failure can be tied to that release. Other runs keep the default name.
+run-name: ${{ github.event_name == 'workflow_dispatch' && inputs.bdsn_sha != '' && format('BDSN {0}', inputs.bdsn_sha) || '' }}
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -133,13 +142,19 @@ jobs:
           BDSN_SHA: ${{ steps.bdsn.outputs.sha }}
         run: |
           set -euo pipefail
-          for i in $(seq 1 12); do
-            live="$(curl -fsS "https://djjessejay.ch/BDSN/bdsn-version.txt?t=$(date +%s)" 2>/dev/null | tr -d '[:space:]' || true)"
-            if [ "$live" = "$BDSN_SHA" ]; then
-              code="$(curl -s -o /dev/null -w '%{http_code}' "https://djjessejay.ch/BDSN/?t=$(date +%s)")"
-              [ "$code" = "200" ] && { echo "BDSN live: $BDSN_SHA"; exit 0; }
+          # Probe the URLs visitors request, without a query string, so the answer
+          # comes through the Worker cache (infra/cloudflare/wdjjj.js caches only
+          # query-free GETs; HTML for s-maxage=600). Without a successful purge the
+          # old release can be served for up to 10 min, hence the 13 min window.
+          [ -f _site/BDSN/index.html ] || { echo "::error::_site/BDSN/index.html fehlt"; exit 1; }
+          want_html="$(sha256sum _site/BDSN/index.html | cut -d' ' -f1)"
+          for i in $(seq 1 78); do
+            live="$(curl -fsS https://djjessejay.ch/BDSN/bdsn-version.txt 2>/dev/null | tr -d '[:space:]' || true)"
+            html="$( (curl -fsS https://djjessejay.ch/BDSN/ 2>/dev/null || true) | sha256sum | cut -d' ' -f1)"
+            if [ "$live" = "$BDSN_SHA" ] && [ "$html" = "$want_html" ]; then
+              echo "BDSN live: $BDSN_SHA (HTML identisch mit Build)"; exit 0
             fi
             sleep 10
           done
-          echo "::error::/BDSN/ liefert nach 2 min nicht ${BDSN_SHA} (live: ${live:-none})"
+          echo "::error::/BDSN/ liefert nach 13 min nicht ${BDSN_SHA} mit dem gebauten HTML (Version live: ${live:-none}, HTML gleich: $([ "$html" = "$want_html" ] && echo ja || echo nein))"
           exit 1

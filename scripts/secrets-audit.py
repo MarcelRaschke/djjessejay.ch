@@ -46,6 +46,14 @@ IF_RE = re.compile(r"^\s*(?:-\s+)?if:\s*(.*)$")
 WARN_RATIO = 0.8
 
 
+def norm(name: str) -> str:
+    """GitHub stores secret names uppercase and matches them case-insensitively.
+    Every name (inventory, builtins, workflow references, API results) goes
+    through this, so GCP_cy8er in the inventory and GCP_CY8ER from the API are
+    the same secret."""
+    return name.upper()
+
+
 class Findings:
     def __init__(self) -> None:
         self.items: list[dict] = []
@@ -71,16 +79,16 @@ class Findings:
 
 def load_inventory() -> tuple[dict[str, dict], set[str]]:
     data = json.loads(INVENTORY.read_text(encoding="utf-8"))
-    secrets = {s["name"]: s for s in data["secrets"]}
+    secrets = {norm(s["name"]): s for s in data["secrets"]}
     if len(secrets) != len(data["secrets"]):
-        sys.exit("inventory: duplicate secret names")
+        sys.exit("inventory: duplicate secret names (case-insensitive)")
     for s in data["secrets"]:
         for key in ("scope", "status", "required", "rotation_days", "consumers"):
             if key not in s:
                 sys.exit(f"inventory: {s['name']} missing field {key}")
         if s["status"] not in ("active", "planned", "forbidden"):
             sys.exit(f"inventory: {s['name']} has invalid status {s['status']}")
-    return secrets, set(data.get("builtin", []))
+    return secrets, {norm(b) for b in data.get("builtin", [])}
 
 
 def scan_workflow(path: Path) -> list[tuple[str, int, str]]:
@@ -112,7 +120,7 @@ def scan_workflow(path: Path) -> list[tuple[str, int, str]]:
         if stripped.startswith("#"):
             continue
         for a, b in REF_RE.findall(line):
-            refs.append((a or b, no, context))
+            refs.append((norm(a or b), no, context))
     return refs
 
 
@@ -174,7 +182,7 @@ def load_remote(remote_dir: Path) -> dict[str, dict[str, dict]]:
         while idx < len(raw):
             doc, end = decoder.raw_decode(raw, idx)
             for s in doc.get("secrets", []):
-                entries[s["name"]] = s
+                entries[norm(s["name"])] = s
             idx = end
             while idx < len(raw) and raw[idx].isspace():
                 idx += 1
