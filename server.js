@@ -5,6 +5,7 @@ const nodemailer = require('nodemailer');
 const path = require('path');
 const fs = require('fs');
 const rateLimit = require('express-rate-limit');
+const { clientKey } = require('./lib/client-key');
 const cors = require('cors');
 const controlCenterRouter = require('./control-center/data-sources');
 const djjjSurveyRouter = require('./routes/djjj-survey');
@@ -44,7 +45,8 @@ const apiLimiter = rateLimit({
     error: 'Too many requests, please try again after 15 minutes.'
   },
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
+  keyGenerator: clientKey
 });
 
 // Stricter rate limiting for AI proxy to bound upstream cost
@@ -53,7 +55,8 @@ const aiLimiter = rateLimit({
   max: 30,
   message: { error: 'Too many AI requests, please try again after 15 minutes.' },
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
+  keyGenerator: clientKey
 });
 
 // Apply rate limiting to API routes

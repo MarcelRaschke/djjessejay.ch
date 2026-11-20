@@ -24,6 +24,41 @@ test('knowledge loads from the canonical sources without the civil name', () => 
   assert.throws(() => jj.buildSystemPrompt('system', knowledge));
 });
 
+test('mix grounding carries provenance status and no unsupported details', () => {
+  const prompt = jj.buildSystemPrompt('mixes', knowledge);
+  for (const mix of knowledge.catalog.filter((m) => m.claimId)) {
+    assert.ok(mix.evidence, mix.id);
+    assert.match(prompt, new RegExp(`id: ${mix.id} .*Belegstatus: ${mix.evidence.status}`));
+  }
+  assert.match(prompt, /no track count or publication-date assertion adopted/);
+  assert.ok(!/Aufnahmen|tracks?\s*:/i.test(JSON.stringify(knowledge.catalog.map(({ evidence, ...m }) => m))), 'no track counts in catalog');
+  assert.ok(!knowledge.claims.some((c) => c.id === 'claim:civil-name'));
+  assert.match(prompt, /BELEGSTATUS/);
+});
+
+test('a maximal booking reply is accepted as history on the next turn', () => {
+  const draft = 'x'.repeat(1500);
+  const reply = jj.parseReply(`Hier ist dein Entwurf, bitte prüfen:\n<booking-draft>${draft}</booking-draft>\nSende ihn selbst; DJ Jesse Jay antwortet persönlich.`, knowledge.catalog);
+  assert.ok(reply.text.length > 1500);
+  const next = jj.validateConversation({ mode: 'booking', messages: [
+    { role: 'user', content: 'Clubnight im Hive' },
+    { role: 'assistant', content: reply.text },
+    { role: 'user', content: 'Bitte noch die Setdauer: 3 Stunden' },
+  ] });
+  assert.equal(next.error, undefined);
+  const huge = jj.parseReply('y'.repeat(jj.MAX_ASSISTANT_CHARS + 500), knowledge.catalog);
+  assert.ok(huge.text.length <= jj.MAX_ASSISTANT_CHARS);
+});
+
+test('rate-limit keys separate visitors behind cloudflared but ignore forged headers', () => {
+  const { clientKey } = require('../lib/client-key.js');
+  const k = (peer, ip) => clientKey({ socket: { remoteAddress: peer }, headers: ip ? { 'cf-connecting-ip': ip } : {} });
+  assert.notEqual(k('127.0.0.1', '203.0.113.7'), k('127.0.0.1', '198.51.100.2'));
+  assert.equal(k('127.0.0.1', '203.0.113.7'), '203.0.113.7');
+  assert.equal(k('203.0.113.9', '1.2.3.4'), '203.0.113.9', 'header from a non-loopback peer is ignored');
+  assert.equal(k('127.0.0.1', 'not-an-ip'), '127.0.0.1');
+});
+
 test('every catalog mix is linked on the start page', async () => {
   const { readFile } = await import('node:fs/promises');
   const html = await readFile(join(root, 'index.html'), 'utf8');
@@ -45,7 +80,7 @@ test('validateConversation enforces mode, alternation and limits', () => {
     { mode: 'ask', messages: [{ role: 'user', content: 42 }] },
   ];
   for (const b of bad) assert.ok(jj.validateConversation(b).error, JSON.stringify(b).slice(0, 80));
-  const long = Array.from({ length: 11 }, (_, i) => ({ role: i % 2 ? 'assistant' : 'user', content: 'x'.repeat(900) }));
+  const long = Array.from({ length: 11 }, (_, i) => ({ role: i % 2 ? 'assistant' : 'user', content: 'x'.repeat(i % 2 ? jj.MAX_ASSISTANT_CHARS : jj.MAX_MESSAGE_CHARS) }));
   assert.ok(jj.validateConversation({ mode: 'ask', messages: long }).error, 'total length');
 });
 

@@ -6,7 +6,7 @@
  *   (EU AI Act Art. 50(1); transfer to Anthropic, see datenschutz.html#jj-ai).
  * - Renders all model output as text. Links come only from server-validated
  *   catalog entries; the booking draft opens the visitor's own mail program.
- * - Nothing is stored except the consent flag in sessionStorage.
+ * - Only the consent flag and a short-lived availability flag go to sessionStorage.
  */
 (() => {
   'use strict';
@@ -40,7 +40,22 @@
     set() { try { sessionStorage.setItem(CONSENT_KEY, '1'); } catch { /* storage unavailable: ask again next time */ } },
   };
 
+  // The availability check is cached per tab for a few minutes, so browsing the
+  // site does not call /api/health on every page view.
+  const HEALTH_KEY = 'jjai-available-v1';
+  const HEALTH_TTL_MS = 5 * 60 * 1000;
+
   async function available() {
+    try {
+      const cached = JSON.parse(sessionStorage.getItem(HEALTH_KEY) || 'null');
+      if (cached && Date.now() - cached.at < HEALTH_TTL_MS) return cached.ok === true;
+    } catch { /* no cache */ }
+    const ok = await probe();
+    try { sessionStorage.setItem(HEALTH_KEY, JSON.stringify({ ok, at: Date.now() })); } catch { /* storage unavailable */ }
+    return ok;
+  }
+
+  async function probe() {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 5000);
     try {

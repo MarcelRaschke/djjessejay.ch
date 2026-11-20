@@ -7,10 +7,11 @@ JJ-AI beantwortet Fragen zu DJ Jesse Jay, bereitet Booking-Anfragen als Mail-Ent
 | Teil | Datei | Aufgabe |
 | --- | --- | --- |
 | Widget | `js/jj-ai.js`, `css/jj-ai.css` | Erscheint nur, wenn `GET /api/health` `jjAi: true` meldet. KI-Hinweis und Einwilligung vor dem ersten Senden, jede Antwort als „KI-generiert“ markiert, Ausgabe nur als Text. |
-| Route | `server.js` → `POST /api/jj-ai/chat` | Rate-Limit `aiLimiter` (30 / 15 min / IP), Validierung, Aufruf von Anthropic, `Cache-Control: no-store`. Inhalte werden nicht gespeichert oder geloggt, nur Fehlerklassen. |
+| Route | `server.js` → `POST /api/jj-ai/chat` | Rate-Limit `aiLimiter` (30 / 15 min pro Besucher; Schlüssel aus `CF-Connecting-IP`, nur vom lokalen cloudflared vertraut, `lib/client-key.js`), Validierung, Aufruf von Anthropic, `Cache-Control: no-store`. Inhalte werden nicht gespeichert oder geloggt, nur Fehlerklassen. |
 | Logik | `lib/jj-ai.js` | Server-eigener System-Prompt je Modus (`ask`, `booking`, `mixes`), Grounding aus den kanonischen Quellen, Parsing der Antwort. |
 | Wissen | `DJ_JESSE_JAY_CANONICAL_PROFILE.md`, `artist-profile.json`, `jj-ai/knowledge-context.json`, `AI_SYSTEM_PROMPT.md` | Werden beim Start geladen. Fehlt eine Quelle, bleibt JJ-AI aus. Der bürgerliche Name wird nicht in den Prompt übernommen. |
-| Mix-Katalog | `jj-ai/mixes.json` | Einzige erlaubte Empfehlungen. Das Modell nennt nur `<mix id="…"/>`; der Server setzt die URL ein. Ein Test prüft, dass jede URL auf der Startseite verlinkt ist. |
+| Mix-Katalog | `jj-ai/mixes.json` | Einzige erlaubte Empfehlungen. Beschreibungen nur aus Website-Text; `claimId` verknüpft den Belegstatus aus `website/provenance.json`. Das Modell nennt nur `<mix id="…"/>`; der Server setzt die URL ein. Ein Test prüft, dass jede URL auf der Startseite verlinkt ist. |
+| Belegstatus | `website/provenance.json` | Claims mit Status, Review-Stand und Quellenhinweis gehen in den Prompt (ohne den Claim zum bürgerlichen Namen). |
 
 ### Request
 
@@ -19,7 +20,7 @@ POST /api/jj-ai/chat
 { "mode": "booking", "messages": [ { "role": "user", "content": "Clubnight am 14. März im Hive" } ] }
 ```
 
-Regeln: Rollen abwechselnd ab `user`, letzte Nachricht `user`, höchstens 12 Nachrichten, je 1500 Zeichen, zusammen 8000. Ein `system`-Feld des Clients wird ignoriert.
+Regeln: Rollen abwechselnd ab `user`, letzte Nachricht `user`, höchstens 12 Nachrichten; Besucher-Nachrichten je 1500 Zeichen, Antworten je 4000 (der Server kürzt eigene Antworten auf diese Länge), zusammen 24000. Ein `system`-Feld des Clients wird ignoriert.
 
 ### Response
 
