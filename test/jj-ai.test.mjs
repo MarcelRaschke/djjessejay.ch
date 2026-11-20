@@ -91,6 +91,10 @@ test('parseReply maps catalog ids, extracts the booking draft and strips markup'
   assert.ok(!/[<>]/.test(r.text), r.text);
   assert.equal(r.bookingDraft, null);
 
+  const nested = jj.parseReply('a <scr<script>ipt>alert(1)</script> <booking-draft>Hallo <img src=x onerror=1> <<b>i>x</booking-draft>', knowledge.catalog);
+  assert.ok(!/[<>]/.test(nested.text), nested.text);
+  assert.ok(!/[<>]/.test(nested.bookingDraft.body), nested.bookingDraft.body);
+
   const b = jj.parseReply('Hier dein Entwurf:\n<booking-draft>Hallo DJ Jesse Jay,\nam 12.3. im Hive …</booking-draft>\nBitte prüfen.', knowledge.catalog);
   assert.equal(b.bookingDraft.to, 'info@djjessejay.ch');
   assert.match(b.bookingDraft.subject, /Booking/);
