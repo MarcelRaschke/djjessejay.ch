@@ -7,9 +7,9 @@ A line NAME=VALUE whose NAME contains PASSWORD, SECRET, TOKEN, PRIVATE_KEY or
 API_KEY fails when VALUE is 20 characters or longer and is not an explicit
 placeholder. Only the value is judged: an inline comment (" # ...") is removed
 first, so a comment such as "# replace_me" cannot exempt a real credential.
-Values are read like a shell assignment (quoted and unquoted fragments
-concatenated, backslash escapes); unterminated quotes or trailing text after
-the value are judged as the raw text. A placeholder must
+Loaders differ (Bash, Node --env-file, dotenv), so a value is judged by the
+longer of its shell reading and its raw text without a trailing comment; it
+is never shortened by escapes or quotes. A placeholder must
 be the whole value in one of the formats below. Python stdlib only; exit 1 on
 any finding.
 """
@@ -87,6 +87,23 @@ def shell_value(raw: str) -> str:
     return "".join(out)
 
 
+def is_credential(raw: str) -> bool:
+    """True when the assigned value may be a real credential.
+
+    Loaders disagree on quotes and backslashes (Bash, Node --env-file,
+    dotenv), so the length is never taken from one parser alone: it is the
+    longer of the shell-parsed value and the raw text without a trailing
+    comment; escapes and quotes only ever shorten a literal value. A
+    placeholder is exempt only when its raw text has no backslash, so an
+    escape cannot turn a real value into something that looks like one.
+    """
+    value = shell_value(raw)
+    if PLACEHOLDER.match(value) and "\\" not in raw:
+        return False
+    literal = re.sub(r"\s+#.*$", "", raw.strip())
+    return max(len(value), len(literal)) >= MIN_LEN
+
+
 def check(path: str) -> list[tuple[str, int, str]]:
     findings = []
     with open(path, encoding="utf-8") as fh:
@@ -94,8 +111,7 @@ def check(path: str) -> list[tuple[str, int, str]]:
             m = SENSITIVE.match(line.rstrip("\n"))
             if not m:
                 continue
-            value = shell_value(m.group(2))
-            if len(value) >= MIN_LEN and not PLACEHOLDER.match(value):
+            if is_credential(m.group(2)):
                 findings.append((path, no, m.group(1)))
     return findings
 
