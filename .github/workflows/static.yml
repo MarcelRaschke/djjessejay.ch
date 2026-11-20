@@ -28,6 +28,11 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    env:
+      # secrets.* is not allowed in if:, presence is evaluated once here.
+      HAS_CF_PURGE: ${{ secrets.CF_CACHE_PURGE_TOKEN != '' && vars.CLOUDFLARE_ZONE_ID != '' }}
+      BDSN_REPO: MarcelRaschke/Blue-Dimension-
+      BDSN_TAG: bdsn-live
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -58,6 +63,48 @@ jobs:
         # manifests, docs, tests and dotfiles are never part of the Pages artifact.
         run: node scripts/stage-pages-site.mjs _site
 
+      # Blue Dimension under /BDSN/. Source of truth is the tag bdsn-live in
+      # Blue-Dimension-, set by its "Release BDSN" workflow after all checks.
+      # No token: public repo, read-only checkout. The checker used here is
+      # this repo's own copy, no code from the other repo is executed.
+      - name: Resolve BDSN release
+        id: bdsn
+        run: |
+          set -euo pipefail
+          sha="$(git ls-remote "https://github.com/${BDSN_REPO}.git" "refs/tags/${BDSN_TAG}^{}" | cut -f1)"
+          [ -n "$sha" ] || sha="$(git ls-remote "https://github.com/${BDSN_REPO}.git" "refs/tags/${BDSN_TAG}" | cut -f1)"
+          if [ -z "$sha" ]; then
+            echo "::notice::${BDSN_TAG} existiert noch nicht; /BDSN/ wird nicht veröffentlicht."
+            echo "staged=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::ungültige SHA"; exit 1; }
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "staged=true" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout Blue Dimension (bdsn-live)
+        if: steps.bdsn.outputs.staged == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ env.BDSN_REPO }}
+          ref: ${{ steps.bdsn.outputs.sha }}
+          path: .bdsn-src
+          persist-credentials: false
+          sparse-checkout: public
+          sparse-checkout-cone-mode: true
+
+      - name: Verify and stage /BDSN/
+        if: steps.bdsn.outputs.staged == 'true'
+        env:
+          BDSN_SHA: ${{ steps.bdsn.outputs.sha }}
+        run: |
+          set -euo pipefail
+          python3 scripts/check-site.py .bdsn-src/public --allow-prefix /media/gallery/
+          rm -rf _site/BDSN
+          cp -r .bdsn-src/public _site/BDSN
+          printf '%s\n' "$BDSN_SHA" > _site/BDSN/bdsn-version.txt
+          rm -rf .bdsn-src
+          echo "BDSN ${BDSN_SHA} unter /BDSN/ bereitgestellt" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
@@ -66,3 +113,33 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+      - name: Purge Cloudflare cache
+        if: env.HAS_CF_PURGE == 'true'
+        env:
+          CF_TOKEN: ${{ secrets.CF_CACHE_PURGE_TOKEN }}
+          CF_ZONE: ${{ vars.CLOUDFLARE_ZONE_ID }}
+        run: |
+          set -euo pipefail
+          resp="$(curl -sS -X POST "https://api.cloudflare.com/client/v4/zones/${CF_ZONE}/purge_cache" \
+            -H "Authorization: Bearer ${CF_TOKEN}" -H "Content-Type: application/json" \
+            --data '{"purge_everything":true}')"
+          echo "$resp" | python3 -c 'import json,sys; sys.exit(0 if json.load(sys.stdin).get("success") else 1)' \
+            || echo "::warning::Cloudflare-Purge fehlgeschlagen"
+
+      - name: Verify /BDSN/ live
+        if: steps.bdsn.outputs.staged == 'true'
+        env:
+          BDSN_SHA: ${{ steps.bdsn.outputs.sha }}
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 12); do
+            live="$(curl -fsS "https://djjessejay.ch/BDSN/bdsn-version.txt?t=$(date +%s)" 2>/dev/null | tr -d '[:space:]' || true)"
+            if [ "$live" = "$BDSN_SHA" ]; then
+              code="$(curl -s -o /dev/null -w '%{http_code}' "https://djjessejay.ch/BDSN/?t=$(date +%s)")"
+              [ "$code" = "200" ] && { echo "BDSN live: $BDSN_SHA"; exit 0; }
+            fi
+            sleep 10
+          done
+          echo "::error::/BDSN/ liefert nach 2 min nicht ${BDSN_SHA} (live: ${live:-none})"
+          exit 1
