@@ -15,7 +15,7 @@
   const HEALTH = '/api/health';
   const MAX_MESSAGES = 12;
   const MAX_CHARS = 1500;
-  const CONSENT_KEY = 'jjai-consent-v1';
+  const CONSENT_FLAG = 'jjai-consent-v1';
   const MODES = {
     ask: { label: 'Fragen', hello: 'Frag mich zu DJ Jesse Jay, seinem Sound oder seiner Radio-Geschichte.' },
     booking: { label: 'Booking', hello: 'Ich helfe dir, eine Booking-Anfrage vorzubereiten. Um welches Datum und welchen Ort geht es?' },
@@ -36,22 +36,22 @@
   }
 
   const store = {
-    get() { try { return sessionStorage.getItem(CONSENT_KEY) === '1'; } catch { return false; } },
-    set() { try { sessionStorage.setItem(CONSENT_KEY, '1'); } catch { /* storage unavailable: ask again next time */ } },
+    get() { try { return sessionStorage.getItem(CONSENT_FLAG) === '1'; } catch { return false; } },
+    set() { try { sessionStorage.setItem(CONSENT_FLAG, '1'); } catch { /* storage unavailable: ask again next time */ } },
   };
 
   // The availability check is cached per tab for a few minutes, so browsing the
   // site does not call /api/health on every page view.
-  const HEALTH_KEY = 'jjai-available-v1';
+  const HEALTH_FLAG = 'jjai-available-v1';
   const HEALTH_TTL_MS = 5 * 60 * 1000;
 
   async function available() {
     try {
-      const cached = JSON.parse(sessionStorage.getItem(HEALTH_KEY) || 'null');
+      const cached = JSON.parse(sessionStorage.getItem(HEALTH_FLAG) || 'null');
       if (cached && Date.now() - cached.at < HEALTH_TTL_MS) return cached.ok === true;
     } catch { /* no cache */ }
     const ok = await probe();
-    try { sessionStorage.setItem(HEALTH_KEY, JSON.stringify({ ok, at: Date.now() })); } catch { /* storage unavailable */ }
+    try { sessionStorage.setItem(HEALTH_FLAG, JSON.stringify({ ok, at: Date.now() })); } catch { /* storage unavailable */ }
     return ok;
   }
 
