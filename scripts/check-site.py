@@ -26,7 +26,16 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 ATTRS = {"href", "src", "poster", "data"}
-SKIP_SCHEMES = ("http:", "https:", "mailto:", "tel:", "data:", "javascript:", "blob:", "about:")
+SKIP_SCHEMES = (
+    "http:",
+    "https:",
+    "mailto:",
+    "tel:",
+    "data:",
+    "javascript:",
+    "blob:",
+    "about:",
+)
 FORBIDDEN = (".php", ".sql", ".pem", ".key")
 
 
@@ -63,8 +72,12 @@ def resolves(root: Path, target: Path) -> bool:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("root", type=Path)
-    ap.add_argument("--allow-prefix", action="append", default=[],
-                    help="root-absolute prefix that is known and accepted (warning only)")
+    ap.add_argument(
+        "--allow-prefix",
+        action="append",
+        default=[],
+        help="root-absolute prefix that is known and accepted (warning only)",
+    )
     args = ap.parse_args()
     root: Path = args.root
 
@@ -78,7 +91,9 @@ def main() -> int:
         if path.is_file():
             name = path.name.lower()
             if name.endswith(FORBIDDEN) or name.startswith(".env"):
-                errors.append(f"{path}: Dateityp darf nicht veröffentlicht werden")
+                errors.append(
+                    f"{path}: Dateityp darf nicht veröffentlicht werden"
+                )
 
     pages = sorted(root.rglob("*.html"))
     checked = 0
@@ -86,7 +101,12 @@ def main() -> int:
         parser = RefParser()
         parser.feed(page.read_text(encoding="utf-8", errors="replace"))
         for line, ref in parser.refs:
-            if ref.startswith(("#", "//")) or ref.lower().startswith(SKIP_SCHEMES) or "${" in ref or "{{" in ref:
+            if (
+                ref.startswith(("#", "//"))
+                or ref.lower().startswith(SKIP_SCHEMES)
+                or "${" in ref
+                or "{{" in ref
+            ):
                 continue
             path_part = unquote(urlsplit(ref).path)
             if not path_part:
@@ -95,19 +115,34 @@ def main() -> int:
             checked += 1
             if path_part.startswith("/"):
                 if any(path_part.startswith(p) for p in args.allow_prefix):
-                    warnings.append(f"{where}: root-absolut, akzeptiert: {ref}")
+                    warnings.append(
+                        f"{where}: root-absolut, akzeptiert: {ref}"
+                    )
                 else:
-                    errors.append(f"{where}: root-absoluter Pfad bricht unter Subpfad: {ref}")
+                    errors.append(
+                        f"{where}: root-absoluter Pfad bricht unter "
+                        f"Subpfad: {ref}"
+                    )
                 continue
-            target = (page.parent / path_part)
+            target = page.parent / path_part
             if not resolves(root, Path(os.path.normpath(target))):
                 errors.append(f"{where}: Ziel fehlt: {ref}")
 
-    print(f"Seiten: {len(pages)}, lokale Referenzen: {checked}, Fehler: {len(errors)}, Warnungen: {len(warnings)}")
+    print(
+        f"Seiten: {len(pages)}, lokale Referenzen: {checked}, "
+        f"Fehler: {len(errors)}, Warnungen: {len(warnings)}"
+    )
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
-    lines = [f"## Site-Check {root}", "", f"{len(pages)} Seiten, {checked} lokale Referenzen, "
-             f"{len(errors)} Fehler, {len(warnings)} Warnungen", ""]
-    lines += [f"- Fehler: `{e}`" for e in errors] + [f"- Warnung: `{w}`" for w in warnings[:20]]
+    lines = [
+        f"## Site-Check {root}",
+        "",
+        f"{len(pages)} Seiten, {checked} lokale Referenzen, "
+        f"{len(errors)} Fehler, {len(warnings)} Warnungen",
+        "",
+    ]
+    lines += [f"- Fehler: `{e}`" for e in errors] + [
+        f"- Warnung: `{w}`" for w in warnings[:20]
+    ]
     if summary:
         with open(summary, "a", encoding="utf-8") as fh:
             fh.write("\n".join(lines) + "\n")
