@@ -49,6 +49,8 @@ Thumbs.db
 *.sql
 !db/schema.sql
 !db/migrations/*.sql
+!infra/cloudflare/migrations/*.sql
+!docs/d1/*.sql
 *.xml
 
 # Video files (large assets, not needed for GitHub Pages deployment)

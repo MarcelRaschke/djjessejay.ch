@@ -13,6 +13,21 @@ routes = [
 [observability]
 enabled = true
 
+# D1 event-datamining: datensparsame Analytics über /__wdjjj/collect.
+# Schema: migrations/0002_djjj_analytics.sql (am 2026-11-24 per API angewendet).
+# Der Collector bleibt inaktiv (204, kein Schreiben), solange das Secret
+# HASH_SECRET fehlt. Es steht bewusst NICHT unter [secrets].required, damit ein
+# fehlendes Analytics-Secret keinen Deploy blockiert.
+[[d1_databases]]
+binding = "DB"
+database_name = "event-datamining"
+database_id = "82704ee7-fcba-4564-98eb-9d8f9edc0609"
+migrations_dir = "migrations"
+
+# 03:17 UTC: Tagesaggregat für gestern, Löschfristen (Rohdaten 400 Tage).
+[triggers]
+crons = ["17 3 * * *"]
+
 # Exposes the deployed version (id, tag, timestamp) to /__wdjjj/health.
 [version_metadata]
 binding = "CF_VERSION_METADATA"
