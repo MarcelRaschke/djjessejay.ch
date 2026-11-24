@@ -40,6 +40,7 @@ on:
     branches: [main]
     paths:
       - "infra/cloudflare/**"
+      - "test/wdjjj-*.test.mjs"
       - ".github/workflows/deploy-wdjjj.yml"
       - "scripts/cloudflare-deploy-preflight.mjs"
       - "test/cloudflare-deploy-preflight.test.mjs"
@@ -58,6 +59,10 @@ on:
         type: choice
         options: [auto, user, account]
         default: auto
+      apply_d1_migrations:
+        description: 'Vor dem Upload D1-Migrationen (event-datamining) anwenden; braucht D1:Edit am Token'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -96,6 +101,9 @@ jobs:
 
       - name: Validate Worker syntax
         run: node --check infra/cloudflare/wdjjj.js
+
+      - name: Test Worker behaviour
+        run: node --test test/wdjjj-health.test.mjs test/wdjjj-api-auth.test.mjs test/wdjjj-analytics.test.mjs
 
       - name: Verify live edge
         if: inputs.diagnose_only != true
@@ -163,6 +171,20 @@ jobs:
       # und Zone > Workers Routes > Edit für Routenänderungen. Der Preflight oben
       # prüft nur Tokenstatus und Lesezugriff; ein Deploy kann danach noch an
       # fehlenden Schreibrechten scheitern.
+      # Optional und standardmässig aus: das Token braucht dafür zusätzlich
+      # Account > D1 > Edit. 0002 ist bereits angewendet und idempotent; der
+      # Lauf trägt sie dann nur in d1_migrations nach. Destruktive Migrationen
+      # liegen bewusst ausserhalb von migrations/ (docs/d1/).
+      - name: Apply D1 migrations
+        if: inputs.diagnose_only != true && inputs.apply_d1_migrations == true
+        uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || env.CLOUDFLARE_ACCOUNT_ID_PUBLIC }}
+          wranglerVersion: "4.160.1"
+          workingDirectory: infra/cloudflare
+          command: d1 migrations apply event-datamining --remote
+
       - name: Deploy wdjjj
         if: inputs.diagnose_only != true
         uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
