@@ -98,7 +98,7 @@ function shouldAlert(ip, requestPath, payloadSize) {
   }
   // Fixed-size fingerprint: keeps "distinct full path" semantics without retaining attacker-sized strings
   if (ipData.paths.size < threshold.uniquePathsPerIP) {
-    ipData.paths.add(crypto.createHash('sha1').update(requestPath).digest('base64'));
+    ipData.paths.add(crypto.createHash('sha256').update(requestPath).digest('base64'));
   }
 
   if (now - ipData.lastAlertAt < config.alerts.cooldownMs) return null;

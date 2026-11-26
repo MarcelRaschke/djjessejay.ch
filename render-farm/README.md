@@ -36,9 +36,8 @@ request. The browser then connects to `wss://` and never sees the token.
    npm install ws
    export RENDER_TOKEN='replace-with-a-long-random-token'
    node render-farm/render-farm-master.js
-   # Note: render-farm-master.js listens on 0.0.0.0 by default. In production,
-   # bind it to 127.0.0.1 (e.g. patch the listen() call or run it behind a
-   # firewall) so only the reverse proxy can reach it.
+   # Binds to 127.0.0.1 by default. Set RENDER_BIND_HOST=0.0.0.0 only if you
+   # really need LAN exposure — otherwise only the reverse proxy can reach it.
    ```
 
 2. Install and configure nginx from the included example:

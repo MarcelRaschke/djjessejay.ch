@@ -5,8 +5,11 @@ const KEY_PATHS = new Set([
   "/cy8er.djjessejay.ch.asc",
 ]);
 
+// No wildcard CORS in BASE_HEADERS: the JSON endpoints (/health, /, errors)
+// stay same-origin. Cross-origin access is granted only on the public key
+// material via CORS_PUBLIC_HEADERS below — serving that key is the worker's
+// purpose; everything else has no business being read from a browser.
 const BASE_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
   "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
   "Referrer-Policy": "no-referrer",
   "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
@@ -14,6 +17,12 @@ const BASE_HEADERS = {
     "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()",
   "X-Content-Type-Options": "nosniff",
   "X-Robots-Tag": "noindex, nofollow",
+};
+
+// Public key files are fetched cross-origin by design (mail clients, key
+// tools, third-party verification pages). Scoped to the key responses only.
+const CORS_PUBLIC_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
 };
 
 const RATE_LIMIT_WINDOW_MS = 60_000;
@@ -226,6 +235,7 @@ export default {
         status: 200,
         headers: {
           ...BASE_HEADERS,
+          ...CORS_PUBLIC_HEADERS,
           ...rateLimitHeaders(rateState),
           "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
           "Content-Disposition": "inline; filename=\"cy8er.djjessejay.ch.asc\"",

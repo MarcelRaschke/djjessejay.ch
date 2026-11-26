@@ -8,6 +8,7 @@ const { spawn } = require("child_process");
 const WebSocket = require("ws");
 
 const PORT = Number(process.env.PORT || 8081);
+const BIND_HOST = process.env.RENDER_BIND_HOST || "127.0.0.1";
 const TOKEN = process.env.RENDER_TOKEN;
 const TOTAL_FRAMES = Number(process.env.TOTAL_FRAMES || 3600);
 const CHUNK_SIZE = Number(process.env.CHUNK_SIZE || 60);
@@ -94,4 +95,4 @@ wss.on("connection", ws => {
     }
   });
 });
-server.listen(PORT, "0.0.0.0", () => console.log(`Render master listening on ${PORT}`));
+server.listen(PORT, BIND_HOST, () => console.log(`Render master listening on ${BIND_HOST}:${PORT}`));
