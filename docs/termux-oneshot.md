@@ -40,8 +40,12 @@ Arbeite autonom. Frage nur, wenn es wirklich nicht anders geht.
 
 3. **Konfiguration**
    cp .env.example .env
-   PORT bleibt 3000. Turnstile-/SMTP-Variablen leer lassen —
-   server.js deaktiviert diese Features dann sauber.
+   PORT bleibt 3000. Ersetze in `.env` die Platzhalter durch leere Werte:
+   `TURNSTILE_SECRET_KEY=`, `SMTP_HOST=`, `SMTP_USER=`, `SMTP_PASS=`
+   und `CONTACT_EMAIL_TO=`. SMTP bleibt damit inaktiv.
+   Ohne Turnstile-Secret antwortet `/api/contact` bei ansonsten gültigen
+   Eingaben mit HTTP 500; erfolgreiche Kontaktanfragen sind so nicht möglich.
+   Die Schutzprüfung nicht umgehen.
 
 4. **Starten + verifizieren**
    node --env-file=.env server.js
