@@ -26,6 +26,7 @@ All notable changes to this project will be documented in this file.
 - Pull request template
 - CI workflow for Python 3.13 and Node 24
 - Feature request issue template update
+- `docs/termux-oneshot.md`: einzelner, selbstgenügsamer Setup-Prompt für KI-Agenten in Termux (autonom, lokal, ohne Push)
 - Server-side AI proxy endpoint `/api/ai/generate` that holds the Anthropic API key only in the server environment and forwards to Anthropic with server-owned system instructions keyed by feature id.
 - Cloudflare Worker routes `/api/*` (GET/HEAD/POST) to the Express backend origin (`API_ORIGIN_HOST`), keeping static-site POST rejection intact for all other paths.
 - GitHub Pages build injects the reCAPTCHA site key into `index.html` when the `RECAPTCHA_SITE_KEY` repository variable is set.
