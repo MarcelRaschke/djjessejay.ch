@@ -10,6 +10,9 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Bot-Schutz des Kontaktformulars von Google reCAPTCHA v3 auf Cloudflare Turnstile umgestellt (`lib/turnstile.js`, `TURNSTILE_SECRET_KEY`, Repository-Variable `TURNSTILE_SITE_KEY`). Prüfung fail closed inklusive Hostname und Action; keine Google-Cookies mehr.
 - `/api/contact` schreibt Name und E-Mail nicht mehr ins Erfolgs-Log.
+- `workers/pgp-directory`: Wildcard-CORS auf die Public-Key-Antworten (`/pgp.txt`, `/cy8er.djjessejay.ch.asc`) beschränkt; JSON-Endpunkte (`/`, `/health`, Fehler) antworten ohne `Access-Control-Allow-Origin`.
+- `render-farm/render-farm-master.js` bindet standardmäßig `127.0.0.1` statt `0.0.0.0`; LAN-Exposure nur noch explizit über `RENDER_BIND_HOST=0.0.0.0`.
+- `honeypot/honeypot-middleware.js` nutzt SHA-256 statt SHA-1 für den Pfad-Fingerprint.
 
 ### Fixed
 - Verify Neo4j snapshot metadata with scalar count queries instead of parsing Cypher plain output as CSV; retain duplicate and inventory checks.

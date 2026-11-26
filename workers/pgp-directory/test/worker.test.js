@@ -181,3 +181,25 @@ test("health endpoint rejects an invalid bearer token", async () => {
   assert.equal(response.status, 401);
   assert.equal(response.headers.get("www-authenticate"), "Bearer");
 });
+
+test("wildcard CORS is scoped to public key material only", async () => {
+  const keyResponse = await worker.fetch(
+    requestWithIp("https://example.test/cy8er.djjessejay.ch.asc"),
+    envWithKey,
+  );
+  assert.equal(keyResponse.status, 200);
+  assert.equal(keyResponse.headers.get("access-control-allow-origin"), "*");
+
+  const healthResponse = await worker.fetch(
+    requestWithIp("https://example.test/health"),
+    envWithoutKey,
+  );
+  assert.equal(healthResponse.headers.get("access-control-allow-origin"), null);
+
+  const notFoundResponse = await worker.fetch(
+    requestWithIp("https://example.test/nope"),
+    envWithKey,
+  );
+  assert.equal(notFoundResponse.status, 404);
+  assert.equal(notFoundResponse.headers.get("access-control-allow-origin"), null);
+});
